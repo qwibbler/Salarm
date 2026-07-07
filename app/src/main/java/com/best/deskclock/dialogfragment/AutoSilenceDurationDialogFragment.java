@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.best.deskclock.R;
 import com.best.deskclock.data.SettingsDAO;
+import com.best.deskclock.data.Timer;
 import com.best.deskclock.databinding.AlarmAutoSilenceDurationDialogBinding;
 import com.best.deskclock.uicomponents.CustomDialog;
 import com.best.deskclock.utils.ThemeUtils;
@@ -59,6 +60,7 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
 
     private static final String AUTO_SILENCE_DURATION = "auto_silence_duration_";
     private static final String ARG_PREF_KEY = AUTO_SILENCE_DURATION + "arg_pref_key";
+    private static final String ARG_TIMER_ID = "arg_timer_id";
     private static final String ARG_EDIT_AUTO_SILENCE_MINUTES = AUTO_SILENCE_DURATION + "arg_edit_auto_silence_minutes";
     private static final String ARG_EDIT_AUTO_SILENCE_SECONDS = AUTO_SILENCE_DURATION + "arg_edit_auto_silence_seconds";
     private static final String ARG_END_OF_RINGTONE = AUTO_SILENCE_DURATION + "arg_end_of_ringtone";
@@ -85,7 +87,6 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
      * @param autoSilenceDuration The auto silence duration, in seconds for timers or in minutes for alarms.
      */
     public static AutoSilenceDurationDialogFragment newInstance(String key, int autoSilenceDuration) {
-
         Bundle args = new Bundle();
 
         boolean isNever = autoSilenceDuration == TIMEOUT_NEVER;
@@ -112,12 +113,43 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
 
     /**
      * Creates a new instance of {@link AutoSilenceDurationDialogFragment} for use
+     * in the timer editing panel, where the auto silence duration is configured for a specific timer.
+     *
+     * @param timerId the {@link Timer} id whose auto silence will be edited.
+     * @param autoSilenceDuration The silence duration in minutes.
+     */
+    public static AutoSilenceDurationDialogFragment newInstance(int timerId, int autoSilenceDuration) {
+        final Bundle args = new Bundle();
+
+        boolean isNever = autoSilenceDuration == TIMEOUT_NEVER;
+        boolean isEndOfRingtone = autoSilenceDuration == TIMEOUT_END_OF_RINGTONE;
+
+        int minutes = 0;
+        int seconds = 0;
+
+        if (!isNever && !isEndOfRingtone) {
+            minutes = autoSilenceDuration / 60;
+            seconds = autoSilenceDuration % 60;
+        }
+
+        args.putInt(ARG_TIMER_ID, timerId);
+        args.putInt(ARG_EDIT_AUTO_SILENCE_MINUTES, minutes);
+        args.putInt(ARG_EDIT_AUTO_SILENCE_SECONDS, seconds);
+        args.putBoolean(ARG_END_OF_RINGTONE, isEndOfRingtone);
+        args.putBoolean(ARG_NEVER, isNever);
+
+        final AutoSilenceDurationDialogFragment fragment = new AutoSilenceDurationDialogFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * Creates a new instance of {@link AutoSilenceDurationDialogFragment} for use
      * in the alarm editing panel, where the auto silence duration is configured for a specific alarm.
      *
      * @param autoSilenceDuration The silence duration in minutes.
      */
     public static AutoSilenceDurationDialogFragment newInstance(int autoSilenceDuration) {
-
         final Bundle args = new Bundle();
 
         boolean isNever = autoSilenceDuration == TIMEOUT_NEVER;
