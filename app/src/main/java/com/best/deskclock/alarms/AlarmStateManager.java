@@ -34,6 +34,7 @@ import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.RelationalAlarmScheduler;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.tiles.AlarmTileService;
@@ -153,6 +154,8 @@ public final class AlarmStateManager extends BroadcastReceiver {
         if (!DeviceUtils.isUserUnlocked(storageContext)) {
             return;
         }
+
+        RelationalAlarmScheduler.syncRelationalAlarms(context);
 
         final AlarmInstance nextAlarm = getNextFiringAlarm(context);
 

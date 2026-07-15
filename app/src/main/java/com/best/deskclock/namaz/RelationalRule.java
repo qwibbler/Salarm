@@ -1,12 +1,22 @@
 package com.best.deskclock.namaz;
 
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.util.Calendar;
 import java.util.Date;
 
 /**
  * Represents a rule for calculating an alarm time relative to a prayer event.
  */
+@Entity(tableName = "relational_rules")
 public class RelationalRule {
+
+    @PrimaryKey(autoGenerate = true)
+    public long id;
+
+    public boolean enabled;
 
     public enum AnchorEvent {
         FAJR, SUNRISE, DHUHR, ASR_SHAFI, ASR_HANAFI, MAGHRIB, ISHA
@@ -27,6 +37,8 @@ public class RelationalRule {
         public int clipRoundingIntervalMinutes;
         public BoundaryType boundaryType;
 
+        public Clip() {}
+
         public Clip(AnchorEvent clipEvent, int clipOffsetMinutes, RoundingDirection clipRoundingDirection,
                     int clipRoundingIntervalMinutes, BoundaryType boundaryType) {
             this.clipEvent = clipEvent;
@@ -41,7 +53,11 @@ public class RelationalRule {
     public int offsetMinutes;
     public RoundingDirection roundingDirection;
     public int roundingIntervalMinutes;
+
+    @Embedded(prefix = "clip_")
     public Clip clip;
+
+    public RelationalRule() {}
 
     public RelationalRule(AnchorEvent anchorEvent, int offsetMinutes, RoundingDirection roundingDirection,
                           int roundingIntervalMinutes) {
@@ -55,6 +71,7 @@ public class RelationalRule {
         this.roundingDirection = roundingDirection;
         this.roundingIntervalMinutes = roundingIntervalMinutes;
         this.clip = clip;
+        this.enabled = true;
     }
 
     /**

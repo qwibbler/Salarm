@@ -120,6 +120,12 @@ public class PreferencesKeys {
     public static final String KEY_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT = "key_enable_delete_occasional_alarm_by_default";
     public static final String KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING = "key_display_low_alarm_volume_warning";
 
+    // Namaz
+    public static final String KEY_NAMAZ_LATITUDE = "key_namaz_latitude";
+    public static final String KEY_NAMAZ_LONGITUDE = "key_namaz_longitude";
+    public static final String KEY_NAMAZ_MADHAB = "key_namaz_madhab";
+    public static final String KEY_NAMAZ_CALC_METHOD = "key_namaz_calc_method";
+
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";
     public static final String KEY_ALARM_CLOCK_DIAL = "key_alarm_clock_dial";

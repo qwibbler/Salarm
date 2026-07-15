@@ -139,6 +139,12 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT = false;
     public static final boolean DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING = true;
 
+    // Namaz
+    public static final String DEFAULT_NAMAZ_LATITUDE = "0.0";
+    public static final String DEFAULT_NAMAZ_LONGITUDE = "0.0";
+    public static final String DEFAULT_NAMAZ_MADHAB = "HANAFI";
+    public static final String DEFAULT_NAMAZ_CALC_METHOD = "KARACHI";
+
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;
     public static final boolean DEFAULT_SWIPE_ACTION = true;

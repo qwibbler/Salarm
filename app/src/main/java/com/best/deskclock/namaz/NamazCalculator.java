@@ -13,17 +13,17 @@ import java.util.Date;
  */
 public class NamazCalculator {
 
-    public static PrayerTimes getPrayerTimes(Date date, double latitude, double longitude, Madhab madhab) {
+    public static PrayerTimes getPrayerTimes(Date date, double latitude, double longitude, Madhab madhab, CalculationMethod method) {
         Coordinates coordinates = new Coordinates(latitude, longitude);
         DateComponents dateComponents = DateComponents.from(date);
-        com.batoulapps.adhan.CalculationParameters parameters = CalculationMethod.KARACHI.getParameters();
+        com.batoulapps.adhan.CalculationParameters parameters = method.getParameters();
         parameters.madhab = madhab;
         return new PrayerTimes(coordinates, dateComponents, parameters);
     }
 
-    public static NamazTimes calculateAllTimes(Date date, double latitude, double longitude) {
-        PrayerTimes hanafi = getPrayerTimes(date, latitude, longitude, Madhab.HANAFI);
-        PrayerTimes shafi = getPrayerTimes(date, latitude, longitude, Madhab.SHAFI);
+    public static NamazTimes calculateAllTimes(Date date, double latitude, double longitude, CalculationMethod method) {
+        PrayerTimes hanafi = getPrayerTimes(date, latitude, longitude, Madhab.HANAFI, method);
+        PrayerTimes shafi = getPrayerTimes(date, latitude, longitude, Madhab.SHAFI, method);
         return new NamazTimes(hanafi, shafi);
     }
 
