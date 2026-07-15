@@ -129,6 +129,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         Preference mAlarmSettingsPref;
         Preference mTimerSettingsPref;
         Preference mStopwatchSettingsPref;
+        Preference mNamazSettingsPref;
         Preference mScreensaverSettings;
         Preference mWidgetsSettings;
         Preference mPermissionsManagement;
@@ -244,6 +245,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mAlarmSettingsPref = findPreference(KEY_ALARM_SETTINGS);
             mTimerSettingsPref = findPreference(KEY_TIMER_SETTINGS);
             mStopwatchSettingsPref = findPreference(KEY_STOPWATCH_SETTINGS);
+            mNamazSettingsPref = findPreference(KEY_NAMAZ_SETTINGS);
             mScreensaverSettings = findPreference(KEY_SCREENSAVER_SETTINGS);
             mWidgetsSettings = findPreference(KEY_WIDGETS_SETTINGS);
             mPermissionsManagement = findPreference(KEY_PERMISSIONS_MANAGEMENT);
@@ -337,6 +339,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
                 case KEY_STOPWATCH_SETTINGS -> animateAndShowFragment(new StopwatchSettingsFragment());
 
+                case KEY_NAMAZ_SETTINGS -> animateAndShowFragment(new NamazSettingsFragment());
+
                 case KEY_SCREENSAVER_SETTINGS -> animateAndShowFragment(new ScreensaverSettingsActivity.ScreensaverSettingsFragment());
 
                 case KEY_WIDGETS_SETTINGS -> animateAndShowFragment(new WidgetSettingsFragment());
@@ -362,6 +366,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mTimerSettingsPref.setOnPreferenceClickListener(this);
 
             mStopwatchSettingsPref.setOnPreferenceClickListener(this);
+
+            mNamazSettingsPref.setOnPreferenceClickListener(this);
 
             mScreensaverSettings.setOnPreferenceClickListener(this);
 

@@ -144,6 +144,8 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_NAMAZ_LONGITUDE = "0.0";
     public static final String DEFAULT_NAMAZ_MADHAB = "HANAFI";
     public static final String DEFAULT_NAMAZ_CALC_METHOD = "KARACHI";
+    public static final String DEFAULT_NAMAZ_LOCATION_MODE = "GPS";
+    public static final String DEFAULT_NAMAZ_CITY_NAME = "Unknown";
 
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;

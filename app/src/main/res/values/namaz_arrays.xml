@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="namaz_location_mode_entries">
+        <item>GPS</item>
+        <item>Manual</item>
+    </string-array>
+    <string-array name="namaz_location_mode_values" translatable="false">
+        <item>GPS</item>
+        <item>MANUAL</item>
+    </string-array>
+
+    <string-array name="namaz_madhab_entries">
+        <item>Hanafi</item>
+        <item>Shafi</item>
+    </string-array>
+    <string-array name="namaz_madhab_values" translatable="false">
+        <item>HANAFI</item>
+        <item>SHAFI</item>
+    </string-array>
+
+    <string-array name="namaz_calc_method_entries">
+        <item>University of Islamic Sciences, Karachi</item>
+        <item>Muslim World League</item>
+        <item>Islamic Society of North America</item>
+        <item>Egyptian General Authority of Survey</item>
+        <item>Umm al-Qura</item>
+        <item>Institute of Geophysics, University of Tehran</item>
+        <item>Gulf Region</item>
+        <item>Kuwait</item>
+        <item>Qatar</item>
+        <item>Majlis Ugama Islam Singapura</item>
+        <item>Diyanet İşleri Başkanlığı, TTurkey</item>
+        <item>Dubai, UAE</item>
+        <item>Moonsighting Committee</item>
+    </string-array>
+    <string-array name="namaz_calc_method_values" translatable="false">
+        <item>KARACHI</item>
+        <item>MUSLIM_WORLD_LEAGUE</item>
+        <item>NORTH_AMERICA</item>
+        <item>EGYPTIAN</item>
+        <item>UMM_AL_QURA</item>
+        <item>TEHRAN</item>
+        <item>GULF</item>
+        <item>KUWAIT</item>
+        <item>QATAR</item>
+        <item>SINGAPORE</item>
+        <item>TURKEY</item>
+        <item>DUBAI</item>
+        <item>MOON_SIGHTING_COMMITTEE</item>
+    </string-array>
+</resources>

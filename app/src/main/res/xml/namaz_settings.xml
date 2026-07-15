@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:key="key_namaz_location_mode"
+        android:title="Location Mode"
+        android:summary="%s"
+        android:entries="@array/namaz_location_mode_entries"
+        android:entryValues="@array/namaz_location_mode_values"
+        android:defaultValue="GPS" />
+
+    <EditTextPreference
+        android:key="key_namaz_manual_latitude"
+        android:title="Manual Latitude"
+        android:summary="%s"
+        android:dependency="key_namaz_location_mode" />
+
+    <EditTextPreference
+        android:key="key_namaz_manual_longitude"
+        android:title="Manual Longitude"
+        android:summary="%s"
+        android:dependency="key_namaz_location_mode" />
+
+    <ListPreference
+        android:key="key_namaz_madhab"
+        android:title="Madhab"
+        android:summary="%s"
+        android:entries="@array/namaz_madhab_entries"
+        android:entryValues="@array/namaz_madhab_values"
+        android:defaultValue="HANAFI" />
+
+    <ListPreference
+        android:key="key_namaz_calc_method"
+        android:title="Calculation Method"
+        android:summary="%s"
+        android:entries="@array/namaz_calc_method_entries"
+        android:entryValues="@array/namaz_calc_method_values"
+        android:defaultValue="KARACHI" />
+
+</PreferenceScreen>

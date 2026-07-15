@@ -22,6 +22,7 @@ public class PreferencesKeys {
     public static final String KEY_ALARM_SETTINGS = "key_alarm_settings";
     public static final String KEY_TIMER_SETTINGS = "key_timer_settings";
     public static final String KEY_STOPWATCH_SETTINGS = "key_stopwatch_settings";
+    public static final String KEY_NAMAZ_SETTINGS = "key_namaz_settings";
     public static final String KEY_SCREENSAVER_SETTINGS = "key_screensaver_settings";
     public static final String KEY_WIDGETS_SETTINGS = "key_widgets_settings";
     public static final String KEY_PERMISSIONS_MANAGEMENT = "key_permissions_management";
@@ -125,6 +126,12 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_LONGITUDE = "key_namaz_longitude";
     public static final String KEY_NAMAZ_MADHAB = "key_namaz_madhab";
     public static final String KEY_NAMAZ_CALC_METHOD = "key_namaz_calc_method";
+    public static final String KEY_NAMAZ_LOCATION_MODE = "key_namaz_location_mode";
+    public static final String KEY_NAMAZ_MANUAL_LATITUDE = "key_namaz_manual_latitude";
+    public static final String KEY_NAMAZ_MANUAL_LONGITUDE = "key_namaz_manual_longitude";
+    public static final String KEY_NAMAZ_AUTO_LATITUDE = "key_namaz_auto_latitude";
+    public static final String KEY_NAMAZ_AUTO_LONGITUDE = "key_namaz_auto_longitude";
+    public static final String KEY_NAMAZ_CITY_NAME = "key_namaz_city_name";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";

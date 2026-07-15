@@ -73,6 +73,7 @@ import com.best.deskclock.data.OnSilentSettingsListener;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.databinding.DeskClockBinding;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.NamazLocationManager;
 import com.best.deskclock.settings.PermissionsManagementActivity;
 import com.best.deskclock.settings.SettingsActivity;
 import com.best.deskclock.setup.FirstLaunch;
@@ -309,6 +310,10 @@ public class DeskClock extends BaseActivity implements FabContainer {
 
         if (SettingsDAO.isForegroundServiceEnabled(mPrefs)) {
             ContextCompat.startForegroundService(this, new Intent(this, KeepAliveService.class));
+        }
+
+        if (NamazLocationManager.getLocationMode(this) == NamazLocationManager.LocationMode.GPS) {
+            NamazLocationManager.requestGpsUpdate(this);
         }
     }
 

@@ -132,6 +132,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.14.0'
     implementation 'com.github.martin-stone:hsv-alpha-color-picker-android:3.1.0'
     implementation 'com.batoulapps.adhan:adhan:1.2.1'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
 
     // Room
     def room_version = "2.6.1"
