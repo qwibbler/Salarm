@@ -110,12 +110,6 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
             }
             NamazLocationManager.setLocationMode(requireContext(), mode);
             updateUiStates();
-        } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
-            if (preference.getSharedPreferences() != null) {
-                preference.getSharedPreferences().edit().putString(key, (String) newValue).apply();
-            }
-            RelationalAlarmScheduler.syncRelationalAlarms(requireContext());
-            return false;
         }
 
         return true;
@@ -125,6 +119,8 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (KEY_NAMAZ_CITY_NAME.equals(key)) {
             updateSummaries();
+        } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
+            RelationalAlarmScheduler.syncRelationalAlarms(requireContext());
         }
     }
 

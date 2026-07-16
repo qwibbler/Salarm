@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 
 import com.batoulapps.adhan.CalculationMethod;
 import com.best.deskclock.alarms.AlarmStateManager;
+import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.settings.PreferencesDefaultValues;
@@ -23,14 +24,39 @@ public class RelationalAlarmScheduler {
     private static final String LABEL_PREFIX = "NAMAZ_RULE_";
 
     public static void syncRelationalAlarms(Context context) {
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                syncRelationalAlarmsInternal(context);
+            } catch (Exception e) {
+                LogUtils.e("Error syncing relational Namaz alarms", e);
+            }
+        });
+    }
+
+    private static void syncRelationalAlarmsInternal(Context context) {
         LogUtils.i("Syncing relational Namaz alarms...");
         NamazDatabase db = NamazDatabase.getDatabase(context);
         List<RelationalRule> rules = db.relationalRuleDao().getEnabledRules();
 
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        double lat = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE));
-        double lon = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE));
-        CalculationMethod method = CalculationMethod.valueOf(prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD));
+        double lat, lon;
+        try {
+            lat = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE));
+            lon = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE));
+        } catch (NumberFormatException e) {
+            LogUtils.e("Error parsing coordinates", e);
+            lat = Double.parseDouble(PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE);
+            lon = Double.parseDouble(PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE);
+        }
+
+        CalculationMethod method;
+        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
+        try {
+            method = CalculationMethod.valueOf(methodStr);
+        } catch (IllegalArgumentException e) {
+            LogUtils.e("Invalid calculation method: " + methodStr, e);
+            method = CalculationMethod.valueOf(PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
+        }
 
         ContentResolver cr = context.getContentResolver();
 
