@@ -12,6 +12,14 @@
         android:iconifiedByDefault="false"
         android:queryHint="Search City or Country..." />
 
+    <ProgressBar
+        android:id="@+id/city_search_progress"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <ListView
         android:id="@+id/city_results_list"
         android:layout_width="match_parent"
