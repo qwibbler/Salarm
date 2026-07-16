@@ -71,6 +71,7 @@ import com.best.deskclock.dialogfragment.AlarmVolumeDialogFragment;
 import com.best.deskclock.dialogfragment.MaterialTimePickerDialogFragment;
 import com.best.deskclock.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.RelationalAlarmDialogFragment;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.uicomponents.CustomTooltip;
@@ -536,10 +537,10 @@ public final class AlarmFragment extends DeskClockFragment
 
     @Override
     public void onUpdateFab(@NonNull ImageView fab) {
-        fab.setImageResource(R.drawable.ic_add);
         fab.setContentDescription(getString(R.string.button_alarms));
 
         if (SettingsDAO.isAlarmFabLongPressEnabled(mPrefs)) {
+            fab.setImageResource(R.drawable.ic_add);
             fab.setVisibility(VISIBLE);
 
             fab.setOnLongClickListener(v -> {
@@ -549,9 +550,20 @@ public final class AlarmFragment extends DeskClockFragment
             });
         } else {
             if (mSideButtonsVisible) {
-                fab.setVisibility(INVISIBLE);
-            } else {
                 fab.setVisibility(VISIBLE);
+                fab.setImageResource(R.drawable.ic_namaz_masjid_with_hands);
+                fab.setOnClickListener(v -> {
+                    new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
+                    hideSideButtonsWithFabAnimation();
+                });
+                fab.setOnLongClickListener(v -> {
+                    CustomTooltip.showAbove(v, getString(R.string.dialog_add_relational_alarm_title), true);
+                    return true;
+                });
+            } else {
+                fab.setImageResource(R.drawable.ic_add);
+                fab.setVisibility(VISIBLE);
+                fab.setOnClickListener(v -> onFabClick());
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, fab.getContentDescription().toString(), true);
                     return true;
