@@ -1413,7 +1413,7 @@
     <string name="show_lockscreen_permission_title">SHOW ON LOCK SCREEN</string>
     <string name="show_lockscreen_dialog_title">Show on lock screen</string>
     <string name="show_lockscreen_dialog_text">On Xiaomi devices, you should manually enable the \"Show on lock screen\" permission from the device settings in order for the application to work properly.</string>
-    <!-- Location Permission -->
+    <!-- Namaz Location Permission -->
     <string name="location_permission_title">ENABLE LOCATION</string>
     <string name="location_dialog_title">Location</string>
     <string name="location_dialog_text">This app uses location to automatically calculate Namaz (prayer) times based on your current geographical position.
@@ -1448,4 +1448,41 @@
     <string name="namaz_location_category_title">Location</string>
     <!-- Prayer settings category title for Namaz settings -->
     <string name="namaz_prayer_settings_category_title">Prayer Settings</string>
+
+    <!-- Relational Alarm -->
+    <string name="dialog_add_relational_alarm_title">Add Relational Alarm</string>
+    <string name="relational_alarm_minutes">minutes</string>
+    <string name="relational_alarm_round">Round:</string>
+    <string name="relational_alarm_safety_boundary">Safety Boundary (Cap)</string>
+    <string name="relational_alarm_no">No</string>
+    <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Boundary</string>
+    <string name="relational_alarm_stop_ringing">Stop ringing/snoozing</string>
+    <string name="relational_alarm_min">min</string>
+    <string name="relational_alarm_save">SAVE</string>
+
+    <string-array name="relational_alarm_offset_type">
+        <item>before</item>
+        <item>after</item>
+    </string-array>
+
+    <string-array name="relational_alarm_prayer_events">
+        <item>Fajr</item>
+        <item>Sunrise</item>
+        <item>Dhuhr</item>
+        <item>Asr (Mithl 1)</item>
+        <item>Asr (Mithl 2)</item>
+        <item>Maghrib</item>
+        <item>Isha</item>
+    </string-array>
+
+    <string-array name="relational_alarm_round_type">
+        <item>to nearest</item>
+        <item>up to</item>
+        <item>down to</item>
+    </string-array>
+
+    <string-array name="relational_alarm_boundary_type">
+        <item>earlier than</item>
+        <item>later than</item>
+    </string-array>
 </resources>
