@@ -10,17 +10,10 @@
         android:entryValues="@array/namaz_location_mode_values"
         android:defaultValue="GPS" />
 
-    <EditTextPreference
-        android:key="key_namaz_manual_latitude"
-        android:title="Manual Latitude"
-        android:summary="%s"
-        android:dependency="key_namaz_location_mode" />
-
-    <EditTextPreference
-        android:key="key_namaz_manual_longitude"
-        android:title="Manual Longitude"
-        android:summary="%s"
-        android:dependency="key_namaz_location_mode" />
+    <Preference
+        android:key="key_namaz_city_name"
+        android:title="City"
+        android:summary="not detected" />
 
     <ListPreference
         android:key="key_namaz_madhab"

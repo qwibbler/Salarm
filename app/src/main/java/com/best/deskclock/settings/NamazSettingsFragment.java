@@ -1,8 +1,10 @@
 package com.best.deskclock.settings;
 
 import static com.best.deskclock.settings.PreferencesKeys.*;
+import static com.best.deskclock.settings.PreferencesDefaultValues.*;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -13,13 +15,14 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 
 import com.best.deskclock.R;
+import com.best.deskclock.namaz.CitySearchDialogFragment;
 import com.best.deskclock.namaz.NamazLocationManager;
 import com.best.deskclock.namaz.RelationalAlarmScheduler;
 
 /**
  * Settings fragment for Namaz-related configurations.
  */
-public class NamazSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
+public class NamazSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(), result -> {
@@ -51,11 +54,49 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
         Preference calcMethod = findPreference(KEY_NAMAZ_CALC_METHOD);
         if (calcMethod != null) calcMethod.setOnPreferenceChangeListener(this);
 
-        Preference manualLat = findPreference(KEY_NAMAZ_MANUAL_LATITUDE);
-        if (manualLat != null) manualLat.setOnPreferenceChangeListener(this);
+        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        if (cityPref != null) {
+            cityPref.setOnPreferenceClickListener(preference -> {
+                if (NamazLocationManager.getLocationMode(requireContext()) == NamazLocationManager.LocationMode.MANUAL) {
+                    new CitySearchDialogFragment().show(getParentFragmentManager(), "city_search");
+                }
+                return true;
+            });
+        }
 
-        Preference manualLon = findPreference(KEY_NAMAZ_MANUAL_LONGITUDE);
-        if (manualLon != null) manualLon.setOnPreferenceChangeListener(this);
+        updateUiStates();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mPrefs != null) {
+            mPrefs.registerOnSharedPreferenceChangeListener(this);
+        }
+        updateSummaries();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPrefs != null) {
+            mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    private void updateUiStates() {
+        NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(requireContext());
+        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        if (cityPref != null) {
+            cityPref.setEnabled(mode == NamazLocationManager.LocationMode.MANUAL);
+        }
+    }
+
+    private void updateSummaries() {
+        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        if (cityPref != null) {
+            cityPref.setSummary(mPrefs.getString(KEY_NAMAZ_CITY_NAME, DEFAULT_NAMAZ_CITY_NAME));
+        }
     }
 
     @Override
@@ -68,14 +109,7 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
                 checkLocationPermissions();
             }
             NamazLocationManager.setLocationMode(requireContext(), mode);
-        } else if (KEY_NAMAZ_MANUAL_LATITUDE.equals(key) || KEY_NAMAZ_MANUAL_LONGITUDE.equals(key)) {
-            if (preference.getSharedPreferences() != null) {
-                preference.getSharedPreferences().edit().putString(key, (String) newValue).apply();
-            }
-            if (NamazLocationManager.getLocationMode(requireContext()) == NamazLocationManager.LocationMode.MANUAL) {
-                RelationalAlarmScheduler.syncRelationalAlarms(requireContext());
-            }
-            return false;
+            updateUiStates();
         } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
             if (preference.getSharedPreferences() != null) {
                 preference.getSharedPreferences().edit().putString(key, (String) newValue).apply();
@@ -85,6 +119,13 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
         }
 
         return true;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (KEY_NAMAZ_CITY_NAME.equals(key)) {
+            updateSummaries();
+        }
     }
 
     private void checkLocationPermissions() {

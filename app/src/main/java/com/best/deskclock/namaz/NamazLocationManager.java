@@ -8,12 +8,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.utils.LogUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -21,6 +24,10 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Manages location settings and GPS updates for Namaz prayer times.
@@ -43,8 +50,6 @@ public class NamazLocationManager {
 
         if (mode == LocationMode.GPS) {
             requestGpsUpdate(context);
-        } else {
-            updateActiveCoordinatesFromManual(context);
         }
     }
 
@@ -54,22 +59,10 @@ public class NamazLocationManager {
     public static LocationMode getLocationMode(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         String modeStr = prefs.getString(KEY_NAMAZ_LOCATION_MODE, DEFAULT_NAMAZ_LOCATION_MODE);
-        return LocationMode.valueOf(modeStr);
-    }
-
-    /**
-     * Manually sets the coordinates and city name.
-     */
-    public static void setManualLocation(Context context, double lat, double lon, String cityName) {
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
-        prefs.edit()
-                .putString(KEY_NAMAZ_MANUAL_LATITUDE, String.valueOf(lat))
-                .putString(KEY_NAMAZ_MANUAL_LONGITUDE, String.valueOf(lon))
-                .putString(KEY_NAMAZ_CITY_NAME, cityName)
-                .apply();
-
-        if (getLocationMode(context) == LocationMode.MANUAL) {
-            updateActiveCoordinates(context, lat, lon);
+        try {
+            return LocationMode.valueOf(modeStr);
+        } catch (IllegalArgumentException e) {
+            return LocationMode.GPS;
         }
     }
 
@@ -86,7 +79,7 @@ public class NamazLocationManager {
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(context);
         client.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
-                handleNewGpsLocation(context, location);
+                handleNewLocation(context, location.getLatitude(), location.getLongitude(), true);
             } else {
                 LogUtils.i("Last location null, requesting fresh update...");
                 requestFreshLocation(context, client);
@@ -99,7 +92,6 @@ public class NamazLocationManager {
                 .setMaxUpdates(1)
                 .build();
 
-        // Re-check permissions just in case
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
             || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
@@ -108,7 +100,7 @@ public class NamazLocationManager {
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
                     if (location != null) {
-                        handleNewGpsLocation(context, location);
+                        handleNewLocation(context, location.getLatitude(), location.getLongitude(), true);
                     }
                     client.removeLocationUpdates(this);
                 }
@@ -116,45 +108,57 @@ public class NamazLocationManager {
         }
     }
 
-    private static void handleNewGpsLocation(Context context, Location location) {
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
-        LogUtils.i("New GPS location received: " + lat + ", " + lon);
+    /**
+     * Handles a new set of coordinates, updates prefs, and triggers sync if significant.
+     * @param isGps If true, will attempt to reverse-geocode the city name.
+     */
+    public static void handleNewLocation(Context context, double lat, double lon, boolean isGps) {
+        LogUtils.i("Processing new location: " + lat + ", " + lon + " (GPS: " + isGps + ")");
 
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
-        prefs.edit()
-                .putString(KEY_NAMAZ_AUTO_LATITUDE, String.valueOf(lat))
-                .putString(KEY_NAMAZ_AUTO_LONGITUDE, String.valueOf(lon))
-                .apply();
-
-        if (getLocationMode(context) == LocationMode.GPS) {
-            updateActiveCoordinates(context, lat, lon);
-        }
-    }
-
-    private static void updateActiveCoordinatesFromManual(Context context) {
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
-        double lat = Double.parseDouble(prefs.getString(KEY_NAMAZ_MANUAL_LATITUDE, DEFAULT_NAMAZ_LATITUDE));
-        double lon = Double.parseDouble(prefs.getString(KEY_NAMAZ_MANUAL_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE));
-        updateActiveCoordinates(context, lat, lon);
-    }
-
-    private static void updateActiveCoordinates(Context context, double newLat, double newLon) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         double oldLat = Double.parseDouble(prefs.getString(KEY_NAMAZ_LATITUDE, DEFAULT_NAMAZ_LATITUDE));
         double oldLon = Double.parseDouble(prefs.getString(KEY_NAMAZ_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE));
 
-        boolean significantChange = Math.abs(newLat - oldLat) > SIGNIFICANT_CHANGE_THRESHOLD
-                || Math.abs(newLon - oldLon) > SIGNIFICANT_CHANGE_THRESHOLD;
+        boolean significantChange = Math.abs(lat - oldLat) > SIGNIFICANT_CHANGE_THRESHOLD
+                || Math.abs(lon - oldLon) > SIGNIFICANT_CHANGE_THRESHOLD;
 
         prefs.edit()
-                .putString(KEY_NAMAZ_LATITUDE, String.valueOf(newLat))
-                .putString(KEY_NAMAZ_LONGITUDE, String.valueOf(newLon))
+                .putString(KEY_NAMAZ_LATITUDE, String.valueOf(lat))
+                .putString(KEY_NAMAZ_LONGITUDE, String.valueOf(lon))
                 .apply();
+
+        if (isGps) {
+            updateCityNameFromCoords(context, lat, lon);
+        }
 
         if (significantChange) {
             LogUtils.i("Significant location change detected. Triggering alarm resync...");
             RelationalAlarmScheduler.syncRelationalAlarms(context);
         }
+    }
+
+    private static void updateCityNameFromCoords(Context context, double lat, double lon) {
+        AppExecutors.getDiskIO().execute(() -> {
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+            try {
+                List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address address = addresses.get(0);
+                    String cityName = address.getLocality();
+                    if (cityName == null) cityName = address.getSubAdminArea();
+                    if (cityName == null) cityName = address.getAdminArea();
+
+                    if (cityName != null) {
+                        String country = address.getCountryName();
+                        final String finalName = cityName + (country != null ? ", " + country : "");
+                        getDefaultSharedPreferences(context).edit()
+                                .putString(KEY_NAMAZ_CITY_NAME, finalName)
+                                .apply();
+                    }
+                }
+            } catch (IOException e) {
+                LogUtils.e("Error reverse-geocoding coordinates", e);
+            }
+        });
     }
 }
