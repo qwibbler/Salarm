@@ -7,6 +7,7 @@ import static android.view.View.VISIBLE;
 import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_FULL_SCREEN_NOTIFICATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_IGNORE_BATTERY_OPTIMIZATIONS;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_LOCATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_NOTIFICATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_SHOW_LOCKSCREEN_PERMISSION;
 
@@ -73,6 +74,8 @@ public class PermissionsManagementPreference extends Preference {
                 setStatusText(PermissionUtils.areNotificationsEnabled(getContext()));
             } else if (isFullScreenNotificationPermissionPreference()) {
                 setStatusText(PermissionUtils.areFullScreenNotificationsEnabled(getContext()));
+            } else if (isLocationPermissionPreference()) {
+                setStatusText(PermissionUtils.isLocationPermissionGranted(getContext()));
             }
 
             mBinding.statusState.setVisibility(VISIBLE);
@@ -156,6 +159,14 @@ public class PermissionsManagementPreference extends Preference {
     }
 
     /**
+     * @return {@code true} if the current preference is related to the location permission;
+     * {@code false} otherwise.
+     */
+    private boolean isLocationPermissionPreference() {
+        return getKey().equals(KEY_LOCATION_PERMISSION);
+    }
+
+    /**
      * @return {@code true} if the current preference is related to the "Show lockscreen" permission
      * for MIUI devices; {@code false} otherwise.
      */
@@ -183,6 +194,10 @@ public class PermissionsManagementPreference extends Preference {
             iconId = R.drawable.ic_fullscreen;
             titleId = R.string.FSN_dialog_title;
             messageId = R.string.FSN_dialog_text;
+        } else if (isLocationPermissionPreference()) {
+            iconId = R.drawable.ic_search;
+            titleId = R.string.location_dialog_title;
+            messageId = R.string.location_dialog_text;
         } else {
             iconId = R.drawable.ic_screen_lock;
             titleId = R.string.show_lockscreen_dialog_title;

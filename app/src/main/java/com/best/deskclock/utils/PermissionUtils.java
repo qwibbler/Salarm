@@ -2,6 +2,7 @@
 
 package com.best.deskclock.utils;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 
 import android.app.NotificationManager;
@@ -48,6 +49,13 @@ public class PermissionUtils {
         }
 
         return false;
+    }
+
+    /**
+     * @return {@code true} when Location permission is granted; {@code false} otherwise.
+     */
+    public static boolean isLocationPermissionGranted(Context context) {
+        return ContextCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**

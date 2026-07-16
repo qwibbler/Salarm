@@ -33,6 +33,13 @@
             app:singleLineTitle="false" />
 
         <com.best.deskclock.settings.custompreference.PermissionsManagementPreference
+            android:key="key_location_permission"
+            android:layout="@layout/settings_preference_permission"
+            android:title="@string/location_permission_title"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.best.deskclock.settings.custompreference.PermissionsManagementPreference
             android:key="key_show_lockscreen_permission"
             android:layout="@layout/settings_preference_permission"
             android:title="@string/show_lockscreen_permission_title"

@@ -2,6 +2,7 @@
 
 package com.best.deskclock.settings;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS;
@@ -14,6 +15,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_ENABLE_FOREGROUND_
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ESSENTIAL_PERMISSIONS_GRANTED;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_FULL_SCREEN_NOTIFICATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_IGNORE_BATTERY_OPTIMIZATIONS;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_LOCATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_NOTIFICATION_PERMISSION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_SHOW_LOCKSCREEN_PERMISSION;
 
@@ -70,21 +72,25 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
 
         private static final String KEY_SHOW_FOREGROUND_SERVICE_DIALOG = "show_foreground_service_dialog";
         private static final String KEY_SHOW_NOTIF_RATIONALE = "show_notif_rationale";
+        private static final String KEY_SHOW_LOCATION_RATIONALE = "show_location_rationale";
         private static final String KEY_PENDING_REVOCATION_PREF = "pending_revocation_pref";
 
         private boolean mShowForegroundServiceDialog = false;
         private boolean mShowNotificationRationaleDialog = false;
+        private boolean mShowLocationRationaleDialog = false;
         private String mPendingRevocationPrefKey = null;
 
         private static final String[] DYNAMIC_PERMISSION_KEYS = {
             KEY_IGNORE_BATTERY_OPTIMIZATIONS,
             KEY_NOTIFICATION_PERMISSION,
-            KEY_FULL_SCREEN_NOTIFICATION_PERMISSION
+            KEY_FULL_SCREEN_NOTIFICATION_PERMISSION,
+            KEY_LOCATION_PERMISSION,
         };
 
         PermissionsManagementPreference mIgnoreBatteryOptimizationsPref;
         PermissionsManagementPreference mNotificationPermissionPref;
         PermissionsManagementPreference mFullScreenNotificationPref;
+        PermissionsManagementPreference mLocationPermissionPref;
         PermissionsManagementPreference mShowLockScreenPref;
         SwitchPreferenceCompat mEnableForegroundServicePref;
 
@@ -102,12 +108,14 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
             mIgnoreBatteryOptimizationsPref = findPreference(KEY_IGNORE_BATTERY_OPTIMIZATIONS);
             mNotificationPermissionPref = findPreference(KEY_NOTIFICATION_PERMISSION);
             mFullScreenNotificationPref = findPreference(KEY_FULL_SCREEN_NOTIFICATION_PERMISSION);
+            mLocationPermissionPref = findPreference(KEY_LOCATION_PERMISSION);
             mShowLockScreenPref = findPreference(KEY_SHOW_LOCKSCREEN_PERMISSION);
             mEnableForegroundServicePref = findPreference(KEY_ENABLE_FOREGROUND_SERVICE);
 
             if (savedInstanceState != null) {
                 mShowForegroundServiceDialog = savedInstanceState.getBoolean(KEY_SHOW_FOREGROUND_SERVICE_DIALOG, false);
                 mShowNotificationRationaleDialog = savedInstanceState.getBoolean(KEY_SHOW_NOTIF_RATIONALE, false);
+                mShowLocationRationaleDialog = savedInstanceState.getBoolean(KEY_SHOW_LOCATION_RATIONALE, false);
                 mPendingRevocationPrefKey = savedInstanceState.getString(KEY_PENDING_REVOCATION_PREF);
             }
 
@@ -120,6 +128,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
 
             outState.putBoolean(KEY_SHOW_FOREGROUND_SERVICE_DIALOG, mShowForegroundServiceDialog);
             outState.putBoolean(KEY_SHOW_NOTIF_RATIONALE, mShowNotificationRationaleDialog);
+            outState.putBoolean(KEY_SHOW_LOCATION_RATIONALE, mShowLocationRationaleDialog);
             outState.putString(KEY_PENDING_REVOCATION_PREF, mPendingRevocationPrefKey);
         }
 
@@ -131,6 +140,8 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
                 showForegroundServiceDialog();
             } else if (mShowNotificationRationaleDialog && (mActiveDialog == null || !mActiveDialog.isShowing())) {
                 showNotificationRationaleDialog();
+            } else if (mShowLocationRationaleDialog && (mActiveDialog == null || !mActiveDialog.isShowing())) {
+                showLocationRationaleDialog();
             } else if (mPendingRevocationPrefKey != null && (mActiveDialog == null || !mActiveDialog.isShowing())) {
 
                 switch (mPendingRevocationPrefKey) {
@@ -140,6 +151,8 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
                         displayRevocationDialog(KEY_IGNORE_BATTERY_OPTIMIZATIONS, getIgnoreBatteryOptimizationsIntentRevoke());
                     case KEY_FULL_SCREEN_NOTIFICATION_PERMISSION ->
                         displayRevocationDialog(KEY_FULL_SCREEN_NOTIFICATION_PERMISSION, getFullScreenNotificationsIntent());
+                    case KEY_LOCATION_PERMISSION ->
+                        displayRevocationDialog(KEY_LOCATION_PERMISSION, getAppInfoIntent());
                 }
             }
 
@@ -153,7 +166,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         @Override
         public void onDestroy() {
             nullifyPreferenceListeners(mIgnoreBatteryOptimizationsPref, mNotificationPermissionPref, mFullScreenNotificationPref,
-                mShowLockScreenPref, mEnableForegroundServicePref);
+                mLocationPermissionPref, mShowLockScreenPref, mEnableForegroundServicePref);
 
             nullifyAllPrefs();
 
@@ -187,6 +200,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
                 case KEY_IGNORE_BATTERY_OPTIMIZATIONS -> launchIgnoreBatteryOptimizationsSettings();
                 case KEY_NOTIFICATION_PERMISSION -> grantOrRevokeNotificationsPermission();
                 case KEY_FULL_SCREEN_NOTIFICATION_PERMISSION -> grantOrRevokeFullScreenNotificationsPermission();
+                case KEY_LOCATION_PERMISSION -> grantOrRevokeLocationPermission();
                 case KEY_SHOW_LOCKSCREEN_PERMISSION -> grantShowOnLockScreenPermissionXiaomi();
             }
 
@@ -200,6 +214,8 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
 
             mFullScreenNotificationPref.setVisible(SdkUtils.isAtLeastAndroid14());
             mFullScreenNotificationPref.setOnPreferenceClickListener(this);
+
+            mLocationPermissionPref.setOnPreferenceClickListener(this);
 
             mShowLockScreenPref.setVisible(DeviceUtils.isMiui());
             mShowLockScreenPref.setOnPreferenceClickListener(this);
@@ -325,6 +341,48 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         }
 
         /**
+         * Grant or revoke Location permission.
+         */
+        private void grantOrRevokeLocationPermission() {
+            if (PermissionUtils.isLocationPermissionGranted(requireContext())) {
+                displayRevocationDialog(KEY_LOCATION_PERMISSION, getAppInfoIntent());
+            } else if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
+                showLocationRationaleDialog();
+            } else {
+                requireActivity().requestPermissions(new String[]{ACCESS_FINE_LOCATION}, 0);
+            }
+        }
+
+        private void showLocationRationaleDialog() {
+            mShowLocationRationaleDialog = true;
+
+            mActiveDialog = CustomDialog.create(
+                requireContext(),
+                null,
+                AppCompatResources.getDrawable(requireContext(), R.drawable.ic_search),
+                getString(R.string.location_dialog_title),
+                getString(R.string.location_dialog_text),
+                null,
+                getString(android.R.string.ok),
+                (d, w) -> requireActivity().requestPermissions(new String[]{ACCESS_FINE_LOCATION}, 0),
+                getString(android.R.string.cancel),
+                null,
+                null,
+                null,
+                (alertDialog -> alertDialog.setOnDismissListener(d -> mShowLocationRationaleDialog = false)),
+                CustomDialog.SoftInputMode.NONE
+            );
+
+            mActiveDialog.show();
+        }
+
+        private Intent getAppInfoIntent() {
+            return new Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.fromParts("package", requireContext().getPackageName(), null))
+                .addFlags(FLAG_ACTIVITY_NEW_TASK);
+        }
+
+        /**
          * Grant the "Show On Lock Screen" permission for Xiaomi devices.
          */
         private void grantShowOnLockScreenPermissionXiaomi() {
@@ -392,6 +450,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
             mIgnoreBatteryOptimizationsPref = null;
             mNotificationPermissionPref = null;
             mFullScreenNotificationPref = null;
+            mLocationPermissionPref = null;
             mShowLockScreenPref = null;
             mEnableForegroundServicePref = null;
         }
