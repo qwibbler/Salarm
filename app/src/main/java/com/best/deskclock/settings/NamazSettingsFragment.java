@@ -37,7 +37,7 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
 
     @Override
     protected String getFragmentTitle() {
-        return "Namaz Settings";
+        return getString(R.string.namaz_settings_title);
     }
 
     @Override

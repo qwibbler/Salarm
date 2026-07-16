@@ -1437,4 +1437,10 @@
     <string name="toast_message_restore_error">Restore failed</string>
     <!-- Namaz City Search -->
     <string name="namaz_city_search_title">Select City</string>
+    <!-- Namaz Settings -->
+    <string name="namaz_settings_title">Namaz Settings</string>
+    <!-- Location category title for Namaz settings -->
+    <string name="namaz_location_category_title">Location</string>
+    <!-- Prayer settings category title for Namaz settings -->
+    <string name="namaz_prayer_settings_category_title">Prayer Settings</string>
 </resources>

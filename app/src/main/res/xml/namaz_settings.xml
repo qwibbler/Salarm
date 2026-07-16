@@ -1,34 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
-        android:key="key_namaz_location_mode"
-        android:title="Location Mode"
-        android:summary="%s"
-        android:entries="@array/namaz_location_mode_entries"
-        android:entryValues="@array/namaz_location_mode_values"
-        android:defaultValue="GPS" />
+    <PreferenceCategory
+        android:title="@string/namaz_location_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
 
-    <Preference
-        android:key="key_namaz_city_name"
-        android:title="City"
-        android:summary="not detected" />
+        <ListPreference
+            android:key="key_namaz_location_mode"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Location Mode"
+            android:summary="%s"
+            android:entries="@array/namaz_location_mode_entries"
+            android:entryValues="@array/namaz_location_mode_values"
+            android:defaultValue="GPS"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
 
-    <ListPreference
-        android:key="key_namaz_madhab"
-        android:title="Madhab"
-        android:summary="%s"
-        android:entries="@array/namaz_madhab_entries"
-        android:entryValues="@array/namaz_madhab_values"
-        android:defaultValue="HANAFI" />
+        <Preference
+            android:key="key_namaz_city_name"
+            android:layout="@layout/settings_preference_layout"
+            android:title="City"
+            android:summary="not detected"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
 
-    <ListPreference
-        android:key="key_namaz_calc_method"
-        android:title="Calculation Method"
-        android:summary="%s"
-        android:entries="@array/namaz_calc_method_entries"
-        android:entryValues="@array/namaz_calc_method_values"
-        android:defaultValue="KARACHI" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/namaz_prayer_settings_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="key_namaz_madhab"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Madhab"
+            android:summary="%s"
+            android:entries="@array/namaz_madhab_entries"
+            android:entryValues="@array/namaz_madhab_values"
+            android:defaultValue="HANAFI"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_namaz_calc_method"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Calculation Method"
+            android:summary="%s"
+            android:entries="@array/namaz_calc_method_entries"
+            android:entryValues="@array/namaz_calc_method_values"
+            android:defaultValue="KARACHI"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
