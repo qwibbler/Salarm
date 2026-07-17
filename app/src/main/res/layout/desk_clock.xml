@@ -82,6 +82,7 @@
                 android:contentDescription="@null"
                 android:importantForAccessibility="no"
                 app:fabCustomSize="@dimen/fab_size"
+                app:maxImageSize="40dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

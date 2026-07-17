@@ -1451,7 +1451,8 @@
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Add Namaz Alarm</string>
-    <string name="relational_alarm_primary_alarm">Set Alarm At…</string>
+    <string name="relational_alarm_primary_alarm">Primary Alarm</string>
+    <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
     <string name="relational_alarm_round">Rounded:</string>
     <string name="relational_alarm_safety_boundary">Safety Boundary (Cap)</string>
@@ -1463,34 +1464,35 @@
     <string name="relational_alarm_round_near">Near</string>
     <string name="relational_alarm_round_up">Up</string>
     <string name="relational_alarm_round_down">Down</string>
-    <string name="relational_alarm_before">before</string>
-    <string name="relational_alarm_after">after</string>
-    <string name="relational_alarm_earlier_than">Earlier Than</string>
-    <string name="relational_alarm_later_than">Later Than</string>
+    <string name="relational_alarm_before">Before</string>
+    <string name="relational_alarm_after">After</string>
+    <string name="relational_alarm_earlier">Earlier</string>
+    <string name="relational_alarm_later">Later</string>
+    <string name="relational_alarm_than">Than</string>
 
     <string-array name="relational_alarm_offset_type">
-        <item>before</item>
-        <item>after</item>
+        <item>Before</item>
+        <item>After</item>
     </string-array>
 
     <string-array name="relational_alarm_prayer_events">
         <item>Fajr</item>
         <item>Sunrise</item>
         <item>Dhuhr</item>
-        <item>Asr (Mithl 1)</item>
-        <item>Asr (Mithl 2)</item>
+        <item>Asr 1</item>
+        <item>Asr 2</item>
         <item>Maghrib</item>
         <item>Isha</item>
     </string-array>
 
     <string-array name="relational_alarm_round_type">
-        <item>to nearest</item>
-        <item>up to</item>
-        <item>down to</item>
+        <item>To the Nearest</item>
+        <item>Up To</item>
+        <item>Down To</item>
     </string-array>
 
     <string-array name="relational_alarm_boundary_type">
-        <item>earlier than</item>
-        <item>later than</item>
+        <item>Earlier</item>
+        <item>Later</item>
     </string-array>
 </resources>

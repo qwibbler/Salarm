@@ -125,6 +125,13 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="RelationalAlarmDialogTheme" parent="AppAlertDialogTheme">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/AppMaterialTimePickerTitleStyle</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+    </style>
+
     <!-- ======================= -->
     <!--   BOTTOM SHEET DIALOG   -->
     <!-- ======================= -->
