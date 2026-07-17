@@ -398,6 +398,8 @@ public class DeskClock extends BaseActivity implements FabContainer {
             return;
         }
 
+        mBinding.fab.setOnClickListener(view -> f.onFabClick());
+
         switch (updateType & FAB_ANIMATION_MASK) {
             case FAB_SHRINK_AND_EXPAND -> mUpdateFabOnlyAnimation.start();
             case FAB_IMMEDIATE -> f.onUpdateFab(mBinding.fab);

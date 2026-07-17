@@ -530,8 +530,13 @@ public final class AlarmFragment extends DeskClockFragment
         if (SettingsDAO.isAlarmFabLongPressEnabled(mPrefs)) {
             startCreatingAlarm();
         } else {
-            mSideButtonsVisible = true;
-            updateFab(FAB_AND_BUTTONS_SHRINK_AND_EXPAND);
+            if (mSideButtonsVisible) {
+                new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
+                hideSideButtonsWithFabAnimation();
+            } else {
+                mSideButtonsVisible = true;
+                updateFab(FAB_AND_BUTTONS_SHRINK_AND_EXPAND);
+            }
         }
     }
 
@@ -552,10 +557,6 @@ public final class AlarmFragment extends DeskClockFragment
             if (mSideButtonsVisible) {
                 fab.setVisibility(VISIBLE);
                 fab.setImageResource(R.drawable.ic_namaz_masjid_with_hands);
-                fab.setOnClickListener(v -> {
-                    new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
-                    hideSideButtonsWithFabAnimation();
-                });
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, getString(R.string.dialog_add_relational_alarm_title), true);
                     return true;
@@ -563,7 +564,6 @@ public final class AlarmFragment extends DeskClockFragment
             } else {
                 fab.setImageResource(R.drawable.ic_add);
                 fab.setVisibility(VISIBLE);
-                fab.setOnClickListener(v -> onFabClick());
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, fab.getContentDescription().toString(), true);
                     return true;
