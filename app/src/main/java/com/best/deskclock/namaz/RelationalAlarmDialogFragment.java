@@ -5,154 +5,239 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.best.deskclock.R;
+import com.best.deskclock.databinding.DialogAddRelationalAlarmBinding;
+import com.best.deskclock.uicomponents.CustomDialog;
 import com.best.deskclock.utils.LogUtils;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
+import com.best.deskclock.utils.Utils;
 
 public class RelationalAlarmDialogFragment extends DialogFragment {
 
     public static final String TAG = "RelationalAlarmDialogFragment";
 
-    private TextInputEditText mPrimaryOffsetValue;
-    private MaterialButton mPrimaryOffsetToggle;
-    private AutoCompleteTextView mPrimaryPrayerEvent;
-    private MaterialButtonToggleGroup mPrimaryRoundGroup;
-    private TextInputEditText mPrimaryRoundValue;
+    private static final String KEY_PRIMARY_VALUE = "primary_value";
+    private static final String KEY_PRIMARY_OFFSET_IDX = "primary_offset_idx";
+    private static final String KEY_PRIMARY_EVENT = "primary_event";
+    private static final String KEY_PRIMARY_ROUND_IDX = "primary_round_idx";
+    private static final String KEY_PRIMARY_ROUND_VALUE = "primary_round_value";
 
-    private CheckBox mBlock2Checkbox;
-    private LinearLayout mBlock2Content;
-    private MaterialButton mSafetyBoundaryToggle;
-    private TextInputEditText mSafetyOffsetValue;
-    private MaterialButton mSafetyOffsetToggle;
-    private AutoCompleteTextView mSafetyPrayerEvent;
-    private MaterialButtonToggleGroup mSafetyRoundGroup;
-    private TextInputEditText mSafetyRoundValue;
+    private static final String KEY_SAFETY_ENABLED = "safety_enabled";
+    private static final String KEY_SAFETY_BOUND_IDX = "safety_bound_idx";
+    private static final String KEY_SAFETY_VALUE = "safety_value";
+    private static final String KEY_SAFETY_OFFSET_IDX = "safety_offset_idx";
+    private static final String KEY_SAFETY_EVENT = "safety_event";
+    private static final String KEY_SAFETY_ROUND_IDX = "safety_round_idx";
+    private static final String KEY_SAFETY_ROUND_VALUE = "safety_round_value";
 
-    private CheckBox mBlock3Checkbox;
-    private LinearLayout mBlock3Content;
-    private TextInputEditText mAutostopOffsetValue;
-    private MaterialButton mAutostopOffsetToggle;
-    private AutoCompleteTextView mAutostopPrayerEvent;
+    private static final String KEY_AUTOSTOP_ENABLED = "autostop_enabled";
+    private static final String KEY_AUTOSTOP_VALUE = "autostop_value";
+    private static final String KEY_AUTOSTOP_OFFSET_IDX = "autostop_offset_idx";
+    private static final String KEY_AUTOSTOP_EVENT = "autostop_event";
+
+    private DialogAddRelationalAlarmBinding mBinding;
+
+    private String[] mOffsetTypes;
+    private String[] mRoundTypes;
+    private String[] mBoundaryTypes;
+
+    private int mPrimaryOffsetIdx = 1; // default "after"
+    private int mPrimaryRoundIdx = 0; // default "to nearest"
+    private int mSafetyBoundIdx = 1; // default "later than"
+    private int mSafetyOffsetIdx = 0; // default "before"
+    private int mSafetyRoundIdx = 0; // default "to nearest"
+    private int mAutostopOffsetIdx = 0; // default "before"
+
+    public static RelationalAlarmDialogFragment newInstance() {
+        return new RelationalAlarmDialogFragment();
+    }
+
+    public static void show(FragmentManager manager) {
+        Utils.showDialogFragment(manager, newInstance(), TAG);
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        View view = getLayoutInflater().inflate(R.layout.dialog_add_relational_alarm, null);
+        mBinding = DialogAddRelationalAlarmBinding.inflate(getLayoutInflater());
 
-        initViews(view);
+        mOffsetTypes = getResources().getStringArray(R.array.relational_alarm_offset_type);
+        mRoundTypes = getResources().getStringArray(R.array.relational_alarm_round_type);
+        mBoundaryTypes = getResources().getStringArray(R.array.relational_alarm_boundary_type);
+
         setupAdapters();
         setupListeners();
-        setInitialDefaults();
 
-        return new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.dialog_add_relational_alarm_title)
-                .setView(view)
-                .setPositiveButton(R.string.relational_alarm_save, (dialog, which) -> saveRelationalAlarm())
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState);
+        } else {
+            setInitialDefaults();
+        }
+
+        return CustomDialog.create(
+            requireContext(),
+            R.style.RelationalAlarmDialogTheme,
+            null,
+            getString(R.string.dialog_add_relational_alarm_title),
+            null,
+            mBinding.getRoot(),
+            getString(R.string.relational_alarm_save),
+            (dialog, which) -> saveRelationalAlarm(),
+            getString(android.R.string.cancel),
+            null,
+            null,
+            null,
+            null,
+            CustomDialog.SoftInputMode.NONE
+        );
     }
 
-    private void initViews(View view) {
-        mPrimaryOffsetValue = view.findViewById(R.id.primary_offset_value);
-        mPrimaryOffsetToggle = view.findViewById(R.id.primary_offset_toggle);
-        mPrimaryPrayerEvent = view.findViewById(R.id.primary_prayer_event);
-        mPrimaryRoundGroup = view.findViewById(R.id.primary_round_group);
-        mPrimaryRoundValue = view.findViewById(R.id.primary_round_value);
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mBinding != null) {
+            outState.putString(KEY_PRIMARY_VALUE, getText(mBinding.primaryOffsetValue));
+            outState.putInt(KEY_PRIMARY_OFFSET_IDX, mPrimaryOffsetIdx);
+            outState.putString(KEY_PRIMARY_EVENT, getText(mBinding.primaryEvent));
+            outState.putInt(KEY_PRIMARY_ROUND_IDX, mPrimaryRoundIdx);
+            outState.putString(KEY_PRIMARY_ROUND_VALUE, getText(mBinding.primaryRoundValue));
 
-        mBlock2Checkbox = view.findViewById(R.id.block2_checkbox);
-        mBlock2Content = view.findViewById(R.id.block2_content);
-        mSafetyBoundaryToggle = view.findViewById(R.id.safety_boundary_toggle);
-        mSafetyOffsetValue = view.findViewById(R.id.safety_offset_value);
-        mSafetyOffsetToggle = view.findViewById(R.id.safety_offset_toggle);
-        mSafetyPrayerEvent = view.findViewById(R.id.safety_prayer_event);
-        mSafetyRoundGroup = view.findViewById(R.id.safety_round_group);
-        mSafetyRoundValue = view.findViewById(R.id.safety_round_value);
+            outState.putBoolean(KEY_SAFETY_ENABLED, mBinding.safetyEnabledCheckbox.isChecked());
+            outState.putInt(KEY_SAFETY_BOUND_IDX, mSafetyBoundIdx);
+            outState.putString(KEY_SAFETY_VALUE, getText(mBinding.safetyOffsetValue));
+            outState.putInt(KEY_SAFETY_OFFSET_IDX, mSafetyOffsetIdx);
+            outState.putString(KEY_SAFETY_EVENT, getText(mBinding.safetyEvent));
+            outState.putInt(KEY_SAFETY_ROUND_IDX, mSafetyRoundIdx);
+            outState.putString(KEY_SAFETY_ROUND_VALUE, getText(mBinding.safetyRoundValue));
 
-        mBlock3Checkbox = view.findViewById(R.id.block3_checkbox);
-        mBlock3Content = view.findViewById(R.id.block3_content);
-        mAutostopOffsetValue = view.findViewById(R.id.autostop_offset_value);
-        mAutostopOffsetToggle = view.findViewById(R.id.autostop_offset_toggle);
-        mAutostopPrayerEvent = view.findViewById(R.id.autostop_prayer_event);
+            outState.putBoolean(KEY_AUTOSTOP_ENABLED, mBinding.autostopEnabledCheckbox.isChecked());
+            outState.putString(KEY_AUTOSTOP_VALUE, getText(mBinding.autostopOffsetValue));
+            outState.putInt(KEY_AUTOSTOP_OFFSET_IDX, mAutostopOffsetIdx);
+            outState.putString(KEY_AUTOSTOP_EVENT, getText(mBinding.autostopEvent));
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        mBinding = null;
+        super.onDestroyView();
     }
 
     private void setupAdapters() {
         ArrayAdapter<CharSequence> prayerEventsAdapter = ArrayAdapter.createFromResource(requireContext(),
                 R.array.relational_alarm_prayer_events, android.R.layout.simple_dropdown_item_1line);
-        mPrimaryPrayerEvent.setAdapter(prayerEventsAdapter);
-        mSafetyPrayerEvent.setAdapter(prayerEventsAdapter);
-        mAutostopPrayerEvent.setAdapter(prayerEventsAdapter);
+        mBinding.primaryEvent.setAdapter(prayerEventsAdapter);
+        mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
+        mBinding.autostopEvent.setAdapter(prayerEventsAdapter);
 
-        // Selection listeners for dropdowns to handle auto-updates
-        mPrimaryPrayerEvent.setOnItemClickListener((parent, view, position, id) -> updateAutostopEvent(position));
+        mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> updateAutostopEvent(position));
     }
 
     private void setInitialDefaults() {
-        // Block 1: 5 minutes after, Near, 0
-        mPrimaryOffsetValue.setText("5");
-        mPrimaryOffsetToggle.setText(R.string.relational_alarm_after);
-        mPrimaryRoundGroup.check(R.id.primary_round_nearest);
-        mPrimaryRoundValue.setText("0");
+        mBinding.primaryOffsetValue.setText("5");
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        mBinding.primaryRoundValue.setText("0");
 
-        // Block 2: 5 minutes before, Near, 0, Unchecked
-        mBlock2Checkbox.setChecked(false);
-        mSafetyBoundaryToggle.setText(R.string.relational_alarm_later_than);
-        mSafetyOffsetValue.setText("5");
-        mSafetyOffsetToggle.setText(R.string.relational_alarm_before);
-        mSafetyRoundGroup.check(R.id.safety_round_nearest);
-        mSafetyRoundValue.setText("0");
+        mBinding.safetyEnabledCheckbox.setChecked(false);
+        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        mBinding.safetyOffsetValue.setText("5");
+        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+        mBinding.safetyRoundValue.setText("0");
 
-        // Block 3: 0 min before, Checked
-        mBlock3Checkbox.setChecked(true);
-        mAutostopOffsetValue.setText("0");
-        mAutostopOffsetToggle.setText(R.string.relational_alarm_before);
+        mBinding.autostopEnabledCheckbox.setChecked(true);
+        mBinding.autostopOffsetValue.setText("0");
+        updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
 
-        // Sync visibility
-        updateBlockState(mBlock2Checkbox.isChecked(), mBlock2Content);
-        updateBlockState(mBlock3Checkbox.isChecked(), mBlock3Content);
+        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
 
-        // Set initial prayer event and trigger autostop logic
-        mPrimaryPrayerEvent.setText(mPrimaryPrayerEvent.getAdapter().getItem(0).toString(), false);
+        mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
         updateAutostopEvent(0);
-        mSafetyPrayerEvent.setText(mSafetyPrayerEvent.getAdapter().getItem(1).toString(), false);
+        mBinding.safetyEvent.setText(mBinding.safetyEvent.getAdapter().getItem(1).toString(), false);
+    }
+
+    private void restoreState(@NonNull Bundle savedInstanceState) {
+        mBinding.primaryOffsetValue.setText(savedInstanceState.getString(KEY_PRIMARY_VALUE));
+        mPrimaryOffsetIdx = savedInstanceState.getInt(KEY_PRIMARY_OFFSET_IDX);
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        mBinding.primaryEvent.setText(savedInstanceState.getString(KEY_PRIMARY_EVENT), false);
+        mPrimaryRoundIdx = savedInstanceState.getInt(KEY_PRIMARY_ROUND_IDX);
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        mBinding.primaryRoundValue.setText(savedInstanceState.getString(KEY_PRIMARY_ROUND_VALUE));
+
+        mBinding.safetyEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_SAFETY_ENABLED));
+        mSafetyBoundIdx = savedInstanceState.getInt(KEY_SAFETY_BOUND_IDX);
+        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        mBinding.safetyOffsetValue.setText(savedInstanceState.getString(KEY_SAFETY_VALUE));
+        mSafetyOffsetIdx = savedInstanceState.getInt(KEY_SAFETY_OFFSET_IDX);
+        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        mBinding.safetyEvent.setText(savedInstanceState.getString(KEY_SAFETY_EVENT), false);
+        mSafetyRoundIdx = savedInstanceState.getInt(KEY_SAFETY_ROUND_IDX);
+        updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+        mBinding.safetyRoundValue.setText(savedInstanceState.getString(KEY_SAFETY_ROUND_VALUE));
+
+        mBinding.autostopEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_AUTOSTOP_ENABLED));
+        mBinding.autostopOffsetValue.setText(savedInstanceState.getString(KEY_AUTOSTOP_VALUE));
+        mAutostopOffsetIdx = savedInstanceState.getInt(KEY_AUTOSTOP_OFFSET_IDX);
+        updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        mBinding.autostopEvent.setText(savedInstanceState.getString(KEY_AUTOSTOP_EVENT), false);
+
+        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
     }
 
     private void updateAutostopEvent(int primaryPosition) {
-        int nextPosition = (primaryPosition + 1) % mPrimaryPrayerEvent.getAdapter().getCount();
-        mAutostopPrayerEvent.setText(mAutostopPrayerEvent.getAdapter().getItem(nextPosition).toString(), false);
+        int nextPosition = (primaryPosition + 1) % mBinding.primaryEvent.getAdapter().getCount();
+        mBinding.autostopEvent.setText(mBinding.primaryEvent.getAdapter().getItem(nextPosition).toString(), false);
     }
 
     private void setupListeners() {
-        mBlock2Checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBlock2Content));
-        mBlock3Checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBlock3Content));
+        mBinding.safetyEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.safetyContent));
+        mBinding.autostopEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.autostopContent));
 
-        mPrimaryOffsetToggle.setOnClickListener(v -> toggleButtonText(mPrimaryOffsetToggle,
-                R.string.relational_alarm_before, R.string.relational_alarm_after));
+        mBinding.primaryOffsetToggle.setOnClickListener(v -> {
+            mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
+            updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        });
 
-        mSafetyOffsetToggle.setOnClickListener(v -> toggleButtonText(mSafetyOffsetToggle,
-                R.string.relational_alarm_before, R.string.relational_alarm_after));
+        mBinding.primaryRoundToggle.setOnClickListener(v -> {
+            mPrimaryRoundIdx = (mPrimaryRoundIdx + 1) % mRoundTypes.length;
+            updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        });
 
-        mAutostopOffsetToggle.setOnClickListener(v -> toggleButtonText(mAutostopOffsetToggle,
-                R.string.relational_alarm_before, R.string.relational_alarm_after));
+        mBinding.safetyBoundaryToggle.setOnClickListener(v -> {
+            mSafetyBoundIdx = (mSafetyBoundIdx + 1) % mBoundaryTypes.length;
+            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        });
 
-        mSafetyBoundaryToggle.setOnClickListener(v -> toggleButtonText(mSafetyBoundaryToggle,
-                R.string.relational_alarm_earlier_than, R.string.relational_alarm_later_than));
+        mBinding.safetyOffsetToggle.setOnClickListener(v -> {
+            mSafetyOffsetIdx = (mSafetyOffsetIdx + 1) % mOffsetTypes.length;
+            updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        });
+
+        mBinding.safetyRoundToggle.setOnClickListener(v -> {
+            mSafetyRoundIdx = (mSafetyRoundIdx + 1) % mRoundTypes.length;
+            updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+        });
+
+        mBinding.autostopOffsetToggle.setOnClickListener(v -> {
+            mAutostopOffsetIdx = (mAutostopOffsetIdx + 1) % mOffsetTypes.length;
+            updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        });
     }
 
-    private void toggleButtonText(MaterialButton button, int stringRes1, int stringRes2) {
-        String text1 = getString(stringRes1);
-        String currentText = button.getText().toString();
-        button.setText(currentText.equals(text1) ? getString(stringRes2) : text1);
+    private void updateToggle(TextView view, String[] values, int index) {
+        if (index >= 0 && index < values.length) {
+            view.setText(values[index]);
+        }
     }
 
     private void updateBlockState(boolean enabled, ViewGroup content) {
@@ -172,32 +257,31 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         }
     }
 
+    private String getText(TextView textView) {
+        return textView != null && textView.getText() != null ? textView.getText().toString() : "";
+    }
+
     private void saveRelationalAlarm() {
-        // Collect all data
-        String primaryValue = mPrimaryOffsetValue.getText() != null ? mPrimaryOffsetValue.getText().toString() : "";
-        String primaryOffset = mPrimaryOffsetToggle.getText().toString();
-        String primaryEvent = mPrimaryPrayerEvent.getText().toString();
-        int primaryRoundId = mPrimaryRoundGroup.getCheckedButtonId();
-        String primaryRoundType = "nearest";
-        if (primaryRoundId == R.id.primary_round_up) primaryRoundType = "up";
-        else if (primaryRoundId == R.id.primary_round_down) primaryRoundType = "down";
-        String primaryRoundValue = mPrimaryRoundValue.getText() != null ? mPrimaryRoundValue.getText().toString() : "";
+        if (mBinding == null) return;
 
-        boolean safetyEnabled = mBlock2Checkbox.isChecked();
-        String safetyBound = mSafetyBoundaryToggle.getText().toString();
-        String safetyValue = mSafetyOffsetValue.getText() != null ? mSafetyOffsetValue.getText().toString() : "";
-        String safetyOffset = mSafetyOffsetToggle.getText().toString();
-        String safetyEvent = mSafetyPrayerEvent.getText().toString();
-        int safetyRoundId = mSafetyRoundGroup.getCheckedButtonId();
-        String safetyRoundType = "nearest";
-        if (safetyRoundId == R.id.safety_round_up) safetyRoundType = "up";
-        else if (safetyRoundId == R.id.safety_round_down) safetyRoundType = "down";
-        String safetyRoundValue = mSafetyRoundValue.getText() != null ? mSafetyRoundValue.getText().toString() : "";
+        String primaryValue = getText(mBinding.primaryOffsetValue);
+        String primaryOffset = getText(mBinding.primaryOffsetToggle);
+        String primaryEvent = getText(mBinding.primaryEvent);
+        String primaryRoundType = getText(mBinding.primaryRoundToggle);
+        String primaryRoundValue = getText(mBinding.primaryRoundValue);
 
-        boolean autostopEnabled = mBlock3Checkbox.isChecked();
-        String autostopValue = mAutostopOffsetValue.getText() != null ? mAutostopOffsetValue.getText().toString() : "";
-        String autostopOffset = mAutostopOffsetToggle.getText().toString();
-        String autostopEvent = mAutostopPrayerEvent.getText().toString();
+        boolean safetyEnabled = mBinding.safetyEnabledCheckbox.isChecked();
+        String safetyBound = getText(mBinding.safetyBoundaryToggle);
+        String safetyValue = getText(mBinding.safetyOffsetValue);
+        String safetyOffset = getText(mBinding.safetyOffsetToggle);
+        String safetyEvent = getText(mBinding.safetyEvent);
+        String safetyRoundType = getText(mBinding.safetyRoundToggle);
+        String safetyRoundValue = getText(mBinding.safetyRoundValue);
+
+        boolean autostopEnabled = mBinding.autostopEnabledCheckbox.isChecked();
+        String autostopValue = getText(mBinding.autostopOffsetValue);
+        String autostopOffset = getText(mBinding.autostopOffsetToggle);
+        String autostopEvent = getText(mBinding.autostopEvent);
 
         LogUtils.i("Saving Relational Alarm:");
         LogUtils.i("Primary: %s min %s %s, Round: %s %s min", primaryValue, primaryOffset, primaryEvent, primaryRoundType, primaryRoundValue);

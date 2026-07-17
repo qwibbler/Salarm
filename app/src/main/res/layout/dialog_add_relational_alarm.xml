@@ -7,6 +7,7 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="?attr/dialogPreferredPadding"
@@ -104,7 +105,7 @@
                     app:boxBackgroundColor="@android:color/transparent"
                     app:hintEnabled="false">
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:id="@+id/primary_prayer_event"
+                        android:id="@+id/primary_event"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
@@ -188,14 +189,14 @@
 
         <!-- Block 2: Safety Boundary -->
         <LinearLayout
-            android:id="@+id/block2_container"
+            android:id="@+id/safety_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginBottom="16dp">
 
             <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/block2_checkbox"
+                android:id="@+id/safety_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="0dp"
@@ -205,7 +206,7 @@
                 android:textColor="?attr/colorPrimary" />
 
             <LinearLayout
-                android:id="@+id/block2_content"
+                android:id="@+id/safety_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -312,7 +313,7 @@
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/safety_prayer_event"
+                            android:id="@+id/safety_event"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
@@ -397,14 +398,14 @@
 
         <!-- Block 3: Auto-Stop / Dismiss Boundary -->
         <LinearLayout
-            android:id="@+id/block3_container"
+            android:id="@+id/autostop_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginBottom="8dp">
 
             <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/block3_checkbox"
+                android:id="@+id/autostop_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="0dp"
@@ -414,7 +415,7 @@
                 android:textColor="?attr/colorPrimary" />
 
             <LinearLayout
-                android:id="@+id/block3_content"
+                android:id="@+id/autostop_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -498,7 +499,7 @@
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/autostop_prayer_event"
+                            android:id="@+id/autostop_event"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
