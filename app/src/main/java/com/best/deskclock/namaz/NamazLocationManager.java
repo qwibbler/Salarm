@@ -175,7 +175,7 @@ public class NamazLocationManager {
                     }
                 }
             } catch (IOException e) {
-                LogUtils.e("Error reverse-geocoding coordinates", e);
+                NamazErrorHandler.handleSyncError(context, e);
             }
         });
     }

@@ -80,11 +80,13 @@ public class AppExecutors {
         }
 
         final AtomicReference<T> result = new AtomicReference<>();
+        final AtomicReference<Throwable> error = new AtomicReference<>();
         final CountDownLatch latch = new CountDownLatch(1);
         mainThread.post(() -> {
             try {
                 result.set(callable.call());
             } catch (Exception e) {
+                error.set(e);
                 LogUtils.e("Error on main thread", e);
             } finally {
                 latch.countDown();
@@ -96,6 +98,10 @@ public class AppExecutors {
         } catch (InterruptedException e) {
             LogUtils.e("Interrupted while waiting for main thread", e);
             Thread.currentThread().interrupt();
+        }
+
+        if (error.get() != null) {
+            throw new RuntimeException("Failed to fetch data from main thread", error.get());
         }
 
         return result.get();

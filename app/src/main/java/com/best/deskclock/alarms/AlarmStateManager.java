@@ -241,7 +241,8 @@ public final class AlarmStateManager extends BroadcastReceiver {
         ContentResolver cr = context.getContentResolver();
         Alarm alarm = Alarm.getAlarm(cr, instance.mAlarmId);
         if (alarm == null) {
-            LogUtils.e("Parent has been deleted with instance: " + instance);
+            LogUtils.e("Parent has been deleted with instance: " + instance + " (orphan instance). Cleaning up.");
+            AlarmInstance.deleteInstance(cr, instance.mId);
             return;
         }
 
@@ -702,6 +703,11 @@ public final class AlarmStateManager extends BroadcastReceiver {
         LogUtils.i("Registering instance: " + instance.mId);
         final ContentResolver cr = context.getContentResolver();
         final Alarm alarm = Alarm.getAlarm(cr, instance.mAlarmId);
+        if (alarm == null) {
+            LogUtils.e("Alarm not found for instance: " + instance.mId + " (orphan instance). Cleaning up.");
+            AlarmInstance.deleteInstance(cr, instance.mId);
+            return;
+        }
         final Calendar currentTime = getCurrentTime();
         final Calendar alarmTime = instance.getAlarmTime();
         final Calendar timeoutTime = instance.getTimeout(context);
