@@ -113,6 +113,21 @@ public final class AlarmUpdateHandler {
         AppExecutors.getDiskIO().execute(() -> {
             ContentResolver cr = mAppContext.getContentResolver();
 
+            if (alarm.relationalRuleId > 0 && !minorUpdate) {
+                com.best.deskclock.namaz.RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+
+                if (popToast) {
+                    final List<AlarmInstance> instanceList = AlarmInstance.getInstancesByAlarmId(cr, alarm.id);
+                    if (!instanceList.isEmpty()) {
+                        final long timeToDisplay = instanceList.get(0).getAlarmTime().getTimeInMillis();
+                        AppExecutors.getMainThread().post(() ->
+                                AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, timeToDisplay)
+                        );
+                    }
+                }
+                return;
+            }
+
             // Update alarm
             alarm.updateAlarm(cr);
 

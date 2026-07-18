@@ -17,6 +17,7 @@ import com.batoulapps.adhan.CalculationMethod;
 import com.best.deskclock.R;
 import com.best.deskclock.alarms.AlarmStateManager;
 import com.best.deskclock.base.AppExecutors;
+import com.best.deskclock.data.Weekdays;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.settings.PreferencesDefaultValues;
@@ -125,6 +126,7 @@ public class RelationalAlarmSyncManager {
             nativeAlarm = new Alarm(0, 0, 0, 0, 0, ringtoneToUse);
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
+            nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
             nativeAlarm.label = "Prayer: " + rule.anchorEvent.name();
             nativeAlarm.addAlarm(cr);
             LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
@@ -149,25 +151,29 @@ public class RelationalAlarmSyncManager {
         if (alarm.relationalRuleId <= 0) return;
 
         final Context appContext = context.getApplicationContext();
-        AppExecutors.getDiskIO().execute(() -> {
-            try {
-                NamazDatabase db = NamazDatabase.getDatabase(appContext);
-                List<RelationalRule> rules = db.relationalRuleDao().getAll();
-                RelationalRule targetRule = null;
-                for (RelationalRule r : rules) {
-                    if (r.id == alarm.relationalRuleId) {
-                        targetRule = r;
-                        break;
-                    }
-                }
+        AppExecutors.getDiskIO().execute(() -> recalculateNextInstanceSync(appContext, alarm));
+    }
 
-                if (targetRule != null) {
-                    recalculateNextInstanceInternal(appContext, alarm, targetRule);
+    public static void recalculateNextInstanceSync(Context context, Alarm alarm) {
+        if (alarm.relationalRuleId <= 0) return;
+
+        try {
+            NamazDatabase db = NamazDatabase.getDatabase(context);
+            List<RelationalRule> rules = db.relationalRuleDao().getAll();
+            RelationalRule targetRule = null;
+            for (RelationalRule r : rules) {
+                if (r.id == alarm.relationalRuleId) {
+                    targetRule = r;
+                    break;
                 }
-            } catch (Throwable t) {
-                NamazErrorHandler.handleSyncError(appContext, t);
             }
-        });
+
+            if (targetRule != null) {
+                recalculateNextInstanceInternal(context, alarm, targetRule);
+            }
+        } catch (Throwable t) {
+            NamazErrorHandler.handleSyncError(context, t);
+        }
     }
 
     private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule) {
@@ -176,15 +182,36 @@ public class RelationalAlarmSyncManager {
         CalculationMethod method = getCalculationMethod(context);
 
         Calendar now = Calendar.getInstance();
-        NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(now.getTime(), coords[0], coords[1], method);
-        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+        Calendar candidateDate = (Calendar) now.clone();
 
-        // If today passed, try tomorrow for accurate autostop calculation
-        if (result.time() <= now.getTimeInMillis()) {
-            Calendar tomorrow = (Calendar) now.clone();
-            tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-            times = NamazCalculator.calculateAllTimes(tomorrow.getTime(), coords[0], coords[1], method);
+        // If it's a one-time alarm for a specific date, start from that date
+        if (alarm.year > 0) {
+            candidateDate.set(alarm.year, alarm.month, alarm.day);
+        }
+
+        RelationalRule.EvaluationResult result = null;
+
+        // Search for the next valid occurrence (up to 366 days)
+        for (int i = 0; i < 366; i++) {
+            NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(candidateDate.getTime(), coords[0], coords[1], method);
             result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+
+            if (result.time() > now.getTimeInMillis()) {
+                if (alarm.daysOfWeek.isRepeating()) {
+                    if (alarm.daysOfWeek.isBitOn(candidateDate.get(Calendar.DAY_OF_WEEK))) {
+                        break;
+                    }
+                } else {
+                    // One-time alarm (either specific date or today/tomorrow)
+                    break;
+                }
+            }
+            candidateDate.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        if (result.time() <= now.getTimeInMillis()) {
+            LogUtils.w("Could not find a future trigger time for rule " + rule.id);
+            return;
         }
 
         Calendar nextTrigger = toCalendar(result.time());
@@ -196,6 +223,12 @@ public class RelationalAlarmSyncManager {
         // 1. Update parent alarm template time so it shows correctly in list
         alarm.hour = nextTrigger.get(Calendar.HOUR_OF_DAY);
         alarm.minutes = nextTrigger.get(Calendar.MINUTE);
+        // Also sync the date if it's a one-time alarm
+        if (!alarm.daysOfWeek.isRepeating()) {
+            alarm.year = nextTrigger.get(Calendar.YEAR);
+            alarm.month = nextTrigger.get(Calendar.MONTH);
+            alarm.day = nextTrigger.get(Calendar.DAY_OF_MONTH);
+        }
         alarm.updateAlarm(cr);
 
         // 2. Update AOSP instances
