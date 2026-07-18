@@ -67,6 +67,24 @@ public class NamazLocationManager {
     }
 
     /**
+     * Checks if the location has been set (either via GPS or manual selection).
+     */
+    public static boolean isLocationSet(Context context) {
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        String latStr = prefs.getString(KEY_NAMAZ_LATITUDE, DEFAULT_NAMAZ_LATITUDE);
+        String lonStr = prefs.getString(KEY_NAMAZ_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE);
+        String cityName = prefs.getString(KEY_NAMAZ_CITY_NAME, DEFAULT_NAMAZ_CITY_NAME);
+
+        try {
+            double lat = Double.parseDouble(latStr);
+            double lon = Double.parseDouble(lonStr);
+            return (lat != 0.0 || lon != 0.0) && !DEFAULT_NAMAZ_CITY_NAME.equals(cityName);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
      * Requests a one-time GPS update if permissions are granted.
      */
     public static void requestGpsUpdate(Context context) {

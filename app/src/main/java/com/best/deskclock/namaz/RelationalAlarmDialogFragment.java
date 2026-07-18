@@ -306,7 +306,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 rule.autostopOffsetMinutes = autostopOffset;
             }
 
-            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule);
+            android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, false, defaultRingtone);
             dismiss();
 
         } catch (RelationalRule.InvalidRuleException e) {
@@ -336,7 +337,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             (dialog, which) -> {
                 try {
                     RelationalRule rule = parseRuleFromUi();
-                    RelationalAlarmSyncManager.saveRule(requireContext(), rule, true);
+                    android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+                    RelationalAlarmSyncManager.saveRule(requireContext(), rule, true, defaultRingtone);
                     dismiss();
                 } catch (Exception ex) {
                     LogUtils.e("Error force saving rule", ex);

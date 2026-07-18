@@ -282,6 +282,10 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     public Alarm(int year, int month, int day, int hour, int minutes) {
+        this(year, month, day, hour, minutes, null);
+    }
+
+    public Alarm(int year, int month, int day, int hour, int minutes, Uri alert) {
         this.id = INVALID_ID;
         this.year = year;
         this.month = month;
@@ -294,7 +298,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.daysOfWeek = Weekdays.NONE;
         this.label = "";
         this.syncByLabel = false;
-        this.alert = DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+        this.alert = alert != null ? alert : DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
         this.deleteAfterUse = DEFAULT_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT;
         this.autoSilenceDuration = DEFAULT_AUTO_SILENCE_DURATION;
         this.snoozeDuration = DEFAULT_ALARM_SNOOZE_DURATION;

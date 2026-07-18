@@ -58,7 +58,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.AlarmsColumns.ALARM_VOLUME + " INTEGER NOT NULL DEFAULT 5, " +
             ClockContract.AlarmsColumns.MANUAL_SORT_ORDER + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.AlarmsColumns.PAUSE_START_DATE + " INTEGER NOT NULL DEFAULT 0, " +
-            ClockContract.AlarmsColumns.PAUSE_END_DATE + " INTEGER NOT NULL DEFAULT 0);");
+            ClockContract.AlarmsColumns.PAUSE_END_DATE + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.AlarmsColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1);");
 
         LogUtils.i("Alarms Table created");
     }
@@ -275,6 +276,12 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 + " INTEGER NOT NULL DEFAULT 0;");
 
             LogUtils.i("pauseStartDate and pauseEndDate columns added for version 26 upgrade.");
+        }
+
+        if (oldVersion < 27) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.RELATIONAL_RULE_ID
+                    + " INTEGER NOT NULL DEFAULT -1;");
+            LogUtils.i("relational_rule_id column added for version 27 upgrade.");
         }
     }
 

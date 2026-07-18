@@ -71,6 +71,7 @@ import com.best.deskclock.dialogfragment.AlarmVolumeDialogFragment;
 import com.best.deskclock.dialogfragment.MaterialTimePickerDialogFragment;
 import com.best.deskclock.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.NamazLocationManager;
 import com.best.deskclock.namaz.RelationalAlarmDialogFragment;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
@@ -531,6 +532,30 @@ public final class AlarmFragment extends DeskClockFragment
             startCreatingAlarm();
         } else {
             if (mSideButtonsVisible) {
+                if (!NamazLocationManager.isLocationSet(requireContext())) {
+                    com.best.deskclock.uicomponents.CustomDialog.create(
+                        requireContext(),
+                        R.style.AppAlertDialogTheme,
+                        null,
+                        getString(R.string.namaz_location_not_set_title),
+                        getString(R.string.namaz_location_not_set_message),
+                        null,
+                        getString(R.string.label_set_location),
+                        (dialog, which) -> {
+                            Intent intent = new Intent(requireContext(), com.best.deskclock.settings.SettingsActivity.class);
+                            intent.putExtra(com.best.deskclock.settings.SettingsActivity.KEY_SHOW_NAMAZ_SETTINGS, true);
+                            startActivity(intent);
+                        },
+                        getString(android.R.string.cancel),
+                        null,
+                        null,
+                        null,
+                        null,
+                        com.best.deskclock.uicomponents.CustomDialog.SoftInputMode.NONE
+                    ).show();
+                    hideSideButtonsWithFabAnimation();
+                    return;
+                }
                 new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
                 hideSideButtonsWithFabAnimation();
             } else {

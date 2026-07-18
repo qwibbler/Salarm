@@ -74,6 +74,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
+    public static final String KEY_SHOW_NAMAZ_SETTINGS = "show_namaz_settings";
     private static final String KEY_APPBAR_EXPANDED = "key_appbar_expanded";
     private boolean mIsAppBarExpanded = true;
 
@@ -292,6 +293,11 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         @Override
         public void onResume() {
             super.onResume();
+
+            if (requireActivity().getIntent().getBooleanExtra(KEY_SHOW_NAMAZ_SETTINGS, false)) {
+                requireActivity().getIntent().removeExtra(KEY_SHOW_NAMAZ_SETTINGS);
+                animateAndShowFragment(new NamazSettingsFragment());
+            }
 
             if (BackupAndRestoreUtils.appNeedsRestart && (mRestartDialog == null || !mRestartDialog.isShowing())) {
                 mRestartDialog = restartAppDialog(requireContext().getApplicationContext(), false);

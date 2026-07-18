@@ -1444,6 +1444,12 @@
     <string name="namaz_city_search_title">Select City</string>
     <!-- Namaz Settings -->
     <string name="namaz_settings_title">Namaz Settings</string>
+    <!-- Namaz Location Not Set Title -->
+    <string name="namaz_location_not_set_title">Location Not Set</string>
+    <!-- Namaz Location Not Set Message -->
+    <string name="namaz_location_not_set_message">Namaz Alarms are not active at this moment as the location has not been set. Please set the location in Namaz Settings to use Namaz Alarms.</string>
+    <!-- Label Set Location -->
+    <string name="label_set_location">Set Location</string>
     <!-- Location category title for Namaz settings -->
     <string name="namaz_location_category_title">Location</string>
     <!-- Prayer settings category title for Namaz settings -->

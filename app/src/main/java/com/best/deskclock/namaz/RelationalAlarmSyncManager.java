@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
@@ -36,12 +37,12 @@ public class RelationalAlarmSyncManager {
     /**
      * Saves or updates a RelationalRule and synchronizes it with a native AOSP Alarm.
      * Throws InvalidRuleException if the rule is physically impossible for the next valid instance.
+     *
+     * @param defaultRingtone The default ringtone URI to use if creating a new native alarm.
+     *                        Passed as a parameter (Solution A) to avoid background thread crashes.
      */
-    public static void saveRule(Context context, RelationalRule rule) throws RelationalRule.InvalidRuleException {
-        saveRule(context, rule, false);
-    }
-
-    public static void saveRule(Context context, RelationalRule rule, boolean forceSave) throws RelationalRule.InvalidRuleException {
+    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone)
+            throws RelationalRule.InvalidRuleException {
         final Context appContext = context.getApplicationContext();
         NamazDatabase db = NamazDatabase.getDatabase(appContext);
 
@@ -63,7 +64,7 @@ public class RelationalAlarmSyncManager {
                 }
 
                 // 3. Sync to AOSP SQLite
-                syncRuleToNativeAlarm(appContext, rule);
+                syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
             } catch (Throwable t) {
                 LogUtils.e("Error persisting RelationalRule", t);
             }
@@ -88,39 +89,45 @@ public class RelationalAlarmSyncManager {
         }
     }
 
-    public static void syncRuleToNativeAlarm(Context context, RelationalRule rule) {
-        final Context appContext = context.getApplicationContext();
-        AppExecutors.getDiskIO().execute(() -> {
-            try {
-                ContentResolver cr = appContext.getContentResolver();
+    /**
+     * Synchronizes a rule to a native alarm.
+     * If a new alarm must be created, it uses the provided defaultRingtone (Solution A)
+     * or fetches it safely using Solution B.
+     */
+    private static void syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
+        ContentResolver cr = context.getContentResolver();
 
-                // Find existing alarm mapped to this rule
-                List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(rule.id));
-                Alarm nativeAlarm;
-                if (alarms.isEmpty()) {
-                    LogUtils.i("Creating new native alarm for rule: " + rule.id);
-                    nativeAlarm = new Alarm();
-                    nativeAlarm.relationalRuleId = rule.id;
-                    nativeAlarm.enabled = rule.enabled;
-                    nativeAlarm.label = "Prayer: " + rule.anchorEvent.name();
-                    nativeAlarm.addAlarm(cr);
-                    LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
-                } else {
-                    nativeAlarm = alarms.get(0);
-                    nativeAlarm.enabled = rule.enabled;
-                    nativeAlarm.updateAlarm(cr);
-                    LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
-                }
+        // Find existing alarm mapped to this rule
+        List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(rule.id));
+        Alarm nativeAlarm;
+        if (alarms.isEmpty()) {
+            LogUtils.i("Creating new native alarm for rule: " + rule.id);
 
-                if (nativeAlarm.enabled) {
-                    recalculateNextInstanceInternal(appContext, nativeAlarm, rule);
-                } else {
-                    AlarmStateManager.deleteAllInstances(appContext, nativeAlarm.id);
-                }
-            } catch (Throwable t) {
-                LogUtils.e("Error syncing rule to native alarm", t);
+            Uri ringtoneToUse = defaultRingtone;
+            if (ringtoneToUse == null) {
+                // Solution B: Fallback to thread-hopping fetcher if not provided
+                ringtoneToUse = AppExecutors.getOnMainThread(() ->
+                    com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings());
             }
-        });
+
+            nativeAlarm = new Alarm(0, 0, 0, 0, 0, ringtoneToUse);
+            nativeAlarm.relationalRuleId = rule.id;
+            nativeAlarm.enabled = rule.enabled;
+            nativeAlarm.label = "Prayer: " + rule.anchorEvent.name();
+            nativeAlarm.addAlarm(cr);
+            LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
+        } else {
+            nativeAlarm = alarms.get(0);
+            nativeAlarm.enabled = rule.enabled;
+            nativeAlarm.updateAlarm(cr);
+            LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
+        }
+
+        if (nativeAlarm.enabled) {
+            recalculateNextInstanceInternal(context, nativeAlarm, rule);
+        } else {
+            AlarmStateManager.deleteAllInstances(context, nativeAlarm.id);
+        }
     }
 
     /**
