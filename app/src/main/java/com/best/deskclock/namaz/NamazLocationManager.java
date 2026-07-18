@@ -133,7 +133,7 @@ public class NamazLocationManager {
 
         if (significantChange) {
             LogUtils.i("Significant location change detected. Triggering alarm resync...");
-            RelationalAlarmScheduler.syncRelationalAlarms(context);
+            RelationalAlarmSyncManager.recalculateAllActiveRules(context);
         }
     }
 

@@ -17,7 +17,7 @@ import androidx.preference.Preference;
 import com.best.deskclock.R;
 import com.best.deskclock.namaz.CitySearchDialogFragment;
 import com.best.deskclock.namaz.NamazLocationManager;
-import com.best.deskclock.namaz.RelationalAlarmScheduler;
+import com.best.deskclock.namaz.RelationalAlarmSyncManager;
 
 /**
  * Settings fragment for Namaz-related configurations.
@@ -120,7 +120,7 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
         if (KEY_NAMAZ_CITY_NAME.equals(key)) {
             updateSummaries();
         } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
-            RelationalAlarmScheduler.syncRelationalAlarms(requireContext());
+            RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());
         }
     }
 

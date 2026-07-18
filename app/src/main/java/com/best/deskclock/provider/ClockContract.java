@@ -206,6 +206,12 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String DELETE_AFTER_USE = "delete_after_use";
+
+        /**
+         * Foreign key to relational rule table (Room).
+         * <p>Type: INTEGER (long)</p>
+         */
+        String RELATIONAL_RULE_ID = "relational_rule_id";
     }
 
     /**

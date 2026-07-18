@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {RelationalRule.class}, version = 1, exportSchema = false)
+@Database(entities = {RelationalRule.class}, version = 2, exportSchema = false)
 public abstract class NamazDatabase extends RoomDatabase {
 
     private static volatile NamazDatabase INSTANCE;
@@ -19,6 +19,7 @@ public abstract class NamazDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     NamazDatabase.class, "namaz_database")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }

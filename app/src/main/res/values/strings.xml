@@ -1479,8 +1479,8 @@
         <item>Fajr</item>
         <item>Sunrise</item>
         <item>Dhuhr</item>
-        <item>Asr 1</item>
-        <item>Asr 2</item>
+        <item>Asr Shafi\'i</item>
+        <item>Asr Hanafi</item>
         <item>Maghrib</item>
         <item>Isha</item>
     </string-array>

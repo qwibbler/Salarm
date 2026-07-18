@@ -264,32 +264,122 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private void saveRelationalAlarm() {
         if (mBinding == null) return;
 
-        String primaryValue = getText(mBinding.primaryOffsetValue);
-        String primaryOffset = getText(mBinding.primaryOffsetToggle);
-        String primaryEvent = getText(mBinding.primaryEvent);
-        String primaryRoundType = getText(mBinding.primaryRoundToggle);
-        String primaryRoundValue = getText(mBinding.primaryRoundValue);
+        try {
+            RelationalRule rule = new RelationalRule();
+            rule.enabled = true;
+            rule.anchorEvent = RelationalRule.AnchorEvent.values()[mBinding.primaryEvent.getAdapter().getCount() - 1]; // Placeholder logic, fix below
 
-        boolean safetyEnabled = mBinding.safetyEnabledCheckbox.isChecked();
-        String safetyBound = getText(mBinding.safetyBoundaryToggle);
-        String safetyValue = getText(mBinding.safetyOffsetValue);
-        String safetyOffset = getText(mBinding.safetyOffsetToggle);
-        String safetyEvent = getText(mBinding.safetyEvent);
-        String safetyRoundType = getText(mBinding.safetyRoundToggle);
-        String safetyRoundValue = getText(mBinding.safetyRoundValue);
+            // Map UI to Rule
+            int primaryEventIdx = getPrayerEventIndex(getText(mBinding.primaryEvent));
+            rule.anchorEvent = RelationalRule.AnchorEvent.values()[primaryEventIdx];
 
-        boolean autostopEnabled = mBinding.autostopEnabledCheckbox.isChecked();
-        String autostopValue = getText(mBinding.autostopOffsetValue);
-        String autostopOffset = getText(mBinding.autostopOffsetToggle);
-        String autostopEvent = getText(mBinding.autostopEvent);
+            int primaryOffset = Integer.parseInt(getText(mBinding.primaryOffsetValue));
+            if (mPrimaryOffsetIdx == 0) primaryOffset *= -1; // Before
+            rule.offsetMinutes = primaryOffset;
 
-        LogUtils.i("Saving Relational Alarm:");
-        LogUtils.i("Primary: %s min %s %s, Round: %s %s min", primaryValue, primaryOffset, primaryEvent, primaryRoundType, primaryRoundValue);
-        if (safetyEnabled) {
-            LogUtils.i("Safety: %s %s min %s %s, Round: %s %s min", safetyBound, safetyValue, safetyOffset, safetyEvent, safetyRoundType, safetyRoundValue);
+            rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
+            rule.roundingIntervalMinutes = Integer.parseInt(getText(mBinding.primaryRoundValue));
+
+            if (mBinding.safetyEnabledCheckbox.isChecked()) {
+                RelationalRule.Clip clip = new RelationalRule.Clip();
+                clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.MAX : RelationalRule.BoundaryType.MIN; // Earlier Than -> MAX, Later Than -> MIN
+
+                int safetyEventIdx = getPrayerEventIndex(getText(mBinding.safetyEvent));
+                clip.clipEvent = RelationalRule.AnchorEvent.values()[safetyEventIdx];
+
+                int safetyOffset = Integer.parseInt(getText(mBinding.safetyOffsetValue));
+                if (mSafetyOffsetIdx == 0) safetyOffset *= -1; // Before
+                clip.clipOffsetMinutes = safetyOffset;
+
+                clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
+                clip.clipRoundingIntervalMinutes = Integer.parseInt(getText(mBinding.safetyRoundValue));
+                rule.clip = clip;
+            }
+
+            if (mBinding.autostopEnabledCheckbox.isChecked()) {
+                rule.autostopEnabled = true;
+                int autostopEventIdx = getPrayerEventIndex(getText(mBinding.autostopEvent));
+                rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[autostopEventIdx];
+
+                int autostopOffset = Integer.parseInt(getText(mBinding.autostopOffsetValue));
+                if (mAutostopOffsetIdx == 0) autostopOffset *= -1; // Before
+                rule.autostopOffsetMinutes = autostopOffset;
+            }
+
+            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule);
+            dismiss();
+
+        } catch (RelationalRule.InvalidRuleException e) {
+            showConflictConfirmation(e);
+        } catch (Exception e) {
+            LogUtils.e("Error parsing relational alarm data", e);
         }
-        if (autostopEnabled) {
-            LogUtils.i("Autostop: %s min %s %s", autostopValue, autostopOffset, autostopEvent);
+    }
+
+    private int getPrayerEventIndex(String eventName) {
+        String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
+        for (int i = 0; i < events.length; i++) {
+            if (events[i].equals(eventName)) return i;
         }
+        return 0;
+    }
+
+    private void showConflictConfirmation(RelationalRule.InvalidRuleException e) {
+        CustomDialog.create(
+            requireContext(),
+            R.style.AppAlertDialogTheme,
+            null,
+            getString(R.string.warning),
+            e.getMessage(),
+            null,
+            getString(android.R.string.ok),
+            (dialog, which) -> {
+                try {
+                    RelationalRule rule = parseRuleFromUi();
+                    RelationalAlarmSyncManager.saveRule(requireContext(), rule, true);
+                    dismiss();
+                } catch (Exception ex) {
+                    LogUtils.e("Error force saving rule", ex);
+                }
+            },
+            getString(android.R.string.cancel),
+            null,
+            null,
+            null,
+            null,
+            CustomDialog.SoftInputMode.NONE
+        ).show();
+    }
+
+    private RelationalRule parseRuleFromUi() {
+        RelationalRule rule = new RelationalRule();
+        rule.enabled = true;
+        rule.anchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.primaryEvent))];
+        int primaryOffset = Integer.parseInt(getText(mBinding.primaryOffsetValue));
+        if (mPrimaryOffsetIdx == 0) primaryOffset *= -1;
+        rule.offsetMinutes = primaryOffset;
+        rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
+        rule.roundingIntervalMinutes = Integer.parseInt(getText(mBinding.primaryRoundValue));
+
+        if (mBinding.safetyEnabledCheckbox.isChecked()) {
+            RelationalRule.Clip clip = new RelationalRule.Clip();
+            clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.MAX : RelationalRule.BoundaryType.MIN;
+            clip.clipEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.safetyEvent))];
+            int safetyOffset = Integer.parseInt(getText(mBinding.safetyOffsetValue));
+            if (mSafetyOffsetIdx == 0) safetyOffset *= -1;
+            clip.clipOffsetMinutes = safetyOffset;
+            clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
+            clip.clipRoundingIntervalMinutes = Integer.parseInt(getText(mBinding.safetyRoundValue));
+            rule.clip = clip;
+        }
+
+        if (mBinding.autostopEnabledCheckbox.isChecked()) {
+            rule.autostopEnabled = true;
+            rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.autostopEvent))];
+            int autostopOffset = Integer.parseInt(getText(mBinding.autostopOffsetValue));
+            if (mAutostopOffsetIdx == 0) autostopOffset *= -1;
+            rule.autostopOffsetMinutes = autostopOffset;
+        }
+        return rule;
     }
 }

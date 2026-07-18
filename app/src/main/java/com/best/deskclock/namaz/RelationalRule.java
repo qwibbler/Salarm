@@ -30,6 +30,23 @@ public class RelationalRule {
         MIN, MAX
     }
 
+    /**
+     * Thrown when a rule's parameters result in an impossible time (e.g. clipping conflict).
+     */
+    public static class InvalidRuleException extends Exception {
+        public final long fallbackTime;
+        public final String alarmName;
+
+        public InvalidRuleException(String message, String alarmName, long fallbackTime) {
+            super(message);
+            this.alarmName = alarmName;
+            this.fallbackTime = fallbackTime;
+        }
+    }
+
+    public record EvaluationResult(long time, boolean conflict, long fallbackTime, int autoSilenceSeconds) {
+    }
+
     public static class Clip {
         public AnchorEvent clipEvent;
         public int clipOffsetMinutes;
@@ -57,7 +74,13 @@ public class RelationalRule {
     @Embedded(prefix = "clip_")
     public Clip clip;
 
-    public RelationalRule() {}
+    public boolean autostopEnabled;
+    public int autostopOffsetMinutes;
+    public AnchorEvent autostopAnchorEvent;
+
+    public RelationalRule() {
+        this.enabled = true;
+    }
 
     public RelationalRule(AnchorEvent anchorEvent, int offsetMinutes, RoundingDirection roundingDirection,
                           int roundingIntervalMinutes) {
@@ -78,29 +101,52 @@ public class RelationalRule {
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */
     public static Date evaluateTime(RelationalRule rule, NamazCalculator.NamazTimes times, Date date) {
-        Date anchorTime = getEventTime(rule.anchorEvent, times);
-        long targetMillis = applyRule(anchorTime, rule.offsetMinutes, rule.roundingDirection, rule.roundingIntervalMinutes);
+        return new Date(evaluateTimeWithConflictCheck(rule, times).time);
+    }
 
+    public static EvaluationResult evaluateTimeWithConflictCheck(RelationalRule rule, NamazCalculator.NamazTimes times) {
+        Date anchorTime = getEventTime(rule.anchorEvent, times);
+        if (anchorTime == null) {
+            // Cannot calculate time for this event
+            return new EvaluationResult(0, true, 0, -1);
+        }
+        long targetMillis = applyRule(anchorTime, rule.offsetMinutes, rule.roundingDirection, rule.roundingIntervalMinutes);
+        long fallbackTime = anchorTime.getTime(); // Default fallback is the anchor event itself
+
+        boolean conflict = false;
         if (rule.clip != null) {
             Date clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
-            long clipMillis = applyRule(clipAnchorTime, rule.clip.clipOffsetMinutes, rule.clip.clipRoundingDirection,
-                    rule.clip.clipRoundingIntervalMinutes);
+            if (clipAnchorTime != null) {
+                long clipMillis = applyRule(clipAnchorTime, rule.clip.clipOffsetMinutes, rule.clip.clipRoundingDirection,
+                        rule.clip.clipRoundingIntervalMinutes);
 
-            switch (rule.clip.boundaryType) {
-                case MIN -> {
-                    if (targetMillis < clipMillis) {
-                        targetMillis = clipMillis;
+                switch (rule.clip.boundaryType) {
+                    case MIN -> {
+                        if (targetMillis < clipMillis) {
+                            targetMillis = clipMillis;
+                            conflict = true;
+                        }
                     }
-                }
-                case MAX -> {
-                    if (targetMillis > clipMillis) {
-                        targetMillis = clipMillis;
+                    case MAX -> {
+                        if (targetMillis > clipMillis) {
+                            targetMillis = clipMillis;
+                            conflict = true;
+                        }
                     }
                 }
             }
         }
 
-        return new Date(targetMillis);
+        int autoSilenceSeconds = -1; // -1 means use default
+        if (rule.autostopEnabled && rule.autostopAnchorEvent != null) {
+            Date autostopAnchorTime = getEventTime(rule.autostopAnchorEvent, times);
+            long autostopMillis = applyRule(autostopAnchorTime, rule.autostopOffsetMinutes, null, 0);
+            if (autostopMillis > targetMillis) {
+                autoSilenceSeconds = (int) ((autostopMillis - targetMillis) / 1000);
+            }
+        }
+
+        return new EvaluationResult(targetMillis, conflict, fallbackTime, autoSilenceSeconds);
     }
 
     private static Date getEventTime(AnchorEvent event, NamazCalculator.NamazTimes times) {
@@ -116,6 +162,9 @@ public class RelationalRule {
     }
 
     private static long applyRule(Date baseTime, int offsetMinutes, RoundingDirection direction, int intervalMinutes) {
+        if (baseTime == null) {
+            return 0; // Or throw a custom exception
+        }
         Calendar cal = Calendar.getInstance();
         cal.setTime(baseTime);
         cal.add(Calendar.MINUTE, offsetMinutes);

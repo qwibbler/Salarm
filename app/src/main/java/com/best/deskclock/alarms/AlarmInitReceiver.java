@@ -145,6 +145,8 @@ public class AlarmInitReceiver extends BroadcastReceiver {
 
         AppExecutors.getDiskIO().execute(() -> {
             try {
+                // Recalculate relational rules (prayer times) on boot or time change
+                com.best.deskclock.namaz.RelationalAlarmSyncManager.recalculateAllActiveRules(context);
                 // Update all the alarm instances
                 AlarmStateManager.fixAlarmInstances(context);
             } finally {

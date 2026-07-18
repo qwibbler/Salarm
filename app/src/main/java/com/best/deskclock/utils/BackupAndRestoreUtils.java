@@ -188,6 +188,7 @@ public class BackupAndRestoreUtils {
             alarmObject.put("manualSortOrder", alarm.manualSortOrder);
             alarmObject.put("pauseStartDate", alarm.pauseStartDate);
             alarmObject.put("pauseEndDate", alarm.pauseEndDate);
+            alarmObject.put("relationalRuleId", alarm.relationalRuleId);
 
             if (alarm.daysOfWeek.isRepeating() || !alarm.isSpecifiedDate()) {
                 alarmsArray.put(alarmObject);
@@ -399,6 +400,7 @@ public class BackupAndRestoreUtils {
         int manualSortOrder = alarmObject.optInt("manualSortOrder", 0);
         long pauseStartDate = alarmObject.optLong("pauseStartDate", 0);
         long pauseEndDate = alarmObject.optLong("pauseEndDate", 0);
+        long relationalRuleId = alarmObject.optLong("relationalRuleId", -1);
 
         // If the pause is in the past during a restore, remove it.
         if (pauseEndDate > 0 && AlarmUtils.isPauseExpired(pauseEndDate)) {
@@ -436,7 +438,7 @@ public class BackupAndRestoreUtils {
 
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes, vibrate, vibrationPattern, flash,
             Weekdays.fromBits(daysOfWeek), label, syncAlarmByLabel, alarmRingtone, deleteAfterUse, autoSilenceDuration, snoozeDuration,
-            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate);
+            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate, relationalRuleId);
 
         restoredAlarm.addAlarm(contentResolver);
 
