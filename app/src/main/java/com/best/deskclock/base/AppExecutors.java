@@ -5,6 +5,8 @@ package com.best.deskclock.base;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.best.deskclock.utils.LogUtils;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -62,5 +64,40 @@ public class AppExecutors {
      */
     public static Handler getMainThread() {
         return mainThread;
+    }
+
+    /**
+     * Executes a task on the main thread and returns its result, blocking the current background thread.
+     * Useful for fetching AOSP settings that are protected by enforceMainLooper().
+     */
+    public static <T> T getOnMainThread(Callable<T> callable) {
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException("Error executing task on main thread", e);
+            }
+        }
+
+        final AtomicReference<T> result = new AtomicReference<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        mainThread.post(() -> {
+            try {
+                result.set(callable.call());
+            } catch (Exception e) {
+                LogUtils.e("Error on main thread", e);
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            LogUtils.e("Interrupted while waiting for main thread", e);
+            Thread.currentThread().interrupt();
+        }
+
+        return result.get();
     }
 }

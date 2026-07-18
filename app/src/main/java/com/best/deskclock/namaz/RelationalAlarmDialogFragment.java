@@ -307,6 +307,13 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             }
 
             android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+
+            // Disable button to prevent double-save and indicate activity
+            if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
+                View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
+                if (saveButton != null) saveButton.setEnabled(false);
+            }
+
             RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, false, defaultRingtone);
             dismiss();
 
@@ -338,7 +345,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 try {
                     RelationalRule rule = parseRuleFromUi();
                     android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
-                    RelationalAlarmSyncManager.saveRule(requireContext(), rule, true, defaultRingtone);
+                    RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, true, defaultRingtone);
                     dismiss();
                 } catch (Exception ex) {
                     LogUtils.e("Error force saving rule", ex);

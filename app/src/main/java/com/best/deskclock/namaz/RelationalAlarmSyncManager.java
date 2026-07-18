@@ -66,7 +66,8 @@ public class RelationalAlarmSyncManager {
                 // 3. Sync to AOSP SQLite
                 syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
             } catch (Throwable t) {
-                LogUtils.e("Error persisting RelationalRule", t);
+                NamazErrorHandler.handleSyncError(appContext, t);
+                NamazErrorHandler.reportSaveFailure(appContext);
             }
         });
     }
@@ -87,6 +88,17 @@ public class RelationalAlarmSyncManager {
                 result.fallbackTime()
             );
         }
+    }
+
+    public static void syncRuleToNativeAlarm(Context context, RelationalRule rule) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                syncRuleToNativeAlarmInternal(appContext, rule, null);
+            } catch (Throwable t) {
+                NamazErrorHandler.handleSyncError(appContext, t);
+            }
+        });
     }
 
     /**
@@ -153,7 +165,7 @@ public class RelationalAlarmSyncManager {
                     recalculateNextInstanceInternal(appContext, alarm, targetRule);
                 }
             } catch (Throwable t) {
-                LogUtils.e("Error recalculating next instance", t);
+                NamazErrorHandler.handleSyncError(appContext, t);
             }
         });
     }
@@ -211,7 +223,7 @@ public class RelationalAlarmSyncManager {
                     recalculateNextInstance(appContext, alarm);
                 }
             } catch (Throwable t) {
-                LogUtils.e("Error recalculating all active rules", t);
+                NamazErrorHandler.handleSyncError(appContext, t);
             }
         });
     }
