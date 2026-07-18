@@ -138,7 +138,7 @@ public class RelationalAlarmSyncManager {
         }
 
         if (nativeAlarm.enabled) {
-            recalculateNextInstanceInternal(context, nativeAlarm, rule);
+            recalculateNextInstanceInternal(context, nativeAlarm, rule, null);
         } else {
             AlarmStateManager.deleteAllInstances(context, nativeAlarm.id);
         }
@@ -148,13 +148,24 @@ public class RelationalAlarmSyncManager {
      * Recalculates the next iteration for a specific native alarm tied to a relational rule.
      */
     public static void recalculateNextInstance(Context context, Alarm alarm) {
+        recalculateNextInstance(context, alarm, null);
+    }
+
+    /**
+     * Recalculates the next iteration, optionally skipping a specific time (e.g. on dismissal).
+     */
+    public static void recalculateNextInstance(Context context, Alarm alarm, Calendar skipTime) {
         if (alarm.relationalRuleId <= 0) return;
 
         final Context appContext = context.getApplicationContext();
-        AppExecutors.getDiskIO().execute(() -> recalculateNextInstanceSync(appContext, alarm));
+        AppExecutors.getDiskIO().execute(() -> recalculateNextInstanceSync(appContext, alarm, skipTime));
     }
 
     public static void recalculateNextInstanceSync(Context context, Alarm alarm) {
+        recalculateNextInstanceSync(context, alarm, null);
+    }
+
+    public static void recalculateNextInstanceSync(Context context, Alarm alarm, Calendar skipTime) {
         if (alarm.relationalRuleId <= 0) return;
 
         try {
@@ -169,55 +180,95 @@ public class RelationalAlarmSyncManager {
             }
 
             if (targetRule != null) {
-                recalculateNextInstanceInternal(context, alarm, targetRule);
+                recalculateNextInstanceInternal(context, alarm, targetRule, skipTime);
             }
         } catch (Throwable t) {
             NamazErrorHandler.handleSyncError(context, t);
         }
     }
 
-    private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule) {
+    private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime) {
         ContentResolver cr = context.getContentResolver();
         double[] coords = getCoordinates(context);
         CalculationMethod method = getCalculationMethod(context);
 
         Calendar now = Calendar.getInstance();
+        // Use minute precision for all comparisons to match AOSP Alarm behavior
+        long nowMin = (now.getTimeInMillis() / 60000) * 60000;
+
         Calendar candidateDate = (Calendar) now.clone();
 
-        // If it's a one-time alarm for a specific date, start from that date
+        long skipMin = -1;
+        if (skipTime != null) {
+            skipMin = (skipTime.getTimeInMillis() / 60000) * 60000;
+            // If we are skipping an occurrence, we move to at least the next day
+            // because prayer events only occur once per day.
+            candidateDate.setTimeInMillis(skipTime.getTimeInMillis());
+            candidateDate.add(Calendar.DAY_OF_YEAR, 1);
+            candidateDate.set(Calendar.HOUR_OF_DAY, 0);
+            candidateDate.set(Calendar.MINUTE, 0);
+            candidateDate.set(Calendar.SECOND, 0);
+            candidateDate.set(Calendar.MILLISECOND, 0);
+
+            // Ensure candidateDate isn't in the past relative to 'now'
+            if (candidateDate.before(now)) {
+                candidateDate.setTime(now.getTime());
+            }
+        }
+
+        // If it's a one-time alarm for a specific date, start from that date unless already past it
         if (alarm.year > 0) {
-            candidateDate.set(alarm.year, alarm.month, alarm.day);
+            Calendar specificDate = Calendar.getInstance();
+            specificDate.set(alarm.year, alarm.month, alarm.day, 0, 0, 0);
+            specificDate.set(Calendar.MILLISECOND, 0);
+            if (specificDate.after(candidateDate)) {
+                candidateDate = specificDate;
+            }
         }
 
         RelationalRule.EvaluationResult result = null;
+        long minTime = Math.max(nowMin, skipMin);
 
         // Search for the next valid occurrence (up to 366 days)
         for (int i = 0; i < 366; i++) {
             NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(candidateDate.getTime(), coords[0], coords[1], method);
             result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
 
-            if (result.time() > now.getTimeInMillis()) {
-                if (alarm.daysOfWeek.isRepeating()) {
-                    if (alarm.daysOfWeek.isBitOn(candidateDate.get(Calendar.DAY_OF_WEEK))) {
+            if (result.time() > 0) {
+                long resultMin = (result.time() / 60000) * 60000;
+                if (resultMin > minTime) {
+                    if (alarm.daysOfWeek.isRepeating()) {
+                        if (alarm.daysOfWeek.isBitOn(candidateDate.get(Calendar.DAY_OF_WEEK))) {
+                            break;
+                        }
+                    } else {
+                        // One-time alarm (either specific date or next available)
                         break;
                     }
-                } else {
-                    // One-time alarm (either specific date or today/tomorrow)
-                    break;
                 }
             }
             candidateDate.add(Calendar.DAY_OF_YEAR, 1);
+            candidateDate.set(Calendar.HOUR_OF_DAY, 0);
+            candidateDate.set(Calendar.MINUTE, 0);
+            candidateDate.set(Calendar.SECOND, 0);
+            candidateDate.set(Calendar.MILLISECOND, 0);
         }
 
-        if (result.time() <= now.getTimeInMillis()) {
+        if (result.time() <= 0) {
+            LogUtils.w("Could not calculate prayer time for rule " + rule.id);
+            return;
+        }
+
+        long finalResultMin = (result.time() / 60000) * 60000;
+        if (finalResultMin <= minTime) {
             LogUtils.w("Could not find a future trigger time for rule " + rule.id);
             return;
         }
 
-        Calendar nextTrigger = toCalendar(result.time());
+        Calendar nextTrigger = toCalendar(finalResultMin);
         if (result.conflict()) {
             sendConflictNotification(context, alarm.label, result.fallbackTime());
-            nextTrigger = toCalendar(result.fallbackTime());
+            nextTrigger = toCalendar((result.fallbackTime() / 60000) * 60000);
         }
 
         // 1. Update parent alarm template time so it shows correctly in list

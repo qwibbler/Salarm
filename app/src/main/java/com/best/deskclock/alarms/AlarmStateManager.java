@@ -247,7 +247,18 @@ public final class AlarmStateManager extends BroadcastReceiver {
         }
 
         if (alarm.relationalRuleId > 0) {
-            com.best.deskclock.namaz.RelationalAlarmSyncManager.recalculateNextInstance(context, alarm);
+            if (!alarm.daysOfWeek.isRepeating()) {
+                if (alarm.deleteAfterUse) {
+                    LogUtils.i("Deleting parent relational alarm: " + alarm.id);
+                    Alarm.deleteAlarm(cr, alarm.id);
+                } else {
+                    LogUtils.i("Disabling parent relational alarm: " + alarm.id);
+                    alarm.enabled = false;
+                    alarm.updateAlarm(cr);
+                }
+            } else {
+                com.best.deskclock.namaz.RelationalAlarmSyncManager.recalculateNextInstance(context, alarm, instance.getAlarmTime());
+            }
             return;
         }
 
