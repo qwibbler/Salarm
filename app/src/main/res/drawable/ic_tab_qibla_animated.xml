@@ -18,7 +18,7 @@
         android:fromId="@id/off"
         android:toId="@id/on">
 
-        <animated-vector android:drawable="@drawable/ic_qibla_for_anim">
+        <animated-vector android:drawable="@drawable/ic_tab_qibla_static">
             <target
                 android:name="group"
                 android:animation="@animator/ic_qibla_animation" />

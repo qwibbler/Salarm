@@ -24,12 +24,9 @@
         <item>Islamic Society of North America</item>
         <item>Egyptian General Authority of Survey</item>
         <item>Umm al-Qura</item>
-        <item>Institute of Geophysics, University of Tehran</item>
-        <item>Gulf Region</item>
         <item>Kuwait</item>
         <item>Qatar</item>
         <item>Majlis Ugama Islam Singapura</item>
-        <item>Diyanet İşleri Başkanlığı, TTurkey</item>
         <item>Dubai, UAE</item>
         <item>Moonsighting Committee</item>
     </string-array>
@@ -39,12 +36,9 @@
         <item>NORTH_AMERICA</item>
         <item>EGYPTIAN</item>
         <item>UMM_AL_QURA</item>
-        <item>TEHRAN</item>
-        <item>GULF</item>
         <item>KUWAIT</item>
         <item>QATAR</item>
         <item>SINGAPORE</item>
-        <item>TURKEY</item>
         <item>DUBAI</item>
         <item>MOON_SIGHTING_COMMITTEE</item>
     </string-array>

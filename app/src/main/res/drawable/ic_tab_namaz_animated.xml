@@ -18,7 +18,7 @@
         android:fromId="@id/off"
         android:toId="@id/on">
 
-        <animated-vector android:drawable="@drawable/ic_namaz_for_anim">
+        <animated-vector android:drawable="@drawable/ic_tab_namaz_static">
             <target
                 android:name="sun"
                 android:animation="@animator/ic_namaz_animation_rotation_ccw" />

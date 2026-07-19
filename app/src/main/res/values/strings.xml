@@ -1456,6 +1456,8 @@
     <string name="namaz_error_background_sync">Namaz sync issue</string>
     <!-- Namaz Error Background Sync Details -->
     <string name="namaz_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
+    <!-- Namaz Detecting Location -->
+    <string name="namaz_detecting_location">Detecting location…</string>
     <!-- Location category title for Namaz settings -->
     <string name="namaz_location_category_title">Location</string>
     <!-- Prayer settings category title for Namaz settings -->
