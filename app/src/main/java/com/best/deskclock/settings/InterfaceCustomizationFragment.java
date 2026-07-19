@@ -460,6 +460,14 @@ public class InterfaceCustomizationFragment extends ScreenFragment
             labels.add(getString(R.string.menu_stopwatch));
         }
 
+        if (selectedTabs.contains(VISIBLE_TAB_NAMAZ)) {
+            labels.add(getString(R.string.menu_namaz));
+        }
+
+        if (selectedTabs.contains(VISIBLE_TAB_QIBLA)) {
+            labels.add(getString(R.string.menu_qibla));
+        }
+
         String summary = String.join(" - ", labels);
 
         mVisibleTabsPref.setSummary(summary);
@@ -526,6 +534,16 @@ public class InterfaceCustomizationFragment extends ScreenFragment
         if (visibleTabs.contains(VISIBLE_TAB_STOPWATCH)) {
             entries.add(getString(R.string.menu_stopwatch));
             entryValues.add(TAB_TO_DISPLAY_STOPWATCH);
+        }
+
+        if (visibleTabs.contains(VISIBLE_TAB_NAMAZ)) {
+            entries.add(getString(R.string.menu_namaz));
+            entryValues.add(TAB_TO_DISPLAY_NAMAZ);
+        }
+
+        if (visibleTabs.contains(VISIBLE_TAB_QIBLA)) {
+            entries.add(getString(R.string.menu_qibla));
+            entryValues.add(TAB_TO_DISPLAY_QIBLA);
         }
 
         // Apply the new lists to mTabToDisplayPref

@@ -128,6 +128,7 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_CALC_METHOD = "key_namaz_calc_method";
     public static final String KEY_NAMAZ_LOCATION_MODE = "key_namaz_location_mode";
     public static final String KEY_NAMAZ_CITY_NAME = "key_namaz_city_name";
+    public static final String KEY_NAMAZ_TABS_MIGRATED = "key_namaz_tabs_migrated";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";

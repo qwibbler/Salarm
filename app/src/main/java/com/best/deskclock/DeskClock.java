@@ -29,6 +29,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_TAB_INDICATOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_TAB_TITLE_VISIBILITY;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_TAB_TO_DISPLAY;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VIBRATIONS;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_VISIBLE_TABS;
 import static com.best.deskclock.utils.AnimatorUtils.getScaleAnimator;
 import static com.best.deskclock.utils.NotificationUtils.EXTRA_UPDATE_ALARM_NOTIFICATIONS;
 import static com.best.deskclock.utils.WidgetUtils.EXTRA_UPDATE_WIDGETS;
@@ -119,6 +120,8 @@ public class DeskClock extends BaseActivity implements FabContainer {
     private String mFontPath;
     private boolean mIsToolBarDisplayed;
 
+    private int mBottomNavPage;
+
     private AlertDialog mKeepAndroidOpenDialog = null;
 
     /**
@@ -186,6 +189,7 @@ public class DeskClock extends BaseActivity implements FabContainer {
     private static final List<String> SUPPORTED_PREF_KEYS = List.of(
         // Interface
         KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS, KEY_KEEP_SCREEN_ON,
+        KEY_VISIBLE_TABS,
         // Permission
         KEY_ESSENTIAL_PERMISSIONS_GRANTED
     );
@@ -245,6 +249,10 @@ public class DeskClock extends BaseActivity implements FabContainer {
 
         configureFabAndButtons();
 
+        UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
+        int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
+        mBottomNavPage = (tabIndex <= 3) ? 1 : 2;
+
         displayKeepAndroidOpenDialogIfUnread();
 
         registerPrefListener();
@@ -294,6 +302,11 @@ public class DeskClock extends BaseActivity implements FabContainer {
         if (tabsChanged) {
             mFragmentTabPagerAdapter.clearCache();
             mFragmentTabPagerAdapter.notifyDataSetChanged();
+
+            // Re-calculate the current page based on the new visible tabs count
+            UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
+            int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
+            mBottomNavPage = (tabIndex <= 3) ? 1 : 2;
         }
 
         if (mShouldRecreate) {
@@ -532,6 +545,16 @@ public class DeskClock extends BaseActivity implements FabContainer {
             tab = UiDataModel.Tab.TIMERS;
         } else if (itemId == R.id.page_stopwatch) {
             tab = UiDataModel.Tab.STOPWATCH;
+        } else if (itemId == R.id.page_namaz) {
+            tab = UiDataModel.Tab.NAMAZ;
+        } else if (itemId == R.id.page_qibla) {
+            tab = UiDataModel.Tab.QIBLA;
+        } else if (itemId == R.id.page_next) {
+            UiDataModel.getUiDataModel().setSelectedTab(UiDataModel.getUiDataModel().getTabAt(4));
+            return false;
+        } else if (itemId == R.id.page_back) {
+            UiDataModel.getUiDataModel().setSelectedTab(UiDataModel.getUiDataModel().getTabAt(3));
+            return false;
         }
 
         if (tab != null) {
@@ -703,6 +726,34 @@ public class DeskClock extends BaseActivity implements FabContainer {
      * text visibility, font update, etc.
      */
     private void configureBottomNavigationView() {
+        Menu menu = mBinding.deskClockBottomMenu.getMenu();
+        menu.clear();
+
+        int totalTabs = UiDataModel.getUiDataModel().getTabCount();
+        boolean pagingNeeded = totalTabs > 4;
+
+        if (pagingNeeded) {
+            if (mBottomNavPage == 1) {
+                for (int i = 0; i < 4; i++) {
+                    addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i);
+                }
+                menu.add(Menu.NONE, R.id.page_next, 4, R.string.menu_next_page)
+                        .setIcon(R.drawable.ic_arrow_right);
+            } else {
+                menu.add(Menu.NONE, R.id.page_back, 0, R.string.menu_previous_page)
+                        .setIcon(R.drawable.ic_chevron_left);
+                for (int i = 4; i < totalTabs; i++) {
+                    addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i - 3);
+                }
+            }
+        } else {
+            for (int i = 0; i < totalTabs; i++) {
+                addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i);
+            }
+        }
+
+        mBinding.deskClockBottomMenu.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_LABELED);
+
         final int primaryColor = MaterialColors.getColor(this, androidx.appcompat.R.attr.colorPrimary, Color.BLACK);
         final int surfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurface, Color.BLACK);
         final int onBackgroundColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnBackground, Color.BLACK);
@@ -754,6 +805,32 @@ public class DeskClock extends BaseActivity implements FabContainer {
                 new int[][]{{android.R.attr.state_selected}, {android.R.attr.state_pressed}, {}},
                 new int[]{primaryColor, primaryColor, onBackgroundColor}));
         }
+    }
+
+    private void addTabToMenu(Menu menu, UiDataModel.Tab tab, int order) {
+        menu.add(Menu.NONE, tab.getPageResId(), order, tab.getLabelResId())
+                .setIcon(getTabIcon(tab));
+    }
+
+    private int getTabIcon(UiDataModel.Tab tab) {
+        return switch (tab) {
+            case ALARMS -> R.drawable.ic_tab_alarm;
+            case CLOCKS -> R.drawable.ic_tab_clock;
+            case TIMERS -> R.drawable.ic_tab_timer;
+            case STOPWATCH -> R.drawable.ic_tab_stopwatch;
+            case NAMAZ -> R.drawable.ic_namaz_masjid_with_hands;
+            case QIBLA -> R.drawable.ic_tab_clock; // Using clock for Qibla as placeholder
+        };
+    }
+
+    private void setBottomNavPage(int page) {
+        if (mBottomNavPage == page) {
+            return;
+        }
+        mBottomNavPage = page;
+        configureBottomNavigationView();
+        applyBottomNavTooltips();
+        updateCurrentTab();
     }
 
     /**
@@ -852,65 +929,32 @@ public class DeskClock extends BaseActivity implements FabContainer {
      * preferences, it automatically falls back to the first available tab.</p>
      */
     private void refreshTabsVisibility(UiDataModel.Tab oldTab, boolean tabsChanged) {
-        // Update the menu icons
-        Menu menu = mBinding.deskClockBottomMenu.getMenu();
-        boolean menuChanged = false;
-
-        boolean showAlarm = UiDataModel.getUiDataModel().isTabVisible(UiDataModel.Tab.ALARMS);
-        boolean showClock = UiDataModel.getUiDataModel().isTabVisible(UiDataModel.Tab.CLOCKS);
-        boolean showTimer = UiDataModel.getUiDataModel().isTabVisible(UiDataModel.Tab.TIMERS);
-        boolean showStopwatch = UiDataModel.getUiDataModel().isTabVisible(UiDataModel.Tab.STOPWATCH);
-
-        if (menu.findItem(R.id.page_alarm).isVisible() != showAlarm) {
-            menu.findItem(R.id.page_alarm).setVisible(showAlarm);
-            menuChanged = true;
+        if (tabsChanged) {
+            configureBottomNavigationView();
         }
-
-        if (menu.findItem(R.id.page_clock).isVisible() != showClock) {
-            menu.findItem(R.id.page_clock).setVisible(showClock);
-            menuChanged = true;
-        }
-
-        if (menu.findItem(R.id.page_timer).isVisible() != showTimer) {
-            menu.findItem(R.id.page_timer).setVisible(showTimer);
-            menuChanged = true;
-        }
-
-        if (menu.findItem(R.id.page_stopwatch).isVisible() != showStopwatch) {
-            menu.findItem(R.id.page_stopwatch).setVisible(showStopwatch);
-            menuChanged = true;
-        }
-
-        final boolean finalMenuChanged = menuChanged;
 
         // Indicate in the menu which tab is currently active to force the Material indicator to redraw
         // when the tabs visibility has been changed
-        mBinding.deskClockBottomMenu.post(() -> {
-            UiDataModel.Tab currentTab = UiDataModel.getUiDataModel().getSelectedTab();
-            int currentItemId = switch (currentTab) {
-                case ALARMS -> R.id.page_alarm;
-                case CLOCKS -> R.id.page_clock;
-                case TIMERS -> R.id.page_timer;
-                case STOPWATCH -> R.id.page_stopwatch;
-            };
+        UiDataModel.Tab currentTab = UiDataModel.getUiDataModel().getSelectedTab();
+        int currentItemId = switch (currentTab) {
+            case ALARMS -> R.id.page_alarm;
+            case CLOCKS -> R.id.page_clock;
+            case TIMERS -> R.id.page_timer;
+            case STOPWATCH -> R.id.page_stopwatch;
+            case NAMAZ -> R.id.page_namaz;
+            case QIBLA -> R.id.page_qibla;
+        };
 
-            MenuItem activeItem = mBinding.deskClockBottomMenu.getMenu().findItem(currentItemId);
-            if (activeItem != null) {
-                if (finalMenuChanged) {
-                    // Workaround to redraw the pill display on the current tab
-                    activeItem.setChecked(false);
-                    activeItem.setChecked(true);
-                } else if (!activeItem.isChecked()) {
-                    activeItem.setChecked(true);
-                }
-            }
+        MenuItem activeItem = mBinding.deskClockBottomMenu.getMenu().findItem(currentItemId);
+        if (activeItem != null && !activeItem.isChecked()) {
+            activeItem.setChecked(true);
+        }
 
-            if (!SettingsDAO.getTabTitleVisibility(mPrefs).equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null) {
-                updateBottomNavTypeface();
-            }
+        if (!SettingsDAO.getTabTitleVisibility(mPrefs).equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null) {
+            updateBottomNavTypeface();
+        }
 
-            applyBottomNavTooltips();
-        });
+        applyBottomNavTooltips();
 
         // Re-enable the listener
         UiDataModel.getUiDataModel().addTabListener(mTabChangeWatcher);
@@ -942,7 +986,10 @@ public class DeskClock extends BaseActivity implements FabContainer {
         final UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
         // Update the selected tab in the mBottomNavigation if it does not agree with UiDataModel.
         if (mBinding.deskClockBottomMenu.getSelectedItemId() != selectedTab.getPageResId()) {
-            mBinding.deskClockBottomMenu.setSelectedItemId(selectedTab.getPageResId());
+            MenuItem item = mBinding.deskClockBottomMenu.getMenu().findItem(selectedTab.getPageResId());
+            if (item != null) {
+                mBinding.deskClockBottomMenu.setSelectedItemId(selectedTab.getPageResId());
+            }
         }
 
         // Update the selected fragment in the viewpager if it does not agree with UiDataModel.
@@ -1122,6 +1169,17 @@ public class DeskClock extends BaseActivity implements FabContainer {
 
             if (fragment instanceof AlarmFragment alarmFragment) {
                 alarmFragment.hideSideButtonsOnlyAnimated();
+            }
+
+            int totalTabs = UiDataModel.getUiDataModel().getTabCount();
+            if (totalTabs > 4) {
+                if (position <= 3) {
+                    setBottomNavPage(1);
+                } else {
+                    setBottomNavPage(2);
+                }
+            } else {
+                setBottomNavPage(1);
             }
         }
     }

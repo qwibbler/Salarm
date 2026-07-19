@@ -377,6 +377,20 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if the Namaz tab is visible in the bottom navigation menu. {@code false} otherwise.
+     */
+    public static boolean isNamazTabVisible(SharedPreferences prefs) {
+        return getVisibleTabs(prefs).contains(VISIBLE_TAB_NAMAZ);
+    }
+
+    /**
+     * @return {@code true} if the Qibla tab is visible in the bottom navigation menu. {@code false} otherwise.
+     */
+    public static boolean isQiblaTabVisible(SharedPreferences prefs) {
+        return getVisibleTabs(prefs).contains(VISIBLE_TAB_QIBLA);
+    }
+
+    /**
      * @return the tab to be displayed once the application has launched.
      */
     public static int getTabToDisplay(SharedPreferences prefs) {

@@ -1507,4 +1507,15 @@
         <item>Earlier</item>
         <item>Later</item>
     </string-array>
+
+    <!-- Bottom Navigation Paging -->
+    <string name="menu_next_page">Next</string>
+    <string name="menu_previous_page">Back</string>
+
+    <!-- Namaz Times Tab -->
+    <string name="menu_namaz">Namaz Times</string>
+    <string name="namaz_countdown_format">%1$s To %2$s</string>
+
+    <!-- Qibla Tab -->
+    <string name="menu_qibla">Qibla</string>
 </resources>

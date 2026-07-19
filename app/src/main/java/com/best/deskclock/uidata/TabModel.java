@@ -11,6 +11,12 @@ import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreference
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_TAB_TO_DISPLAY_INTEGER;
 import static com.best.deskclock.uidata.UiDataModel.Tab;
 
+import static com.best.deskclock.settings.PreferencesKeys.KEY_NAMAZ_TABS_MIGRATED;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_VISIBLE_TABS;
+import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_VISIBLE_TABS;
+import static com.best.deskclock.settings.PreferencesDefaultValues.VISIBLE_TAB_NAMAZ;
+import static com.best.deskclock.settings.PreferencesDefaultValues.VISIBLE_TAB_QIBLA;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
@@ -27,6 +33,7 @@ import com.best.deskclock.provider.Alarm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * All tab data is accessed via this model.
@@ -65,12 +72,31 @@ final class TabModel {
      * @return {@code true} if the visibility of the tabs has changed, {@code false} otherwise.
      */
     boolean updateActiveTabs() {
+        // Migration: ensure new tabs are enabled by default for existing users
+        if (!mPrefs.getBoolean(KEY_NAMAZ_TABS_MIGRATED, false)) {
+            Set<String> visibleTabs = mPrefs.getStringSet(KEY_VISIBLE_TABS, null);
+            java.util.Set<String> newSet;
+            if (visibleTabs == null) {
+                newSet = new java.util.HashSet<>(DEFAULT_VISIBLE_TABS);
+            } else {
+                newSet = new java.util.HashSet<>(visibleTabs);
+                newSet.add(VISIBLE_TAB_NAMAZ);
+                newSet.add(VISIBLE_TAB_QIBLA);
+            }
+            mPrefs.edit()
+                    .putStringSet(KEY_VISIBLE_TABS, newSet)
+                    .putBoolean(KEY_NAMAZ_TABS_MIGRATED, true)
+                    .apply();
+        }
+
         List<Tab> newActiveTabs = new ArrayList<>();
 
         final boolean isAlarmTabVisible = SettingsDAO.isAlarmTabVisible(mPrefs);
         final boolean isClockTabVisible = SettingsDAO.isClockTabVisible(mPrefs);
         final boolean isTimerTabVisible = SettingsDAO.isTimerTabVisible(mPrefs);
         final boolean isStopwatchTabVisible = SettingsDAO.isStopwatchTabVisible(mPrefs);
+        final boolean isNamazTabVisible = SettingsDAO.isNamazTabVisible(mPrefs);
+        final boolean isQiblaTabVisible = SettingsDAO.isQiblaTabVisible(mPrefs);
 
         if (isAlarmTabVisible) {
             newActiveTabs.add(Tab.ALARMS);
@@ -86,6 +112,14 @@ final class TabModel {
 
         if (isStopwatchTabVisible) {
             newActiveTabs.add(Tab.STOPWATCH);
+        }
+
+        if (isNamazTabVisible) {
+            newActiveTabs.add(Tab.NAMAZ);
+        }
+
+        if (isQiblaTabVisible) {
+            newActiveTabs.add(Tab.QIBLA);
         }
 
         // This shouldn't happen because it's impossible to uncheck all the entries in the "Visible tabs" setting
