@@ -29,6 +29,12 @@ public class AppExecutors {
     private static final ExecutorService diskIO = Executors.newSingleThreadExecutor();
 
     /**
+     * Multi-thread asynchronous executor for network-bound or blocking operations
+     * that don't need to be sequential.
+     */
+    private static final ExecutorService networkIO = Executors.newFixedThreadPool(4);
+
+    /**
      * Handler attached to the application's main thread (UI Thread).
      * Safely sends tasks to the user interface from a background thread.
      */
@@ -47,6 +53,13 @@ public class AppExecutors {
      */
     public static ExecutorService getDiskIO() {
         return diskIO;
+    }
+
+    /**
+     * Returns the executor dedicated to network-bound or blocking operations.
+     */
+    public static ExecutorService getNetworkIO() {
+        return networkIO;
     }
 
     /**

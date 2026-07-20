@@ -1,5 +1,6 @@
 package com.best.deskclock.namaz;
 
+import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_NAMAZ_CITY_NAME;
 
 import android.app.Dialog;
@@ -80,7 +81,10 @@ public class CitySearchDialogFragment extends DialogFragment {
     private final List<CitySearchResult> mDisplayResults = new ArrayList<>();
     private CityAdapter mAdapter;
     private ProgressBar mProgressBar;
-    private static final Map<String, CitySearchResult> sResolvedCache = new ConcurrentHashMap<>();
+
+    private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable mSearchRunnable;
+    private boolean mIsSelecting = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,15 +92,8 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         List<City> cities = DataModel.getDataModel().getAllCities();
         for (City c : cities) {
-            CitySearchResult cached = sResolvedCache.get(c.getName());
-            if (cached != null) {
-                mBuiltInResults.add(cached);
-            } else {
-                mBuiltInResults.add(new CitySearchResult(c.getName(), "", "", 0, 0));
-            }
+            mBuiltInResults.add(new CitySearchResult(c.getName(), "", "", 0, 0));
         }
-
-        resolveBuiltInCities();
     }
 
     @NonNull
@@ -122,8 +119,13 @@ public class CitySearchDialogFragment extends DialogFragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (mSearchRunnable != null) {
+                    mHandler.removeCallbacks(mSearchRunnable);
+                }
+
                 if (newText.length() > 1) {
-                    filterAndSearch(newText);
+                    mSearchRunnable = () -> filterAndSearch(newText);
+                    mHandler.postDelayed(mSearchRunnable, 500);
                 } else if (newText.isEmpty()) {
                     populateInitialList();
                 }
@@ -140,31 +142,6 @@ public class CitySearchDialogFragment extends DialogFragment {
                 .setTitle(R.string.namaz_city_search_title)
                 .setView(view)
                 .create();
-    }
-
-    private void resolveBuiltInCities() {
-        AppExecutors.getDiskIO().execute(() -> {
-            if (!Geocoder.isPresent()) return;
-            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
-            for (CitySearchResult res : mBuiltInResults) {
-                if (res.country.isEmpty()) {
-                    try {
-                        List<Address> addresses = geocoder.getFromLocationName(res.city, 1);
-                        if (addresses != null && !addresses.isEmpty()) {
-                            Address addr = addresses.get(0);
-                            res.province = addr.getAdminArea();
-                            res.country = addr.getCountryName();
-                            res.latitude = addr.getLatitude();
-                            res.longitude = addr.getLongitude();
-                            sResolvedCache.put(res.city, res);
-                        }
-                    } catch (IOException ignored) {}
-                }
-            }
-            AppExecutors.getMainThread().post(() -> {
-                if (mAdapter != null) mAdapter.notifyDataSetChanged();
-            });
-        });
     }
 
     private void populateInitialList() {
@@ -187,12 +164,17 @@ public class CitySearchDialogFragment extends DialogFragment {
     private void performGeocoderSearch(String query) {
         if (!Geocoder.isPresent()) return;
 
+        final Context context = getContext();
+        if (context == null) return;
+        final Context appContext = context.getApplicationContext();
+
         mProgressBar.setVisibility(View.VISIBLE);
-        AppExecutors.getDiskIO().execute(() -> {
-            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        AppExecutors.getNetworkIO().execute(() -> {
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
             try {
                 List<Address> addresses = geocoder.getFromLocationName(query, 10);
                 AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded()) return;
                     mProgressBar.setVisibility(View.GONE);
                     if (addresses != null) {
                         for (Address addr : addresses) {
@@ -200,10 +182,13 @@ public class CitySearchDialogFragment extends DialogFragment {
                             if (cityName == null) cityName = addr.getFeatureName();
 
                             if (cityName != null && !cityName.equalsIgnoreCase(addr.getCountryName())) {
+                                String state = addr.getAdminArea();
+                                String country = addr.getCountryName();
+
                                 CitySearchResult res = new CitySearchResult(
                                         cityName,
-                                        addr.getAdminArea(),
-                                        addr.getCountryName(),
+                                        state,
+                                        country,
                                         addr.getLatitude(),
                                         addr.getLongitude()
                                 );
@@ -222,12 +207,17 @@ public class CitySearchDialogFragment extends DialogFragment {
                     }
                 });
             } catch (IOException e) {
-                AppExecutors.getMainThread().post(() -> mProgressBar.setVisibility(View.GONE));
+                AppExecutors.getMainThread().post(() -> {
+                    if (isAdded()) mProgressBar.setVisibility(View.GONE);
+                });
             }
         });
     }
 
     private void selectCity(CitySearchResult city) {
+        if (mIsSelecting) return;
+        mIsSelecting = true;
+
         if (city.latitude == 0 && city.longitude == 0) {
             resolveAndSelect(city);
         } else {
@@ -236,12 +226,23 @@ public class CitySearchDialogFragment extends DialogFragment {
     }
 
     private void resolveAndSelect(CitySearchResult city) {
+        final Context context = getContext();
+        if (context == null) {
+            mIsSelecting = false;
+            return;
+        }
+        final Context appContext = context.getApplicationContext();
+
         mProgressBar.setVisibility(View.VISIBLE);
-        AppExecutors.getDiskIO().execute(() -> {
-            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        AppExecutors.getNetworkIO().execute(() -> {
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
             try {
                 List<Address> addresses = geocoder.getFromLocationName(city.city, 1);
                 AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded()) {
+                        mIsSelecting = false;
+                        return;
+                    }
                     mProgressBar.setVisibility(View.GONE);
                     if (addresses != null && !addresses.isEmpty()) {
                         Address addr = addresses.get(0);
@@ -250,18 +251,30 @@ public class CitySearchDialogFragment extends DialogFragment {
                         city.province = addr.getAdminArea();
                         city.country = addr.getCountryName();
                         saveAndDismiss(city);
+                    } else {
+                        mIsSelecting = false;
+                        android.widget.Toast.makeText(appContext, "Could not resolve city coordinates", android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (IOException e) {
-                AppExecutors.getMainThread().post(() -> mProgressBar.setVisibility(View.GONE));
+                AppExecutors.getMainThread().post(() -> {
+                    mIsSelecting = false;
+                    if (isAdded()) mProgressBar.setVisibility(View.GONE);
+                });
             }
         });
     }
 
     private void saveAndDismiss(CitySearchResult city) {
-        NamazLocationManager.handleNewLocation(requireContext(), city.latitude, city.longitude, false);
+        final Context context = getContext();
+        if (context == null) {
+            mIsSelecting = false;
+            return;
+        }
+
+        NamazLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);
         String finalDisplayName = city.city + (city.getFullLocation().isEmpty() ? "" : ", " + city.getFullLocation());
-        DeskClockApplication.getDefaultSharedPreferences(requireContext())
+        getDefaultSharedPreferences(context)
                 .edit()
                 .putString(KEY_NAMAZ_CITY_NAME, finalDisplayName)
                 .apply();

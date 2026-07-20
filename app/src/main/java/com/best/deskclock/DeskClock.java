@@ -46,9 +46,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.StringRes;
@@ -550,10 +552,10 @@ public class DeskClock extends BaseActivity implements FabContainer {
         } else if (itemId == R.id.page_qibla) {
             tab = UiDataModel.Tab.QIBLA;
         } else if (itemId == R.id.page_next) {
-            UiDataModel.getUiDataModel().setSelectedTab(UiDataModel.getUiDataModel().getTabAt(4));
+            setBottomNavPage(2);
             return false;
         } else if (itemId == R.id.page_back) {
-            UiDataModel.getUiDataModel().setSelectedTab(UiDataModel.getUiDataModel().getTabAt(3));
+            setBottomNavPage(1);
             return false;
         }
 
@@ -725,6 +727,7 @@ public class DeskClock extends BaseActivity implements FabContainer {
      * Configures the {@link BottomNavigationView}, such as the icon color, text color,
      * text visibility, font update, etc.
      */
+    @SuppressLint("RestrictedApi")
     private void configureBottomNavigationView() {
         Menu menu = mBinding.deskClockBottomMenu.getMenu();
         menu.clear();
@@ -737,11 +740,13 @@ public class DeskClock extends BaseActivity implements FabContainer {
                 for (int i = 0; i < 4; i++) {
                     addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i);
                 }
-                menu.add(Menu.NONE, R.id.page_next, 4, R.string.menu_next_page)
+                MenuItem nextItem = menu.add(Menu.NONE, R.id.page_next, 4, R.string.menu_next_page)
                         .setIcon(R.drawable.ic_arrow_right);
+                nextItem.setCheckable(false);
             } else {
-                menu.add(Menu.NONE, R.id.page_back, 0, R.string.menu_previous_page)
+                MenuItem backItem = menu.add(Menu.NONE, R.id.page_back, 0, R.string.menu_previous_page)
                         .setIcon(R.drawable.ic_chevron_left);
+                backItem.setCheckable(false);
                 for (int i = 4; i < totalTabs; i++) {
                     addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i - 3);
                 }
@@ -805,6 +810,59 @@ public class DeskClock extends BaseActivity implements FabContainer {
                 new int[][]{{android.R.attr.state_selected}, {android.R.attr.state_pressed}, {}},
                 new int[]{primaryColor, primaryColor, onBackgroundColor}));
         }
+
+        mBinding.deskClockBottomMenu.post(() -> {
+            if (isFinishing() || isDestroyed() || mBinding == null || mBinding.deskClockBottomMenu == null) {
+                return;
+            }
+
+            final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                    if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                        if (velocityX > 0) {
+                            setBottomNavPage(1);
+                        } else {
+                            setBottomNavPage(2);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                    return Math.abs(distanceX) > Math.abs(distanceY);
+                }
+
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return true;
+                }
+            });
+
+            View menuView = mBinding.deskClockBottomMenu.getChildAt(0);
+            if (menuView instanceof android.view.ViewGroup menuViewGroup) {
+                for (int i = 0; i < menuViewGroup.getChildCount(); i++) {
+                    View itemView = menuViewGroup.getChildAt(i);
+                    if (itemView != null) {
+                        itemView.setOnTouchListener((v, event) -> {
+                            gestureDetector.onTouchEvent(event);
+                            return false;
+                        });
+                    }
+                }
+            }
+
+            if (menuView != null) {
+                menuView.setOnTouchListener((v, event) -> {
+                    gestureDetector.onTouchEvent(event);
+                    return false;
+                });
+            }
+
+            applyBottomNavTooltips();
+        });
     }
 
     private void addTabToMenu(Menu menu, UiDataModel.Tab tab, int order) {
@@ -818,8 +876,8 @@ public class DeskClock extends BaseActivity implements FabContainer {
             case CLOCKS -> R.drawable.ic_tab_clock;
             case TIMERS -> R.drawable.ic_tab_timer;
             case STOPWATCH -> R.drawable.ic_tab_stopwatch;
-            case NAMAZ -> R.drawable.ic_namaz_masjid_with_hands;
-            case QIBLA -> R.drawable.ic_tab_clock; // Using clock for Qibla as placeholder
+            case NAMAZ -> R.drawable.ic_tab_namaz;
+            case QIBLA -> R.drawable.ic_tab_qibla;
         };
     }
 
@@ -829,8 +887,12 @@ public class DeskClock extends BaseActivity implements FabContainer {
         }
         mBottomNavPage = page;
         configureBottomNavigationView();
-        applyBottomNavTooltips();
-        updateCurrentTab();
+
+        final UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
+        MenuItem item = mBinding.deskClockBottomMenu.getMenu().findItem(selectedTab.getPageResId());
+        if (item != null) {
+            mBinding.deskClockBottomMenu.setSelectedItemId(selectedTab.getPageResId());
+        }
     }
 
     /**
@@ -862,18 +924,28 @@ public class DeskClock extends BaseActivity implements FabContainer {
      */
     @SuppressLint("RestrictedApi")
     private void applyBottomNavTooltips() {
+        if (mBinding == null || mBinding.deskClockBottomMenu == null) {
+            return;
+        }
+
         for (int i = 0; i < mBinding.deskClockBottomMenu.getChildCount(); i++) {
             View child = mBinding.deskClockBottomMenu.getChildAt(i);
 
             if (child instanceof BottomNavigationMenuView menuView) {
                 for (int j = 0; j < menuView.getChildCount(); j++) {
                     View itemView = menuView.getChildAt(j);
+                    if (itemView == null) {
+                        continue;
+                    }
 
                     // Disable the system tooltip
                     ViewCompat.setTooltipText(itemView, null);
 
                     // Install the custom tooltip
                     itemView.setOnLongClickListener(v -> {
+                        if (!(v instanceof BottomNavigationItemView)) {
+                            return true;
+                        }
                         MenuItem item = ((BottomNavigationItemView) v).getItemData();
 
                         CharSequence title;

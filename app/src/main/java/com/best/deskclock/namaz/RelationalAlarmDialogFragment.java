@@ -321,6 +321,12 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             showConflictConfirmation(e);
         } catch (Exception e) {
             LogUtils.e("Error parsing relational alarm data", e);
+            android.widget.Toast.makeText(requireContext(), R.string.namaz_error_saving, android.widget.Toast.LENGTH_LONG).show();
+            // Re-enable button on failure
+            if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
+                View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
+                if (saveButton != null) saveButton.setEnabled(true);
+            }
         }
     }
 
@@ -349,6 +355,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                     dismiss();
                 } catch (Exception ex) {
                     LogUtils.e("Error force saving rule", ex);
+                    android.widget.Toast.makeText(requireContext(), R.string.namaz_error_saving, android.widget.Toast.LENGTH_LONG).show();
                 }
             },
             getString(android.R.string.cancel),

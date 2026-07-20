@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<resources>
+    <item name="page_alarm" type="id" />
+    <item name="page_clock" type="id" />
+    <item name="page_timer" type="id" />
+    <item name="page_stopwatch" type="id" />
+    <item name="page_namaz" type="id" />
+    <item name="page_qibla" type="id" />
+    <item name="page_next" type="id" />
+    <item name="page_back" type="id" />
+</resources>

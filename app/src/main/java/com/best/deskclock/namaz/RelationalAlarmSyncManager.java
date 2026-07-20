@@ -333,15 +333,27 @@ public class RelationalAlarmSyncManager {
 
     private static double[] getCoordinates(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        double lat = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE));
-        double lon = Double.parseDouble(prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE));
-        return new double[]{lat, lon};
+        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE);
+        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE);
+        try {
+            double lat = Double.parseDouble(latStr);
+            double lon = Double.parseDouble(lonStr);
+            return new double[]{lat, lon};
+        } catch (NumberFormatException e) {
+            LogUtils.e("Error parsing coordinates from preferences", e);
+            return new double[]{0.0, 0.0};
+        }
     }
 
     private static CalculationMethod getCalculationMethod(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
-        return CalculationMethod.valueOf(methodStr);
+        try {
+            return CalculationMethod.valueOf(methodStr);
+        } catch (IllegalArgumentException e) {
+            LogUtils.e("Invalid calculation method in preferences: " + methodStr, e);
+            return CalculationMethod.valueOf(PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
+        }
     }
 
     private static Calendar toCalendar(long millis) {

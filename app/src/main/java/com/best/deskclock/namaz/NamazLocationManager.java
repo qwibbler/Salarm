@@ -16,6 +16,7 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import com.best.deskclock.R;
 import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.utils.LogUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -49,8 +50,12 @@ public class NamazLocationManager {
         LogUtils.i("Location mode set to: " + mode);
 
         if (mode == LocationMode.GPS) {
+            prefs.edit().putString(KEY_NAMAZ_CITY_NAME, context.getString(R.string.namaz_detecting_location)).apply();
             requestGpsUpdate(context);
         }
+
+        // Always trigger a resync when switching modes to ensure correctness
+        RelationalAlarmSyncManager.recalculateAllActiveRules(context);
     }
 
     /**
@@ -73,12 +78,12 @@ public class NamazLocationManager {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         String latStr = prefs.getString(KEY_NAMAZ_LATITUDE, DEFAULT_NAMAZ_LATITUDE);
         String lonStr = prefs.getString(KEY_NAMAZ_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE);
-        String cityName = prefs.getString(KEY_NAMAZ_CITY_NAME, DEFAULT_NAMAZ_CITY_NAME);
 
         try {
             double lat = Double.parseDouble(latStr);
             double lon = Double.parseDouble(lonStr);
-            return (lat != 0.0 || lon != 0.0) && !DEFAULT_NAMAZ_CITY_NAME.equals(cityName);
+            // Relaxed check: we only need valid coordinates to calculate times.
+            return (lat != 0.0 || lon != 0.0);
         } catch (NumberFormatException e) {
             return false;
         }
@@ -97,7 +102,7 @@ public class NamazLocationManager {
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(context);
         client.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
-                handleNewLocation(context, location.getLatitude(), location.getLongitude(), true);
+                handleNewLocation(context, location.getLatitude(), location.getLongitude(), true, false);
             } else {
                 LogUtils.i("Last location null, requesting fresh update...");
                 requestFreshLocation(context, client);
@@ -106,38 +111,58 @@ public class NamazLocationManager {
     }
 
     private static void requestFreshLocation(Context context, FusedLocationProviderClient client) {
+        final Context appContext = context.getApplicationContext();
         LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10000)
                 .setMaxUpdates(1)
                 .build();
 
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            || ActivityCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            client.requestLocationUpdates(request, new LocationCallback() {
+            final LocationCallback callback = new LocationCallback() {
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     Location location = locationResult.getLastLocation();
                     if (location != null) {
-                        handleNewLocation(context, location.getLatitude(), location.getLongitude(), true);
+                        handleNewLocation(appContext, location.getLatitude(), location.getLongitude(), true, false);
                     }
                     client.removeLocationUpdates(this);
                 }
-            }, Looper.getMainLooper());
+            };
+
+            client.requestLocationUpdates(request, callback, Looper.getMainLooper());
+
+            // Add a timeout to stop searching and clear status if no location found
+            AppExecutors.getMainThread().postDelayed(() -> {
+                client.removeLocationUpdates(callback);
+                // If we're still stuck in "Detecting...", revert to a neutral state
+                SharedPreferences prefs = getDefaultSharedPreferences(appContext);
+                if (appContext.getString(R.string.namaz_detecting_location).equals(prefs.getString(KEY_NAMAZ_CITY_NAME, ""))) {
+                    prefs.edit().putString(KEY_NAMAZ_CITY_NAME, "Not detected").apply();
+                }
+            }, 30000); // 30 second timeout
         }
     }
 
     /**
      * Handles a new set of coordinates, updates prefs, and triggers sync if significant.
      * @param isGps If true, will attempt to reverse-geocode the city name.
+     * @param forceSync If true, triggers a resync regardless of the distance changed.
      */
-    public static void handleNewLocation(Context context, double lat, double lon, boolean isGps) {
-        LogUtils.i("Processing new location: " + lat + ", " + lon + " (GPS: " + isGps + ")");
+    public static void handleNewLocation(Context context, double lat, double lon, boolean isGps, boolean forceSync) {
+        LogUtils.i("Processing new location: " + lat + ", " + lon + " (GPS: " + isGps + ", ForceSync: " + forceSync + ")");
 
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        double oldLat = Double.parseDouble(prefs.getString(KEY_NAMAZ_LATITUDE, DEFAULT_NAMAZ_LATITUDE));
-        double oldLon = Double.parseDouble(prefs.getString(KEY_NAMAZ_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE));
+        double oldLat, oldLon;
+        try {
+            oldLat = Double.parseDouble(prefs.getString(KEY_NAMAZ_LATITUDE, DEFAULT_NAMAZ_LATITUDE));
+            oldLon = Double.parseDouble(prefs.getString(KEY_NAMAZ_LONGITUDE, DEFAULT_NAMAZ_LONGITUDE));
+        } catch (NumberFormatException e) {
+            oldLat = 0.0;
+            oldLon = 0.0;
+        }
 
-        boolean significantChange = Math.abs(lat - oldLat) > SIGNIFICANT_CHANGE_THRESHOLD
+        boolean significantChange = forceSync || Math.abs(lat - oldLat) > SIGNIFICANT_CHANGE_THRESHOLD
                 || Math.abs(lon - oldLon) > SIGNIFICANT_CHANGE_THRESHOLD;
 
         prefs.edit()
@@ -156,26 +181,39 @@ public class NamazLocationManager {
     }
 
     private static void updateCityNameFromCoords(Context context, double lat, double lon) {
-        AppExecutors.getDiskIO().execute(() -> {
-            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getNetworkIO().execute(() -> {
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
             try {
                 List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
                 if (addresses != null && !addresses.isEmpty()) {
                     Address address = addresses.get(0);
-                    String cityName = address.getLocality();
-                    if (cityName == null) cityName = address.getSubAdminArea();
-                    if (cityName == null) cityName = address.getAdminArea();
+                    String city = address.getLocality();
+                    String state = address.getAdminArea();
+                    String country = address.getCountryName();
 
-                    if (cityName != null) {
-                        String country = address.getCountryName();
-                        final String finalName = cityName + (country != null ? ", " + country : "");
-                        getDefaultSharedPreferences(context).edit()
-                                .putString(KEY_NAMAZ_CITY_NAME, finalName)
+                    if (city == null) city = address.getSubAdminArea();
+                    if (city == null) city = address.getFeatureName();
+
+                    StringBuilder sb = new StringBuilder();
+                    if (city != null) sb.append(city);
+                    if (state != null && !state.equalsIgnoreCase(city)) {
+                        if (sb.length() > 0) sb.append(", ");
+                        sb.append(state);
+                    }
+                    if (country != null) {
+                        if (sb.length() > 0) sb.append(", ");
+                        sb.append(country);
+                    }
+
+                    if (sb.length() > 0) {
+                        getDefaultSharedPreferences(appContext).edit()
+                                .putString(KEY_NAMAZ_CITY_NAME, sb.toString())
                                 .apply();
                     }
                 }
             } catch (IOException e) {
-                NamazErrorHandler.handleSyncError(context, e);
+                NamazErrorHandler.handleSyncError(appContext, e);
             }
         });
     }
