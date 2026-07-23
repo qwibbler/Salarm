@@ -380,8 +380,12 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_compact_widget_apply_horizontal_padding";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_compact_widget_default_background_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_compact_widget_custom_background_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TEXT_COLOR = "key_namaz_compact_widget_default_text_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TEXT_COLOR = "key_namaz_compact_widget_custom_text_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR = "key_namaz_compact_widget_default_timeline_active_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR = "key_namaz_compact_widget_custom_timeline_active_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR = "key_namaz_compact_widget_default_timeline_next_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_compact_widget_custom_timeline_next_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_default_timeline_standard_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_custom_timeline_standard_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
 
     // ****************

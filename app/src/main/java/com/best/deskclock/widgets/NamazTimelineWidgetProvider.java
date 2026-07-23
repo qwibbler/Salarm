@@ -292,7 +292,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
 
-        // Improved scaling: use a smaller ratio (1.8f) to let timeline items grow even more
+        // Improved scaling: use a smaller ratio (1.5f) to let timeline items grow even more
         DigitalWidgetSizes low = measure(template, 10, sizer, mode);
         DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode);
 
@@ -309,7 +309,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
     private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode) {
         DigitalWidgetSizes measured = template.newSize();
-        measured.setWidgetFontSizePx(fontSizePx, 1.8f);
+        measured.setWidgetFontSizePx(fontSizePx, 1.5f);
 
         TextView timeView = sizer.findViewById(R.id.countdown_time);
         timeView.setTextSize(COMPLEX_UNIT_PX, measured.mWidgetFontSizePx);

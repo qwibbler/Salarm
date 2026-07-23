@@ -45,6 +45,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/widget_text_color"
             android:textSize="10sp"
+            android:paddingHorizontal="3dp"
             android:includeFontPadding="false"
             tools:text="Fajr" />
         <TextView

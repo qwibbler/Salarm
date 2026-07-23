@@ -16,8 +16,7 @@
         android:id="@+id/namaz_widget_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="0dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/countdown_container"
@@ -31,6 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_color"
+                android:paddingHorizontal="3dp"
                 android:includeFontPadding="false"
                 tools:text="1h:24m"
                 tools:textSize="48sp" />
@@ -40,6 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_color"
+                android:paddingHorizontal="3dp"
                 android:includeFontPadding="false"
                 android:textAllCaps="true"
                 tools:text="To Dhuhr"
