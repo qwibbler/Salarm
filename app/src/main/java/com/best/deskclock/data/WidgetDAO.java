@@ -756,12 +756,28 @@ public final class WidgetDAO {
         return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
     }
 
-    public static boolean isNamazCompactWidgetDefaultTextColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TEXT_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
+    public static boolean isNamazCompactWidgetDefaultTimelineActiveColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
     }
 
-    public static int getNamazCompactWidgetCustomTextColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TEXT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    public static int getNamazCompactWidgetCustomTimelineActiveColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isNamazCompactWidgetDefaultTimelineNextColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCompactWidgetCustomTimelineNextColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isNamazCompactWidgetDefaultTimelineStandardColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCompactWidgetCustomTimelineStandardColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static int getNamazCompactWidgetMaxFontSize(SharedPreferences prefs) {
