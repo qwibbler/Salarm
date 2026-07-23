@@ -446,6 +446,54 @@
                 android:resource="@xml/appwidget_next_alarm" />
         </receiver>
 
+        <activity
+            android:name="com.best.deskclock.widgets.WidgetConfiguration$NamazWidgetConfiguration"
+            android:excludeFromRecents="true"
+            android:label="@string/namaz_timeline_widget_label"
+            android:theme="@style/Theme.DeskClock" />
+
+        <activity
+            android:name="com.best.deskclock.widgets.WidgetConfiguration$NamazCompactWidgetConfiguration"
+            android:excludeFromRecents="true"
+            android:label="@string/namaz_timeline_widget_label"
+            android:theme="@style/Theme.DeskClock" />
+
+        <!-- Namaz timeline widget -->
+        <receiver
+            android:name="com.best.deskclock.widgets.NamazTimelineWidgetProvider"
+            android:exported="true"
+            android:label="@string/namaz_timeline_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.APPLICATION_LOCALE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_namaz_timeline_info" />
+        </receiver>
+
+        <!-- Namaz compact widget -->
+        <receiver
+            android:name="com.best.deskclock.widgets.NamazCompactWidgetProvider"
+            android:exported="true"
+            android:label="Namaz Compact">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.APPLICATION_LOCALE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_namaz_compact_info" />
+        </receiver>
+
         <!-- ============================================================== -->
         <!-- Tiles.                                                         -->
         <!-- ============================================================== -->

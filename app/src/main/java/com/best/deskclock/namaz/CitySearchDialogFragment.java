@@ -21,20 +21,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.DialogFragment;
 
-import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.data.City;
 import com.best.deskclock.data.DataModel;
-import com.best.deskclock.utils.LogUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CitySearchDialogFragment extends DialogFragment {
 

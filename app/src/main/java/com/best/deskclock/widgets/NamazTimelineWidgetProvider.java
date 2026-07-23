@@ -1,0 +1,399 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+package com.best.deskclock.widgets;
+
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT;
+import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH;
+import static android.util.TypedValue.COMPLEX_UNIT_PX;
+import static android.view.View.MeasureSpec.UNSPECIFIED;
+import static androidx.core.util.TypedValueCompat.dpToPx;
+import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
+import static com.best.deskclock.utils.WidgetUtils.METHOD_SET_IMAGE_ICON;
+
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Icon;
+import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RemoteViews;
+import android.widget.TextView;
+
+import com.batoulapps.adhan.CalculationMethod;
+import com.best.deskclock.DeskClock;
+import com.best.deskclock.R;
+import com.best.deskclock.data.SettingsDAO;
+import com.best.deskclock.data.WidgetDAO;
+import com.best.deskclock.namaz.NamazCalculator;
+import com.best.deskclock.settings.PreferencesKeys;
+import com.best.deskclock.utils.SdkUtils;
+import com.best.deskclock.utils.ThemeUtils;
+import com.best.deskclock.utils.WidgetUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.Keep;
+import androidx.core.content.ContextCompat;
+
+/**
+ * An adaptive widget that displays the Namaz (prayer) timeline.
+ * Features:
+ * - Large countdown header.
+ * - Responsive layout states (WIDE, NARROW).
+ * - Full-width font scaling via measurement logic.
+ * - Customizable colors and styles.
+ * - Cyclical highlighting of active and next prayers.
+ */
+public class NamazTimelineWidgetProvider extends AppWidgetProvider {
+
+    private static final int MODE_WIDE = 0;
+    private static final int MODE_NARROW = 1;
+
+    @Override
+    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            relayoutWidget(context, appWidgetManager, appWidgetId, null);
+        }
+    }
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+        relayoutWidget(context, appWidgetManager, appWidgetId, newOptions);
+    }
+
+    private void relayoutWidget(Context context, AppWidgetManager wm, int widgetId, Bundle options) {
+        if (options == null) {
+            options = wm.getAppWidgetOptions(widgetId);
+        }
+
+        final RemoteViews portrait = buildRemoteViews(context, wm, widgetId, options, true);
+        final RemoteViews landscape = buildRemoteViews(context, wm, widgetId, options, false);
+
+        final RemoteViews widget = new RemoteViews(landscape, portrait);
+        wm.updateAppWidget(widgetId, widget);
+    }
+
+    private RemoteViews buildRemoteViews(Context context, AppWidgetManager wm, int widgetId, Bundle options, boolean portrait) {
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.appwidget_namaz_timeline);
+
+        // 1. Data Loading
+        Date now = new Date();
+        NamazCalculator.NamazTimes times = getNamazTimes(prefs, now);
+        if (times == null) {
+            rv.setTextViewText(R.id.countdown_time, "Set Location");
+            rv.setViewVisibility(R.id.countdown_label, View.GONE);
+            rv.setViewVisibility(R.id.timeline_container, View.GONE);
+            return rv;
+        }
+
+        List<PrayerItem> allPrayers = getAllPrayers(times, prefs);
+        PrayerItem nextPrayer = getNextPrayer(times, prefs);
+        int activeIndex = getActivePrayerIndex(allPrayers);
+
+        // 2. Responsive Mode Determination
+        final DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        final float density = displayMetrics.density;
+        final int minWidthPx = (int) (density * options.getInt(OPTION_APPWIDGET_MIN_WIDTH));
+        final int minHeightPx = (int) (density * options.getInt(OPTION_APPWIDGET_MIN_HEIGHT));
+        final int maxWidthPx = (int) (density * options.getInt(OPTION_APPWIDGET_MAX_WIDTH));
+        final int maxHeightPx = (int) (density * options.getInt(OPTION_APPWIDGET_MAX_HEIGHT));
+
+        final int targetWidthPx = portrait ? minWidthPx : maxWidthPx;
+        final int targetHeightPx = portrait ? maxHeightPx : minHeightPx;
+
+        int mode = getLayoutMode(targetWidthPx / density);
+
+        // 3. Size Optimization (Binary Search)
+        int maxFontSize = WidgetDAO.getNamazWidgetMaxFontSize(prefs);
+        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode);
+
+        // 4. Styles Application
+        configureBackground(rv, context, prefs, targetWidthPx, targetHeightPx);
+        configurePadding(rv, context, prefs);
+
+        // 5. Content Rendering
+        updateCountdown(rv, context, prefs, nextPrayer, sizes.mWidgetFontSizePx, sizes.mFontSizePx);
+        renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+
+        // 6. Click Action
+        Intent intent = new Intent(context, DeskClock.class);
+        intent.putExtra(WidgetUtils.KEY_LAUNCHED_FROM_WIDGET, true);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        rv.setOnClickPendingIntent(R.id.namaz_widget_root, pendingIntent);
+
+        return rv;
+    }
+
+    private static void updateCountdown(RemoteViews rv, Context context, SharedPreferences prefs, PrayerItem next, float timeFontSize, float labelFontSize) {
+        if (next == null) return;
+
+        long diff = next.time.getTime() - System.currentTimeMillis();
+        long hours = TimeUnit.MILLISECONDS.toHours(diff);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
+
+        String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
+        String label = context.getString(R.string.namaz_countdown_format, "", next.name).replace(" To ", "").trim();
+        if (WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs)) {
+            timeLeft = timeLeft.toUpperCase();
+            label = label.toUpperCase();
+        }
+
+        rv.setTextViewText(R.id.countdown_time, timeLeft);
+        rv.setTextViewTextSize(R.id.countdown_time, COMPLEX_UNIT_PX, timeFontSize);
+
+        rv.setTextViewText(R.id.countdown_label, "TO " + label);
+        rv.setTextViewTextSize(R.id.countdown_label, COMPLEX_UNIT_PX, labelFontSize);
+
+        // Colors
+        if (!WidgetDAO.isNamazWidgetDefaultCountdownTimeColor(prefs)) {
+            rv.setTextColor(R.id.countdown_time, WidgetDAO.getNamazWidgetCustomCountdownTimeColor(prefs));
+        } else {
+            rv.setTextColor(R.id.countdown_time, ContextCompat.getColor(context, R.color.digital_widget_time_color));
+        }
+
+        if (!WidgetDAO.isNamazWidgetDefaultCountdownLabelColor(prefs)) {
+            rv.setTextColor(R.id.countdown_label, WidgetDAO.getNamazWidgetCustomCountdownLabelColor(prefs));
+        } else {
+            rv.setTextColor(R.id.countdown_label, ContextCompat.getColor(context, R.color.next_alarm_widget_title_color));
+        }
+    }
+
+    private static void renderTimeline(RemoteViews rv, Context context, SharedPreferences prefs,
+                                      List<PrayerItem> prayers, int activeIndex, int mode, float fontSize) {
+        rv.removeAllViews(R.id.timeline_container);
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat(DateFormat.is24HourFormat(context) ? "HH:mm" : "h:mm a", Locale.getDefault());
+        boolean uppercase = WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs);
+
+        int activeColor = WidgetDAO.isNamazWidgetDefaultTimelineActiveColor(prefs)
+                ? ContextCompat.getColor(context, R.color.digital_widget_time_color)
+                : WidgetDAO.getNamazWidgetCustomTimelineActiveColor(prefs);
+
+        int nextColor = WidgetDAO.isNamazWidgetDefaultTimelineNextColor(prefs)
+                ? ContextCompat.getColor(context, R.color.next_alarm_widget_title_color)
+                : WidgetDAO.getNamazWidgetCustomTimelineNextColor(prefs);
+
+        int standardColor = WidgetDAO.isNamazWidgetDefaultTimelineStandardColor(prefs)
+                ? ContextCompat.getColor(context, R.color.widget_text_color)
+                : WidgetDAO.getNamazWidgetCustomTimelineStandardColor(prefs);
+
+        int nextIndex = (activeIndex + 1) % prayers.size();
+
+        for (int i = 0; i < prayers.size(); i++) {
+            PrayerItem prayer = prayers.get(i);
+            RemoteViews itemRv = new RemoteViews(context.getPackageName(), R.layout.namaz_widget_item);
+
+            itemRv.setViewVisibility(R.id.mode_wide, mode == MODE_WIDE ? View.VISIBLE : View.GONE);
+            itemRv.setViewVisibility(R.id.mode_narrow, mode == MODE_NARROW ? View.VISIBLE : View.GONE);
+            itemRv.setViewVisibility(R.id.mode_compact, View.GONE);
+
+            String name = prayer.name;
+            String time = timeFormat.format(prayer.time);
+            if (uppercase) {
+                name = name.toUpperCase();
+                time = time.toUpperCase();
+            }
+
+            int color = standardColor;
+            if (i == activeIndex) color = activeColor;
+            else if (i == nextIndex) color = nextColor;
+
+            if (mode == MODE_WIDE) {
+                itemRv.setTextViewText(R.id.label_wide, name);
+                itemRv.setTextViewText(R.id.time_wide, time);
+                itemRv.setTextColor(R.id.label_wide, color);
+                itemRv.setTextColor(R.id.time_wide, color);
+                itemRv.setTextViewTextSize(R.id.label_wide, COMPLEX_UNIT_PX, fontSize);
+                itemRv.setTextViewTextSize(R.id.time_wide, COMPLEX_UNIT_PX, fontSize);
+            } else {
+                itemRv.setTextViewText(R.id.label_narrow, name);
+                itemRv.setTextViewText(R.id.time_narrow, time);
+                itemRv.setTextColor(R.id.label_narrow, color);
+                itemRv.setTextColor(R.id.time_narrow, color);
+                itemRv.setTextViewTextSize(R.id.label_narrow, COMPLEX_UNIT_PX, fontSize * 0.8f);
+                itemRv.setTextViewTextSize(R.id.time_narrow, COMPLEX_UNIT_PX, fontSize);
+            }
+
+            rv.addView(R.id.timeline_container, itemRv);
+        }
+    }
+
+    private static int getLayoutMode(float widthDp) {
+        if (widthDp <= 180) return MODE_NARROW;
+        return MODE_WIDE;
+    }
+
+    private static void configureBackground(RemoteViews rv, Context context, SharedPreferences prefs, int widthPx, int heightPx) {
+        if (!WidgetDAO.isBackgroundDisplayedOnNamazWidget(prefs) || widthPx <= 0 || heightPx <= 0) {
+            rv.setImageViewResource(R.id.widget_background, 0);
+            return;
+        }
+
+        int radius = (int) dpToPx(WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(prefs)
+            ? WidgetDAO.getNamazWidgetBackgroundCornerRadius(prefs)
+            : 24, context.getResources().getDisplayMetrics());
+
+        int color = WidgetDAO.isNamazWidgetDefaultBackgroundColor(prefs)
+                ? ContextCompat.getColor(context, R.color.widget_background_color)
+                : WidgetDAO.getNamazWidgetBackgroundColor(prefs);
+
+        if (SdkUtils.isAtLeastAndroid12()) {
+             if (WidgetDAO.isNamazWidgetDefaultBackgroundColor(prefs)) {
+                 Icon dayIcon = WidgetUtils.createRoundedIcon(widthPx, heightPx, WidgetUtils.getBackgroundColorDay(context), radius);
+                 Icon nightIcon = WidgetUtils.createRoundedIcon(widthPx, heightPx, WidgetUtils.getBackgroundColorNight(context), radius);
+                 rv.setIcon(R.id.widget_background, METHOD_SET_IMAGE_ICON, dayIcon, nightIcon);
+             } else {
+                 Icon icon = WidgetUtils.createRoundedIcon(widthPx, heightPx, color, radius);
+                 rv.setIcon(R.id.widget_background, METHOD_SET_IMAGE_ICON, icon);
+             }
+        } else {
+             Icon icon = WidgetUtils.createRoundedIcon(widthPx, heightPx, color, radius);
+             rv.setIcon(R.id.widget_background, METHOD_SET_IMAGE_ICON, icon);
+        }
+    }
+
+    private static void configurePadding(RemoteViews rv, Context context, SharedPreferences prefs) {
+        int padding = (int) dpToPx(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(prefs)
+                ? 20
+                : 0, context.getResources().getDisplayMetrics());
+        rv.setViewPadding(R.id.namaz_widget_container, padding, padding, padding, padding);
+    }
+
+    private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx,
+                                           int maxFontSize, int mode) {
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        @SuppressLint("InflateParams")
+        View sizer = inflater.inflate(R.layout.appwidget_namaz_timeline_sizer, null);
+
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        int padding = (int) dpToPx(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(prefs)
+                ? 20
+                : 0, context.getResources().getDisplayMetrics());
+        sizer.setPadding(padding, padding, padding, padding);
+
+        DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
+
+        // Improved scaling: use a smaller ratio (1.8f) to let timeline items grow even more
+        DigitalWidgetSizes low = measure(template, 10, sizer, mode);
+        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode);
+
+        if (!high.hasViolations()) return high;
+
+        while (low.getWidgetFontSizePx() < high.getWidgetFontSizePx() - 1) {
+            int mid = (low.getWidgetFontSizePx() + high.getWidgetFontSizePx()) / 2;
+            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode);
+            if (midSize.hasViolations()) high = midSize;
+            else low = midSize;
+        }
+        return low;
+    }
+
+    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode) {
+        DigitalWidgetSizes measured = template.newSize();
+        measured.setWidgetFontSizePx(fontSizePx, 1.8f);
+
+        TextView timeView = sizer.findViewById(R.id.countdown_time);
+        timeView.setTextSize(COMPLEX_UNIT_PX, measured.mWidgetFontSizePx);
+        timeView.setText("11h:59m");
+
+        TextView labelView = sizer.findViewById(R.id.countdown_label);
+        labelView.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+
+        LinearLayout container = sizer.findViewById(R.id.timeline_container);
+        for (int i = 0; i < container.getChildCount(); i++) {
+            View item = container.getChildAt(i);
+            TextView tvWide = item.findViewById(R.id.label_wide);
+            TextView tvNarrow = item.findViewById(R.id.label_narrow);
+
+            if (mode == MODE_WIDE) {
+                tvWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                item.findViewById(R.id.mode_wide).setVisibility(View.VISIBLE);
+                item.findViewById(R.id.mode_narrow).setVisibility(View.GONE);
+            } else {
+                tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                item.findViewById(R.id.mode_wide).setVisibility(View.GONE);
+                item.findViewById(R.id.mode_narrow).setVisibility(View.VISIBLE);
+            }
+        }
+
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetWidthPx, View.MeasureSpec.UNSPECIFIED);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetHeightPx, View.MeasureSpec.UNSPECIFIED);
+        sizer.measure(widthSpec, heightSpec);
+
+        measured.mMeasuredWidthPx = sizer.getMeasuredWidth();
+        measured.mMeasuredHeightPx = sizer.getMeasuredHeight();
+
+        return measured;
+    }
+
+    private static NamazCalculator.NamazTimes getNamazTimes(SharedPreferences prefs, Date date) {
+        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, null);
+        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, null);
+        if (latStr == null || lonStr == null) return null;
+        try {
+            double lat = Double.parseDouble(latStr);
+            double lon = Double.parseDouble(lonStr);
+            String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
+            return NamazCalculator.calculateAllTimes(date, lat, lon, CalculationMethod.valueOf(methodStr));
+        } catch (Exception e) { return null; }
+    }
+
+    private static List<PrayerItem> getAllPrayers(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+        String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+        boolean isShafi = "SHAFI".equals(madhabStr);
+        List<PrayerItem> items = new ArrayList<>();
+        items.add(new PrayerItem("Fajr", times.fajr));
+        items.add(new PrayerItem("Sunrise", times.sunrise));
+        items.add(new PrayerItem("Dhuhr", times.dhuhr));
+        items.add(new PrayerItem("Asr", isShafi ? times.asrShafi : times.asrHanafi));
+        items.add(new PrayerItem("Maghrib", times.maghrib));
+        items.add(new PrayerItem("Isha", times.isha));
+        return items;
+    }
+
+    private static PrayerItem getNextPrayer(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+        Date now = new Date();
+        List<PrayerItem> items = getAllPrayers(times, prefs);
+        for (PrayerItem item : items) { if (now.before(item.time)) return item; }
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        NamazCalculator.NamazTimes tomorrow = getNamazTimes(prefs, cal.getTime());
+        if (tomorrow != null) return new PrayerItem("Fajr", tomorrow.fajr);
+        return null;
+    }
+
+    private static int getActivePrayerIndex(List<PrayerItem> items) {
+        Date now = new Date();
+        for (int i = items.size() - 1; i >= 0; i--) { if (now.after(items.get(i).time)) return i; }
+        return items.size() - 1;
+    }
+
+    @Keep
+    public static void updateAppWidget(Context context, AppWidgetManager wm, int widgetId) {
+        new NamazTimelineWidgetProvider().relayoutWidget(context, wm, widgetId, null);
+    }
+
+    private static class PrayerItem {
+        String name; Date time;
+        PrayerItem(String name, Date time) { this.name = name; this.time = time; }
+    }
+}

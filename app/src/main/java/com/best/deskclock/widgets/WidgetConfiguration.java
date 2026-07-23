@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 import com.best.deskclock.R;
 import com.best.deskclock.settings.AppWidgetAnalogSettingsFragment;
 import com.best.deskclock.settings.AppWidgetDigitalSettingsFragment;
+import com.best.deskclock.settings.AppWidgetNamazCompactSettingsFragment;
+import com.best.deskclock.settings.AppWidgetNamazSettingsFragment;
 import com.best.deskclock.settings.AppWidgetNextAlarmSettingsFragment;
 import com.best.deskclock.settings.AppWidgetVerticalSettingsFragment;
 import com.best.deskclock.uicomponents.CollapsingToolbarBaseActivity;
@@ -78,6 +80,36 @@ public class WidgetConfiguration {
             super.onCreate(savedInstanceState);
 
             showFragmentFromWidget(this, savedInstanceState, new AppWidgetNextAlarmSettingsFragment());
+        }
+    }
+
+    public static class NamazWidgetConfiguration extends CollapsingToolbarBaseActivity {
+
+        @Override
+        protected String getActivityTitle() {
+            return getString(R.string.namaz_timeline_widget_label);
+        }
+
+        @Override
+        public void onCreate(final Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazSettingsFragment());
+        }
+    }
+
+    public static class NamazCompactWidgetConfiguration extends CollapsingToolbarBaseActivity {
+
+        @Override
+        protected String getActivityTitle() {
+            return getString(R.string.namaz_timeline_widget_label);
+        }
+
+        @Override
+        public void onCreate(final Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazCompactSettingsFragment());
         }
     }
 

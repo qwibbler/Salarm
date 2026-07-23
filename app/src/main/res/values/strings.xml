@@ -1518,6 +1518,10 @@
     <string name="menu_namaz">Namaz Times</string>
     <string name="namaz_countdown_format">%1$s To %2$s</string>
 
+    <!-- Namaz Timeline Widget -->
+    <string name="namaz_timeline_widget_label">Namaz Timeline</string>
+    <string name="apply_padding_title">Apply padding</string>
+
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>
 </resources>

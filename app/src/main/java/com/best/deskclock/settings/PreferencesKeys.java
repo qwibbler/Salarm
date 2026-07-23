@@ -350,6 +350,40 @@ public class PreferencesKeys {
     public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_ALARM_COLOR = "key_next_alarm_widget_custom_alarm_color";
     public static final String KEY_NEXT_ALARM_WIDGET_MAXIMUM_FONT_SIZE = "key_next_alarm_widget_maximum_font_size";
 
+    // Namaz Widget
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_widget_display_text_uppercase";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_widget_display_text_shadow";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND = "key_namaz_widget_display_background";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_customize_background_corner_radius";
+    public static final String KEY_NAMAZ_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_background_corner_radius";
+    public static final String KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_widget_apply_horizontal_padding";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_widget_default_background_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_widget_custom_background_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR = "key_namaz_widget_default_countdown_time_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR = "key_namaz_widget_custom_countdown_time_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_default_countdown_label_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_custom_countdown_label_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_default_timeline_active_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_custom_timeline_active_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR = "key_namaz_widget_default_timeline_next_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_widget_custom_timeline_next_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_widget_default_timeline_standard_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_widget_custom_timeline_standard_color";
+    public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
+
+    // Namaz Compact Widget
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_compact_widget_display_text_uppercase";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_compact_widget_display_text_shadow";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND = "key_namaz_compact_widget_display_background";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_compact_widget_customize_background_corner_radius";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_compact_widget_background_corner_radius";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_compact_widget_apply_horizontal_padding";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_compact_widget_default_background_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_compact_widget_custom_background_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TEXT_COLOR = "key_namaz_compact_widget_default_text_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TEXT_COLOR = "key_namaz_compact_widget_custom_text_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
+
     // ****************
     // ** FILE NAMES **
     // ****************
