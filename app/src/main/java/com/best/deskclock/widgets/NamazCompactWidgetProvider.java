@@ -61,11 +61,25 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             relayoutWidget(context, appWidgetManager, appWidgetId, null);
         }
+        NamazWidgetUpdateReceiver.scheduleNextUpdate(context);
     }
 
     @Override
-    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
-        relayoutWidget(context, appWidgetManager, appWidgetId, newOptions);
+    public void onEnabled(Context context) {
+        super.onEnabled(context);
+        NamazWidgetUpdateReceiver.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        // We only cancel if no other Namaz widgets are active.
+        // NamazWidgetUpdateReceiver.onReceive handles this check during its cycle too.
+    }
+
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int widgetId, Bundle newOptions) {
+        relayoutWidget(context, appWidgetManager, widgetId, newOptions);
     }
 
     private void relayoutWidget(Context context, AppWidgetManager wm, int widgetId, Bundle options) {

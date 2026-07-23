@@ -345,6 +345,15 @@
             android:directBootAware="true">
         </receiver>
 
+        <receiver
+            android:name="com.best.deskclock.widgets.NamazWidgetUpdateReceiver"
+            android:directBootAware="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.best.deskclock.NAMAZ_MINUTE_UPDATE" />
+            </intent-filter>
+        </receiver>
+
         <!-- ============================================================== -->
         <!-- App widget components.                                         -->
         <!-- ============================================================== -->

@@ -71,6 +71,19 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             relayoutWidget(context, appWidgetManager, appWidgetId, null);
         }
+        NamazWidgetUpdateReceiver.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onEnabled(Context context) {
+        super.onEnabled(context);
+        NamazWidgetUpdateReceiver.scheduleNextUpdate(context);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        NamazWidgetUpdateReceiver.cancelUpdate(context);
     }
 
     @Override
