@@ -100,11 +100,22 @@ public class NamazTimesFragment extends DeskClockFragment {
 
         NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(new Date(), lat, lon, method);
 
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES, false);
+        String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+
         List<PrayerItem> items = new ArrayList<>();
         items.add(new PrayerItem("Fajr", times.fajr));
         items.add(new PrayerItem("Sunrise", times.sunrise));
         items.add(new PrayerItem("Dhuhr", times.dhuhr));
-        items.add(new PrayerItem("Asr", times.asrHanafi)); // Defaulting to Hanafi for display
+
+        if (showBothAsr) {
+            items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
+            items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+        } else {
+            Date asrTime = madhab.equals("HANAFI") ? times.asrHanafi : times.asrShafi;
+            items.add(new PrayerItem(context.getString(R.string.asr_label), asrTime));
+        }
+
         items.add(new PrayerItem("Maghrib", times.maghrib));
         items.add(new PrayerItem("Isha", times.isha));
 

@@ -128,6 +128,9 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_CALC_METHOD = "key_namaz_calc_method";
     public static final String KEY_NAMAZ_LOCATION_MODE = "key_namaz_location_mode";
     public static final String KEY_NAMAZ_CITY_NAME = "key_namaz_city_name";
+    public static final String KEY_NAMAZ_SHOW_BOTH_ASR = "key_namaz_show_both_asr";
+    public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_namaz_show_both_asr_in_alarm_events";
+    public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES = "key_namaz_show_both_asr_in_namaz_times";
     public static final String KEY_NAMAZ_TABS_MIGRATED = "key_namaz_tabs_migrated";
 
     // Alarm Display Customization

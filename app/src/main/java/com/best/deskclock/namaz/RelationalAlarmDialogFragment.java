@@ -1,6 +1,7 @@
 package com.best.deskclock.namaz;
 
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.databinding.DialogAddRelationalAlarmBinding;
+import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.uicomponents.CustomDialog;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RelationalAlarmDialogFragment extends DialogFragment {
 
@@ -130,8 +137,27 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private void setupAdapters() {
-        ArrayAdapter<CharSequence> prayerEventsAdapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.relational_alarm_prayer_events, android.R.layout.simple_dropdown_item_1line);
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+
+        List<String> eventsList = new ArrayList<>();
+        String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
+        if (showBothAsr) {
+            eventsList.addAll(Arrays.asList(originalEvents));
+        } else {
+            for (int i = 0; i < originalEvents.length; i++) {
+                if (i == 3) { // ASR_SHAFI
+                    eventsList.add(getString(R.string.asr_label));
+                } else if (i == 4) { // ASR_HANAFI
+                    continue; // Skip the second Asr
+                } else {
+                    eventsList.add(originalEvents[i]);
+                }
+            }
+        }
+
+        ArrayAdapter<String> prayerEventsAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_dropdown_item_1line, eventsList);
         mBinding.primaryEvent.setAdapter(prayerEventsAdapter);
         mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
         mBinding.autostopEvent.setAdapter(prayerEventsAdapter);
@@ -267,7 +293,6 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         try {
             RelationalRule rule = new RelationalRule();
             rule.enabled = true;
-            rule.anchorEvent = RelationalRule.AnchorEvent.values()[mBinding.primaryEvent.getAdapter().getCount() - 1]; // Placeholder logic, fix below
 
             // Map UI to Rule
             int primaryEventIdx = getPrayerEventIndex(getText(mBinding.primaryEvent));
@@ -331,6 +356,11 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private int getPrayerEventIndex(String eventName) {
+        if (getString(R.string.asr_label).equals(eventName)) {
+            SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
+            String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+            return madhab.equals("HANAFI") ? 4 : 3; // 4: ASR_HANAFI, 3: ASR_SHAFI
+        }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
         for (int i = 0; i < events.length; i++) {
             if (events[i].equals(eventName)) return i;

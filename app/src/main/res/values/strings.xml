@@ -1462,6 +1462,16 @@
     <string name="namaz_location_category_title">Location</string>
     <!-- Prayer settings category title for Namaz settings -->
     <string name="namaz_prayer_settings_category_title">Prayer Settings</string>
+    <!-- Show both Asr setting title -->
+    <string name="show_both_asr_title">Show both Asrs</string>
+    <!-- Show both Asrs in the alarm events setting title -->
+    <string name="show_both_asr_in_alarm_events_title">Show both Asrs in the alarm events</string>
+    <!-- Show both Asrs in the namaz times setting title -->
+    <string name="show_both_asr_in_namaz_times_title">Show both Asrs in the namaz times</string>
+    <!-- Asr labels -->
+    <string name="asr_label">Asr</string>
+    <string name="asr_hanafi_label">Asr Hanafi</string>
+    <string name="asr_shafii_label">Asr Shafi\'i</string>
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Add Namaz Alarm</string>

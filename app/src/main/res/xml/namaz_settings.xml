@@ -60,6 +60,32 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_show_both_asr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/show_both_asr_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_show_both_asr_in_alarm_events"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/show_both_asr_in_alarm_events_title"
+            android:defaultValue="false"
+            android:dependency="key_namaz_show_both_asr"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_show_both_asr_in_namaz_times"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/show_both_asr_in_namaz_times_title"
+            android:defaultValue="false"
+            android:dependency="key_namaz_show_both_asr"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

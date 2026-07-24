@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.best.deskclock.R;
 import com.best.deskclock.namaz.CitySearchDialogFragment;
@@ -54,6 +55,9 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
         Preference calcMethod = findPreference(KEY_NAMAZ_CALC_METHOD);
         if (calcMethod != null) calcMethod.setOnPreferenceChangeListener(this);
 
+        Preference showBothAsr = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR);
+        if (showBothAsr != null) showBothAsr.setOnPreferenceChangeListener(this);
+
         Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
         if (cityPref != null) {
             cityPref.setOnPreferenceClickListener(preference -> {
@@ -90,6 +94,15 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
         if (cityPref != null) {
             cityPref.setEnabled(mode == NamazLocationManager.LocationMode.MANUAL);
         }
+
+        Preference showBothAsr = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR);
+        Preference sub1 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS);
+        Preference sub2 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES);
+
+        boolean bothAsrEnabled = showBothAsr instanceof SwitchPreferenceCompat sw && sw.isChecked();
+
+        if (sub1 != null) sub1.setVisible(bothAsrEnabled);
+        if (sub2 != null) sub2.setVisible(bothAsrEnabled);
     }
 
     private void updateSummaries() {
@@ -121,6 +134,8 @@ public class NamazSettingsFragment extends ScreenFragment implements Preference.
             updateSummaries();
         } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
             RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());
+        } else if (KEY_NAMAZ_SHOW_BOTH_ASR.equals(key)) {
+            updateUiStates();
         }
     }
 
