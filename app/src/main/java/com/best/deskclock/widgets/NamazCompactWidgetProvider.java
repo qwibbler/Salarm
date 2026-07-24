@@ -49,6 +49,7 @@ import java.util.Locale;
 
 import androidx.annotation.Keep;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 
 /**
  * A vertical compact Namaz widget that displays all prayers (Initials left, Time right).
@@ -163,6 +164,8 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             if (i == activeIndex) color = activeColor;
             else if (i == nextIndex) color = nextColor;
 
+            applyItemHighlight(itemRv, prefs, i, activeIndex, nextIndex, activeColor, nextColor);
+
             itemRv.setTextViewText(R.id.initial_compact, initial);
             itemRv.setTextViewTextSize(R.id.initial_compact, COMPLEX_UNIT_PX, sizes.mWidgetFontSizePx);
             itemRv.setTextColor(R.id.initial_compact, color);
@@ -180,6 +183,32 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         rv.setOnClickPendingIntent(R.id.namaz_widget_root, pendingIntent);
 
         return rv;
+    }
+
+    private static void applyItemHighlight(RemoteViews itemRv, SharedPreferences prefs, int index,
+                                          int activeIndex, int nextIndex, int activeColor, int nextColor) {
+        if (!WidgetDAO.isItemHighlightDisplayedOnNamazCompactWidget(prefs)) {
+            itemRv.setViewVisibility(R.id.item_background, View.GONE);
+            return;
+        }
+
+        if (index == activeIndex || index == nextIndex) {
+            int highlightColor;
+            if (index == activeIndex) {
+                highlightColor = WidgetDAO.isNamazCompactWidgetItemActiveHighlightDefaultColor(prefs)
+                        ? ColorUtils.setAlphaComponent(activeColor, 0x4D) // ~30% alpha
+                        : WidgetDAO.getNamazCompactWidgetItemActiveHighlightColor(prefs);
+            } else {
+                highlightColor = WidgetDAO.isNamazCompactWidgetItemNextHighlightDefaultColor(prefs)
+                        ? ColorUtils.setAlphaComponent(nextColor, 0x26) // ~15% alpha
+                        : WidgetDAO.getNamazCompactWidgetItemNextHighlightColor(prefs);
+            }
+
+            itemRv.setViewVisibility(R.id.item_background, View.VISIBLE);
+            itemRv.setInt(R.id.item_background, "setColorFilter", highlightColor);
+        } else {
+            itemRv.setViewVisibility(R.id.item_background, View.GONE);
+        }
     }
 
     private static void configureBackground(RemoteViews rv, Context context, SharedPreferences prefs, int widthPx, int heightPx) {

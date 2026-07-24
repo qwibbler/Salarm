@@ -48,6 +48,12 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
     SwitchPreferenceCompat mDefaultTimelineStandardColorPref;
     ColorPickerPreference mCustomTimelineStandardColorPref;
 
+    SwitchPreferenceCompat mDisplayItemHighlightPref;
+    SwitchPreferenceCompat mDefaultItemActiveHighlightColorPref;
+    ColorPickerPreference mCustomItemActiveHighlightColorPref;
+    SwitchPreferenceCompat mDefaultItemNextHighlightColorPref;
+    ColorPickerPreference mCustomItemNextHighlightColorPref;
+
     CustomSliderPreference mNamazWidgetMaxFontSizePref;
 
     @Override
@@ -80,6 +86,12 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomTimelineNextColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR);
         mDefaultTimelineStandardColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR);
         mCustomTimelineStandardColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR);
+
+        mDisplayItemHighlightPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
+        mDefaultItemActiveHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR);
+        mCustomItemActiveHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR);
+        mDefaultItemNextHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR);
+        mCustomItemNextHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR);
 
         mNamazWidgetMaxFontSizePref = findPreference(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE);
 
@@ -114,7 +126,10 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
             mCustomBackgroundColorPref, mDefaultCountdownTimeColorPref, mCustomCountdownTimeColorPref,
             mDefaultCountdownLabelColorPref, mCustomCountdownLabelColorPref, mDefaultTimelineActiveColorPref,
             mCustomTimelineActiveColorPref, mDefaultTimelineNextColorPref, mCustomTimelineNextColorPref,
-            mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref, mNamazWidgetMaxFontSizePref);
+            mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
+            mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
+            mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
+            mNamazWidgetMaxFontSizePref);
 
         nullifyAllPrefs();
 
@@ -189,6 +204,25 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
                 mCustomTimelineStandardColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
+
+            case KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT -> {
+                boolean displayHighlight = (boolean) newValue;
+                mDefaultItemActiveHighlightColorPref.setVisible(displayHighlight);
+                mCustomItemActiveHighlightColorPref.setVisible(displayHighlight && !WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
+                mDefaultItemNextHighlightColorPref.setVisible(displayHighlight);
+                mCustomItemNextHighlightColorPref.setVisible(displayHighlight && !WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR -> {
+                mCustomItemActiveHighlightColorPref.setVisible(!(boolean) newValue);
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR -> {
+                mCustomItemNextHighlightColorPref.setVisible(!(boolean) newValue);
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
         }
 
         WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
@@ -242,6 +276,17 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomTimelineStandardColorPref.setVisible(!WidgetDAO.isNamazWidgetDefaultTimelineStandardColor(mPrefs));
         mCustomTimelineStandardColorPref.setOnPreferenceChangeListener(this);
 
+        boolean isItemHighlightVisible = WidgetDAO.isItemHighlightDisplayedOnNamazWidget(mPrefs);
+        mDisplayItemHighlightPref.setOnPreferenceChangeListener(this);
+        mDefaultItemActiveHighlightColorPref.setVisible(isItemHighlightVisible);
+        mDefaultItemActiveHighlightColorPref.setOnPreferenceChangeListener(this);
+        mCustomItemActiveHighlightColorPref.setVisible(isItemHighlightVisible && !WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
+        mCustomItemActiveHighlightColorPref.setOnPreferenceChangeListener(this);
+        mDefaultItemNextHighlightColorPref.setVisible(isItemHighlightVisible);
+        mDefaultItemNextHighlightColorPref.setOnPreferenceChangeListener(this);
+        mCustomItemNextHighlightColorPref.setVisible(isItemHighlightVisible && !WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
+        mCustomItemNextHighlightColorPref.setOnPreferenceChangeListener(this);
+
         mNamazWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
     }
 
@@ -258,6 +303,9 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mDefaultTimelineActiveColorPref.setChecked(WidgetDAO.isNamazWidgetDefaultTimelineActiveColor(mPrefs));
         mDefaultTimelineNextColorPref.setChecked(WidgetDAO.isNamazWidgetDefaultTimelineNextColor(mPrefs));
         mDefaultTimelineStandardColorPref.setChecked(WidgetDAO.isNamazWidgetDefaultTimelineStandardColor(mPrefs));
+        mDisplayItemHighlightPref.setChecked(WidgetDAO.isItemHighlightDisplayedOnNamazWidget(mPrefs));
+        mDefaultItemActiveHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
+        mDefaultItemNextHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
     }
 
     private void updateNamazWidget() {
@@ -288,6 +336,11 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomTimelineNextColorPref = null;
         mDefaultTimelineStandardColorPref = null;
         mCustomTimelineStandardColorPref = null;
+        mDisplayItemHighlightPref = null;
+        mDefaultItemActiveHighlightColorPref = null;
+        mCustomItemActiveHighlightColorPref = null;
+        mDefaultItemNextHighlightColorPref = null;
+        mCustomItemNextHighlightColorPref = null;
         mNamazWidgetMaxFontSizePref = null;
     }
 

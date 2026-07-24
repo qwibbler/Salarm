@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.Keep;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 
 /**
  * An adaptive widget that displays the Namaz (prayer) timeline.
@@ -229,6 +230,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             if (i == activeIndex) color = activeColor;
             else if (i == nextIndex) color = nextColor;
 
+            applyItemHighlight(itemRv, prefs, i, activeIndex, nextIndex, activeColor, nextColor);
+
             if (mode == MODE_WIDE) {
                 itemRv.setTextViewText(R.id.label_wide, name);
                 itemRv.setTextViewText(R.id.time_wide, time);
@@ -246,6 +249,32 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             }
 
             rv.addView(R.id.timeline_container, itemRv);
+        }
+    }
+
+    private static void applyItemHighlight(RemoteViews itemRv, SharedPreferences prefs, int index,
+                                          int activeIndex, int nextIndex, int activeColor, int nextColor) {
+        if (!WidgetDAO.isItemHighlightDisplayedOnNamazWidget(prefs)) {
+            itemRv.setViewVisibility(R.id.item_background, View.GONE);
+            return;
+        }
+
+        if (index == activeIndex || index == nextIndex) {
+            int highlightColor;
+            if (index == activeIndex) {
+                highlightColor = WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(prefs)
+                        ? ColorUtils.setAlphaComponent(activeColor, 0x4D) // ~30% alpha
+                        : WidgetDAO.getNamazWidgetItemActiveHighlightColor(prefs);
+            } else {
+                highlightColor = WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(prefs)
+                        ? ColorUtils.setAlphaComponent(nextColor, 0x26) // ~15% alpha
+                        : WidgetDAO.getNamazWidgetItemNextHighlightColor(prefs);
+            }
+
+            itemRv.setViewVisibility(R.id.item_background, View.VISIBLE);
+            itemRv.setInt(R.id.item_background, "setColorFilter", highlightColor);
+        } else {
+            itemRv.setViewVisibility(R.id.item_background, View.GONE);
         }
     }
 

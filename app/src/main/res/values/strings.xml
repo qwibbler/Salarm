@@ -1521,6 +1521,11 @@
     <!-- Namaz Timeline Widget -->
     <string name="namaz_timeline_widget_label">Namaz Timeline</string>
     <string name="apply_padding_title">Apply padding</string>
+    <string name="namaz_widget_highlight_item_title">Highlight current/next events</string>
+    <string name="namaz_widget_highlight_active_default_color_title">Use default color for current event highlight</string>
+    <string name="namaz_widget_highlight_active_custom_color_title">Current event highlight color</string>
+    <string name="namaz_widget_highlight_next_default_color_title">Use default color for next event highlight</string>
+    <string name="namaz_widget_highlight_next_custom_color_title">Next event highlight color</string>
 
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>

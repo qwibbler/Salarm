@@ -716,6 +716,26 @@ public final class WidgetDAO {
         return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
+    public static boolean isItemHighlightDisplayedOnNamazWidget(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED);
+    }
+
+    public static boolean isNamazWidgetItemActiveHighlightDefaultColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazWidgetItemActiveHighlightColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isNamazWidgetItemNextHighlightDefaultColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazWidgetItemNextHighlightColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
     public static int getNamazWidgetMaxFontSize(SharedPreferences prefs) {
         return prefs.getInt(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
     }
@@ -778,6 +798,26 @@ public final class WidgetDAO {
 
     public static int getNamazCompactWidgetCustomTimelineStandardColor(SharedPreferences prefs) {
         return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isItemHighlightDisplayedOnNamazCompactWidget(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_NAMAZ_COMPACT_WIDGET_ITEM_HIGHLIGHT_DISPLAYED);
+    }
+
+    public static boolean isNamazCompactWidgetItemActiveHighlightDefaultColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCompactWidgetItemActiveHighlightColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isNamazCompactWidgetItemNextHighlightDefaultColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCompactWidgetItemNextHighlightColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static int getNamazCompactWidgetMaxFontSize(SharedPreferences prefs) {

@@ -1,99 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/namaz_item_root"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="vertical"
-    android:padding="2dp">
+    android:layout_height="wrap_content">
 
-    <!-- WIDE MODE -->
+    <ImageView
+        android:id="@+id/item_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/namaz_item_highlight"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no" />
+
     <LinearLayout
-        android:id="@+id/mode_wide"
+        android:id="@+id/namaz_item_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/label_wide"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/widget_text_color"
-            android:includeFontPadding="false"
-            tools:text="Fajr" />
-        <TextView
-            android:id="@+id/time_wide"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/widget_text_color"
-            android:includeFontPadding="false"
-            tools:text="5:12 AM" />
-    </LinearLayout>
-
-    <!-- NARROW MODE -->
-    <LinearLayout
-        android:id="@+id/mode_narrow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/label_narrow"
-            android:layout_width="wrap_content"
+        android:padding="2dp">
+
+        <!-- WIDE MODE -->
+        <LinearLayout
+            android:id="@+id/mode_wide"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/label_wide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/widget_text_color"
+                android:includeFontPadding="false"
+                tools:text="Fajr" />
+            <TextView
+                android:id="@+id/time_wide"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_text_color"
+                android:includeFontPadding="false"
+                tools:text="5:12 AM" />
+        </LinearLayout>
+
+        <!-- NARROW MODE -->
+        <LinearLayout
+            android:id="@+id/mode_narrow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/label_narrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_text_color"
+                android:textSize="12sp"
+                android:paddingHorizontal="3dp"
+                android:includeFontPadding="false"
+                tools:text="Fajr" />
+            <TextView
+                android:id="@+id/time_narrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_text_color"
+                android:textSize="12sp"
+                android:includeFontPadding="false"
+                tools:text="5:12 AM" />
+        </LinearLayout>
+
+        <!-- COMPACT MODE (Single line initials) -->
+        <TextView
+            android:id="@+id/mode_compact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
             android:textColor="@color/widget_text_color"
             android:textSize="12sp"
-            android:paddingHorizontal="3dp"
+            android:visibility="gone"
             android:includeFontPadding="false"
-            tools:text="Fajr" />
-        <TextView
-            android:id="@+id/time_narrow"
-            android:layout_width="wrap_content"
+            tools:text="F: 5:12 AM" />
+
+        <!-- COMPACT VERTICAL MODE (Initials left, Time right) -->
+        <LinearLayout
+            android:id="@+id/mode_compact_vertical"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/widget_text_color"
-            android:textSize="12sp"
-            android:includeFontPadding="false"
-            tools:text="5:12 AM" />
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/initial_compact"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:textColor="@color/widget_text_color"
+                android:includeFontPadding="false"
+                tools:text="F" />
+            <TextView
+                android:id="@+id/time_compact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textColor="@color/widget_text_color"
+                android:includeFontPadding="false"
+                tools:text="5:12 AM" />
+        </LinearLayout>
+
     </LinearLayout>
-
-    <!-- COMPACT MODE (Single line initials) -->
-    <TextView
-        android:id="@+id/mode_compact"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/widget_text_color"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:includeFontPadding="false"
-        tools:text="F: 5:12 AM" />
-
-    <!-- COMPACT VERTICAL MODE (Initials left, Time right) -->
-    <LinearLayout
-        android:id="@+id/mode_compact_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/initial_compact"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="start"
-            android:textColor="@color/widget_text_color"
-            android:includeFontPadding="false"
-            tools:text="F" />
-        <TextView
-            android:id="@+id/time_compact"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:textColor="@color/widget_text_color"
-            android:includeFontPadding="false"
-            tools:text="5:12 AM" />
-    </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

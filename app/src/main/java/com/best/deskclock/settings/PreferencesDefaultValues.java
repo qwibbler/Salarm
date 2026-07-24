@@ -275,11 +275,13 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_SHADOW_DISPLAYED = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
 
     // Namaz Compact Widget
     public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND = true;
     public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING = true;
     public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR = true;
+    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
 
     // Common widget values
     public static final boolean DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;

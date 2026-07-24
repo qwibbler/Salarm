@@ -100,6 +100,41 @@
             android:title="Timeline standard event color"
             android:defaultValue="#FFFFFF"
             app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_compact_widget_display_item_highlight"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_widget_highlight_item_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_compact_widget_default_item_active_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_widget_highlight_active_default_color_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+            android:key="key_namaz_compact_widget_custom_item_active_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_widget_highlight_active_custom_color_title"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_compact_widget_default_item_next_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_widget_highlight_next_default_color_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+            android:key="key_namaz_compact_widget_custom_item_next_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_widget_highlight_next_custom_color_title"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

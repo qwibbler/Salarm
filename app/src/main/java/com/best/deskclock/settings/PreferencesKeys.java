@@ -369,6 +369,11 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_widget_custom_timeline_next_color";
     public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_widget_default_timeline_standard_color";
     public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_widget_custom_timeline_standard_color";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT = "key_namaz_widget_display_item_highlight";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_active_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_active_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_next_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
 
     // Namaz Compact Widget
@@ -386,6 +391,11 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_compact_widget_custom_timeline_next_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_default_timeline_standard_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_custom_timeline_standard_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_ITEM_HIGHLIGHT = "key_namaz_compact_widget_display_item_highlight";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_active_highlight_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_active_highlight_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_next_highlight_color";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
 
     // ****************
