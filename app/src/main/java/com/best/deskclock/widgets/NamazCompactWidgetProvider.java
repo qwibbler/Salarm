@@ -109,7 +109,7 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             return rv;
         }
 
-        List<PrayerItem> allPrayers = getAllPrayers(times, prefs);
+        List<PrayerItem> allPrayers = getAllPrayers(context, times, prefs);
         int activeIndex = getActivePrayerIndex(allPrayers);
         int nextIndex = (activeIndex + 1) % allPrayers.size();
 
@@ -153,7 +153,17 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             itemRv.setViewVisibility(R.id.mode_compact, View.GONE);
             itemRv.setViewVisibility(R.id.mode_compact_vertical, View.VISIBLE);
 
-            String initial = prayer.name.substring(0, 1);
+            String initial;
+            if (prayer.name.equals(context.getString(R.string.asr_shafii_label))) {
+                initial = "A1";
+            } else if (prayer.name.equals(context.getString(R.string.asr_hanafi_label))) {
+                initial = "A2";
+            } else if (prayer.name.equals(context.getString(R.string.asr_label))) {
+                initial = "A";
+            } else {
+                initial = prayer.name.substring(0, 1);
+            }
+
             String time = timeFormat.format(prayer.time);
             if (uppercase) {
                 initial = initial.toUpperCase();
@@ -267,21 +277,21 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
 
         DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
 
-        DigitalWidgetSizes low = measure(template, 10, sizer);
-        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer);
+        DigitalWidgetSizes low = measure(template, 10, sizer, prayers, context);
+        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, prayers, context);
 
         if (!high.hasViolations()) return high;
 
         while (low.getWidgetFontSizePx() < high.getWidgetFontSizePx() - 1) {
             int mid = (low.getWidgetFontSizePx() + high.getWidgetFontSizePx()) / 2;
-            DigitalWidgetSizes midSize = measure(template, mid, sizer);
+            DigitalWidgetSizes midSize = measure(template, mid, sizer, prayers, context);
             if (midSize.hasViolations()) high = midSize;
             else low = midSize;
         }
         return low;
     }
 
-    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer) {
+    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, List<PrayerItem> prayers, Context context) {
         DigitalWidgetSizes measured = template.newSize();
         measured.setWidgetFontSizePx(fontSizePx, 1.0f);
 
@@ -293,16 +303,28 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             tvInitial.setTextSize(COMPLEX_UNIT_PX, fontSizePx);
             tvTime.setTextSize(COMPLEX_UNIT_PX, fontSizePx);
 
-            tvInitial.setText("M");
+            String prayerName = prayers.get(i).name;
+            String initial;
+            if (prayerName.equals(context.getString(R.string.asr_shafii_label))) {
+                initial = "A1";
+            } else if (prayerName.equals(context.getString(R.string.asr_hanafi_label))) {
+                initial = "A2";
+            } else if (prayerName.equals(context.getString(R.string.asr_label))) {
+                initial = "A";
+            } else {
+                initial = prayerName.substring(0, 1);
+            }
+            tvInitial.setText(initial);
             tvTime.setText("11:59 PM");
         }
 
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetWidthPx, View.MeasureSpec.UNSPECIFIED);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetWidthPx, View.MeasureSpec.EXACTLY);
         int heightSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetHeightPx, View.MeasureSpec.UNSPECIFIED);
         sizer.measure(widthSpec, heightSpec);
 
         measured.mMeasuredWidthPx = sizer.getMeasuredWidth();
         measured.mMeasuredHeightPx = sizer.getMeasuredHeight();
+
         return measured;
     }
 
@@ -318,22 +340,47 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         } catch (Exception e) { return null; }
     }
 
-    private static List<PrayerItem> getAllPrayers(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
+        boolean showBothAsr = WidgetDAO.isNamazCompactWidgetShowBothAsrs(prefs);
+
         List<PrayerItem> items = new ArrayList<>();
-        items.add(new PrayerItem("Fajr", times.fajr));
-        items.add(new PrayerItem("Sunrise", times.sunrise));
-        items.add(new PrayerItem("Dhuhr", times.dhuhr));
-        items.add(new PrayerItem("Asr", isShafi ? times.asrShafi : times.asrHanafi));
-        items.add(new PrayerItem("Maghrib", times.maghrib));
-        items.add(new PrayerItem("Isha", times.isha));
+        if (WidgetDAO.isNamazCompactWidgetFajrVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.fajr_label), times.fajr));
+        }
+        if (WidgetDAO.isNamazCompactWidgetSunriseVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise));
+        }
+        if (WidgetDAO.isNamazCompactWidgetDhuhrVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr));
+        }
+
+        if (showBothAsr) {
+            if (WidgetDAO.isNamazCompactWidgetAsrShafiVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
+            }
+            if (WidgetDAO.isNamazCompactWidgetAsrHanafiVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+            }
+        } else {
+            if (WidgetDAO.isNamazCompactWidgetAsrVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_label), isShafi ? times.asrShafi : times.asrHanafi));
+            }
+        }
+
+        if (WidgetDAO.isNamazCompactWidgetMaghribVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib));
+        }
+        if (WidgetDAO.isNamazCompactWidgetIshaVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
+        }
         return items;
     }
 
-    private static PrayerItem getNextPrayer(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+    private static PrayerItem getNextPrayer(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
         Date now = new Date();
-        List<PrayerItem> items = getAllPrayers(times, prefs);
+        List<PrayerItem> items = getAllPrayers(context, times, prefs);
         for (PrayerItem item : items) { if (now.before(item.time)) return item; }
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);

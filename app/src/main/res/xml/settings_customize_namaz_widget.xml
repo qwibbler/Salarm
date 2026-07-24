@@ -7,6 +7,86 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
+        android:key="key_namaz_widget_events_category"
+        android:title="@string/namaz_widget_events_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_both_asrs"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/show_both_asr_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_fajr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/fajr_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_sunrise"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/sunrise_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_dhuhr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/dhuhr_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_asr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/asr_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_asr_shafi"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/asr_shafii_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_asr_hanafi"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/asr_hanafi_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_maghrib"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/maghrib_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_isha"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/isha_label"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/style_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">

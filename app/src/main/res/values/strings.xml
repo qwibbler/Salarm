@@ -1529,6 +1529,13 @@
     <string name="namaz_countdown_format">%1$s To %2$s</string>
 
     <!-- Namaz Widgets -->
+    <string name="namaz_widget_events_category_title">Events</string>
+    <string name="fajr_label">Fajr</string>
+    <string name="sunrise_label">Sunrise</string>
+    <string name="dhuhr_label">Dhuhr</string>
+    <string name="maghrib_label">Maghrib</string>
+    <string name="isha_label">Isha</string>
+
     <string name="namaz_timeline_widget_label">Namaz Times</string>
     <string name="namaz_compact_widget_label">Namaz Times Compact</string>
     <string name="apply_padding_title">Apply padding</string>

@@ -381,6 +381,17 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
 
+    // Namaz Widget Events
+    public static final String KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS = "key_namaz_widget_show_both_asrs";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_FAJR = "key_namaz_widget_show_fajr";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_SUNRISE = "key_namaz_widget_show_sunrise";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_DHUHR = "key_namaz_widget_show_dhuhr";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR = "key_namaz_widget_show_asr";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI = "key_namaz_widget_show_asr_hanafi";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI = "key_namaz_widget_show_asr_shafi";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_MAGHRIB = "key_namaz_widget_show_maghrib";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ISHA = "key_namaz_widget_show_isha";
+
     // Namaz Compact Widget
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_compact_widget_display_text_uppercase";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_compact_widget_display_text_shadow";
@@ -402,6 +413,17 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_next_highlight_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
+
+    // Namaz Compact Widget Events
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS = "key_namaz_compact_widget_show_both_asrs";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_FAJR = "key_namaz_compact_widget_show_fajr";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_SUNRISE = "key_namaz_compact_widget_show_sunrise";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_DHUHR = "key_namaz_compact_widget_show_dhuhr";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR = "key_namaz_compact_widget_show_asr";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_HANAFI = "key_namaz_compact_widget_show_asr_hanafi";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_SHAFI = "key_namaz_compact_widget_show_asr_shafi";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_MAGHRIB = "key_namaz_compact_widget_show_maghrib";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ISHA = "key_namaz_compact_widget_show_isha";
 
     // ****************
     // ** FILE NAMES **

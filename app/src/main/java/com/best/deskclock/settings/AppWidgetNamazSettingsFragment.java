@@ -56,6 +56,16 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     CustomSliderPreference mNamazWidgetMaxFontSizePref;
 
+    SwitchPreferenceCompat mShowBothAsrsPref;
+    SwitchPreferenceCompat mShowFajrPref;
+    SwitchPreferenceCompat mShowSunrisePref;
+    SwitchPreferenceCompat mShowDhuhrPref;
+    SwitchPreferenceCompat mShowAsrPref;
+    SwitchPreferenceCompat mShowAsrShafiPref;
+    SwitchPreferenceCompat mShowAsrHanafiPref;
+    SwitchPreferenceCompat mShowMaghribPref;
+    SwitchPreferenceCompat mShowIshaPref;
+
     @Override
     protected String getFragmentTitle() {
         return getString(R.string.namaz_timeline_widget_label);
@@ -94,6 +104,16 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomItemNextHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR);
 
         mNamazWidgetMaxFontSizePref = findPreference(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE);
+
+        mShowBothAsrsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS);
+        mShowFajrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_FAJR);
+        mShowSunrisePref = findPreference(KEY_NAMAZ_WIDGET_SHOW_SUNRISE);
+        mShowDhuhrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_DHUHR);
+        mShowAsrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR);
+        mShowAsrShafiPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI);
+        mShowAsrHanafiPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI);
+        mShowMaghribPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_MAGHRIB);
+        mShowIshaPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ISHA);
 
         setupPreferences();
 
@@ -138,9 +158,19 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
-        switch (pref.getKey()) {
+        String key = pref.getKey();
+        if (KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS.equals(key)) {
+            mPrefs.edit().putBoolean(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS, (boolean) newValue).apply();
+            updateEventsVisibility();
+        }
+
+        switch (key) {
             case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
-                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING ->
+                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_FAJR,
+                 KEY_NAMAZ_WIDGET_SHOW_SUNRISE, KEY_NAMAZ_WIDGET_SHOW_DHUHR,
+                 KEY_NAMAZ_WIDGET_SHOW_ASR, KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI,
+                 KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI, KEY_NAMAZ_WIDGET_SHOW_MAGHRIB,
+                 KEY_NAMAZ_WIDGET_SHOW_ISHA ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
             case KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND -> {
@@ -288,6 +318,30 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomItemNextHighlightColorPref.setOnPreferenceChangeListener(this);
 
         mNamazWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
+
+        if (mShowBothAsrsPref != null) {
+            if (!mPrefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
+                mShowBothAsrsPref.setChecked(mPrefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, false));
+            }
+            mShowBothAsrsPref.setOnPreferenceChangeListener(this);
+        }
+        if (mShowFajrPref != null) mShowFajrPref.setOnPreferenceChangeListener(this);
+        if (mShowSunrisePref != null) mShowSunrisePref.setOnPreferenceChangeListener(this);
+        if (mShowDhuhrPref != null) mShowDhuhrPref.setOnPreferenceChangeListener(this);
+        if (mShowAsrPref != null) mShowAsrPref.setOnPreferenceChangeListener(this);
+        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setOnPreferenceChangeListener(this);
+        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setOnPreferenceChangeListener(this);
+        if (mShowMaghribPref != null) mShowMaghribPref.setOnPreferenceChangeListener(this);
+        if (mShowIshaPref != null) mShowIshaPref.setOnPreferenceChangeListener(this);
+
+        updateEventsVisibility();
+    }
+
+    private void updateEventsVisibility() {
+        boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(mPrefs);
+        if (mShowAsrPref != null) mShowAsrPref.setVisible(!showBothAsr);
+        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setVisible(showBothAsr);
+        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setVisible(showBothAsr);
     }
 
     private void saveCheckedPreferenceStates() {
@@ -306,6 +360,15 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mDisplayItemHighlightPref.setChecked(WidgetDAO.isItemHighlightDisplayedOnNamazWidget(mPrefs));
         mDefaultItemActiveHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
         mDefaultItemNextHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
+
+        if (mShowFajrPref != null) mShowFajrPref.setChecked(WidgetDAO.isNamazWidgetFajrVisible(mPrefs));
+        if (mShowSunrisePref != null) mShowSunrisePref.setChecked(WidgetDAO.isNamazWidgetSunriseVisible(mPrefs));
+        if (mShowDhuhrPref != null) mShowDhuhrPref.setChecked(WidgetDAO.isNamazWidgetDhuhrVisible(mPrefs));
+        if (mShowAsrPref != null) mShowAsrPref.setChecked(WidgetDAO.isNamazWidgetAsrVisible(mPrefs));
+        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setChecked(WidgetDAO.isNamazWidgetAsrShafiVisible(mPrefs));
+        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setChecked(WidgetDAO.isNamazWidgetAsrHanafiVisible(mPrefs));
+        if (mShowMaghribPref != null) mShowMaghribPref.setChecked(WidgetDAO.isNamazWidgetMaghribVisible(mPrefs));
+        if (mShowIshaPref != null) mShowIshaPref.setChecked(WidgetDAO.isNamazWidgetIshaVisible(mPrefs));
     }
 
     private void updateNamazWidget() {
@@ -342,6 +405,15 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mDefaultItemNextHighlightColorPref = null;
         mCustomItemNextHighlightColorPref = null;
         mNamazWidgetMaxFontSizePref = null;
+        mShowBothAsrsPref = null;
+        mShowFajrPref = null;
+        mShowSunrisePref = null;
+        mShowDhuhrPref = null;
+        mShowAsrPref = null;
+        mShowAsrShafiPref = null;
+        mShowAsrHanafiPref = null;
+        mShowMaghribPref = null;
+        mShowIshaPref = null;
     }
 
 }

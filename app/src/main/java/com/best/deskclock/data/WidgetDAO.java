@@ -740,6 +740,45 @@ public final class WidgetDAO {
         return prefs.getInt(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
     }
 
+    public static boolean isNamazWidgetShowBothAsrs(SharedPreferences prefs) {
+        if (!prefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
+            return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+        }
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+    }
+
+    public static boolean isNamazWidgetFajrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_FAJR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetSunriseVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_SUNRISE, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetDhuhrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_DHUHR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetAsrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetAsrHanafiVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetAsrShafiVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetMaghribVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_MAGHRIB, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazWidgetIshaVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ISHA, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
     // **************************
     // ** NAMAZ COMPACT WIDGET **
     // **************************
@@ -822,6 +861,45 @@ public final class WidgetDAO {
 
     public static int getNamazCompactWidgetMaxFontSize(SharedPreferences prefs) {
         return prefs.getInt(KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
+    }
+
+    public static boolean isNamazCompactWidgetShowBothAsrs(SharedPreferences prefs) {
+        if (!prefs.contains(KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS)) {
+            return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+        }
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+    }
+
+    public static boolean isNamazCompactWidgetFajrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_FAJR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetSunriseVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_SUNRISE, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetDhuhrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_DHUHR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetAsrVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetAsrHanafiVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_HANAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetAsrShafiVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_SHAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetMaghribVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_MAGHRIB, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetIshaVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ISHA, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
     }
 
 }

@@ -118,8 +118,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             return rv;
         }
 
-        List<PrayerItem> allPrayers = getAllPrayers(times, prefs);
-        PrayerItem nextPrayer = getNextPrayer(times, prefs);
+        List<PrayerItem> allPrayers = getAllPrayers(context, times, prefs);
+        PrayerItem nextPrayer = getNextPrayer(context, times, prefs);
         int activeIndex = getActivePrayerIndex(allPrayers);
 
         // 2. Responsive Mode Determination
@@ -137,7 +137,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         // 3. Size Optimization (Binary Search)
         int maxFontSize = WidgetDAO.getNamazWidgetMaxFontSize(prefs);
-        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode);
+        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode, allPrayers);
 
         // 4. Styles Application
         configureBackground(rv, context, prefs, targetWidthPx, targetHeightPx);
@@ -320,11 +320,18 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     }
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx,
-                                           int maxFontSize, int mode) {
+                                           int maxFontSize, int mode, List<PrayerItem> prayers) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
         View sizer = inflater.inflate(R.layout.appwidget_namaz_timeline_sizer, null);
+
+        LinearLayout container = sizer.findViewById(R.id.timeline_container);
+        container.removeAllViews();
+        for (int i = 0; i < prayers.size(); i++) {
+            View item = inflater.inflate(R.layout.namaz_widget_item, container, false);
+            container.addView(item);
+        }
 
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         int padding = (int) dpToPx(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(prefs)
@@ -335,21 +342,21 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
 
         // Improved scaling: use a smaller ratio (1.5f) to let timeline items grow even more
-        DigitalWidgetSizes low = measure(template, 10, sizer, mode);
-        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode);
+        DigitalWidgetSizes low = measure(template, 10, sizer, mode, prayers);
+        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode, prayers);
 
         if (!high.hasViolations()) return high;
 
         while (low.getWidgetFontSizePx() < high.getWidgetFontSizePx() - 1) {
             int mid = (low.getWidgetFontSizePx() + high.getWidgetFontSizePx()) / 2;
-            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode);
+            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode, prayers);
             if (midSize.hasViolations()) high = midSize;
             else low = midSize;
         }
         return low;
     }
 
-    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode) {
+    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode, List<PrayerItem> prayers) {
         DigitalWidgetSizes measured = template.newSize();
         measured.setWidgetFontSizePx(fontSizePx, 1.5f);
 
@@ -359,25 +366,35 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         TextView labelView = sizer.findViewById(R.id.countdown_label);
         labelView.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+        labelView.setText("TO ASR SHAFI'I");
 
         LinearLayout container = sizer.findViewById(R.id.timeline_container);
         for (int i = 0; i < container.getChildCount(); i++) {
             View item = container.getChildAt(i);
             TextView tvWide = item.findViewById(R.id.label_wide);
             TextView tvNarrow = item.findViewById(R.id.label_narrow);
+            TextView tvTimeWide = item.findViewById(R.id.time_wide);
+            TextView tvTimeNarrow = item.findViewById(R.id.time_narrow);
 
+            String name = prayers.get(i).name;
             if (mode == MODE_WIDE) {
+                tvWide.setText(name);
+                tvTimeWide.setText("11:59 PM");
                 tvWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                tvTimeWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
                 item.findViewById(R.id.mode_wide).setVisibility(View.VISIBLE);
                 item.findViewById(R.id.mode_narrow).setVisibility(View.GONE);
             } else {
-                tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                tvNarrow.setText(name);
+                tvTimeNarrow.setText("11:59 PM");
+                tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx * 0.8f);
+                tvTimeNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
                 item.findViewById(R.id.mode_wide).setVisibility(View.GONE);
                 item.findViewById(R.id.mode_narrow).setVisibility(View.VISIBLE);
             }
         }
 
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetWidthPx, View.MeasureSpec.UNSPECIFIED);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetWidthPx, View.MeasureSpec.EXACTLY);
         int heightSpec = View.MeasureSpec.makeMeasureSpec(template.mTargetHeightPx, View.MeasureSpec.UNSPECIFIED);
         sizer.measure(widthSpec, heightSpec);
 
@@ -399,22 +416,47 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         } catch (Exception e) { return null; }
     }
 
-    private static List<PrayerItem> getAllPrayers(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
+        boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(prefs);
+
         List<PrayerItem> items = new ArrayList<>();
-        items.add(new PrayerItem("Fajr", times.fajr));
-        items.add(new PrayerItem("Sunrise", times.sunrise));
-        items.add(new PrayerItem("Dhuhr", times.dhuhr));
-        items.add(new PrayerItem("Asr", isShafi ? times.asrShafi : times.asrHanafi));
-        items.add(new PrayerItem("Maghrib", times.maghrib));
-        items.add(new PrayerItem("Isha", times.isha));
+        if (WidgetDAO.isNamazWidgetFajrVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.fajr_label), times.fajr));
+        }
+        if (WidgetDAO.isNamazWidgetSunriseVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise));
+        }
+        if (WidgetDAO.isNamazWidgetDhuhrVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr));
+        }
+
+        if (showBothAsr) {
+            if (WidgetDAO.isNamazWidgetAsrShafiVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
+            }
+            if (WidgetDAO.isNamazWidgetAsrHanafiVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+            }
+        } else {
+            if (WidgetDAO.isNamazWidgetAsrVisible(prefs)) {
+                items.add(new PrayerItem(context.getString(R.string.asr_label), isShafi ? times.asrShafi : times.asrHanafi));
+            }
+        }
+
+        if (WidgetDAO.isNamazWidgetMaghribVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib));
+        }
+        if (WidgetDAO.isNamazWidgetIshaVisible(prefs)) {
+            items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
+        }
         return items;
     }
 
-    private static PrayerItem getNextPrayer(NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+    private static PrayerItem getNextPrayer(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
         Date now = new Date();
-        List<PrayerItem> items = getAllPrayers(times, prefs);
+        List<PrayerItem> items = getAllPrayers(context, times, prefs);
         for (PrayerItem item : items) { if (now.before(item.time)) return item; }
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
