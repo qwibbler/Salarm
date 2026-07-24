@@ -155,6 +155,7 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR = false;
     public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS = false;
     public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES = false;
+    public static final String DEFAULT_NAMAZ_DISPLAY_TIMEZONE = null;
 
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;

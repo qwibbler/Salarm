@@ -14,6 +14,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.widget.ImageButton;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,20 +27,26 @@ import com.batoulapps.adhan.CalculationMethod;
 import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.base.DeskClockFragment;
-import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.settings.PreferencesKeys;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class NamazTimesFragment extends DeskClockFragment {
 
     private TextView mCountdownText;
     private RecyclerView mRecyclerView;
     private NamazAdapter mAdapter;
+    private TextView mSelectedDateText;
+    private TextView mLocationInfoText;
+    private final Calendar mSelectedDate = Calendar.getInstance();
+
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Runnable mUpdateRunnable = new Runnable() {
         @Override
@@ -59,7 +69,67 @@ public class NamazTimesFragment extends DeskClockFragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new NamazAdapter();
         mRecyclerView.setAdapter(mAdapter);
+
+        mSelectedDateText = view.findViewById(R.id.selected_date_text);
+        mLocationInfoText = view.findViewById(R.id.location_info_text);
+
+        view.findViewById(R.id.prev_date_button).setOnClickListener(v -> changeDate(-1));
+        view.findViewById(R.id.next_date_button).setOnClickListener(v -> changeDate(1));
+        view.findViewById(R.id.date_picker_trigger).setOnClickListener(v -> showDatePicker());
+        view.findViewById(R.id.namaz_settings_button).setOnClickListener(v -> showSettingsDialog());
+
+        setupHeaderSwipe(view.findViewById(R.id.date_navigation_header));
+
         return view;
+    }
+
+    private void setupHeaderSwipe(View header) {
+        GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
+                if (Math.abs(velocityX) > Math.abs(velocityY)) {
+                    if (velocityX > 0) {
+                        changeDate(-1);
+                    } else {
+                        changeDate(1);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        header.setOnTouchListener((v, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                return true;
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                v.performClick();
+            }
+            return true;
+        });
+    }
+
+    private void changeDate(int days) {
+        mSelectedDate.add(Calendar.DAY_OF_YEAR, days);
+        updateUI();
+    }
+
+    private void showDatePicker() {
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date")
+                .setSelection(mSelectedDate.getTimeInMillis())
+                .build();
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            mSelectedDate.setTimeInMillis(selection);
+            updateUI();
+        });
+        datePicker.show(getParentFragmentManager(), "NAMAZ_DATE_PICKER");
+    }
+
+    private void showSettingsDialog() {
+        NamazSettingsDialog dialog = new NamazSettingsDialog();
+        dialog.setOnSettingsChangedListener(this::updateUI);
+        dialog.show(getParentFragmentManager(), "NAMAZ_SETTINGS_DIALOG");
     }
 
     @Override
@@ -98,7 +168,7 @@ public class NamazTimesFragment extends DeskClockFragment {
             method = CalculationMethod.MUSLIM_WORLD_LEAGUE;
         }
 
-        NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(new Date(), lat, lon, method);
+        NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(mSelectedDate.getTime(), lat, lon, method);
 
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES, false);
         String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
@@ -121,11 +191,63 @@ public class NamazTimesFragment extends DeskClockFragment {
 
         mAdapter.setItems(items);
         updateCountdown(times);
+        updateDateHeader();
+        updateFooter();
+    }
+
+    private void updateDateHeader() {
+        Calendar today = Calendar.getInstance();
+        String label;
+        if (isSameDay(mSelectedDate, today)) {
+            label = "Today, " + formatDateLabel(mSelectedDate);
+        } else {
+            Calendar yesterday = Calendar.getInstance();
+            yesterday.add(Calendar.DAY_OF_YEAR, -1);
+            if (isSameDay(mSelectedDate, yesterday)) {
+                label = "Yesterday, " + formatDateLabel(mSelectedDate);
+            } else {
+                Calendar tomorrow = Calendar.getInstance();
+                tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+                if (isSameDay(mSelectedDate, tomorrow)) {
+                    label = "Tomorrow, " + formatDateLabel(mSelectedDate);
+                } else {
+                    label = new SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(mSelectedDate.getTime());
+                }
+            }
+        }
+        mSelectedDateText.setText(label);
+    }
+
+    private String formatDateLabel(Calendar date) {
+        return new SimpleDateFormat("MMM d", Locale.getDefault()).format(date.getTime());
+    }
+
+    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+               cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    private void updateFooter() {
+        Context context = getContext();
+        if (context == null) return;
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
+        String cityName = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Unknown");
+        NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(context);
+
+        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        TimeZone tz = TimeZone.getTimeZone(tzId);
+        String tzName = tz.getDisplayName(false, TimeZone.SHORT);
+
+        String footerText = String.format("%s (%s) • %s", cityName, mode.name(), tzName);
+        mLocationInfoText.setText(footerText);
     }
 
     private void updateCountdown(NamazCalculator.NamazTimes times) {
         Date now = new Date();
         PrayerItem nextPrayer = null;
+
+        boolean isToday = isSameDay(mSelectedDate, Calendar.getInstance());
+        mCountdownText.setAlpha(isToday ? 1.0f : 0.5f);
 
         if (now.before(times.fajr)) nextPrayer = new PrayerItem("Fajr", times.fajr);
         else if (now.before(times.sunrise)) nextPrayer = new PrayerItem("Sunrise", times.sunrise);
@@ -135,7 +257,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         else if (now.before(times.isha)) nextPrayer = new PrayerItem("Isha", times.isha);
         else {
             // Next day's Fajr
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = (Calendar) mSelectedDate.clone();
             cal.add(Calendar.DAY_OF_YEAR, 1);
             Context context = getContext();
             if (context != null) {
@@ -214,7 +336,16 @@ public class NamazTimesFragment extends DeskClockFragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             PrayerItem item = mItems.get(position);
             holder.name.setText(item.name);
-            holder.time.setText(DateFormat.getTimeFormat(getContext()).format(item.time));
+
+            Context context = getContext();
+            if (context == null) return;
+
+            SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
+            String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+            TimeZone tz = TimeZone.getTimeZone(tzId);
+            java.text.DateFormat format = android.text.format.DateFormat.getTimeFormat(context);
+            format.setTimeZone(tz);
+            holder.time.setText(format.format(item.time));
 
             // Highlight current prayer
             Date now = new Date();
@@ -226,7 +357,10 @@ public class NamazTimesFragment extends DeskClockFragment {
                 isCurrent = now.after(item.time) || now.before(mItems.get(0).time);
             }
 
-            if (isCurrent && getContext() != null) {
+            // Only highlight if it's today
+            boolean isToday = isSameDay(mSelectedDate, Calendar.getInstance());
+
+            if (isToday && isCurrent && getContext() != null) {
                 holder.itemView.setBackgroundColor(getContext().getColor(R.color.md_theme_primaryContainer));
             } else {
                 holder.itemView.setBackground(null);
