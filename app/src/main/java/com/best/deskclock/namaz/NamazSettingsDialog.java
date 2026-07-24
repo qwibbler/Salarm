@@ -66,6 +66,8 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
             picker.show(getParentFragmentManager(), "city_picker");
         });
 
+        AutoCompleteTextView timezonePicker = view.findViewById(R.id.timezone_picker);
+
         getParentFragmentManager().setFragmentResultListener("city_picked", this, (requestKey, result) -> {
             String name = result.getString("city_name");
             double lat = result.getDouble("latitude");
@@ -78,12 +80,15 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
                     .putString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE, String.valueOf(lon))
                     .apply();
 
-            autoDetectTimezone(prefs, name, country);
+            String detectedTz = autoDetectTimezone(prefs, name, country);
+            if (detectedTz != null) {
+                timezonePicker.setText(detectedTz, false);
+            }
+
             updateCitySummary(citySummary, prefs);
             if (mListener != null) mListener.onSettingsChanged();
         });
 
-        AutoCompleteTextView timezonePicker = view.findViewById(R.id.timezone_picker);
         String[] ids = TimeZone.getAvailableIDs();
         List<String> timezoneList = new ArrayList<>();
         Collections.addAll(timezoneList, ids);
@@ -109,7 +114,7 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
         summary.setText("Currently viewing: " + name);
     }
 
-    private void autoDetectTimezone(SharedPreferences prefs, String cityName, String countryName) {
+    private String autoDetectTimezone(SharedPreferences prefs, String cityName, String countryName) {
         String[] ids = TimeZone.getAvailableIDs();
         String cityLower = cityName.split(",")[0].trim().toLowerCase(Locale.getDefault());
         String countryLower = countryName != null ? countryName.toLowerCase(Locale.getDefault()) : "";
@@ -118,7 +123,7 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
         for (String id : ids) {
             if (id.toLowerCase(Locale.getDefault()).contains(cityLower)) {
                 prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, id).apply();
-                return;
+                return id;
             }
         }
 
@@ -127,9 +132,10 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
             for (String id : ids) {
                 if (id.toLowerCase(Locale.getDefault()).contains(countryLower)) {
                     prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, id).apply();
-                    return;
+                    return id;
                 }
             }
         }
+        return null;
     }
 }

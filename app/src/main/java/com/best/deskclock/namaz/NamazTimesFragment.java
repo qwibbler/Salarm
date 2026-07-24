@@ -151,6 +151,16 @@ public class NamazTimesFragment extends DeskClockFragment {
         super.onPause();
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
         prefs.unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
+
+        // Revert temporary view overrides when leaving the page
+        prefs.edit()
+                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE)
+                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE)
+                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME)
+                .remove(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE)
+                .apply();
+        mSelectedDate.setTimeInMillis(System.currentTimeMillis());
+
         mHandler.removeCallbacks(mUpdateRunnable);
     }
 
