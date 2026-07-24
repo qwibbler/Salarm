@@ -146,7 +146,16 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
             }
             case KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_BACKGROUND_COLOR -> {
                 boolean isCustomColor = !(boolean) newValue;
+                boolean displayBackground = WidgetDAO.isBackgroundDisplayedOnNamazCompactWidget(mPrefs);
+                boolean isRadiusCustomizable = WidgetDAO.isNamazCompactWidgetBackgroundCornerRadiusCustomizable(mPrefs);
+
                 mCustomBackgroundColorPref.setVisible(isCustomColor);
+
+                if (!SdkUtils.isAtLeastAndroid12()) {
+                    mCustomizeBackgroundCornerRadiusPref.setVisible(isCustomColor && displayBackground);
+                    mBackgroundCornerRadiusPref.setVisible(isCustomColor && displayBackground && isRadiusCustomizable);
+                }
+
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
             case KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR -> {
@@ -187,9 +196,21 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
         mShowBackgroundOnNamazCompactWidgetPref.setOnPreferenceChangeListener(this);
         boolean isBackgroundVisible = WidgetDAO.isBackgroundDisplayedOnNamazCompactWidget(mPrefs);
+        boolean isBackgroundCornerRadiusCustomizable = WidgetDAO.isNamazCompactWidgetBackgroundCornerRadiusCustomizable(mPrefs);
         boolean isCustomColor = !WidgetDAO.isNamazCompactWidgetDefaultBackgroundColor(mPrefs);
-        mCustomizeBackgroundCornerRadiusPref.setVisible(isBackgroundVisible);
+
+        if (SdkUtils.isAtLeastAndroid12()) {
+            mCustomizeBackgroundCornerRadiusPref.setVisible(isBackgroundVisible);
+            mBackgroundCornerRadiusPref.setVisible(isBackgroundVisible && isBackgroundCornerRadiusCustomizable);
+        } else {
+            mCustomizeBackgroundCornerRadiusPref.setVisible(isBackgroundVisible && isCustomColor);
+            mBackgroundCornerRadiusPref.setVisible(isBackgroundVisible
+                && isCustomColor
+                && isBackgroundCornerRadiusCustomizable);
+        }
+
         mCustomizeBackgroundCornerRadiusPref.setOnPreferenceChangeListener(this);
+        mApplyHorizontalPaddingPref.setTitle(R.string.apply_padding_title);
         mApplyHorizontalPaddingPref.setOnPreferenceChangeListener(this);
         mDefaultBackgroundColorPref.setVisible(isBackgroundVisible);
         mDefaultBackgroundColorPref.setOnPreferenceChangeListener(this);
