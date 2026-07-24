@@ -38,13 +38,15 @@ public class CitySearchDialogFragment extends DialogFragment {
         String city;
         String province;
         String country;
+        String countryCode;
         double latitude;
         double longitude;
 
-        CitySearchResult(String city, String province, String country, double lat, double lon) {
+        CitySearchResult(String city, String province, String country, String countryCode, double lat, double lon) {
             this.city = city;
             this.province = province != null ? province : "";
             this.country = country != null ? country : "";
+            this.countryCode = countryCode != null ? countryCode : "";
             this.latitude = lat;
             this.longitude = lon;
         }
@@ -93,7 +95,7 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         List<City> cities = DataModel.getDataModel().getAllCities();
         for (City c : cities) {
-            mBuiltInResults.add(new CitySearchResult(c.getName(), "", "", 0, 0));
+            mBuiltInResults.add(new CitySearchResult(c.getName(), "", "", "", 0, 0));
         }
     }
 
@@ -181,8 +183,9 @@ public class CitySearchDialogFragment extends DialogFragment {
                         for (Address addr : addresses) {
                             String cityName = addr.getLocality();
                             if (cityName == null) cityName = addr.getFeatureName();
+                            if (cityName == null) continue;
 
-                            if (cityName != null && !cityName.equalsIgnoreCase(addr.getCountryName())) {
+                            if (!cityName.equalsIgnoreCase(addr.getCountryName())) {
                                 String state = addr.getAdminArea();
                                 String country = addr.getCountryName();
 
@@ -190,6 +193,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                                         cityName,
                                         state,
                                         country,
+                                        addr.getCountryCode(),
                                         addr.getLatitude(),
                                         addr.getLongitude()
                                 );
@@ -251,6 +255,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                         city.longitude = addr.getLongitude();
                         city.province = addr.getAdminArea();
                         city.country = addr.getCountryName();
+                        city.countryCode = addr.getCountryCode();
                         saveAndDismiss(city);
                     } else {
                         mIsSelecting = false;
@@ -281,6 +286,7 @@ public class CitySearchDialogFragment extends DialogFragment {
             result.putDouble("latitude", city.latitude);
             result.putDouble("longitude", city.longitude);
             result.putString("country", city.country);
+            result.putString("country_code", city.countryCode);
             getParentFragmentManager().setFragmentResult("city_picked", result);
         } else {
             NamazLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);

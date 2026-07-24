@@ -299,8 +299,14 @@ public class NamazTimesFragment extends DeskClockFragment {
         // Countdown uses GLOBAL coordinates and TODAY's date
         String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
         String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
-        double lat = Double.parseDouble(latStr);
-        double lon = Double.parseDouble(lonStr);
+        double lat, lon;
+        try {
+            lat = Double.parseDouble(latStr);
+            lon = Double.parseDouble(lonStr);
+        } catch (NumberFormatException e) {
+            lat = 0.0;
+            lon = 0.0;
+        }
 
         String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
         CalculationMethod method = CalculationMethod.valueOf(methodStr);
