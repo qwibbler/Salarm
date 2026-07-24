@@ -138,6 +138,16 @@ public class NamazTimesFragment extends DeskClockFragment {
     }
 
     @Override
+    public void setMenuVisibility(boolean menuVisible) {
+        super.setMenuVisibility(menuVisible);
+        if (menuVisible) {
+            updateUI();
+        } else if (isAdded()) {
+            revertToDefaultState();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
@@ -152,6 +162,16 @@ public class NamazTimesFragment extends DeskClockFragment {
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
         prefs.unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
 
+        revertToDefaultState();
+
+        mHandler.removeCallbacks(mUpdateRunnable);
+    }
+
+    private void revertToDefaultState() {
+        Context context = getContext();
+        if (context == null) return;
+
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
         // Revert temporary view overrides when leaving the page
         prefs.edit()
                 .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE)
@@ -160,8 +180,6 @@ public class NamazTimesFragment extends DeskClockFragment {
                 .remove(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE)
                 .apply();
         mSelectedDate.setTimeInMillis(System.currentTimeMillis());
-
-        mHandler.removeCallbacks(mUpdateRunnable);
     }
 
     private void updateUI() {
