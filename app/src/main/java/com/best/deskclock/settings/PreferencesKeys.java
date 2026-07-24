@@ -133,6 +133,9 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES = "key_namaz_show_both_asr_in_namaz_times";
     public static final String KEY_NAMAZ_TABS_MIGRATED = "key_namaz_tabs_migrated";
     public static final String KEY_NAMAZ_DISPLAY_TIMEZONE = "key_namaz_display_timezone";
+    public static final String KEY_NAMAZ_VIEW_LATITUDE = "key_namaz_view_latitude";
+    public static final String KEY_NAMAZ_VIEW_LONGITUDE = "key_namaz_view_longitude";
+    public static final String KEY_NAMAZ_VIEW_CITY_NAME = "key_namaz_view_city_name";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";

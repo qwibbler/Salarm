@@ -81,6 +81,11 @@ public class CitySearchDialogFragment extends DialogFragment {
     private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable mSearchRunnable;
     private boolean mIsSelecting = false;
+    private boolean mIsPickerMode = false;
+
+    public void setPickerMode(boolean isPickerMode) {
+        mIsPickerMode = isPickerMode;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -268,12 +273,22 @@ public class CitySearchDialogFragment extends DialogFragment {
             return;
         }
 
-        NamazLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);
         String finalDisplayName = city.city + (city.getFullLocation().isEmpty() ? "" : ", " + city.getFullLocation());
-        getDefaultSharedPreferences(context)
-                .edit()
-                .putString(KEY_NAMAZ_CITY_NAME, finalDisplayName)
-                .apply();
+
+        if (mIsPickerMode) {
+            Bundle result = new Bundle();
+            result.putString("city_name", finalDisplayName);
+            result.putDouble("latitude", city.latitude);
+            result.putDouble("longitude", city.longitude);
+            result.putString("country", city.country);
+            getParentFragmentManager().setFragmentResult("city_picked", result);
+        } else {
+            NamazLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);
+            getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString(KEY_NAMAZ_CITY_NAME, finalDisplayName)
+                    .apply();
+        }
         dismiss();
     }
 

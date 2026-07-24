@@ -48,6 +48,11 @@ public class NamazTimesFragment extends DeskClockFragment {
     private final Calendar mSelectedDate = Calendar.getInstance();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = (prefs, key) -> {
+        if (PreferencesKeys.KEY_NAMAZ_CITY_NAME.equals(key) || PreferencesKeys.KEY_NAMAZ_LATITUDE.equals(key)) {
+            updateUI();
+        }
+    };
     private final Runnable mUpdateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -135,6 +140,8 @@ public class NamazTimesFragment extends DeskClockFragment {
     @Override
     public void onResume() {
         super.onResume();
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
+        prefs.registerOnSharedPreferenceChangeListener(mPreferenceListener);
         updateUI();
         mHandler.post(mUpdateRunnable);
     }
@@ -142,6 +149,8 @@ public class NamazTimesFragment extends DeskClockFragment {
     @Override
     public void onPause() {
         super.onPause();
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
+        prefs.unregisterOnSharedPreferenceChangeListener(mPreferenceListener);
         mHandler.removeCallbacks(mUpdateRunnable);
     }
 
@@ -150,8 +159,13 @@ public class NamazTimesFragment extends DeskClockFragment {
         if (context == null) return;
 
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
+
+        // Use local VIEW overrides if present, otherwise fall back to global settings
+        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE,
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0"));
+        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE,
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0"));
+
         double lat, lon;
         try {
             lat = Double.parseDouble(latStr);
@@ -160,6 +174,7 @@ public class NamazTimesFragment extends DeskClockFragment {
             lat = 0.0;
             lon = 0.0;
         }
+
         String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
         CalculationMethod method;
         try {
@@ -190,7 +205,9 @@ public class NamazTimesFragment extends DeskClockFragment {
         items.add(new PrayerItem("Isha", times.isha));
 
         mAdapter.setItems(items);
-        updateCountdown(times);
+
+        // Countdown always uses TODAY and GLOBAL settings
+        updateCountdown();
         updateDateHeader();
         updateFooter();
     }
@@ -222,7 +239,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         return new SimpleDateFormat("MMM d", Locale.getDefault()).format(date.getTime());
     }
 
-    private boolean isSameDay(Calendar cal1, Calendar cal2) {
+    private static boolean isSameDay(Calendar cal1, Calendar cal2) {
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
@@ -231,57 +248,56 @@ public class NamazTimesFragment extends DeskClockFragment {
         Context context = getContext();
         if (context == null) return;
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
-        String cityName = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Unknown");
+
+        String cityName = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME,
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Unknown"));
+
         NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(context);
+        boolean isOverride = prefs.contains(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME);
 
         String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         TimeZone tz = TimeZone.getTimeZone(tzId);
         String tzName = tz.getDisplayName(false, TimeZone.SHORT);
 
-        String footerText = String.format("%s (%s) • %s", cityName, mode.name(), tzName);
+        String footerText = String.format("%s (%s%s) • %s", cityName, mode.name(), isOverride ? "/View" : "", tzName);
         mLocationInfoText.setText(footerText);
     }
 
-    private void updateCountdown(NamazCalculator.NamazTimes times) {
+    private void updateCountdown() {
+        Context context = getContext();
+        if (context == null) return;
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
+
+        // Countdown uses GLOBAL coordinates and TODAY's date
+        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
+        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
+        double lat = Double.parseDouble(latStr);
+        double lon = Double.parseDouble(lonStr);
+
+        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
+        CalculationMethod method = CalculationMethod.valueOf(methodStr);
+
+        Calendar todayCal = Calendar.getInstance();
+        NamazCalculator.NamazTimes todayTimes = NamazCalculator.calculateAllTimes(todayCal.getTime(), lat, lon, method);
+
         Date now = new Date();
         PrayerItem nextPrayer = null;
 
-        boolean isToday = isSameDay(mSelectedDate, Calendar.getInstance());
-        mCountdownText.setAlpha(isToday ? 1.0f : 0.5f);
+        boolean isViewingToday = isSameDay(mSelectedDate, todayCal);
+        mCountdownText.setAlpha(isViewingToday ? 1.0f : 0.5f);
 
-        if (now.before(times.fajr)) nextPrayer = new PrayerItem("Fajr", times.fajr);
-        else if (now.before(times.sunrise)) nextPrayer = new PrayerItem("Sunrise", times.sunrise);
-        else if (now.before(times.dhuhr)) nextPrayer = new PrayerItem("Dhuhr", times.dhuhr);
-        else if (now.before(times.asrHanafi)) nextPrayer = new PrayerItem("Asr", times.asrHanafi);
-        else if (now.before(times.maghrib)) nextPrayer = new PrayerItem("Maghrib", times.maghrib);
-        else if (now.before(times.isha)) nextPrayer = new PrayerItem("Isha", times.isha);
+        if (now.before(todayTimes.fajr)) nextPrayer = new PrayerItem("Fajr", todayTimes.fajr);
+        else if (now.before(todayTimes.sunrise)) nextPrayer = new PrayerItem("Sunrise", todayTimes.sunrise);
+        else if (now.before(todayTimes.dhuhr)) nextPrayer = new PrayerItem("Dhuhr", todayTimes.dhuhr);
+        else if (now.before(todayTimes.asrHanafi)) nextPrayer = new PrayerItem("Asr", todayTimes.asrHanafi);
+        else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem("Maghrib", todayTimes.maghrib);
+        else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem("Isha", todayTimes.isha);
         else {
-            // Next day's Fajr
-            Calendar cal = (Calendar) mSelectedDate.clone();
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            Context context = getContext();
-            if (context != null) {
-                SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
-                String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
-                String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
-                double lat, lon;
-                try {
-                    lat = Double.parseDouble(latStr);
-                    lon = Double.parseDouble(lonStr);
-                } catch (NumberFormatException e) {
-                    lat = 0.0;
-                    lon = 0.0;
-                }
-                String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
-                CalculationMethod method;
-                try {
-                    method = CalculationMethod.valueOf(methodStr);
-                } catch (IllegalArgumentException e) {
-                    method = CalculationMethod.MUSLIM_WORLD_LEAGUE;
-                }
-                NamazCalculator.NamazTimes tomorrowTimes = NamazCalculator.calculateAllTimes(cal.getTime(), lat, lon, method);
-                nextPrayer = new PrayerItem("Fajr", tomorrowTimes.fajr);
-            }
+            // Next day's Fajr (still based on GLOBAL location)
+            Calendar tomorrow = Calendar.getInstance();
+            tomorrow.add(Calendar.DAY_OF_YEAR, 1);
+            NamazCalculator.NamazTimes tomorrowTimes = NamazCalculator.calculateAllTimes(tomorrow.getTime(), lat, lon, method);
+            nextPrayer = new PrayerItem("Fajr", tomorrowTimes.fajr);
         }
 
         if (nextPrayer != null) {
