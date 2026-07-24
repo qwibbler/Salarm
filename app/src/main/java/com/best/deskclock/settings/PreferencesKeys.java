@@ -266,6 +266,8 @@ public class PreferencesKeys {
     public static final String KEY_DIGITAL_WIDGET_CUSTOMIZATION = "key_digital_widget_customization";
     public static final String KEY_VERTICAL_WIDGET_CUSTOMIZATION = "key_vertical_widget_customization";
     public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION = "key_next_alarm_widget_customization";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZATION = "key_namaz_widget_customization";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZATION = "key_namaz_compact_widget_customization";
 
     // Analog Widget
     public static final String KEY_ANALOG_WIDGET_CLOCK_DIAL = "key_analog_widget_clock_dial";

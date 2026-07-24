@@ -1518,8 +1518,9 @@
     <string name="menu_namaz">Namaz Times</string>
     <string name="namaz_countdown_format">%1$s To %2$s</string>
 
-    <!-- Namaz Timeline Widget -->
-    <string name="namaz_timeline_widget_label">Namaz Timeline</string>
+    <!-- Namaz Widgets -->
+    <string name="namaz_timeline_widget_label">Namaz Times</string>
+    <string name="namaz_compact_widget_label">Namaz Times Compact</string>
     <string name="apply_padding_title">Apply padding</string>
     <string name="namaz_widget_highlight_item_title">Highlight current/next events</string>
     <string name="namaz_widget_highlight_active_default_color_title">Use default color for current event highlight</string>

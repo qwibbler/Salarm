@@ -54,7 +54,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_timeline_widget_label);
+        return getString(R.string.namaz_compact_widget_label);
     }
 
     @Override

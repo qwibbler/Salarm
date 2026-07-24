@@ -102,7 +102,7 @@ public class WidgetConfiguration {
 
         @Override
         protected String getActivityTitle() {
-            return getString(R.string.namaz_timeline_widget_label);
+            return getString(R.string.namaz_compact_widget_label);
         }
 
         @Override
