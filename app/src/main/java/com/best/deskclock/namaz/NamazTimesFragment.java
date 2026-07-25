@@ -45,6 +45,8 @@ public class NamazTimesFragment extends DeskClockFragment {
     private NamazAdapter mAdapter;
     private TextView mSelectedDateText;
     private TextView mLocationInfoText;
+    private TextView mTimezoneInfoText;
+    private TextView mTimezoneWarningText;
     private final Calendar mSelectedDate = Calendar.getInstance();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -77,6 +79,8 @@ public class NamazTimesFragment extends DeskClockFragment {
 
         mSelectedDateText = view.findViewById(R.id.selected_date_text);
         mLocationInfoText = view.findViewById(R.id.location_info_text);
+        mTimezoneInfoText = view.findViewById(R.id.timezone_info_text);
+        mTimezoneWarningText = view.findViewById(R.id.namaz_timezone_warning);
 
         view.findViewById(R.id.prev_date_button).setOnClickListener(v -> changeDate(-1));
         view.findViewById(R.id.next_date_button).setOnClickListener(v -> changeDate(1));
@@ -287,8 +291,29 @@ public class NamazTimesFragment extends DeskClockFragment {
         TimeZone tz = TimeZone.getTimeZone(tzId);
         String tzName = tz.getDisplayName(false, TimeZone.SHORT);
 
-        String footerText = String.format("%s (%s%s) • %s", cityName, mode.name(), isOverride ? "/View" : "", tzName);
-        mLocationInfoText.setText(footerText);
+        mLocationInfoText.setText(String.format("%s (%s%s)", cityName, mode.name(), isOverride ? "/View" : ""));
+        mTimezoneInfoText.setText(String.format("%s • %s", tzId, tzName));
+
+        // Timezone Warning Logic
+        String localTzId = null;
+        if (isOverride) {
+            // Guessed for manual city
+            localTzId = NamazTimezoneUtils.guessTimezone(cityName);
+        } else if (mode == NamazLocationManager.LocationMode.GPS) {
+            // Local is system default for GPS mode
+            localTzId = TimeZone.getDefault().getID();
+        }
+
+        boolean showWarning = false;
+        if (localTzId != null) {
+            // Compare guessed/system local with current viewing timezone
+            showWarning = !tzId.equals(localTzId);
+        } else if (isOverride) {
+            // If we couldn't even guess a timezone for a manual city, show warning as it's unreliable
+            showWarning = true;
+        }
+
+        mTimezoneWarningText.setVisibility(showWarning ? View.VISIBLE : View.GONE);
     }
 
     private void updateCountdown() {

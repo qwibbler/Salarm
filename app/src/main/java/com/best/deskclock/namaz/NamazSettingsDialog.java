@@ -61,7 +61,10 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
                     .putString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE, String.valueOf(lon))
                     .apply();
 
-            String detectedTz = autoDetectTimezone(prefs, name, country, countryCode);
+            String detectedTz = NamazTimezoneUtils.guessTimezone(name);
+            if (detectedTz != null) {
+                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, detectedTz).apply();
+            }
 
             if (mTimezonePicker != null && detectedTz != null) {
                 mTimezonePicker.setText(detectedTz, false);
@@ -135,46 +138,5 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
             name = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Current Location");
         }
         summary.setText("Currently viewing: " + name);
-    }
-
-    private String autoDetectTimezone(SharedPreferences prefs, String cityName, String countryName, String countryCode) {
-        if (cityName == null) return null;
-
-        String[] ids = TimeZone.getAvailableIDs();
-        String cityPart = cityName.split(",")[0].trim().toLowerCase(Locale.getDefault());
-        if (cityPart.isEmpty()) return null;
-        String cityUnderscore = cityPart.replace(" ", "_");
-        String countryLower = countryName != null ? countryName.toLowerCase(Locale.getDefault()) : "";
-        String countryUnderscore = countryLower.replace(" ", "_");
-
-        // 1. Precise match: ID ends with /City or /City_Name
-        for (String id : ids) {
-            String idLower = id.toLowerCase(Locale.getDefault());
-            if (idLower.endsWith("/" + cityPart) || idLower.endsWith("/" + cityUnderscore)) {
-                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, id).apply();
-                return id;
-            }
-        }
-
-        // 2. Fuzzy match: ID contains city name
-        for (String id : ids) {
-            if (id.toLowerCase(Locale.getDefault()).contains(cityUnderscore)) {
-                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, id).apply();
-                return id;
-            }
-        }
-
-        // 3. Country match
-        if (!countryLower.isEmpty()) {
-            for (String id : ids) {
-                String idLower = id.toLowerCase(Locale.getDefault());
-                if (idLower.contains(countryLower) || idLower.contains(countryUnderscore)) {
-                    prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, id).apply();
-                    return id;
-                }
-            }
-        }
-
-        return null;
     }
 }

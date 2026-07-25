@@ -1537,6 +1537,7 @@
     <!-- Namaz Times Tab -->
     <string name="menu_namaz">Namaz Times</string>
     <string name="namaz_countdown_format">%1$s To %2$s</string>
+    <string name="namaz_timezone_warning">These are not the local times for this location.</string>
 
     <!-- Namaz Widgets -->
     <string name="namaz_widget_events_category_title">Events</string>

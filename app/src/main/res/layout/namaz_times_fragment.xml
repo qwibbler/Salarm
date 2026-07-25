@@ -84,6 +84,24 @@
         android:layout_weight="1"
         android:clipToPadding="false" />
 
+    <TextView
+        android:id="@+id/namaz_timezone_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorErrorContainer"
+        android:textColor="?attr/colorOnErrorContainer"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:drawableStartCompat="@drawable/ic_error"
+        android:drawablePadding="8dp"
+        app:drawableTint="?attr/colorOnErrorContainer"
+        android:gravity="center_vertical"
+        android:text="@string/namaz_timezone_warning"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -106,16 +124,33 @@
             android:src="@drawable/ic_tab_namaz_static"
             app:tint="?attr/colorPrimary" />
 
-        <TextView
-            android:id="@+id/location_info_text"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:textAppearance="?attr/textAppearanceLabelSmall"
-            tools:text="Casablanca (GPS) • GMT+01:00" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/location_info_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textStyle="bold"
+                tools:text="Casablanca (GPS)" />
+
+            <TextView
+                android:id="@+id/timezone_info_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:alpha="0.7"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                tools:text="Africa/Casablanca • GMT+01:00" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/namaz_settings_button"
