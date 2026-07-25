@@ -170,14 +170,7 @@ public class RelationalAlarmSyncManager {
 
         try {
             NamazDatabase db = NamazDatabase.getDatabase(context);
-            List<RelationalRule> rules = db.relationalRuleDao().getAll();
-            RelationalRule targetRule = null;
-            for (RelationalRule r : rules) {
-                if (r.id == alarm.relationalRuleId) {
-                    targetRule = r;
-                    break;
-                }
-            }
+            RelationalRule targetRule = db.relationalRuleDao().getById(alarm.relationalRuleId);
 
             if (targetRule != null) {
                 recalculateNextInstanceInternal(context, alarm, targetRule, skipTime);
@@ -189,6 +182,9 @@ public class RelationalAlarmSyncManager {
 
     private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime) {
         ContentResolver cr = context.getContentResolver();
+        final SharedPreferences prefs = getDefaultSharedPreferences(context);
+        final boolean wasStyledDaysEnabled = alarm.isRepeatDayStyleEnabled(prefs);
+
         double[] coords = getCoordinates(context);
         CalculationMethod method = getCalculationMethod(context);
 
@@ -289,10 +285,7 @@ public class RelationalAlarmSyncManager {
 
         // 2. Update AOSP instances
         AlarmStateManager.deleteAllInstances(context, alarm.id);
-        AlarmInstance instance = new AlarmInstance(nextTrigger, alarm.id);
-        instance.mLabel = alarm.label;
-        instance.mRingtone = alarm.alert;
-        instance.mVibrate = alarm.vibrate;
+        AlarmInstance instance = alarm.createInstance(nextTrigger);
 
         if (result.autoSilenceSeconds() > 0) {
             instance.mAutoSilenceDuration = result.autoSilenceSeconds();
@@ -300,6 +293,10 @@ public class RelationalAlarmSyncManager {
 
         instance.addInstance(cr);
         AlarmStateManager.registerInstance(context, instance, true);
+
+        if (wasStyledDaysEnabled && skipTime != null) {
+            alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);
+        }
     }
 
     public static void recalculateAllActiveRules(Context context) {

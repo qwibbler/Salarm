@@ -580,17 +580,17 @@ public final class AlarmStateManager extends BroadcastReceiver {
             AppExecutors.getMainThread().post(() -> AlarmUtils.showDismissToast(context, alarm, instance));
         }
 
-        // Already pre-dismissed instances are only being re-registered. Their parent was
-        // rescheduled when the user originally dismissed them.
-        if (instance.mAlarmId != null && !alreadyPreDismissed) {
-            updateParentAlarm(context, instance);
-        }
-
         // When the alarm is dismissed from the notification and all days of the week are selected,
         // correctly display the next occurrence in the alarm item.
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         if (alarm != null && !alreadyPreDismissed && !alarm.isRepeatDayStyleEnabled(prefs)) {
             alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);
+        }
+
+        // Already pre-dismissed instances are only being re-registered. Their parent was
+        // rescheduled when the user originally dismissed them.
+        if (instance.mAlarmId != null && !alreadyPreDismissed) {
+            updateParentAlarm(context, instance);
         }
 
         cancelPowerOffAlarm(context, instance);

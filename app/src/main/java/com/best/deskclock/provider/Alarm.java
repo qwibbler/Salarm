@@ -851,8 +851,11 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     public AlarmInstance createInstanceAfter(Calendar time) {
-        Calendar nextInstanceTime = getNextAlarmTime(time);
-        AlarmInstance result = new AlarmInstance(nextInstanceTime, id);
+        return createInstance(getNextAlarmTime(time));
+    }
+
+    public AlarmInstance createInstance(Calendar time) {
+        AlarmInstance result = new AlarmInstance(time, id);
         result.mVibrate = vibrate;
         result.mVibrationPattern = vibrationPattern;
         result.mFlash = flash;
