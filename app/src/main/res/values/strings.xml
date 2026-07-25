@@ -1494,6 +1494,16 @@
     <string name="relational_alarm_later">Later</string>
     <string name="relational_alarm_than">Than</string>
 
+    <!-- Relational Alarm Description -->
+    <string name="namaz_rule_at">at</string>
+    <string name="namaz_rule_description_base">alarm %1$s %2$s</string>
+    <string name="namaz_rule_offset_before">%1$dm before</string>
+    <string name="namaz_rule_offset_after">%1$dm after</string>
+    <string name="namaz_rule_rounded">, rounded to the nearest %1$dm</string>
+    <string name="namaz_rule_no_later">, no later than %1$s %2$s</string>
+    <string name="namaz_rule_no_earlier">, no earlier than %1$s %2$s</string>
+    <string name="namaz_rule_autostop">, auto dismissed %1$s %2$s</string>
+
     <string-array name="relational_alarm_offset_type">
         <item>Before</item>
         <item>After</item>

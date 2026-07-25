@@ -97,6 +97,62 @@ public class RelationalRule {
         this.enabled = true;
     }
 
+    public String getRuleDescription(android.content.Context context) {
+        StringBuilder sb = new StringBuilder();
+
+        // Base: alarm [at / 5m after / 10m before] Fajr
+        String offsetPart = getOffsetPart(context, offsetMinutes);
+        String eventName = getEventName(context, anchorEvent);
+        sb.append(context.getString(com.best.deskclock.R.string.namaz_rule_description_base, offsetPart, eventName));
+
+        // Rounding: rounded to the nearest 5m
+        if (roundingIntervalMinutes > 0) {
+            sb.append(" (").append(context.getString(com.best.deskclock.R.string.namaz_rule_rounded, roundingIntervalMinutes)).append(")");
+        }
+
+        // Clip: no later than 15m before sunrise
+        if (clip != null) {
+            String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
+            String clipEventName = getEventName(context, clip.clipEvent);
+            int clipResId = clip.boundaryType == BoundaryType.MAX ? com.best.deskclock.R.string.namaz_rule_no_later : com.best.deskclock.R.string.namaz_rule_no_earlier;
+            sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
+        }
+
+        // Autostop: auto dismissed at sunrise
+        if (autostopEnabled && autostopAnchorEvent != null) {
+            String autostopOffsetPart = getOffsetPart(context, autostopOffsetMinutes);
+            String autostopEventName = getEventName(context, autostopAnchorEvent);
+            sb.append(context.getString(com.best.deskclock.R.string.namaz_rule_autostop, autostopOffsetPart, autostopEventName));
+        }
+
+        String description = sb.toString();
+        if (description.isEmpty()) return "";
+        return description.substring(0, 1).toUpperCase() + description.substring(1);
+    }
+
+    private String getOffsetPart(android.content.Context context, int offset) {
+        if (offset == 0) {
+            return context.getString(com.best.deskclock.R.string.namaz_rule_at);
+        } else if (offset > 0) {
+            return context.getString(com.best.deskclock.R.string.namaz_rule_offset_after, offset);
+        } else {
+            return context.getString(com.best.deskclock.R.string.namaz_rule_offset_before, Math.abs(offset));
+        }
+    }
+
+    public static String getEventName(android.content.Context context, AnchorEvent event) {
+        int resId = switch (event) {
+            case FAJR -> com.best.deskclock.R.string.fajr_label;
+            case SUNRISE -> com.best.deskclock.R.string.sunrise_label;
+            case DHUHR -> com.best.deskclock.R.string.dhuhr_label;
+            case ASR_SHAFI -> com.best.deskclock.R.string.asr_shafii_label;
+            case ASR_HANAFI -> com.best.deskclock.R.string.asr_hanafi_label;
+            case MAGHRIB -> com.best.deskclock.R.string.maghrib_label;
+            case ISHA -> com.best.deskclock.R.string.isha_label;
+        };
+        return context.getString(resId);
+    }
+
     /**
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */

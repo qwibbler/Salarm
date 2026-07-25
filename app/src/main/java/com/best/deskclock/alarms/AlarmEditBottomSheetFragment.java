@@ -45,6 +45,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.best.deskclock.DeskClock;
 import com.best.deskclock.R;
+import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
@@ -64,6 +65,9 @@ import com.best.deskclock.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.best.deskclock.dialogfragment.VibrationPatternDialogFragment;
 import com.best.deskclock.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.NamazDatabase;
+import com.best.deskclock.namaz.RelationalAlarmDialogFragment;
+import com.best.deskclock.namaz.RelationalRule;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.ringtone.RingtonePickerActivity;
@@ -111,6 +115,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     private DisplayMetrics mDisplayMetrics;
     private Alarm mAlarm;
     private Alarm mOriginalAlarm;
+    private RelationalRule mNamazRule;
     private AlarmUpdateHandler mAlarmUpdateHandler;
     private String mTag;
     private boolean mIsNewAlarm;
@@ -252,6 +257,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindDaysOfWeekButtons();
         bindSelectedDate();
         bindPauseAlarm();
+        bindNamazRule();
         bindLabel();
         bindRingtone();
         bindVibrator();
@@ -458,14 +464,15 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
     private void bindPauseAlarm() {
         boolean isRepeating = mAlarm.daysOfWeek.isRepeating();
+        boolean isNamazAlarm = mAlarm.relationalRuleId > 0;
 
-        mBinding.pauseAlarmLayout.setEnabled(isRepeating);
-        mBinding.pauseAlarm.setEnabled(isRepeating);
+        mBinding.pauseAlarmLayout.setEnabled(isRepeating || isNamazAlarm);
+        mBinding.pauseAlarm.setEnabled(isRepeating || isNamazAlarm);
         mBinding.pauseAlarm.setTypeface(mGeneralTypeface);
 
         mAlarm.clearPauseIfExpired();
 
-        if (isRepeating && mAlarm.isPauseSet()) {
+        if ((isRepeating || isNamazAlarm) && mAlarm.isPauseSet()) {
             String dateRangeStr = AlarmUtils.formatPauseDateRange(requireContext(), mAlarm.pauseStartDate, mAlarm.pauseEndDate);
 
             mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_range, dateRangeStr));
@@ -478,7 +485,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.cancelPauseAlarm.setVisibility(View.GONE);
         }
 
-        if (isRepeating) {
+        if (isRepeating || isNamazAlarm) {
             mBinding.pauseAlarmLayout.setOnClickListener(v -> DatePickerDialogFragment.showMaterialDateRangePicker(
                 getChildFragmentManager(),
                 mPrefs,
@@ -498,6 +505,33 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         } else {
             mBinding.pauseAlarmLayout.setOnClickListener(null);
         }
+    }
+
+    private void bindNamazRule() {
+        if (mAlarm.relationalRuleId <= 0) {
+            mBinding.namazRuleDescription.setVisibility(View.GONE);
+            return;
+        }
+
+        AppExecutors.getDiskIO().execute(() -> {
+            mNamazRule = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getById(mAlarm.relationalRuleId);
+            if (mNamazRule != null) {
+                AppExecutors.getMainThread().post(() -> {
+                    mBinding.namazRuleDescription.setVisibility(View.VISIBLE);
+                    mBinding.namazRuleDescription.setTypeface(mGeneralTypeface);
+                    mBinding.namazRuleDescription.setText(mNamazRule.getRuleDescription(requireContext()));
+                    mBinding.namazRuleDescription.setOnClickListener(v ->
+                        RelationalAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
+                    );
+                    updateAllGroupBackgrounds();
+                });
+            } else {
+                AppExecutors.getMainThread().post(() -> {
+                    mBinding.namazRuleDescription.setVisibility(View.GONE);
+                    updateAllGroupBackgrounds();
+                });
+            }
+        });
     }
 
     private void bindLabel() {
@@ -943,6 +977,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 mAlarm.alarmVolume = bundle.getInt(AlarmVolumeDialogFragment.RESULT_VOLUME_VALUE);
                 bindAlarmVolume();
             });
+
+        childFragmentManager.setFragmentResultListener(RelationalAlarmDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> bindNamazRule());
     }
 
     /**
@@ -1200,24 +1237,16 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void updateAllGroupBackgrounds() {
+        if (mBinding == null) return;
+
         applyExpressiveBackgroundsToGroup(mBinding.scheduleAlarmLayout, mBinding.pauseAlarmLayout);
+
+        applyExpressiveBackgroundsToGroup(mBinding.namazRuleDescription);
 
         applyExpressiveBackgroundsToGroup(mBinding.editLabel, mBinding.chooseRingtone);
 
-        applyExpressiveBackgroundsToGroup(
-            mBinding.vibrateOnOff,
-            mBinding.vibrationPatternLayout,
-            mBinding.flashOnOff,
-            mBinding.deleteOccasionalAlarmAfterUse
-        );
-
-        applyExpressiveBackgroundsToGroup(
-            mBinding.autoSilenceDurationLayout,
-            mBinding.snoozeDurationLayout,
-            mBinding.missedAlarmRepeatLimitLayout,
-            mBinding.crescendoDurationLayout,
-            mBinding.alarmVolumeLayout
-        );
+        updateSecondGroup();
+        updateThirdGroup();
     }
 
     private void nullifyClickListeners(View... views) {

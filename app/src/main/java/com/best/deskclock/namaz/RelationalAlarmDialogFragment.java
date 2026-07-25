@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
+import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.databinding.DialogAddRelationalAlarmBinding;
 import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.uicomponents.CustomDialog;
@@ -28,6 +29,8 @@ import java.util.List;
 public class RelationalAlarmDialogFragment extends DialogFragment {
 
     public static final String TAG = "RelationalAlarmDialogFragment";
+    public static final String REQUEST_KEY = "relational_rule_saved";
+    private static final String ARG_RULE_ID = "arg_rule_id";
 
     private static final String KEY_PRIMARY_VALUE = "primary_value";
     private static final String KEY_PRIMARY_OFFSET_IDX = "primary_offset_idx";
@@ -65,8 +68,20 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         return new RelationalAlarmDialogFragment();
     }
 
+    public static RelationalAlarmDialogFragment newInstance(long ruleId) {
+        RelationalAlarmDialogFragment fragment = new RelationalAlarmDialogFragment();
+        Bundle args = new Bundle();
+        args.putLong(ARG_RULE_ID, ruleId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public static void show(FragmentManager manager) {
         Utils.showDialogFragment(manager, newInstance(), TAG);
+    }
+
+    public static void show(FragmentManager manager, long ruleId) {
+        Utils.showDialogFragment(manager, newInstance(ruleId), TAG);
     }
 
     @NonNull
@@ -84,7 +99,18 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
         } else {
-            setInitialDefaults();
+            Bundle args = getArguments();
+            if (args != null && args.containsKey(ARG_RULE_ID)) {
+                long ruleId = args.getLong(ARG_RULE_ID);
+                AppExecutors.getDiskIO().execute(() -> {
+                    RelationalRule rule = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getById(ruleId);
+                    if (rule != null) {
+                        AppExecutors.getMainThread().post(() -> populateUiFromRule(rule));
+                    }
+                });
+            } else {
+                setInitialDefaults();
+            }
         }
 
         return CustomDialog.create(
@@ -287,23 +313,95 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         return textView != null && textView.getText() != null ? textView.getText().toString() : "";
     }
 
+    private void populateUiFromRule(RelationalRule rule) {
+        if (mBinding == null) return;
+
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) mBinding.primaryEvent.getAdapter();
+        String primaryEventName = getEventNameForRule(rule.anchorEvent);
+        int primaryPos = adapter.getPosition(primaryEventName);
+        if (primaryPos >= 0) {
+            mBinding.primaryEvent.setText(adapter.getItem(primaryPos), false);
+        }
+
+        mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(rule.offsetMinutes)));
+        mPrimaryOffsetIdx = rule.offsetMinutes >= 0 ? 1 : 0;
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        mPrimaryRoundIdx = rule.roundingDirection != null ? rule.roundingDirection.ordinal() : 0;
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        mBinding.primaryRoundValue.setText(String.valueOf(rule.roundingIntervalMinutes));
+
+        if (rule.clip != null) {
+            mBinding.safetyEnabledCheckbox.setChecked(true);
+            mSafetyBoundIdx = rule.clip.boundaryType == RelationalRule.BoundaryType.MAX ? 0 : 1;
+            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+
+            String safetyEventName = getEventNameForRule(rule.clip.clipEvent);
+            int safetyPos = adapter.getPosition(safetyEventName);
+            if (safetyPos >= 0) {
+                mBinding.safetyEvent.setText(adapter.getItem(safetyPos), false);
+            }
+
+            mBinding.safetyOffsetValue.setText(String.valueOf(Math.abs(rule.clip.clipOffsetMinutes)));
+            mSafetyOffsetIdx = rule.clip.clipOffsetMinutes >= 0 ? 1 : 0;
+            updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+            mSafetyRoundIdx = rule.clip.clipRoundingDirection != null ? rule.clip.clipRoundingDirection.ordinal() : 0;
+            updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+            mBinding.safetyRoundValue.setText(String.valueOf(rule.clip.clipRoundingIntervalMinutes));
+        } else {
+            mBinding.safetyEnabledCheckbox.setChecked(false);
+        }
+
+        if (rule.autostopEnabled) {
+            mBinding.autostopEnabledCheckbox.setChecked(true);
+            if (rule.autostopAnchorEvent != null) {
+                String autostopEventName = getEventNameForRule(rule.autostopAnchorEvent);
+                int autostopPos = adapter.getPosition(autostopEventName);
+                if (autostopPos >= 0) {
+                    mBinding.autostopEvent.setText(adapter.getItem(autostopPos), false);
+                }
+            }
+            mBinding.autostopOffsetValue.setText(String.valueOf(Math.abs(rule.autostopOffsetMinutes)));
+            mAutostopOffsetIdx = rule.autostopOffsetMinutes >= 0 ? 1 : 0;
+            updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        } else {
+            mBinding.autostopEnabledCheckbox.setChecked(false);
+        }
+
+        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
+    }
+
+    private String getEventNameForRule(RelationalRule.AnchorEvent event) {
+        SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        if (!showBothAsr && (event == RelationalRule.AnchorEvent.ASR_HANAFI || event == RelationalRule.AnchorEvent.ASR_SHAFI)) {
+            return getString(R.string.asr_label);
+        }
+        String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
+        return originalEvents[event.ordinal()];
+    }
+
     private void saveRelationalAlarm() {
         if (mBinding == null) return;
 
         try {
             RelationalRule rule = new RelationalRule();
+            Bundle args = getArguments();
+            if (args != null && args.containsKey(ARG_RULE_ID)) {
+                rule.id = args.getLong(ARG_RULE_ID);
+            }
             rule.enabled = true;
 
             // Map UI to Rule
             int primaryEventIdx = getPrayerEventIndex(getText(mBinding.primaryEvent));
             rule.anchorEvent = RelationalRule.AnchorEvent.values()[primaryEventIdx];
 
-            int primaryOffset = Integer.parseInt(getText(mBinding.primaryOffsetValue));
+            int primaryOffset = parseMinutes(getText(mBinding.primaryOffsetValue));
             if (mPrimaryOffsetIdx == 0) primaryOffset *= -1; // Before
             rule.offsetMinutes = primaryOffset;
 
             rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
-            rule.roundingIntervalMinutes = Integer.parseInt(getText(mBinding.primaryRoundValue));
+            rule.roundingIntervalMinutes = parseMinutes(getText(mBinding.primaryRoundValue));
 
             if (mBinding.safetyEnabledCheckbox.isChecked()) {
                 RelationalRule.Clip clip = new RelationalRule.Clip();
@@ -312,12 +410,12 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 int safetyEventIdx = getPrayerEventIndex(getText(mBinding.safetyEvent));
                 clip.clipEvent = RelationalRule.AnchorEvent.values()[safetyEventIdx];
 
-                int safetyOffset = Integer.parseInt(getText(mBinding.safetyOffsetValue));
+                int safetyOffset = parseMinutes(getText(mBinding.safetyOffsetValue));
                 if (mSafetyOffsetIdx == 0) safetyOffset *= -1; // Before
                 clip.clipOffsetMinutes = safetyOffset;
 
                 clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
-                clip.clipRoundingIntervalMinutes = Integer.parseInt(getText(mBinding.safetyRoundValue));
+                clip.clipRoundingIntervalMinutes = parseMinutes(getText(mBinding.safetyRoundValue));
                 rule.clip = clip;
             }
 
@@ -326,7 +424,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 int autostopEventIdx = getPrayerEventIndex(getText(mBinding.autostopEvent));
                 rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[autostopEventIdx];
 
-                int autostopOffset = Integer.parseInt(getText(mBinding.autostopOffsetValue));
+                int autostopOffset = parseMinutes(getText(mBinding.autostopOffsetValue));
                 if (mAutostopOffsetIdx == 0) autostopOffset *= -1; // Before
                 rule.autostopOffsetMinutes = autostopOffset;
             }
@@ -340,6 +438,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             }
 
             RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, false, defaultRingtone);
+            getParentFragmentManager().setFragmentResult(REQUEST_KEY, new Bundle());
             dismiss();
 
         } catch (RelationalRule.InvalidRuleException e) {
@@ -352,6 +451,15 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
                 if (saveButton != null) saveButton.setEnabled(true);
             }
+        }
+    }
+
+    private int parseMinutes(String text) {
+        if (text == null || text.trim().isEmpty()) return 0;
+        try {
+            return Integer.parseInt(text.trim());
+        } catch (NumberFormatException e) {
+            return 0;
         }
     }
 
