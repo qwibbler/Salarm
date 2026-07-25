@@ -107,7 +107,7 @@ public class RelationalRule {
 
         // Rounding: rounded to the nearest 5m
         if (roundingIntervalMinutes > 0) {
-            sb.append(" (").append(context.getString(com.best.deskclock.R.string.namaz_rule_rounded, roundingIntervalMinutes)).append(")");
+            sb.append(context.getString(com.best.deskclock.R.string.namaz_rule_rounded, roundingIntervalMinutes));
         }
 
         // Clip: no later than 15m before sunrise

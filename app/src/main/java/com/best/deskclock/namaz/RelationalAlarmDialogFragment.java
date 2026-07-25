@@ -99,6 +99,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
         } else {
+            setInitialDefaults();
+
             Bundle args = getArguments();
             if (args != null && args.containsKey(ARG_RULE_ID)) {
                 long ruleId = args.getLong(ARG_RULE_ID);
@@ -108,8 +110,6 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                         AppExecutors.getMainThread().post(() -> populateUiFromRule(rule));
                     }
                 });
-            } else {
-                setInitialDefaults();
             }
         }
 
