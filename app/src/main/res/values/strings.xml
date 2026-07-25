@@ -8,7 +8,7 @@
     tools:ignore="MissingTranslation">
     <!-- Label shown on launcher icon -->
     <!-- Label for the application displayed on-screen when this application must be represented to the user. -->
-    <string name="app_label">Clock</string>
+    <string name="app_label">Salarm</string>
     <!-- Default label to display for an alarm -->
     <string name="default_label">Alarm</string>
     <!-- Label title in the alarm editing panel to schedule alarm -->
@@ -96,7 +96,7 @@
     <!-- Label shown when user has set a non-repeating alarm for a specific day -->
     <string name="alarm_scheduled_for">Scheduled for %s</string>
     <!-- Button label on the alarm notification panel: Dismiss -->
-    <string name="alarm_alert_dismiss_text">Dismiss Next Alarm</string>
+    <string name="alarm_alert_dismiss_text">Dismiss Next</string>
     <!-- Button label on the alarm notification panel: Dismiss & Delete -->
     <string name="alarm_alert_dismiss_and_delete_text">Dismiss &amp; Delete</string>
     <!-- Button label on the alarm editing panel: Dismiss & Delete -->
