@@ -516,6 +516,17 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         AppExecutors.getDiskIO().execute(() -> {
             mNamazRule = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getById(mAlarm.relationalRuleId);
             if (mNamazRule != null) {
+                // Reload alarm to get potentially updated time and silence duration
+                Alarm reloadedAlarm = Alarm.getAlarm(requireContext().getContentResolver(), mAlarm.id);
+                if (reloadedAlarm != null) {
+                    mAlarm.hour = reloadedAlarm.hour;
+                    mAlarm.minutes = reloadedAlarm.minutes;
+                    mAlarm.year = reloadedAlarm.year;
+                    mAlarm.month = reloadedAlarm.month;
+                    mAlarm.day = reloadedAlarm.day;
+                    mAlarm.autoSilenceDuration = reloadedAlarm.autoSilenceDuration;
+                }
+
                 AppExecutors.getMainThread().post(() -> {
                     mBinding.namazRuleDescription.setVisibility(View.VISIBLE);
                     mBinding.namazRuleDescription.setTypeface(mGeneralTypeface);
@@ -523,6 +534,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     mBinding.namazRuleDescription.setOnClickListener(v ->
                         RelationalAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
                     );
+
+                    bindClock();
+                    bindAutoSilenceValue();
                     updateAllGroupBackgrounds();
                 });
             } else {
@@ -695,14 +709,22 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding.autoSilenceDurationLayout.setVisibility(VISIBLE);
 
-        View.OnClickListener openAutoSilenceDurationFragment = v -> {
-            Events.sendAlarmEvent(R.string.action_set_auto_silence_duration, R.string.label_deskclock);
+        boolean isAutostopEnabled = mNamazRule != null && mNamazRule.autostopEnabled;
+        mBinding.autoSilenceDurationLayout.setEnabled(!isAutostopEnabled);
+        mBinding.autoSilenceDurationLayout.setAlpha(isAutostopEnabled ? 0.4f : 1.0f);
 
-            final AutoSilenceDurationDialogFragment fragment = AutoSilenceDurationDialogFragment.newInstance(mAlarm.autoSilenceDuration);
-            AutoSilenceDurationDialogFragment.show(getChildFragmentManager(), fragment);
-        };
+        if (isAutostopEnabled) {
+            mBinding.autoSilenceDurationLayout.setOnClickListener(null);
+        } else {
+            View.OnClickListener openAutoSilenceDurationFragment = v -> {
+                Events.sendAlarmEvent(R.string.action_set_auto_silence_duration, R.string.label_deskclock);
 
-        mBinding.autoSilenceDurationLayout.setOnClickListener(openAutoSilenceDurationFragment);
+                final AutoSilenceDurationDialogFragment fragment = AutoSilenceDurationDialogFragment.newInstance(mAlarm.autoSilenceDuration);
+                AutoSilenceDurationDialogFragment.show(getChildFragmentManager(), fragment);
+            };
+
+            mBinding.autoSilenceDurationLayout.setOnClickListener(openAutoSilenceDurationFragment);
+        }
     }
 
     private void bindSnoozeDurationValue() {

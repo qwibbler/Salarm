@@ -280,6 +280,11 @@ public class RelationalAlarmSyncManager {
             alarm.month = nextTrigger.get(Calendar.MONTH);
             alarm.day = nextTrigger.get(Calendar.DAY_OF_MONTH);
         }
+
+        if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
+            alarm.autoSilenceDuration = result.autoSilenceSeconds();
+        }
+
         alarm.updateAlarm(cr);
 
         // 2. Update AOSP instances
