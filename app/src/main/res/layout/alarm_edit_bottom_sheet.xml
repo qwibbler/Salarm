@@ -147,7 +147,7 @@
                 android:minHeight="48dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="10dp"
-                android:drawableStart="@drawable/ic_tab_namaz_static"
+                android:drawableStart="@drawable/ic_namaz_alarm"
                 android:drawablePadding="10dp"
                 android:drawableTint="?attr/colorOnSurfaceVariant"
                 android:gravity="center_vertical"

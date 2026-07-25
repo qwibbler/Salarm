@@ -61,7 +61,7 @@
         android:layout="@layout/settings_preference_layout"
         android:title="@string/namaz_settings_title"
         android:summary="Prayer times and location"
-        android:icon="@drawable/ic_alarm_add"
+        android:icon="@drawable/ic_namaz_alarm"
         app:singleLineTitle="false" />
 
     <Preference
