@@ -581,7 +581,7 @@ public final class AlarmFragment extends DeskClockFragment
         } else {
             if (mSideButtonsVisible) {
                 fab.setVisibility(VISIBLE);
-                fab.setImageResource(R.drawable.ic_namaz_masjid_with_hands);
+                fab.setImageResource(R.drawable.ic_namaz_alarm);
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, getString(R.string.dialog_add_relational_alarm_title), true);
                     return true;

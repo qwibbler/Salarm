@@ -329,7 +329,7 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/display_dismiss_button_title"
             android:summary="@string/display_dismiss_button_summary"
-            android:defaultValue="false"
+            android:defaultValue="true"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
