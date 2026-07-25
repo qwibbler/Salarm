@@ -190,6 +190,10 @@ public final class AlarmTimeClickHandler {
     }
 
     public void onClockClicked(Alarm alarm) {
+        if (alarm.relationalRuleId > 0) {
+            return;
+        }
+
         mSelectedAlarm = alarm;
 
         if (SettingsDAO.getMaterialTimePickerStyle(mPrefs).equals(SPINNER_TIME_PICKER_STYLE)) {
@@ -200,6 +204,10 @@ public final class AlarmTimeClickHandler {
     }
 
     public void onClockLongClicked(Alarm alarm) {
+        if (alarm.relationalRuleId > 0) {
+            return;
+        }
+
         mSelectedAlarm = alarm;
         showAlarmDelayPickerDialog();
     }

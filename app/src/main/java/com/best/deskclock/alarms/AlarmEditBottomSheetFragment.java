@@ -335,30 +335,37 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindClock() {
-        mBinding.digitalClock.setBackground(ThemeUtils.pillRippleDrawable(requireContext(), Color.TRANSPARENT));
         mBinding.digitalClock.setTime(mAlarm.hour, mAlarm.minutes);
         mBinding.digitalClock.setTypeface(mAlarmBoldTypeface);
 
-        mBinding.digitalClock.setOnClickListener(v -> {
-            Events.sendAlarmEvent(R.string.action_set_time, R.string.label_deskclock);
+        if (mAlarm.relationalRuleId > 0) {
+            mBinding.digitalClock.setOnClickListener(null);
+            mBinding.digitalClock.setOnLongClickListener(null);
+            mBinding.digitalClock.setClickable(false);
+            mBinding.digitalClock.setBackground(null);
+        } else {
+            mBinding.digitalClock.setBackground(ThemeUtils.pillRippleDrawable(requireContext(), Color.TRANSPARENT));
+            mBinding.digitalClock.setOnClickListener(v -> {
+                Events.sendAlarmEvent(R.string.action_set_time, R.string.label_deskclock);
 
-            if (SettingsDAO.getMaterialTimePickerStyle(mPrefs).equals(SPINNER_TIME_PICKER_STYLE)) {
-                final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(mAlarm.hour, mAlarm.minutes);
-                SpinnerTimePickerDialogFragment.show(getChildFragmentManager(), fragment);
-            } else {
-                MaterialTimePickerDialogFragment.show(
-                    requireContext(), getChildFragmentManager(), TAG, mAlarm.hour, mAlarm.minutes, mPrefs);
-            }
-        });
+                if (SettingsDAO.getMaterialTimePickerStyle(mPrefs).equals(SPINNER_TIME_PICKER_STYLE)) {
+                    final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(mAlarm.hour, mAlarm.minutes);
+                    SpinnerTimePickerDialogFragment.show(getChildFragmentManager(), fragment);
+                } else {
+                    MaterialTimePickerDialogFragment.show(
+                        requireContext(), getChildFragmentManager(), TAG, mAlarm.hour, mAlarm.minutes, mPrefs);
+                }
+            });
 
-        mBinding.digitalClock.setOnLongClickListener(v -> {
-            Events.sendAlarmEvent(R.string.action_set_delay, R.string.label_deskclock);
+            mBinding.digitalClock.setOnLongClickListener(v -> {
+                Events.sendAlarmEvent(R.string.action_set_delay, R.string.label_deskclock);
 
-            final AlarmDelayPickerDialogFragment fragment = AlarmDelayPickerDialogFragment.newInstance(0, 0);
-            AlarmDelayPickerDialogFragment.show(getChildFragmentManager(), fragment);
+                final AlarmDelayPickerDialogFragment fragment = AlarmDelayPickerDialogFragment.newInstance(0, 0);
+                AlarmDelayPickerDialogFragment.show(getChildFragmentManager(), fragment);
 
-            return true;
-        });
+                return true;
+            });
+        }
     }
 
     private void bindDaysOfWeekButtons() {

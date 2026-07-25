@@ -81,13 +81,6 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
             mItemHolder.getAlarmTimeClickHandler().displayBottomSheetDialog(mItemHolder.item, false)
         );
 
-        // Clock handler
-        mBinding.digitalClock.setOnClickListener(v -> mItemHolder.getAlarmTimeClickHandler().onClockClicked(mItemHolder.item));
-        mBinding.digitalClock.setOnLongClickListener(v -> {
-            mItemHolder.getAlarmTimeClickHandler().onClockLongClicked(mItemHolder.item);
-            return true;
-        });
-
         // Upcoming date font
         mBinding.upcomingDate.setTypeface(mGeneralTypeface);
 
@@ -205,6 +198,24 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
     private void bindClock(Alarm alarm) {
         mBinding.digitalClock.refreshFormat();
         mBinding.digitalClock.setTime(alarm.hour, alarm.minutes);
+
+        if (alarm.relationalRuleId > 0) {
+            mBinding.digitalClock.setOnClickListener(null);
+            mBinding.digitalClock.setOnLongClickListener(null);
+            mBinding.digitalClock.setClickable(false);
+            mBinding.digitalClock.setBackground(null);
+        } else {
+            mBinding.digitalClock.setOnClickListener(v ->
+                mItemHolder.getAlarmTimeClickHandler().onClockClicked(mItemHolder.item));
+            mBinding.digitalClock.setOnLongClickListener(v -> {
+                mItemHolder.getAlarmTimeClickHandler().onClockLongClicked(mItemHolder.item);
+                return true;
+            });
+            mBinding.digitalClock.setClickable(true);
+            TypedValue outValue = new TypedValue();
+            itemView.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+            mBinding.digitalClock.setBackgroundResource(outValue.resourceId);
+        }
     }
 
     private void bindRepeatText(Context context, Alarm alarm, AlarmInstance alarmInstance) {
