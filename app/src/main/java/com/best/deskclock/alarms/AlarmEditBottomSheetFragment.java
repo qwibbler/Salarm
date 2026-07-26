@@ -516,15 +516,18 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
     private void bindNamazRule() {
         if (mAlarm.relationalRuleId <= 0) {
-            mBinding.namazRuleDescription.setVisibility(View.GONE);
+            if (mBinding != null) {
+                mBinding.namazRuleDescription.setVisibility(View.GONE);
+            }
             return;
         }
 
+        final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            mNamazRule = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getById(mAlarm.relationalRuleId);
+            mNamazRule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
             if (mNamazRule != null) {
                 // Reload alarm to get potentially updated time and silence duration
-                Alarm reloadedAlarm = Alarm.getAlarm(requireContext().getContentResolver(), mAlarm.id);
+                Alarm reloadedAlarm = Alarm.getAlarm(appContext.getContentResolver(), mAlarm.id);
                 if (reloadedAlarm != null) {
                     mAlarm.hour = reloadedAlarm.hour;
                     mAlarm.minutes = reloadedAlarm.minutes;
@@ -535,6 +538,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 }
 
                 AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded() || mBinding == null) return;
                     mBinding.namazRuleDescription.setVisibility(View.VISIBLE);
                     mBinding.namazRuleDescription.setTypeface(mGeneralTypeface);
                     mBinding.namazRuleDescription.setText(mNamazRule.getRuleDescription(requireContext()));
@@ -548,6 +552,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 });
             } else {
                 AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded() || mBinding == null) return;
                     mBinding.namazRuleDescription.setVisibility(View.GONE);
                     updateAllGroupBackgrounds();
                 });

@@ -80,9 +80,10 @@ public class RelationalAlarmSyncManager {
         RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
 
         if (result.conflict()) {
+            String timeStr = result.fallbackTime() > 0 ? AlarmUtils.getFormattedTime(context, result.fallbackTime()) : "unknown time";
             throw new RelationalRule.InvalidRuleException(
                 "Your alarm has a rule conflict. If you choose to continue, the alarm will default to "
-                + AlarmUtils.getFormattedTime(context, result.fallbackTime()) + ". Please Confirm.",
+                + timeStr + ". Please Confirm.",
                 rule.anchorEvent.name(),
                 result.fallbackTime()
             );
@@ -248,6 +249,12 @@ public class RelationalAlarmSyncManager {
 
         if (result.time() <= 0) {
             LogUtils.w("Could not calculate prayer time for rule " + rule.id);
+            // Disable native alarm if we can't calculate a future time to prevent stuck instances
+            AppExecutors.getDiskIO().execute(() -> {
+                alarm.enabled = false;
+                alarm.updateAlarm(context.getContentResolver());
+                AlarmStateManager.deleteAllInstances(context, alarm.id);
+            });
             return;
         }
 

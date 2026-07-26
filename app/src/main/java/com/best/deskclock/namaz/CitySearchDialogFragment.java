@@ -171,13 +171,13 @@ public class CitySearchDialogFragment extends DialogFragment {
         if (context == null) return;
         final Context appContext = context.getApplicationContext();
 
-        mProgressBar.setVisibility(View.VISIBLE);
+        if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
             Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
             try {
                 List<Address> addresses = geocoder.getFromLocationName(query, 10);
                 AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded()) return;
+                    if (!isAdded() || mAdapter == null || mProgressBar == null) return;
                     mProgressBar.setVisibility(View.GONE);
                     if (addresses != null) {
                         for (Address addr : addresses) {
@@ -213,7 +213,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                 });
             } catch (IOException e) {
                 AppExecutors.getMainThread().post(() -> {
-                    if (isAdded()) mProgressBar.setVisibility(View.GONE);
+                    if (isAdded() && mProgressBar != null) mProgressBar.setVisibility(View.GONE);
                 });
             }
         });
@@ -238,7 +238,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         }
         final Context appContext = context.getApplicationContext();
 
-        mProgressBar.setVisibility(View.VISIBLE);
+        if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
             Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
             try {
@@ -248,7 +248,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                         mIsSelecting = false;
                         return;
                     }
-                    mProgressBar.setVisibility(View.GONE);
+                    if (mProgressBar != null) mProgressBar.setVisibility(View.GONE);
                     if (addresses != null && !addresses.isEmpty()) {
                         Address addr = addresses.get(0);
                         city.latitude = addr.getLatitude();
@@ -265,13 +265,17 @@ public class CitySearchDialogFragment extends DialogFragment {
             } catch (IOException e) {
                 AppExecutors.getMainThread().post(() -> {
                     mIsSelecting = false;
-                    if (isAdded()) mProgressBar.setVisibility(View.GONE);
+                    if (isAdded() && mProgressBar != null) mProgressBar.setVisibility(View.GONE);
                 });
             }
         });
     }
 
     private void saveAndDismiss(CitySearchResult city) {
+        if (!isAdded()) {
+            mIsSelecting = false;
+            return;
+        }
         final Context context = getContext();
         if (context == null) {
             mIsSelecting = false;

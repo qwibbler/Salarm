@@ -1,6 +1,7 @@
 package com.best.deskclock.namaz;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -105,10 +106,15 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             Bundle args = getArguments();
             if (args != null && args.containsKey(ARG_RULE_ID)) {
                 long ruleId = args.getLong(ARG_RULE_ID);
+                final Context appContext = requireContext().getApplicationContext();
                 AppExecutors.getDiskIO().execute(() -> {
-                    RelationalRule rule = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getById(ruleId);
+                    RelationalRule rule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(ruleId);
                     if (rule != null) {
-                        AppExecutors.getMainThread().post(() -> populateUiFromRule(rule));
+                        AppExecutors.getMainThread().post(() -> {
+                            if (isAdded() && mBinding != null) {
+                                populateUiFromRule(rule);
+                            }
+                        });
                     }
                 });
             }
@@ -212,7 +218,9 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
 
-        mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
+        if (mBinding.primaryEvent.getAdapter().getCount() > 0) {
+            mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
+        }
         updateAutostopEvent(0);
         mBinding.safetyEvent.setText(mBinding.safetyEvent.getAdapter().getItem(1).toString(), false);
     }
@@ -383,7 +391,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private void saveRelationalAlarm() {
-        if (mBinding == null) return;
+        if (mBinding == null || !isAdded()) return;
 
         try {
             RelationalRule rule = parseRuleFromUi();
@@ -427,8 +435,11 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private int getPrayerEventIndex(String eventName) {
+        if (eventName == null) return 0;
+        Context context = getContext();
+        if (context == null) return 0;
         if (getString(R.string.asr_label).equals(eventName)) {
-            Madhab madhab = NamazUtils.getMadhab(requireContext());
+            Madhab madhab = NamazUtils.getMadhab(context);
             return madhab == Madhab.HANAFI ? 4 : 3; // 4: ASR_HANAFI, 3: ASR_SHAFI
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);

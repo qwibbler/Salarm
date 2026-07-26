@@ -1,5 +1,6 @@
 package com.best.deskclock.namaz;
 
+import androidx.annotation.NonNull;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -156,11 +157,13 @@ public class RelationalRule {
     /**
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */
-    public static Date evaluateTime(RelationalRule rule, NamazCalculator.NamazTimes times, Date date) {
-        return new Date(evaluateTimeWithConflictCheck(rule, times).time);
+    public static Date evaluateTime(@NonNull RelationalRule rule, @NonNull NamazCalculator.NamazTimes times, Date date) {
+        EvaluationResult result = evaluateTimeWithConflictCheck(rule, times);
+        return result.time > 0 ? new Date(result.time) : null;
     }
 
-    public static EvaluationResult evaluateTimeWithConflictCheck(RelationalRule rule, NamazCalculator.NamazTimes times) {
+    @NonNull
+    public static EvaluationResult evaluateTimeWithConflictCheck(@NonNull RelationalRule rule, @NonNull NamazCalculator.NamazTimes times) {
         Date anchorTime = getEventTime(rule.anchorEvent, times);
         if (anchorTime == null) {
             // Cannot calculate time for this event

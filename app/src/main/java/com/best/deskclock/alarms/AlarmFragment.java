@@ -1015,9 +1015,10 @@ public final class AlarmFragment extends DeskClockFragment
         if (context == null) {
             return;
         }
+        final Context appContext = context.getApplicationContext();
 
         AppExecutors.getDiskIO().execute(() -> {
-            ContentResolver cr = context.getContentResolver();
+            ContentResolver cr = appContext.getContentResolver();
 
             for (int i = 0; i < currentItems.size(); i++) {
                 Alarm alarm = currentItems.get(i).item;
