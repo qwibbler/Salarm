@@ -7,12 +7,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.util.Objects;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -41,7 +41,6 @@ import java.util.TimeZone;
 public class NamazTimesFragment extends DeskClockFragment {
 
     private TextView mCountdownText;
-    private RecyclerView mRecyclerView;
     private NamazAdapter mAdapter;
     private TextView mSelectedDateText;
     private TextView mLocationInfoText;
@@ -72,10 +71,10 @@ public class NamazTimesFragment extends DeskClockFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.namaz_times_fragment, container, false);
         mCountdownText = view.findViewById(R.id.namaz_countdown);
-        mRecyclerView = view.findViewById(R.id.namaz_list);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerView recyclerView = view.findViewById(R.id.namaz_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new NamazAdapter();
-        mRecyclerView.setAdapter(mAdapter);
+        recyclerView.setAdapter(mAdapter);
 
         mSelectedDateText = view.findViewById(R.id.selected_date_text);
         mLocationInfoText = view.findViewById(R.id.location_info_text);
@@ -125,7 +124,7 @@ public class NamazTimesFragment extends DeskClockFragment {
 
     private void showDatePicker() {
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Select Date")
+                .setTitleText(R.string.date_picker_dialog_title)
                 .setSelection(mSelectedDate.getTimeInMillis())
                 .build();
         datePicker.addOnPositiveButtonClickListener(selection -> {
@@ -229,7 +228,7 @@ public class NamazTimesFragment extends DeskClockFragment {
             items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
             items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
         } else {
-            Date asrTime = madhab.equals("HANAFI") ? times.asrHanafi : times.asrShafi;
+            Date asrTime = "HANAFI".equals(madhab) ? times.asrHanafi : times.asrShafi;
             items.add(new PrayerItem(context.getString(R.string.asr_label), asrTime));
         }
 
@@ -248,19 +247,19 @@ public class NamazTimesFragment extends DeskClockFragment {
         Calendar today = Calendar.getInstance();
         String label;
         if (isSameDay(mSelectedDate, today)) {
-            label = "Today, " + formatDateLabel(mSelectedDate);
+            label = getString(R.string.salarm_today_prefix) + formatDateLabel(mSelectedDate);
         } else {
             Calendar yesterday = Calendar.getInstance();
             yesterday.add(Calendar.DAY_OF_YEAR, -1);
             if (isSameDay(mSelectedDate, yesterday)) {
-                label = "Yesterday, " + formatDateLabel(mSelectedDate);
+                label = getString(R.string.salarm_yesterday_prefix) + formatDateLabel(mSelectedDate);
             } else {
                 Calendar tomorrow = Calendar.getInstance();
                 tomorrow.add(Calendar.DAY_OF_YEAR, 1);
                 if (isSameDay(mSelectedDate, tomorrow)) {
-                    label = "Tomorrow, " + formatDateLabel(mSelectedDate);
+                    label = getString(R.string.salarm_tomorrow_prefix) + formatDateLabel(mSelectedDate);
                 } else {
-                    label = new SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(mSelectedDate.getTime());
+                    label = new SimpleDateFormat(getString(R.string.salarm_full_date_format), Locale.getDefault()).format(mSelectedDate.getTime());
                 }
             }
         }
@@ -268,7 +267,7 @@ public class NamazTimesFragment extends DeskClockFragment {
     }
 
     private String formatDateLabel(Calendar date) {
-        return new SimpleDateFormat("MMM d", Locale.getDefault()).format(date.getTime());
+        return new SimpleDateFormat(getString(R.string.salarm_short_date_format), Locale.getDefault()).format(date.getTime());
     }
 
     private static boolean isSameDay(Calendar cal1, Calendar cal2) {
@@ -282,7 +281,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(context);
 
         String cityName = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Unknown"));
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, context.getString(R.string.salarm_unknown_location)));
 
         NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(context);
         boolean isOverride = prefs.contains(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME);
@@ -307,7 +306,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         boolean showWarning = false;
         if (localTzId != null) {
             // Compare guessed/system local with current viewing timezone
-            showWarning = !tzId.equals(localTzId);
+            showWarning = !Objects.equals(tzId, localTzId);
         } else if (isOverride) {
             // If we couldn't even guess a timezone for a manual city, show warning as it's unreliable
             showWarning = true;
@@ -340,7 +339,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         NamazCalculator.NamazTimes todayTimes = NamazCalculator.calculateAllTimes(todayCal.getTime(), lat, lon, method);
 
         Date now = new Date();
-        PrayerItem nextPrayer = null;
+        PrayerItem nextPrayer;
 
         boolean isViewingToday = isSameDay(mSelectedDate, todayCal);
         mCountdownText.setAlpha(isViewingToday ? 1.0f : 0.5f);
@@ -363,7 +362,7 @@ public class NamazTimesFragment extends DeskClockFragment {
             long diff = nextPrayer.time.getTime() - now.getTime();
             long hours = diff / (3600 * 1000);
             long minutes = (diff / (60 * 1000)) % 60;
-            String countdown = String.format(Locale.getDefault(), "%dh:%02dm To %s", hours, minutes, nextPrayer.name);
+            String countdown = getString(R.string.salarm_namaz_countdown_format, hours, minutes, nextPrayer.name);
             mCountdownText.setText(countdown);
         }
     }

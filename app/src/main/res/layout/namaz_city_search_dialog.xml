@@ -16,7 +16,7 @@
         android:background="@drawable/pill_background"
         android:iconifiedByDefault="false"
         app:iconifiedByDefault="false"
-        app:queryHint="Search City or Country..." />
+        app:queryHint="@string/salarm_city_search_hint_extended" />
 
     <ProgressBar
         android:id="@+id/city_search_progress"

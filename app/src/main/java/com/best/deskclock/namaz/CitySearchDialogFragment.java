@@ -259,7 +259,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                         saveAndDismiss(city);
                     } else {
                         mIsSelecting = false;
-                        android.widget.Toast.makeText(appContext, "Could not resolve city coordinates", android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(appContext, R.string.salarm_error_resolve_city, android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (IOException e) {

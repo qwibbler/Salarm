@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Viewing Options"
+        android:text="@string/salarm_viewing_options_title"
         android:textAppearance="?attr/textAppearanceTitleLarge"
         android:layout_marginBottom="24dp" />
 
@@ -18,14 +18,14 @@
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Use Current Location"
+        android:text="@string/salarm_use_current_location"
         android:layout_marginBottom="16dp"
         app:icon="@drawable/ic_tab_namaz_static" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Temporary View Location"
+        android:text="@string/salarm_temporary_view_location_label"
         android:textAppearance="?attr/textAppearanceLabelMedium"
         android:layout_marginBottom="8dp" />
 
@@ -34,7 +34,7 @@
         style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Another City"
+        android:text="@string/salarm_select_another_city"
         android:layout_marginBottom="4dp"
         app:icon="@drawable/ic_search" />
 
@@ -51,7 +51,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Display Timezone"
+        android:text="@string/salarm_display_timezone_label"
         android:textAppearance="?attr/textAppearanceLabelMedium"
         android:layout_marginBottom="8dp" />
 
@@ -66,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            android:hint="Select Timezone" />
+            android:hint="@string/salarm_select_timezone_hint" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>

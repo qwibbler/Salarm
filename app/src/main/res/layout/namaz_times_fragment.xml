@@ -21,7 +21,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_left"
-            android:contentDescription="Previous Day"
+            android:contentDescription="@string/salarm_previous_day"
             app:tint="?attr/colorOnSurface" />
 
         <LinearLayout
@@ -58,7 +58,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_right"
-            android:contentDescription="Next Day"
+            android:contentDescription="@string/salarm_next_day"
             app:tint="?attr/colorOnSurface" />
     </LinearLayout>
 
@@ -158,7 +158,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_settings"
-            android:contentDescription="Settings"
+            android:contentDescription="@string/settings"
             app:tint="?attr/colorOnSurfaceVariant" />
     </LinearLayout>
 

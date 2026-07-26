@@ -21,7 +21,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class NamazSettingsDialog extends BottomSheetDialogFragment {
@@ -48,8 +47,6 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
 
             double lat = result.getDouble("latitude");
             double lon = result.getDouble("longitude");
-            String country = result.getString("country");
-            String countryCode = result.getString("country_code");
 
             Context context = getContext();
             if (context == null) return;
@@ -135,8 +132,8 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
         if (summary == null || prefs == null) return;
         String name = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME, null);
         if (name == null) {
-            name = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, "Current Location");
+            name = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, getString(R.string.salarm_current_location));
         }
-        summary.setText("Currently viewing: " + name);
+        summary.setText(getString(R.string.salarm_currently_viewing_prefix, name));
     }
 }

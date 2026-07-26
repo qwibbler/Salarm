@@ -1554,4 +1554,25 @@
 
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>
+
+    <!-- Pass 1 Refactor Extracted Strings -->
+    <string name="salarm_today_prefix">Today, </string>
+    <string name="salarm_yesterday_prefix">Yesterday, </string>
+    <string name="salarm_tomorrow_prefix">Tomorrow, </string>
+    <string name="salarm_namaz_countdown_format">%1$dh:%2$02dm To %3$s</string>
+    <string name="salarm_full_date_format">EEE, MMM d</string>
+    <string name="salarm_short_date_format">MMM d</string>
+    <string name="salarm_unknown_location">Unknown</string>
+    <string name="salarm_current_location">Current Location</string>
+    <string name="salarm_currently_viewing_prefix">Currently viewing: %1$s</string>
+    <string name="salarm_error_resolve_city">Could not resolve city coordinates</string>
+    <string name="salarm_previous_day">Previous Day</string>
+    <string name="salarm_next_day">Next Day</string>
+    <string name="salarm_viewing_options_title">Viewing Options</string>
+    <string name="salarm_use_current_location">Use Current Location</string>
+    <string name="salarm_temporary_view_location_label">Temporary View Location</string>
+    <string name="salarm_select_another_city">Select Another City</string>
+    <string name="salarm_display_timezone_label">Display Timezone</string>
+    <string name="salarm_select_timezone_hint">Select Timezone</string>
+    <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
 </resources>
