@@ -127,7 +127,7 @@ public class RelationalAlarmSyncManager {
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
-            nativeAlarm.label = "\uD83D\uDD14 " + rule.anchorEvent.name();
+            nativeAlarm.label = "\uD83D\uDD14 " + RelationalRule.getEventName(context, rule.anchorEvent);
             nativeAlarm.addAlarm(cr);
             LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
         } else {

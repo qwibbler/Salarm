@@ -756,35 +756,39 @@ public final class WidgetDAO {
     }
 
     public static boolean isNamazWidgetFajrVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_FAJR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("fajr");
     }
 
     public static boolean isNamazWidgetSunriseVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_SUNRISE, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("sunrise");
     }
 
     public static boolean isNamazWidgetDhuhrVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_DHUHR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("dhuhr");
     }
 
     public static boolean isNamazWidgetAsrVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("asr");
     }
 
     public static boolean isNamazWidgetAsrHanafiVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("asr_hanafi");
     }
 
     public static boolean isNamazWidgetAsrShafiVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("asr_shafi");
     }
 
     public static boolean isNamazWidgetMaghribVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_MAGHRIB, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("maghrib");
     }
 
     public static boolean isNamazWidgetIshaVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ISHA, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+        return getNamazWidgetVisibleEvents(prefs).contains("isha");
+    }
+
+    public static java.util.Set<String> getNamazWidgetVisibleEvents(SharedPreferences prefs) {
+        return prefs.getStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS);
     }
 
     public static boolean isNamazWidgetShowAlarms(SharedPreferences prefs) {
@@ -792,7 +796,7 @@ public final class WidgetDAO {
     }
 
     public static boolean isNamazWidgetRuleVisible(SharedPreferences prefs, long ruleId) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX + ruleId, false);
+        return getNamazWidgetVisibleEvents(prefs).contains("rule_" + ruleId);
     }
 
     // ****************************

@@ -11,16 +11,26 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.HapticFeedbackConstantsCompat;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.best.deskclock.R;
+import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.data.WidgetDAO;
 import com.best.deskclock.namaz.NamazDatabase;
 import com.best.deskclock.namaz.RelationalRule;
+import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.settings.custompreference.ColorPickerPreference;
 import com.best.deskclock.settings.custompreference.CustomSliderPreference;
 import com.best.deskclock.utils.SdkUtils;
@@ -28,7 +38,10 @@ import com.best.deskclock.utils.Utils;
 import com.best.deskclock.utils.WidgetUtils;
 import com.best.deskclock.widgets.NamazTimelineWidgetProvider;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
 
@@ -65,14 +78,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     SwitchPreferenceCompat mShowBothAsrsPref;
     SwitchPreferenceCompat mShowCountdownPref;
-    SwitchPreferenceCompat mShowFajrPref;
-    SwitchPreferenceCompat mShowSunrisePref;
-    SwitchPreferenceCompat mShowDhuhrPref;
-    SwitchPreferenceCompat mShowAsrPref;
-    SwitchPreferenceCompat mShowAsrShafiPref;
-    SwitchPreferenceCompat mShowAsrHanafiPref;
-    SwitchPreferenceCompat mShowMaghribPref;
-    SwitchPreferenceCompat mShowIshaPref;
+    Preference mVisibleEventsPref;
 
     SwitchPreferenceCompat mShowAlarmsPref;
 
@@ -118,14 +124,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
         mShowBothAsrsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS);
         mShowCountdownPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN);
-        mShowFajrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_FAJR);
-        mShowSunrisePref = findPreference(KEY_NAMAZ_WIDGET_SHOW_SUNRISE);
-        mShowDhuhrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_DHUHR);
-        mShowAsrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR);
-        mShowAsrShafiPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI);
-        mShowAsrHanafiPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI);
-        mShowMaghribPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_MAGHRIB);
-        mShowIshaPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ISHA);
+        mVisibleEventsPref = findPreference(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS);
 
         mShowAlarmsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ALARMS);
 
@@ -163,7 +162,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
             mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
             mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
             mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
-            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref);
+            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref, mShowBothAsrsPref);
 
         nullifyAllPrefs();
 
@@ -171,22 +170,25 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
     }
 
     @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        if (KEY_NAMAZ_WIDGET_VISIBLE_EVENTS.equals(preference.getKey())) {
+            showVisibleEventsDialog();
+            return true;
+        }
+        return super.onPreferenceTreeClick(preference);
+    }
+
+    @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         String key = pref.getKey();
         if (KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS.equals(key)) {
             mPrefs.edit().putBoolean(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS, (boolean) newValue).apply();
-            updateEventsVisibility();
         }
 
         switch (key) {
             case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_SHOW_SYMBOLS,
                  KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
-                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN,
-                 KEY_NAMAZ_WIDGET_SHOW_FAJR,
-                 KEY_NAMAZ_WIDGET_SHOW_SUNRISE, KEY_NAMAZ_WIDGET_SHOW_DHUHR,
-                 KEY_NAMAZ_WIDGET_SHOW_ASR, KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI,
-                 KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI, KEY_NAMAZ_WIDGET_SHOW_MAGHRIB,
-                 KEY_NAMAZ_WIDGET_SHOW_ISHA ->
+                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
             case KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND -> {
@@ -270,11 +272,8 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_SHOW_ALARMS -> {
-                boolean showAlarms = (boolean) newValue;
+            case KEY_NAMAZ_WIDGET_SHOW_ALARMS ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
-                addRulePreferences(showAlarms);
-            }
         }
 
         WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
@@ -350,66 +349,129 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
             }
             mShowBothAsrsPref.setOnPreferenceChangeListener(this);
         }
-        if (mShowFajrPref != null) mShowFajrPref.setOnPreferenceChangeListener(this);
-        if (mShowSunrisePref != null) mShowSunrisePref.setOnPreferenceChangeListener(this);
-        if (mShowDhuhrPref != null) mShowDhuhrPref.setOnPreferenceChangeListener(this);
-        if (mShowAsrPref != null) mShowAsrPref.setOnPreferenceChangeListener(this);
-        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setOnPreferenceChangeListener(this);
-        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setOnPreferenceChangeListener(this);
-        if (mShowMaghribPref != null) mShowMaghribPref.setOnPreferenceChangeListener(this);
-        if (mShowIshaPref != null) mShowIshaPref.setOnPreferenceChangeListener(this);
 
         if (mShowAlarmsPref != null) {
             mShowAlarmsPref.setOnPreferenceChangeListener(this);
-            addRulePreferences(WidgetDAO.isNamazWidgetShowAlarms(mPrefs));
         }
-
-        updateEventsVisibility();
     }
 
-    private void addRulePreferences(boolean showAlarms) {
-        PreferenceCategory category = findPreference("key_namaz_widget_events_category");
-        if (category == null) return;
+    private void showVisibleEventsDialog() {
+        Context context = getContext();
+        if (context == null) return;
 
-        // Remove existing rule prefs first
-        int count = category.getPreferenceCount();
-        for (int i = count - 1; i >= 0; i--) {
-            Preference p = category.getPreference(i);
-            String key = p.getKey();
-            if (key != null && key.startsWith(KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX)) {
-                category.removePreference(p);
+        AppExecutors.getDiskIO().execute(() -> {
+            List<EventItem> items = new ArrayList<>();
+            Set<String> visibleEvents = WidgetDAO.getNamazWidgetVisibleEvents(mPrefs);
+            boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(mPrefs);
+
+            items.add(new EventItem("fajr", getString(R.string.fajr_label), null, visibleEvents.contains("fajr")));
+            items.add(new EventItem("sunrise", getString(R.string.sunrise_label), null, visibleEvents.contains("sunrise")));
+            items.add(new EventItem("dhuhr", getString(R.string.dhuhr_label), null, visibleEvents.contains("dhuhr")));
+            if (showBothAsr) {
+                items.add(new EventItem("asr_shafi", getString(R.string.asr_shafii_label), null, visibleEvents.contains("asr_shafi")));
+                items.add(new EventItem("asr_hanafi", getString(R.string.asr_hanafi_label), null, visibleEvents.contains("asr_hanafi")));
+            } else {
+                items.add(new EventItem("asr", getString(R.string.asr_label), null, visibleEvents.contains("asr")));
             }
-        }
+            items.add(new EventItem("maghrib", getString(R.string.maghrib_label), null, visibleEvents.contains("maghrib")));
+            items.add(new EventItem("isha", getString(R.string.isha_label), null, visibleEvents.contains("isha")));
 
-        if (showAlarms) {
-            Context context = getContext();
-            if (context == null) return;
-            com.best.deskclock.base.AppExecutors.getDiskIO().execute(() -> {
-                Context bgContext = getContext();
-                if (bgContext == null) return;
-                List<RelationalRule> rules = NamazDatabase.getDatabase(bgContext).relationalRuleDao().getAll();
-                com.best.deskclock.base.AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded()) return;
-                    for (RelationalRule rule : rules) {
-                        SwitchPreferenceCompat rulePref = new SwitchPreferenceCompat(requireContext());
-                        rulePref.setKey(KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX + rule.id);
-                        rulePref.setTitle(rule.getRuleDescription(requireContext()));
-                        rulePref.setLayoutResource(R.layout.settings_preference_layout);
-                        rulePref.setSingleLineTitle(false);
-                        rulePref.setDefaultValue(false);
-                        rulePref.setOnPreferenceChangeListener(this);
-                        category.addPreference(rulePref);
+            if (WidgetDAO.isNamazWidgetShowAlarms(mPrefs)) {
+                List<RelationalRule> rules = NamazDatabase.getDatabase(context).relationalRuleDao().getAll();
+                for (RelationalRule rule : rules) {
+                    String key = "rule_" + rule.id;
+                    String subtitle = rule.getRuleDescription(context);
+                    String title;
+
+                    Alarm alarm = Alarm.getAlarmByRuleId(context.getContentResolver(), rule.id);
+                    if (alarm != null && !alarm.label.isEmpty()) {
+                        title = alarm.label;
+                    } else {
+                        title = RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm";
                     }
-                });
+
+                    items.add(new EventItem(key, title, subtitle, visibleEvents.contains(key)));
+                }
+            }
+
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded()) return;
+
+                ListView listView = new ListView(requireContext());
+                EventAdapter adapter = new EventAdapter(requireContext(), items);
+                listView.setAdapter(adapter);
+
+                new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.visible_events_title)
+                    .setView(listView)
+                    .setPositiveButton(android.R.string.ok, (d, w) -> {
+                        Set<String> selectedEvents = new HashSet<>(visibleEvents);
+                        for (EventItem item : items) {
+                            selectedEvents.remove(item.key);
+                            if (item.selected) {
+                                selectedEvents.add(item.key);
+                            }
+                        }
+                        mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, selectedEvents).apply();
+                        WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
             });
+        });
+    }
+
+    private static class EventItem {
+        final String key;
+        final String title;
+        final String subtitle;
+        boolean selected;
+
+        EventItem(String key, String title, String subtitle, boolean selected) {
+            this.key = key;
+            this.title = title;
+            this.subtitle = subtitle;
+            this.selected = selected;
         }
     }
 
-    private void updateEventsVisibility() {
-        boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(mPrefs);
-        if (mShowAsrPref != null) mShowAsrPref.setVisible(!showBothAsr);
-        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setVisible(showBothAsr);
-        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setVisible(showBothAsr);
+    private class EventAdapter extends ArrayAdapter<EventItem> {
+        EventAdapter(Context context, List<EventItem> items) {
+            super(context, R.layout.namaz_visible_event_item, items);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.namaz_visible_event_item, parent, false);
+            }
+
+            EventItem item = getItem(position);
+            CheckBox checkBox = convertView.findViewById(R.id.event_checkbox);
+            TextView titleView = convertView.findViewById(R.id.event_title);
+            TextView subtitleView = convertView.findViewById(R.id.event_subtitle);
+
+            if (item != null) {
+                titleView.setText(item.title);
+                if (item.subtitle != null && !item.subtitle.isEmpty()) {
+                    subtitleView.setText(item.subtitle);
+                    subtitleView.setVisibility(View.VISIBLE);
+                } else {
+                    subtitleView.setVisibility(View.GONE);
+                }
+                checkBox.setChecked(item.selected);
+            }
+
+            convertView.setOnClickListener(v -> {
+                if (item != null) {
+                    item.selected = !item.selected;
+                    checkBox.setChecked(item.selected);
+                }
+            });
+
+            return convertView;
+        }
     }
 
     private void saveCheckedPreferenceStates() {
@@ -431,15 +493,6 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mDefaultItemNextHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
 
         if (mShowCountdownPref != null) mShowCountdownPref.setChecked(WidgetDAO.isNamazWidgetCountdownVisible(mPrefs));
-
-        if (mShowFajrPref != null) mShowFajrPref.setChecked(WidgetDAO.isNamazWidgetFajrVisible(mPrefs));
-        if (mShowSunrisePref != null) mShowSunrisePref.setChecked(WidgetDAO.isNamazWidgetSunriseVisible(mPrefs));
-        if (mShowDhuhrPref != null) mShowDhuhrPref.setChecked(WidgetDAO.isNamazWidgetDhuhrVisible(mPrefs));
-        if (mShowAsrPref != null) mShowAsrPref.setChecked(WidgetDAO.isNamazWidgetAsrVisible(mPrefs));
-        if (mShowAsrShafiPref != null) mShowAsrShafiPref.setChecked(WidgetDAO.isNamazWidgetAsrShafiVisible(mPrefs));
-        if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setChecked(WidgetDAO.isNamazWidgetAsrHanafiVisible(mPrefs));
-        if (mShowMaghribPref != null) mShowMaghribPref.setChecked(WidgetDAO.isNamazWidgetMaghribVisible(mPrefs));
-        if (mShowIshaPref != null) mShowIshaPref.setChecked(WidgetDAO.isNamazWidgetIshaVisible(mPrefs));
 
         if (mShowAlarmsPref != null) mShowAlarmsPref.setChecked(WidgetDAO.isNamazWidgetShowAlarms(mPrefs));
     }
@@ -481,14 +534,6 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mNamazWidgetMaxFontSizePref = null;
         mShowBothAsrsPref = null;
         mShowCountdownPref = null;
-        mShowFajrPref = null;
-        mShowSunrisePref = null;
-        mShowDhuhrPref = null;
-        mShowAsrPref = null;
-        mShowAsrShafiPref = null;
-        mShowAsrHanafiPref = null;
-        mShowMaghribPref = null;
-        mShowIshaPref = null;
         mShowAlarmsPref = null;
     }
 

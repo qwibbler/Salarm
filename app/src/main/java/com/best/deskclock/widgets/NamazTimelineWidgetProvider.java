@@ -260,11 +260,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             String name = prayer.name;
             String time = timeFormat.format(prayer.time);
             if (uppercase) {
-                if (name.startsWith("🔔 ")) {
-                    name = "🔔 " + name.substring(2).toUpperCase();
-                } else {
-                    name = name.toUpperCase();
-                }
+                name = name.toUpperCase();
                 time = time.toUpperCase();
             }
 
@@ -613,7 +609,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                 if (WidgetDAO.isNamazWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
                     items.add(new PrayerItem("🔔", label, ruleTime, rule.id));
                 } else {
-                    items.add(new PrayerItem("🔔 " + label, label, ruleTime, rule.id));
+                    items.add(new PrayerItem(label, label, ruleTime, rule.id));
                 }
             }
         }

@@ -284,6 +284,14 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;
+    public static final Set<String> DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS = Set.of(
+        "fajr",
+        "sunrise",
+        "dhuhr",
+        "asr",
+        "maghrib",
+        "isha"
+    );
 
     // Namaz Countdown Widget
     public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;

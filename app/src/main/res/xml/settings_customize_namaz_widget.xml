@@ -13,14 +13,6 @@
         app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_both_asrs"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/show_both_asr_title"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
             android:key="key_namaz_widget_show_countdown"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/namaz_widget_show_countdown_title"
@@ -29,82 +21,24 @@
             app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_fajr"
+            android:key="key_namaz_widget_show_both_asrs"
             android:layout="@layout/settings_preference_layout"
-            android:title="@string/fajr_label"
-            android:defaultValue="true"
+            android:title="@string/show_both_asr_title"
+            android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_sunrise"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/sunrise_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_dhuhr"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/dhuhr_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_asr"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/asr_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_asr_shafi"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/asr_shafii_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_asr_hanafi"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/asr_hanafi_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_maghrib"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/maghrib_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_isha"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/isha_label"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="key_namaz_widget_alarms_category"
-        android:title="Alarms"
-        app:allowDividerAbove="false"
-        app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
             android:key="key_namaz_widget_show_alarms"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/namaz_widget_show_alarms_title"
             android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="key_namaz_widget_visible_events"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/visible_events_title"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>
@@ -115,17 +49,17 @@
         app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
-            android:key="key_namaz_widget_display_text_uppercase"
+            android:key="key_namaz_widget_show_symbols"
             android:layout="@layout/settings_preference_layout"
-            android:title="@string/display_text_uppercase_title"
+            android:title="@string/namaz_widget_display_symbols_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_symbols"
+            android:key="key_namaz_widget_display_text_uppercase"
             android:layout="@layout/settings_preference_layout"
-            android:title="@string/namaz_widget_display_symbols_title"
+            android:title="@string/display_text_uppercase_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />

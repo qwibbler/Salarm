@@ -387,8 +387,7 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN = "key_namaz_widget_show_countdown";
     public static final String KEY_NAMAZ_WIDGET_SHOW_ALARMS = "key_namaz_widget_show_alarms";
     public static final String KEY_NAMAZ_WIDGET_SHOW_SYMBOLS = "key_namaz_widget_show_symbols";
-    public static final String KEY_NAMAZ_WIDGET_DISMISS_ALARMS = "key_namaz_widget_dismiss_alarms";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX = "key_namaz_widget_show_rule_";
+    public static final String KEY_NAMAZ_WIDGET_VISIBLE_EVENTS = "key_namaz_widget_visible_events";
 
     // Namaz Widget Events
     public static final String KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS = "key_namaz_widget_show_both_asrs";
