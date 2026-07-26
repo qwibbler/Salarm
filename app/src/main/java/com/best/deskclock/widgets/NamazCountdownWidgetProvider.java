@@ -269,20 +269,21 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
         long now = System.currentTimeMillis();
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
+        boolean showSymbols = WidgetDAO.isNamazCountdownWidgetSymbolsVisible(prefs);
         Date asrTime = isShafi ? times.asrShafi : times.asrHanafi;
 
-        if (now < times.fajr.getTime()) return new PrayerItem(context.getString(R.string.fajr_label), times.fajr);
-        if (now < times.sunrise.getTime()) return new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise);
-        if (now < times.dhuhr.getTime()) return new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr);
-        if (now < asrTime.getTime()) return new PrayerItem(context.getString(R.string.asr_label), asrTime);
-        if (now < times.maghrib.getTime()) return new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib);
-        if (now < times.isha.getTime()) return new PrayerItem(context.getString(R.string.isha_label), times.isha);
+        if (now < times.fajr.getTime()) return new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), times.fajr);
+        if (now < times.sunrise.getTime()) return new PrayerItem(showSymbols ? "🌅" : context.getString(R.string.sunrise_label), times.sunrise);
+        if (now < times.dhuhr.getTime()) return new PrayerItem(showSymbols ? "☀️" : context.getString(R.string.dhuhr_label), times.dhuhr);
+        if (now < asrTime.getTime()) return new PrayerItem(showSymbols ? (isShafi ? "🌤️" : "⛅") : context.getString(R.string.asr_label), asrTime);
+        if (now < times.maghrib.getTime()) return new PrayerItem(showSymbols ? "🌇" : context.getString(R.string.maghrib_label), times.maghrib);
+        if (now < times.isha.getTime()) return new PrayerItem(showSymbols ? "🌙" : context.getString(R.string.isha_label), times.isha);
 
         // Next day Fajr
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
         NamazCalculator.NamazTimes nextDay = getNamazTimes(prefs, cal.getTime());
-        return nextDay != null ? new PrayerItem(context.getString(R.string.fajr_label), nextDay.fajr) : null;
+        return nextDay != null ? new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), nextDay.fajr) : null;
     }
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {

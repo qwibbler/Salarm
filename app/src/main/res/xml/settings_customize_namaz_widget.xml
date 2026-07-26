@@ -123,6 +123,14 @@
             app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_symbols"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Display Symbols"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
             android:key="key_namaz_widget_display_text_shadow"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/display_text_shadow_title"

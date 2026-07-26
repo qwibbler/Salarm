@@ -359,36 +359,38 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
         boolean showBothAsr = WidgetDAO.isNamazCompactWidgetShowBothAsrs(prefs);
+        boolean showSymbols = WidgetDAO.isNamazCompactWidgetSymbolsVisible(prefs);
 
         List<PrayerItem> items = new ArrayList<>();
         if (WidgetDAO.isNamazCompactWidgetFajrVisible(prefs)) {
-            items.add(new PrayerItem(context.getString(R.string.fajr_label), times.fajr));
+            items.add(new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), times.fajr));
         }
         if (WidgetDAO.isNamazCompactWidgetSunriseVisible(prefs)) {
-            items.add(new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise));
+            items.add(new PrayerItem(showSymbols ? "🌅" : context.getString(R.string.sunrise_label), times.sunrise));
         }
         if (WidgetDAO.isNamazCompactWidgetDhuhrVisible(prefs)) {
-            items.add(new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr));
+            items.add(new PrayerItem(showSymbols ? "☀️" : context.getString(R.string.dhuhr_label), times.dhuhr));
         }
 
         if (showBothAsr) {
             if (WidgetDAO.isNamazCompactWidgetAsrShafiVisible(prefs)) {
-                items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
+                items.add(new PrayerItem(showSymbols ? "🌤️" : context.getString(R.string.asr_shafii_label), times.asrShafi));
             }
             if (WidgetDAO.isNamazCompactWidgetAsrHanafiVisible(prefs)) {
-                items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+                items.add(new PrayerItem(showSymbols ? "⛅" : context.getString(R.string.asr_hanafi_label), times.asrHanafi));
             }
         } else {
             if (WidgetDAO.isNamazCompactWidgetAsrVisible(prefs)) {
-                items.add(new PrayerItem(context.getString(R.string.asr_label), isShafi ? times.asrShafi : times.asrHanafi));
+                String name = showSymbols ? (isShafi ? "🌤️" : "⛅") : context.getString(R.string.asr_label);
+                items.add(new PrayerItem(name, isShafi ? times.asrShafi : times.asrHanafi));
             }
         }
 
         if (WidgetDAO.isNamazCompactWidgetMaghribVisible(prefs)) {
-            items.add(new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib));
+            items.add(new PrayerItem(showSymbols ? "🌇" : context.getString(R.string.maghrib_label), times.maghrib));
         }
         if (WidgetDAO.isNamazCompactWidgetIshaVisible(prefs)) {
-            items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
+            items.add(new PrayerItem(showSymbols ? "🌙" : context.getString(R.string.isha_label), times.isha));
         }
 
         if (WidgetDAO.isNamazCompactWidgetShowAlarms(prefs) && rules != null) {
@@ -427,7 +429,11 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
                     }
                 }
                 String label = (alarm != null && !alarm.label.isEmpty()) ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
-                items.add(new PrayerItem(label, ruleTime, rule.id));
+                if (WidgetDAO.isNamazCompactWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
+                    items.add(new PrayerItem("🔔", ruleTime, rule.id));
+                } else {
+                    items.add(new PrayerItem(label, ruleTime, rule.id));
+                }
             }
         }
     }

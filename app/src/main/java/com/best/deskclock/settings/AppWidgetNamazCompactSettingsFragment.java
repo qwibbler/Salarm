@@ -35,6 +35,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 
     SwitchPreferenceCompat mDisplayTextUppercasePref;
+    SwitchPreferenceCompat mShowSymbolsPref;
     SwitchPreferenceCompat mDisplayTextShadowPref;
     SwitchPreferenceCompat mShowBackgroundOnNamazCompactWidgetPref;
     SwitchPreferenceCompat mCustomizeBackgroundCornerRadiusPref;
@@ -82,6 +83,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         addPreferencesFromResource(R.xml.settings_customize_namaz_compact_widget);
 
         mDisplayTextUppercasePref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE);
+        mShowSymbolsPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS);
         mDisplayTextShadowPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW);
         mShowBackgroundOnNamazCompactWidgetPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND);
         mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
@@ -141,7 +143,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
 
     @Override
     public void onDestroy() {
-        nullifyPreferenceListeners(mDisplayTextUppercasePref, mDisplayTextShadowPref, mShowBackgroundOnNamazCompactWidgetPref,
+        nullifyPreferenceListeners(mDisplayTextUppercasePref, mShowSymbolsPref, mDisplayTextShadowPref, mShowBackgroundOnNamazCompactWidgetPref,
             mCustomizeBackgroundCornerRadiusPref, mBackgroundCornerRadiusPref, mApplyHorizontalPaddingPref, mDefaultBackgroundColorPref,
             mCustomBackgroundColorPref, mDefaultTimelineActiveColorPref,
             mCustomTimelineActiveColorPref, mDefaultTimelineNextColorPref, mCustomTimelineNextColorPref,
@@ -162,7 +164,8 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         }
 
         switch (key) {
-            case KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW,
+            case KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS,
+                 KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW,
                  KEY_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_COMPACT_WIDGET_SHOW_FAJR,
                  KEY_NAMAZ_COMPACT_WIDGET_SHOW_SUNRISE, KEY_NAMAZ_COMPACT_WIDGET_SHOW_DHUHR,
                  KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR, KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_SHAFI,
@@ -239,6 +242,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
 
     private void setupPreferences() {
         mDisplayTextUppercasePref.setOnPreferenceChangeListener(this);
+        mShowSymbolsPref.setOnPreferenceChangeListener(this);
         mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
         mShowBackgroundOnNamazCompactWidgetPref.setOnPreferenceChangeListener(this);
         boolean isBackgroundVisible = WidgetDAO.isBackgroundDisplayedOnNamazCompactWidget(mPrefs);
@@ -358,6 +362,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
 
     private void saveCheckedPreferenceStates() {
         mDisplayTextUppercasePref.setChecked(WidgetDAO.isTextUppercaseDisplayedOnNamazCompactWidget(mPrefs));
+        mShowSymbolsPref.setChecked(WidgetDAO.isNamazCompactWidgetSymbolsVisible(mPrefs));
         mDisplayTextShadowPref.setChecked(WidgetDAO.isTextShadowDisplayedOnNamazCompactWidget(mPrefs));
         mShowBackgroundOnNamazCompactWidgetPref.setChecked(WidgetDAO.isBackgroundDisplayedOnNamazCompactWidget(mPrefs));
         mCustomizeBackgroundCornerRadiusPref.setChecked(WidgetDAO.isNamazCompactWidgetBackgroundCornerRadiusCustomizable(mPrefs));
@@ -392,7 +397,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
     }
 
     private void nullifyAllPrefs() {
-        mDisplayTextUppercasePref = null; mDisplayTextShadowPref = null;
+        mDisplayTextUppercasePref = null; mShowSymbolsPref = null; mDisplayTextShadowPref = null;
         mShowBackgroundOnNamazCompactWidgetPref = null; mCustomizeBackgroundCornerRadiusPref = null;
         mBackgroundCornerRadiusPref = null; mApplyHorizontalPaddingPref = null;
         mDefaultBackgroundColorPref = null; mCustomBackgroundColorPref = null;

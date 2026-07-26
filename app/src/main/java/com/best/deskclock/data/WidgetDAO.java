@@ -744,6 +744,10 @@ public final class WidgetDAO {
         return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN, DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN);
     }
 
+    public static boolean isNamazWidgetSymbolsVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_SYMBOLS, DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS);
+    }
+
     public static boolean isNamazWidgetShowBothAsrs(SharedPreferences prefs) {
         if (!prefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
             return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
@@ -882,6 +886,10 @@ public final class WidgetDAO {
         return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
     }
 
+    public static boolean isNamazCompactWidgetSymbolsVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS, DEFAULT_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS);
+    }
+
     public static boolean isNamazCompactWidgetFajrVisible(SharedPreferences prefs) {
         return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_FAJR, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
     }
@@ -976,6 +984,10 @@ public final class WidgetDAO {
 
     public static int getNamazCountdownWidgetMaxFontSize(SharedPreferences prefs) {
         return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
+    }
+
+    public static boolean isNamazCountdownWidgetSymbolsVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
     }
 
 }

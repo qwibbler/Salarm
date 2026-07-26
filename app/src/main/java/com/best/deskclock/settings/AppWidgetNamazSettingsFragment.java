@@ -35,6 +35,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 
     SwitchPreferenceCompat mDisplayTextUppercasePref;
+    SwitchPreferenceCompat mShowSymbolsPref;
     SwitchPreferenceCompat mDisplayTextShadowPref;
     SwitchPreferenceCompat mShowBackgroundOnNamazWidgetPref;
     SwitchPreferenceCompat mCustomizeBackgroundCornerRadiusPref;
@@ -87,6 +88,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         addPreferencesFromResource(R.xml.settings_customize_namaz_widget);
 
         mDisplayTextUppercasePref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE);
+        mShowSymbolsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_SYMBOLS);
         mDisplayTextShadowPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW);
         mShowBackgroundOnNamazWidgetPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND);
         mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
@@ -153,7 +155,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     @Override
     public void onDestroy() {
-        nullifyPreferenceListeners(mDisplayTextUppercasePref, mDisplayTextShadowPref, mShowBackgroundOnNamazWidgetPref,
+        nullifyPreferenceListeners(mDisplayTextUppercasePref, mShowSymbolsPref, mDisplayTextShadowPref, mShowBackgroundOnNamazWidgetPref,
             mCustomizeBackgroundCornerRadiusPref, mBackgroundCornerRadiusPref, mApplyHorizontalPaddingPref, mDefaultBackgroundColorPref,
             mCustomBackgroundColorPref, mDefaultCountdownTimeColorPref, mCustomCountdownTimeColorPref,
             mDefaultCountdownLabelColorPref, mCustomCountdownLabelColorPref, mDefaultTimelineActiveColorPref,
@@ -177,7 +179,8 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         }
 
         switch (key) {
-            case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
+            case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_SHOW_SYMBOLS,
+                 KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
                  KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN,
                  KEY_NAMAZ_WIDGET_SHOW_FAJR,
                  KEY_NAMAZ_WIDGET_SHOW_SUNRISE, KEY_NAMAZ_WIDGET_SHOW_DHUHR,
@@ -280,6 +283,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     private void setupPreferences() {
         mDisplayTextUppercasePref.setOnPreferenceChangeListener(this);
+        mShowSymbolsPref.setOnPreferenceChangeListener(this);
         mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
         mShowBackgroundOnNamazWidgetPref.setOnPreferenceChangeListener(this);
 
@@ -410,6 +414,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     private void saveCheckedPreferenceStates() {
         mDisplayTextUppercasePref.setChecked(WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(mPrefs));
+        mShowSymbolsPref.setChecked(WidgetDAO.isNamazWidgetSymbolsVisible(mPrefs));
         mDisplayTextShadowPref.setChecked(WidgetDAO.isTextShadowDisplayedOnNamazWidget(mPrefs));
         mShowBackgroundOnNamazWidgetPref.setChecked(WidgetDAO.isBackgroundDisplayedOnNamazWidget(mPrefs));
         mCustomizeBackgroundCornerRadiusPref.setChecked(WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(mPrefs));
@@ -450,6 +455,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
     private void nullifyAllPrefs() {
         mDisplayTextUppercasePref = null;
+        mShowSymbolsPref = null;
         mDisplayTextShadowPref = null;
         mShowBackgroundOnNamazWidgetPref = null;
         mCustomizeBackgroundCornerRadiusPref = null;

@@ -29,6 +29,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 
     SwitchPreferenceCompat mDisplayTextUppercasePref;
+    SwitchPreferenceCompat mShowSymbolsPref;
     SwitchPreferenceCompat mDisplayTextShadowPref;
     SwitchPreferenceCompat mShowBackgroundPref;
     SwitchPreferenceCompat mCustomizeBackgroundCornerRadiusPref;
@@ -54,6 +55,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
         addPreferencesFromResource(R.xml.settings_customize_namaz_countdown_widget);
 
         mDisplayTextUppercasePref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE);
+        mShowSymbolsPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
         mDisplayTextShadowPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW);
         mShowBackgroundPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
         mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
@@ -91,7 +93,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
 
     @Override
     public void onDestroy() {
-        nullifyPreferenceListeners(mDisplayTextUppercasePref, mDisplayTextShadowPref, mShowBackgroundPref,
+        nullifyPreferenceListeners(mDisplayTextUppercasePref, mShowSymbolsPref, mDisplayTextShadowPref, mShowBackgroundPref,
             mCustomizeBackgroundCornerRadiusPref, mBackgroundCornerRadiusPref, mApplyHorizontalPaddingPref,
             mDefaultBackgroundColorPref, mCustomBackgroundColorPref, mDefaultTimeColorPref, mCustomTimeColorPref,
             mDefaultLabelColorPref, mCustomLabelColorPref, mMaxFontSizePref);
@@ -103,7 +105,8 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         String key = pref.getKey();
         switch (key) {
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW,
+            case KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS,
+                 KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW,
                  KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
@@ -159,6 +162,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
 
     private void setupPreferences() {
         mDisplayTextUppercasePref.setOnPreferenceChangeListener(this);
+        mShowSymbolsPref.setOnPreferenceChangeListener(this);
         mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
         mShowBackgroundPref.setOnPreferenceChangeListener(this);
 
@@ -194,6 +198,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
 
     private void saveCheckedPreferenceStates() {
         mDisplayTextUppercasePref.setChecked(WidgetDAO.isTextUppercaseDisplayedOnNamazCountdownWidget(mPrefs));
+        mShowSymbolsPref.setChecked(WidgetDAO.isNamazCountdownWidgetSymbolsVisible(mPrefs));
         mDisplayTextShadowPref.setChecked(WidgetDAO.isTextShadowDisplayedOnNamazCountdownWidget(mPrefs));
         mShowBackgroundPref.setChecked(WidgetDAO.isBackgroundDisplayedOnNamazCountdownWidget(mPrefs));
         mCustomizeBackgroundCornerRadiusPref.setChecked(WidgetDAO.isNamazCountdownWidgetBackgroundCornerRadiusCustomizable(mPrefs));
@@ -213,6 +218,7 @@ public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment impl
 
     private void nullifyAllPrefs() {
         mDisplayTextUppercasePref = null;
+        mShowSymbolsPref = null;
         mDisplayTextShadowPref = null;
         mShowBackgroundPref = null;
         mCustomizeBackgroundCornerRadiusPref = null;
