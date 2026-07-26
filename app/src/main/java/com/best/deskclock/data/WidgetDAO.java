@@ -922,4 +922,60 @@ public final class WidgetDAO {
         return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX + ruleId, false);
     }
 
+    // ****************************
+    // ** NAMAZ COUNTDOWN WIDGET **
+    // ****************************
+
+    public static boolean isTextUppercaseDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED);
+    }
+
+    public static boolean isTextShadowDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW, DEFAULT_WIDGET_TEXT_SHADOW_DISPLAYED);
+    }
+
+    public static boolean isBackgroundDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
+    }
+
+    public static boolean isNamazCountdownWidgetBackgroundCornerRadiusCustomizable(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
+    }
+
+    public static int getNamazCountdownWidgetBackgroundCornerRadius(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS);
+    }
+
+    public static boolean isNamazCountdownWidgetHorizontalPaddingApplied(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING);
+    }
+
+    public static boolean isNamazCountdownWidgetDefaultBackgroundColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCountdownWidgetBackgroundColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
+    }
+
+    public static boolean isNamazCountdownWidgetDefaultTimeColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCountdownWidgetCustomTimeColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static boolean isNamazCountdownWidgetDefaultLabelColor(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+    }
+
+    public static int getNamazCountdownWidgetCustomLabelColor(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+    }
+
+    public static int getNamazCountdownWidgetMaxFontSize(SharedPreferences prefs) {
+        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
+    }
+
 }

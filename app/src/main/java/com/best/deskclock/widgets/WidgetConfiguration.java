@@ -13,6 +13,7 @@ import com.best.deskclock.R;
 import com.best.deskclock.settings.AppWidgetAnalogSettingsFragment;
 import com.best.deskclock.settings.AppWidgetDigitalSettingsFragment;
 import com.best.deskclock.settings.AppWidgetNamazCompactSettingsFragment;
+import com.best.deskclock.settings.AppWidgetNamazCountdownSettingsFragment;
 import com.best.deskclock.settings.AppWidgetNamazSettingsFragment;
 import com.best.deskclock.settings.AppWidgetNextAlarmSettingsFragment;
 import com.best.deskclock.settings.AppWidgetVerticalSettingsFragment;
@@ -110,6 +111,21 @@ public class WidgetConfiguration {
             super.onCreate(savedInstanceState);
 
             showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazCompactSettingsFragment());
+        }
+    }
+
+    public static class NamazCountdownWidgetConfiguration extends CollapsingToolbarBaseActivity {
+
+        @Override
+        protected String getActivityTitle() {
+            return getString(R.string.namaz_countdown_widget_label);
+        }
+
+        @Override
+        public void onCreate(final Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazCountdownSettingsFragment());
         }
     }
 

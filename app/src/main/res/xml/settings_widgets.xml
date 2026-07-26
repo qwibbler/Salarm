@@ -43,6 +43,13 @@
         app:singleLineTitle="false" />
 
     <Preference
+        android:key="key_namaz_countdown_widget_customization"
+        android:layout="@layout/settings_preference_layout"
+        android:title="@string/namaz_countdown_widget_label"
+        app:iconSpaceReserved="false"
+        app:singleLineTitle="false" />
+
+    <Preference
         android:key="key_namaz_compact_widget_customization"
         android:layout="@layout/settings_preference_layout"
         android:title="@string/namaz_compact_widget_label"
