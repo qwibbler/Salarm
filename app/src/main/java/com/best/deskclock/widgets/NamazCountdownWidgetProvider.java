@@ -143,7 +143,7 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
 
         String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
-        String label = context.getString(R.string.namaz_countdown_format, "", next.name).replace(" To ", "").trim();
+        String label = context.getString(R.string.namaz_countdown_format, "", next.fullName).replace(" To ", "").trim();
         if (WidgetDAO.isTextUppercaseDisplayedOnNamazCountdownWidget(prefs)) {
             timeLeft = timeLeft.toUpperCase();
             label = label.toUpperCase();
@@ -272,18 +272,40 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
         boolean showSymbols = WidgetDAO.isNamazCountdownWidgetSymbolsVisible(prefs);
         Date asrTime = isShafi ? times.asrShafi : times.asrHanafi;
 
-        if (now < times.fajr.getTime()) return new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), times.fajr);
-        if (now < times.sunrise.getTime()) return new PrayerItem(showSymbols ? "🌅" : context.getString(R.string.sunrise_label), times.sunrise);
-        if (now < times.dhuhr.getTime()) return new PrayerItem(showSymbols ? "☀️" : context.getString(R.string.dhuhr_label), times.dhuhr);
-        if (now < asrTime.getTime()) return new PrayerItem(showSymbols ? (isShafi ? "🌤️" : "⛅") : context.getString(R.string.asr_label), asrTime);
-        if (now < times.maghrib.getTime()) return new PrayerItem(showSymbols ? "🌇" : context.getString(R.string.maghrib_label), times.maghrib);
-        if (now < times.isha.getTime()) return new PrayerItem(showSymbols ? "🌙" : context.getString(R.string.isha_label), times.isha);
+        if (now < times.fajr.getTime()) {
+            String label = context.getString(R.string.fajr_label);
+            return new PrayerItem(showSymbols ? "🌌" : label, label, times.fajr);
+        }
+        if (now < times.sunrise.getTime()) {
+            String label = context.getString(R.string.sunrise_label);
+            return new PrayerItem(showSymbols ? "🌅" : label, label, times.sunrise);
+        }
+        if (now < times.dhuhr.getTime()) {
+            String label = context.getString(R.string.dhuhr_label);
+            return new PrayerItem(showSymbols ? "☀️" : label, label, times.dhuhr);
+        }
+        if (now < asrTime.getTime()) {
+            String label = context.getString(R.string.asr_label);
+            return new PrayerItem(showSymbols ? (isShafi ? "🌤️" : "⛅") : label, label, asrTime);
+        }
+        if (now < times.maghrib.getTime()) {
+            String label = context.getString(R.string.maghrib_label);
+            return new PrayerItem(showSymbols ? "🌇" : label, label, times.maghrib);
+        }
+        if (now < times.isha.getTime()) {
+            String label = context.getString(R.string.isha_label);
+            return new PrayerItem(showSymbols ? "🌙" : label, label, times.isha);
+        }
 
         // Next day Fajr
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
         NamazCalculator.NamazTimes nextDay = getNamazTimes(prefs, cal.getTime());
-        return nextDay != null ? new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), nextDay.fajr) : null;
+        if (nextDay != null) {
+            String label = context.getString(R.string.fajr_label);
+            return new PrayerItem(showSymbols ? "🌌" : label, label, nextDay.fajr);
+        }
+        return null;
     }
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -291,10 +313,10 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
     }
 
     private static class PrayerItem {
-        String name;
-        Date time;
-        PrayerItem(String name, Date time) {
+        String name; String fullName; Date time;
+        PrayerItem(String name, String fullName, Date time) {
             this.name = name;
+            this.fullName = fullName;
             this.time = time;
         }
     }

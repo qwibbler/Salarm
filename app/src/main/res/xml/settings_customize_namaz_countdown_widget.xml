@@ -22,7 +22,7 @@
         <SwitchPreferenceCompat
             android:key="key_namaz_countdown_widget_show_symbols"
             android:layout="@layout/settings_preference_layout"
-            android:title="Display Symbols"
+            android:title="@string/namaz_widget_display_symbols_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />

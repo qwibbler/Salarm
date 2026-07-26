@@ -221,9 +221,9 @@ public class NamazTimesFragment extends DeskClockFragment {
         String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
 
         List<PrayerItem> items = new ArrayList<>();
-        items.add(new PrayerItem("Fajr", times.fajr));
-        items.add(new PrayerItem("Sunrise", times.sunrise));
-        items.add(new PrayerItem("Dhuhr", times.dhuhr));
+        items.add(new PrayerItem(context.getString(R.string.fajr_label), times.fajr));
+        items.add(new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise));
+        items.add(new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr));
 
         if (showBothAsr) {
             items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
@@ -233,8 +233,8 @@ public class NamazTimesFragment extends DeskClockFragment {
             items.add(new PrayerItem(context.getString(R.string.asr_label), asrTime));
         }
 
-        items.add(new PrayerItem("Maghrib", times.maghrib));
-        items.add(new PrayerItem("Isha", times.isha));
+        items.add(new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib));
+        items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
 
         mAdapter.setItems(items);
 
@@ -345,18 +345,18 @@ public class NamazTimesFragment extends DeskClockFragment {
         boolean isViewingToday = isSameDay(mSelectedDate, todayCal);
         mCountdownText.setAlpha(isViewingToday ? 1.0f : 0.5f);
 
-        if (now.before(todayTimes.fajr)) nextPrayer = new PrayerItem("Fajr", todayTimes.fajr);
-        else if (now.before(todayTimes.sunrise)) nextPrayer = new PrayerItem("Sunrise", todayTimes.sunrise);
-        else if (now.before(todayTimes.dhuhr)) nextPrayer = new PrayerItem("Dhuhr", todayTimes.dhuhr);
-        else if (now.before(todayTimes.asrHanafi)) nextPrayer = new PrayerItem("Asr", todayTimes.asrHanafi);
-        else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem("Maghrib", todayTimes.maghrib);
-        else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem("Isha", todayTimes.isha);
+        if (now.before(todayTimes.fajr)) nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), todayTimes.fajr);
+        else if (now.before(todayTimes.sunrise)) nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todayTimes.sunrise);
+        else if (now.before(todayTimes.dhuhr)) nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todayTimes.dhuhr);
+        else if (now.before(todayTimes.asrHanafi)) nextPrayer = new PrayerItem(context.getString(R.string.asr_label), todayTimes.asrHanafi);
+        else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todayTimes.maghrib);
+        else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todayTimes.isha);
         else {
             // Next day's Fajr (still based on GLOBAL location)
             Calendar tomorrow = Calendar.getInstance();
             tomorrow.add(Calendar.DAY_OF_YEAR, 1);
             NamazCalculator.NamazTimes tomorrowTimes = NamazCalculator.calculateAllTimes(tomorrow.getTime(), lat, lon, method);
-            nextPrayer = new PrayerItem("Fajr", tomorrowTimes.fajr);
+            nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowTimes.fajr);
         }
 
         if (nextPrayer != null) {

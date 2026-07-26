@@ -1541,6 +1541,7 @@
 
     <!-- Namaz Widgets -->
     <string name="namaz_widget_events_category_title">Events</string>
+    <string name="namaz_widget_display_symbols_title">Display symbols instead of names</string>
     <string name="fajr_label">Fajr</string>
     <string name="sunrise_label">Sunrise</string>
     <string name="dhuhr_label">Dhuhr</string>

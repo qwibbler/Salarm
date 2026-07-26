@@ -130,7 +130,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             return rv;
         }
 
-        PrayerItem nextPrayer = getNextPrayerFromItems(allPrayers, prefs);
+        PrayerItem nextPrayer = getNextPrayerFromItems(context, allPrayers, prefs);
         int activeIndex = getActivePrayerIndex(allPrayers);
 
         // 2. Responsive Mode Determination
@@ -190,7 +190,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
 
         String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
-        String label = context.getString(R.string.namaz_countdown_format, "", next.name).replace(" To ", "").trim();
+        String label = context.getString(R.string.namaz_countdown_format, "", next.fullName).replace(" To ", "").trim();
         if (WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs)) {
             timeLeft = timeLeft.toUpperCase();
             label = label.toUpperCase();
@@ -489,34 +489,42 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         List<PrayerItem> items = new ArrayList<>();
         if (WidgetDAO.isNamazWidgetFajrVisible(prefs)) {
-            items.add(new PrayerItem(showSymbols ? "🌌" : context.getString(R.string.fajr_label), times.fajr));
+            String label = context.getString(R.string.fajr_label);
+            items.add(new PrayerItem(showSymbols ? "🌌" : label, label, times.fajr));
         }
         if (WidgetDAO.isNamazWidgetSunriseVisible(prefs)) {
-            items.add(new PrayerItem(showSymbols ? "🌅" : context.getString(R.string.sunrise_label), times.sunrise));
+            String label = context.getString(R.string.sunrise_label);
+            items.add(new PrayerItem(showSymbols ? "🌅" : label, label, times.sunrise));
         }
         if (WidgetDAO.isNamazWidgetDhuhrVisible(prefs)) {
-            items.add(new PrayerItem(showSymbols ? "☀️" : context.getString(R.string.dhuhr_label), times.dhuhr));
+            String label = context.getString(R.string.dhuhr_label);
+            items.add(new PrayerItem(showSymbols ? "☀️" : label, label, times.dhuhr));
         }
 
         if (showBothAsr) {
             if (WidgetDAO.isNamazWidgetAsrShafiVisible(prefs)) {
-                items.add(new PrayerItem(showSymbols ? "🌤️" : context.getString(R.string.asr_shafii_label), times.asrShafi));
+                String label = context.getString(R.string.asr_shafii_label);
+                items.add(new PrayerItem(showSymbols ? "🌤️" : label, label, times.asrShafi));
             }
             if (WidgetDAO.isNamazWidgetAsrHanafiVisible(prefs)) {
-                items.add(new PrayerItem(showSymbols ? "⛅" : context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+                String label = context.getString(R.string.asr_hanafi_label);
+                items.add(new PrayerItem(showSymbols ? "⛅" : label, label, times.asrHanafi));
             }
         } else {
             if (WidgetDAO.isNamazWidgetAsrVisible(prefs)) {
-                String name = showSymbols ? (isShafi ? "🌤️" : "⛅") : context.getString(R.string.asr_label);
-                items.add(new PrayerItem(name, isShafi ? times.asrShafi : times.asrHanafi));
+                String label = context.getString(R.string.asr_label);
+                String name = showSymbols ? (isShafi ? "🌤️" : "⛅") : label;
+                items.add(new PrayerItem(name, label, isShafi ? times.asrShafi : times.asrHanafi));
             }
         }
 
         if (WidgetDAO.isNamazWidgetMaghribVisible(prefs)) {
-            items.add(new PrayerItem(showSymbols ? "🌇" : context.getString(R.string.maghrib_label), times.maghrib));
+            String label = context.getString(R.string.maghrib_label);
+            items.add(new PrayerItem(showSymbols ? "🌇" : label, label, times.maghrib));
         }
         if (WidgetDAO.isNamazWidgetIshaVisible(prefs)) {
-            items.add(new PrayerItem(showSymbols ? "🌙" : context.getString(R.string.isha_label), times.isha));
+            String label = context.getString(R.string.isha_label);
+            items.add(new PrayerItem(showSymbols ? "🌙" : label, label, times.isha));
         }
 
         if (WidgetDAO.isNamazWidgetShowAlarms(prefs) && rules != null) {
@@ -564,9 +572,9 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
                 String label = (alarm != null && !alarm.label.isEmpty()) ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
                 if (WidgetDAO.isNamazWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
-                    items.add(new PrayerItem("🔔", ruleTime, rule.id));
+                    items.add(new PrayerItem("🔔", label, ruleTime, rule.id));
                 } else {
-                    items.add(new PrayerItem("🔔 " + label, ruleTime, rule.id));
+                    items.add(new PrayerItem("🔔 " + label, label, ruleTime, rule.id));
                 }
             }
         }
@@ -583,19 +591,24 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         new NamazTimelineWidgetProvider().relayoutWidget(context, wm, widgetId, null);
     }
 
-    private static PrayerItem getNextPrayerFromItems(List<PrayerItem> items, SharedPreferences prefs) {
+    private static PrayerItem getNextPrayerFromItems(Context context, List<PrayerItem> items, SharedPreferences prefs) {
         Date now = new Date();
-        for (PrayerItem item : items) { if (now.before(item.time)) return item; }
+        for (PrayerItem item : items) {
+            if (item.ruleId == -1 && now.before(item.time)) return item;
+        }
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
         NamazCalculator.NamazTimes tomorrow = getNamazTimes(prefs, cal.getTime());
-        if (tomorrow != null) return new PrayerItem("Fajr", tomorrow.fajr);
+        if (tomorrow != null) {
+            String label = context.getString(R.string.fajr_label);
+            return new PrayerItem(label, label, tomorrow.fajr);
+        }
         return null;
     }
 
     private static class PrayerItem {
-        String name; Date time; long ruleId = -1;
-        PrayerItem(String name, Date time) { this.name = name; this.time = time; }
-        PrayerItem(String name, Date time, long ruleId) { this.name = name; this.time = time; this.ruleId = ruleId; }
+        String name; String fullName; Date time; long ruleId = -1;
+        PrayerItem(String name, String fullName, Date time) { this.name = name; this.fullName = fullName; this.time = time; }
+        PrayerItem(String name, String fullName, Date time, long ruleId) { this.name = name; this.fullName = fullName; this.time = time; this.ruleId = ruleId; }
     }
 }
