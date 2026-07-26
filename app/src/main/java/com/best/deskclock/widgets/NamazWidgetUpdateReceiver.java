@@ -35,17 +35,8 @@ public class NamazWidgetUpdateReceiver extends BroadcastReceiver {
             context.sendBroadcast(updateIntent);
         }
 
-        // Update Compact Widgets
-        int[] compactIds = wm.getAppWidgetIds(new ComponentName(context, NamazCompactWidgetProvider.class));
-        if (compactIds.length > 0) {
-            Intent updateIntent = new Intent(context, NamazCompactWidgetProvider.class);
-            updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, compactIds);
-            context.sendBroadcast(updateIntent);
-        }
-
         // Reschedule for the next minute if any Namaz widget is still active
-        if (timelineIds.length > 0 || compactIds.length > 0) {
+        if (timelineIds.length > 0) {
             scheduleNextUpdate(context);
         }
     }

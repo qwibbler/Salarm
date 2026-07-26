@@ -23,7 +23,7 @@
         <SwitchPreferenceCompat
             android:key="key_namaz_widget_show_countdown"
             android:layout="@layout/settings_preference_layout"
-            android:title="Show countdown"
+            android:title="@string/namaz_widget_show_countdown_title"
             android:defaultValue="true"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
@@ -103,7 +103,7 @@
         <SwitchPreferenceCompat
             android:key="key_namaz_widget_show_alarms"
             android:layout="@layout/settings_preference_layout"
-            android:title="Show namaz alarms"
+            android:title="@string/namaz_widget_show_alarms_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false" />
 
