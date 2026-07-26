@@ -467,6 +467,12 @@
             android:label="@string/namaz_compact_widget_label"
             android:theme="@style/Theme.DeskClock" />
 
+        <activity
+            android:name="com.best.deskclock.widgets.WidgetConfiguration$NamazCountdownWidgetConfiguration"
+            android:excludeFromRecents="true"
+            android:label="@string/namaz_countdown_widget_label"
+            android:theme="@style/Theme.DeskClock" />
+
         <!-- Namaz timeline widget -->
         <receiver
             android:name="com.best.deskclock.widgets.NamazTimelineWidgetProvider"
@@ -501,6 +507,24 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/appwidget_namaz_compact_info" />
+        </receiver>
+
+        <!-- Namaz countdown widget -->
+        <receiver
+            android:name="com.best.deskclock.widgets.NamazCountdownWidgetProvider"
+            android:exported="true"
+            android:label="@string/namaz_countdown_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.APPLICATION_LOCALE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_namaz_countdown_info" />
         </receiver>
 
         <!-- ============================================================== -->
