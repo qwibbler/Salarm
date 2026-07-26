@@ -1483,15 +1483,7 @@
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>
     <string name="relational_alarm_stop_ringing">Dismiss Alarm</string>
-    <string name="relational_alarm_min">min</string>
     <string name="relational_alarm_save">SAVE</string>
-    <string name="relational_alarm_round_near">Near</string>
-    <string name="relational_alarm_round_up">Up</string>
-    <string name="relational_alarm_round_down">Down</string>
-    <string name="relational_alarm_before">Before</string>
-    <string name="relational_alarm_after">After</string>
-    <string name="relational_alarm_earlier">Earlier</string>
-    <string name="relational_alarm_later">Later</string>
     <string name="relational_alarm_than">Than</string>
 
     <!-- Relational Alarm Description -->
