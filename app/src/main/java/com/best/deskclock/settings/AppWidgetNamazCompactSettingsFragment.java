@@ -8,21 +8,27 @@ import static com.best.deskclock.settings.PreferencesKeys.*;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.core.view.HapticFeedbackConstantsCompat;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.best.deskclock.R;
 import com.best.deskclock.data.WidgetDAO;
+import com.best.deskclock.namaz.NamazDatabase;
+import com.best.deskclock.namaz.RelationalRule;
 import com.best.deskclock.settings.custompreference.ColorPickerPreference;
 import com.best.deskclock.settings.custompreference.CustomSliderPreference;
 import com.best.deskclock.utils.SdkUtils;
 import com.best.deskclock.utils.Utils;
 import com.best.deskclock.utils.WidgetUtils;
 import com.best.deskclock.widgets.NamazCompactWidgetProvider;
+
+import java.util.List;
 
 public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
 
@@ -61,6 +67,8 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
     SwitchPreferenceCompat mShowAsrHanafiPref;
     SwitchPreferenceCompat mShowMaghribPref;
     SwitchPreferenceCompat mShowIshaPref;
+
+    SwitchPreferenceCompat mShowAlarmsPref;
 
     @Override
     protected String getFragmentTitle() {
@@ -107,6 +115,8 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         mShowMaghribPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_SHOW_MAGHRIB);
         mShowIshaPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ISHA);
 
+        mShowAlarmsPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS);
+
         setupPreferences();
 
         WidgetUtils.addFinishOnBackPressedIfLaunchedFromWidget(this);
@@ -138,7 +148,7 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
             mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
             mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
             mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
-            mNamazCompactWidgetMaxFontSizePref);
+            mNamazCompactWidgetMaxFontSizePref, mShowAlarmsPref);
         nullifyAllPrefs();
         super.onDestroy();
     }
@@ -216,6 +226,12 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
                 mCustomItemNextHighlightColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
+
+            case KEY_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS -> {
+                boolean showAlarms = (boolean) newValue;
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                addRulePreferences(showAlarms);
+            }
         }
         WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazCompactWidgetProvider.class);
         return true;
@@ -287,7 +303,50 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         if (mShowMaghribPref != null) mShowMaghribPref.setOnPreferenceChangeListener(this);
         if (mShowIshaPref != null) mShowIshaPref.setOnPreferenceChangeListener(this);
 
+        if (mShowAlarmsPref != null) {
+            mShowAlarmsPref.setOnPreferenceChangeListener(this);
+            addRulePreferences(WidgetDAO.isNamazCompactWidgetShowAlarms(mPrefs));
+        }
+
         updateEventsVisibility();
+    }
+
+    private void addRulePreferences(boolean showAlarms) {
+        PreferenceCategory category = findPreference("key_namaz_compact_widget_events_category");
+        if (category == null) return;
+
+        // Remove existing rule prefs first
+        int count = category.getPreferenceCount();
+        for (int i = count - 1; i >= 0; i--) {
+            Preference p = category.getPreference(i);
+            String key = p.getKey();
+            if (key != null && key.startsWith(KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX)) {
+                category.removePreference(p);
+            }
+        }
+
+        if (showAlarms) {
+            Context context = getContext();
+            if (context == null) return;
+            com.best.deskclock.base.AppExecutors.getDiskIO().execute(() -> {
+                Context bgContext = getContext();
+                if (bgContext == null) return;
+                List<RelationalRule> rules = NamazDatabase.getDatabase(bgContext).relationalRuleDao().getAll();
+                com.best.deskclock.base.AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded()) return;
+                    for (RelationalRule rule : rules) {
+                        SwitchPreferenceCompat rulePref = new SwitchPreferenceCompat(requireContext());
+                        rulePref.setKey(KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX + rule.id);
+                        rulePref.setTitle(rule.getRuleDescription(requireContext()));
+                        rulePref.setLayoutResource(R.layout.settings_preference_layout);
+                        rulePref.setSingleLineTitle(false);
+                        rulePref.setDefaultValue(false);
+                        rulePref.setOnPreferenceChangeListener(this);
+                        category.addPreference(rulePref);
+                    }
+                });
+            });
+        }
     }
 
     private void updateEventsVisibility() {
@@ -320,6 +379,8 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         if (mShowAsrHanafiPref != null) mShowAsrHanafiPref.setChecked(WidgetDAO.isNamazCompactWidgetAsrHanafiVisible(mPrefs));
         if (mShowMaghribPref != null) mShowMaghribPref.setChecked(WidgetDAO.isNamazCompactWidgetMaghribVisible(mPrefs));
         if (mShowIshaPref != null) mShowIshaPref.setChecked(WidgetDAO.isNamazCompactWidgetIshaVisible(mPrefs));
+
+        if (mShowAlarmsPref != null) mShowAlarmsPref.setChecked(WidgetDAO.isNamazCompactWidgetShowAlarms(mPrefs));
     }
 
     private void updateNamazCompactWidget() {
@@ -351,5 +412,6 @@ public class AppWidgetNamazCompactSettingsFragment extends ScreenFragment implem
         mShowAsrHanafiPref = null;
         mShowMaghribPref = null;
         mShowIshaPref = null;
+        mShowAlarmsPref = null;
     }
 }

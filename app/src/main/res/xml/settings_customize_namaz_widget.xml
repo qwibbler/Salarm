@@ -87,6 +87,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="key_namaz_widget_alarms_category"
+        android:title="Alarms"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_namaz_widget_show_alarms"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Show Namaz Alarms"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/style_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">

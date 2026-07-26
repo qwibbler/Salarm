@@ -595,6 +595,18 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         return null;
     }
 
+    public static Alarm getAlarmByRuleId(ContentResolver cr, long ruleId) {
+        final String selection = RELATIONAL_RULE_ID + "=?";
+        final String[] selectionArgs = {String.valueOf(ruleId)};
+        try (Cursor cursor = cr.query(CONTENT_URI, QUERY_COLUMNS, selection, selectionArgs, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                return new Alarm(cursor);
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Get all alarms given conditions.
      *

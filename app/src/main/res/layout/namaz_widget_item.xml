@@ -71,16 +71,22 @@
         </LinearLayout>
 
         <!-- COMPACT MODE (Single line initials) -->
-        <TextView
-            android:id="@+id/mode_compact"
+        <LinearLayout
+            android:id="@+id/mode_compact_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:textColor="@color/widget_text_color"
-            android:textSize="12sp"
-            android:visibility="gone"
-            android:includeFontPadding="false"
-            tools:text="F: 5:12 AM" />
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/mode_compact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_text_color"
+                android:textSize="12sp"
+                android:includeFontPadding="false"
+                tools:text="F: 5:12 AM" />
+        </LinearLayout>
 
         <!-- COMPACT VERTICAL MODE (Initials left, Time right) -->
         <LinearLayout

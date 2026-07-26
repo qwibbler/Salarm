@@ -384,6 +384,9 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_next_highlight_color";
     public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ALARMS = "key_namaz_widget_show_alarms";
+    public static final String KEY_NAMAZ_WIDGET_DISMISS_ALARMS = "key_namaz_widget_dismiss_alarms";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX = "key_namaz_widget_show_rule_";
 
     // Namaz Widget Events
     public static final String KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS = "key_namaz_widget_show_both_asrs";
@@ -417,6 +420,9 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_next_highlight_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_next_highlight_color";
     public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS = "key_namaz_compact_widget_show_alarms";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISMISS_ALARMS = "key_namaz_compact_widget_dismiss_alarms";
+    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX = "key_namaz_compact_widget_show_rule_";
 
     // Namaz Compact Widget Events
     public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS = "key_namaz_compact_widget_show_both_asrs";

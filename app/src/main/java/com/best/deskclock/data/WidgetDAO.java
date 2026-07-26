@@ -779,6 +779,14 @@ public final class WidgetDAO {
         return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ISHA, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
     }
 
+    public static boolean isNamazWidgetShowAlarms(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ALARMS, DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS);
+    }
+
+    public static boolean isNamazWidgetRuleVisible(SharedPreferences prefs, long ruleId) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_RULE_PREFIX + ruleId, false);
+    }
+
     // **************************
     // ** NAMAZ COMPACT WIDGET **
     // **************************
@@ -900,6 +908,14 @@ public final class WidgetDAO {
 
     public static boolean isNamazCompactWidgetIshaVisible(SharedPreferences prefs) {
         return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ISHA, DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT);
+    }
+
+    public static boolean isNamazCompactWidgetShowAlarms(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS, DEFAULT_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS);
+    }
+
+    public static boolean isNamazCompactWidgetRuleVisible(SharedPreferences prefs, long ruleId) {
+        return prefs.getBoolean(KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX + ruleId, false);
     }
 
 }

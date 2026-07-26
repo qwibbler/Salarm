@@ -32,20 +32,23 @@ import android.widget.TextView;
 import com.batoulapps.adhan.CalculationMethod;
 import com.best.deskclock.DeskClock;
 import com.best.deskclock.R;
-import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.WidgetDAO;
 import com.best.deskclock.namaz.NamazCalculator;
+import com.best.deskclock.namaz.NamazDatabase;
+import com.best.deskclock.namaz.RelationalRule;
 import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.utils.SdkUtils;
-import com.best.deskclock.utils.ThemeUtils;
 import com.best.deskclock.utils.WidgetUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.Keep;
 import androidx.core.content.ContextCompat;
@@ -74,8 +77,6 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         super.onDisabled(context);
-        // We only cancel if no other Namaz widgets are active.
-        // NamazWidgetUpdateReceiver.onReceive handles this check during its cycle too.
     }
 
     @Override
@@ -84,23 +85,33 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
     }
 
     private void relayoutWidget(Context context, AppWidgetManager wm, int widgetId, Bundle options) {
-        if (options == null) {
-            options = wm.getAppWidgetOptions(widgetId);
-        }
+        com.best.deskclock.base.AppExecutors.getDiskIO().execute(() -> {
+            Bundle finalOptions = options != null ? options : wm.getAppWidgetOptions(widgetId);
+            SharedPreferences prefs = com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences(context);
+            List<RelationalRule> rules = null;
+            if (WidgetDAO.isNamazCompactWidgetShowAlarms(prefs)) {
+                rules = NamazDatabase.getDatabase(context).relationalRuleDao().getAll();
+            }
+            List<RelationalRule> finalRules = rules;
 
-        final RemoteViews portrait = buildRemoteViews(context, wm, widgetId, options, true);
-        final RemoteViews landscape = buildRemoteViews(context, wm, widgetId, options, false);
+            Date now = new Date();
+            NamazCalculator.NamazTimes times = getNamazTimes(prefs, now);
+            List<PrayerItem> allPrayers = times != null ? getAllPrayers(context, times, prefs, finalRules) : new ArrayList<>();
 
-        final RemoteViews widget = new RemoteViews(landscape, portrait);
-        wm.updateAppWidget(widgetId, widget);
+            com.best.deskclock.base.AppExecutors.getMainThread().post(() -> {
+                final RemoteViews portrait = buildRemoteViews(context, wm, widgetId, finalOptions, true, times, allPrayers);
+                final RemoteViews landscape = buildRemoteViews(context, wm, widgetId, finalOptions, false, times, allPrayers);
+
+                final RemoteViews widget = new RemoteViews(landscape, portrait);
+                wm.updateAppWidget(widgetId, widget);
+            });
+        });
     }
 
-    private RemoteViews buildRemoteViews(Context context, AppWidgetManager wm, int widgetId, Bundle options, boolean portrait) {
+    private RemoteViews buildRemoteViews(Context context, AppWidgetManager wm, int widgetId, Bundle options, boolean portrait, NamazCalculator.NamazTimes times, List<PrayerItem> allPrayers) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.appwidget_namaz_compact);
 
-        Date now = new Date();
-        NamazCalculator.NamazTimes times = getNamazTimes(prefs, now);
         if (times == null) {
             RemoteViews itemRv = new RemoteViews(context.getPackageName(), R.layout.namaz_widget_item);
             itemRv.setViewVisibility(R.id.mode_compact_vertical, View.VISIBLE);
@@ -109,7 +120,6 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             return rv;
         }
 
-        List<PrayerItem> allPrayers = getAllPrayers(context, times, prefs);
         int activeIndex = getActivePrayerIndex(allPrayers);
         int nextIndex = (activeIndex + 1) % allPrayers.size();
 
@@ -150,11 +160,13 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
             RemoteViews itemRv = new RemoteViews(context.getPackageName(), R.layout.namaz_widget_item);
             itemRv.setViewVisibility(R.id.mode_wide, View.GONE);
             itemRv.setViewVisibility(R.id.mode_narrow, View.GONE);
-            itemRv.setViewVisibility(R.id.mode_compact, View.GONE);
+            itemRv.setViewVisibility(R.id.mode_compact_container, View.GONE);
             itemRv.setViewVisibility(R.id.mode_compact_vertical, View.VISIBLE);
 
             String initial;
-            if (prayer.name.equals(context.getString(R.string.asr_shafii_label))) {
+            if (prayer.ruleId != -1) {
+                initial = "🔔";
+            } else if (prayer.name.equals(context.getString(R.string.asr_shafii_label))) {
                 initial = "A1";
             } else if (prayer.name.equals(context.getString(R.string.asr_hanafi_label))) {
                 initial = "A2";
@@ -166,7 +178,9 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
 
             String time = timeFormat.format(prayer.time);
             if (uppercase) {
-                initial = initial.toUpperCase();
+                if (prayer.ruleId == -1) {
+                    initial = initial.toUpperCase();
+                }
                 time = time.toUpperCase();
             }
 
@@ -176,6 +190,7 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
 
             applyItemHighlight(itemRv, prefs, i, activeIndex, nextIndex, activeColor, nextColor);
 
+            itemRv.setViewVisibility(R.id.initial_compact, View.VISIBLE);
             itemRv.setTextViewText(R.id.initial_compact, initial);
             itemRv.setTextViewTextSize(R.id.initial_compact, COMPLEX_UNIT_PX, sizes.mWidgetFontSizePx);
             itemRv.setTextColor(R.id.initial_compact, color);
@@ -340,7 +355,7 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         } catch (Exception e) { return null; }
     }
 
-    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
+    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs, List<RelationalRule> rules) {
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
         boolean showBothAsr = WidgetDAO.isNamazCompactWidgetShowBothAsrs(prefs);
@@ -375,18 +390,46 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
         if (WidgetDAO.isNamazCompactWidgetIshaVisible(prefs)) {
             items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
         }
+
+        if (WidgetDAO.isNamazCompactWidgetShowAlarms(prefs) && rules != null) {
+            Date now = new Date();
+            Calendar tomorrowCal = Calendar.getInstance();
+            tomorrowCal.add(Calendar.DAY_OF_YEAR, 1);
+            NamazCalculator.NamazTimes tomorrowTimes = getNamazTimes(prefs, tomorrowCal.getTime());
+
+            for (RelationalRule rule : rules) {
+                if (WidgetDAO.isNamazCompactWidgetRuleVisible(prefs, rule.id)) {
+                    addAlarmIfValid(context, items, rule, times, now);
+                    if (tomorrowTimes != null) {
+                        addAlarmIfValid(context, items, rule, tomorrowTimes, now);
+                    }
+                }
+            }
+            Collections.sort(items, new Comparator<PrayerItem>() {
+                @Override
+                public int compare(PrayerItem o1, PrayerItem o2) {
+                    return o1.time.compareTo(o2.time);
+                }
+            });
+        }
         return items;
     }
 
-    private static PrayerItem getNextPrayer(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs) {
-        Date now = new Date();
-        List<PrayerItem> items = getAllPrayers(context, times, prefs);
-        for (PrayerItem item : items) { if (now.before(item.time)) return item; }
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, 1);
-        NamazCalculator.NamazTimes tomorrow = getNamazTimes(prefs, cal.getTime());
-        if (tomorrow != null) return new PrayerItem("Fajr", tomorrow.fajr);
-        return null;
+    private static void addAlarmIfValid(Context context, List<PrayerItem> items, RelationalRule rule, NamazCalculator.NamazTimes times, Date now) {
+        Date ruleTime = RelationalRule.evaluateTime(rule, times, new Date());
+        if (ruleTime.getTime() > 0) {
+            long diff = ruleTime.getTime() - now.getTime();
+            if (Math.abs(diff) < TimeUnit.HOURS.toMillis(24)) {
+                com.best.deskclock.provider.Alarm alarm = com.best.deskclock.provider.Alarm.getAlarmByRuleId(context.getContentResolver(), rule.id);
+                if (alarm != null && !alarm.daysOfWeek.isRepeating()) {
+                    if (now.getTime() - ruleTime.getTime() > TimeUnit.MINUTES.toMillis(30)) {
+                        return;
+                    }
+                }
+                String label = (alarm != null && !alarm.label.isEmpty()) ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
+                items.add(new PrayerItem(label, ruleTime, rule.id));
+            }
+        }
     }
 
     private static int getActivePrayerIndex(List<PrayerItem> items) {
@@ -401,7 +444,8 @@ public class NamazCompactWidgetProvider extends AppWidgetProvider {
     }
 
     private static class PrayerItem {
-        String name; Date time;
+        String name; Date time; long ruleId = -1;
         PrayerItem(String name, Date time) { this.name = name; this.time = time; }
+        PrayerItem(String name, Date time, long ruleId) { this.name = name; this.time = time; this.ruleId = ruleId; }
     }
 }
