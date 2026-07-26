@@ -391,14 +391,6 @@ public class PreferencesKeys {
 
     // Namaz Widget Events
     public static final String KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS = "key_namaz_widget_show_both_asrs";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_FAJR = "key_namaz_widget_show_fajr";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_SUNRISE = "key_namaz_widget_show_sunrise";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_DHUHR = "key_namaz_widget_show_dhuhr";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR = "key_namaz_widget_show_asr";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI = "key_namaz_widget_show_asr_hanafi";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI = "key_namaz_widget_show_asr_shafi";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_MAGHRIB = "key_namaz_widget_show_maghrib";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_ISHA = "key_namaz_widget_show_isha";
 
     // Namaz Countdown Widget
     public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_countdown_widget_display_text_uppercase";

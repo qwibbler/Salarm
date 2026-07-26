@@ -153,9 +153,6 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_NAMAZ_LOCATION_MODE = "GPS";
     public static final String DEFAULT_NAMAZ_CITY_NAME = "Unknown";
     public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR = false;
-    public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS = false;
-    public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES = false;
-    public static final String DEFAULT_NAMAZ_DISPLAY_TIMEZONE = null;
 
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;
@@ -280,7 +277,6 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;

@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

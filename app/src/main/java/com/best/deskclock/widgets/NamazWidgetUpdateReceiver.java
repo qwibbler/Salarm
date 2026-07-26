@@ -10,8 +10,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-import com.best.deskclock.utils.LogUtils;
-
 import java.util.Calendar;
 
 /**

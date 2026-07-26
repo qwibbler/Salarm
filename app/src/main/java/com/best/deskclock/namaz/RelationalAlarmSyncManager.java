@@ -89,17 +89,6 @@ public class RelationalAlarmSyncManager {
         }
     }
 
-    public static void syncRuleToNativeAlarm(Context context, RelationalRule rule) {
-        final Context appContext = context.getApplicationContext();
-        AppExecutors.getDiskIO().execute(() -> {
-            try {
-                syncRuleToNativeAlarmInternal(appContext, rule, null);
-            } catch (Throwable t) {
-                NamazErrorHandler.handleSyncError(appContext, t);
-            }
-        });
-    }
-
     /**
      * Synchronizes a rule to a native alarm.
      * If a new alarm must be created, it uses the provided defaultRingtone (Solution A)
