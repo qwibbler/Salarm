@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.Madhab;
 import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.base.AppExecutors;
@@ -385,48 +386,10 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         if (mBinding == null) return;
 
         try {
-            RelationalRule rule = new RelationalRule();
+            RelationalRule rule = parseRuleFromUi();
             Bundle args = getArguments();
             if (args != null && args.containsKey(ARG_RULE_ID)) {
                 rule.id = args.getLong(ARG_RULE_ID);
-            }
-            rule.enabled = true;
-
-            // Map UI to Rule
-            int primaryEventIdx = getPrayerEventIndex(getText(mBinding.primaryEvent));
-            rule.anchorEvent = RelationalRule.AnchorEvent.values()[primaryEventIdx];
-
-            int primaryOffset = parseMinutes(getText(mBinding.primaryOffsetValue));
-            if (mPrimaryOffsetIdx == 0) primaryOffset *= -1; // Before
-            rule.offsetMinutes = primaryOffset;
-
-            rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
-            rule.roundingIntervalMinutes = parseMinutes(getText(mBinding.primaryRoundValue));
-
-            if (mBinding.safetyEnabledCheckbox.isChecked()) {
-                RelationalRule.Clip clip = new RelationalRule.Clip();
-                clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.MAX : RelationalRule.BoundaryType.MIN; // Earlier Than -> MAX, Later Than -> MIN
-
-                int safetyEventIdx = getPrayerEventIndex(getText(mBinding.safetyEvent));
-                clip.clipEvent = RelationalRule.AnchorEvent.values()[safetyEventIdx];
-
-                int safetyOffset = parseMinutes(getText(mBinding.safetyOffsetValue));
-                if (mSafetyOffsetIdx == 0) safetyOffset *= -1; // Before
-                clip.clipOffsetMinutes = safetyOffset;
-
-                clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
-                clip.clipRoundingIntervalMinutes = parseMinutes(getText(mBinding.safetyRoundValue));
-                rule.clip = clip;
-            }
-
-            if (mBinding.autostopEnabledCheckbox.isChecked()) {
-                rule.autostopEnabled = true;
-                int autostopEventIdx = getPrayerEventIndex(getText(mBinding.autostopEvent));
-                rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[autostopEventIdx];
-
-                int autostopOffset = parseMinutes(getText(mBinding.autostopOffsetValue));
-                if (mAutostopOffsetIdx == 0) autostopOffset *= -1; // Before
-                rule.autostopOffsetMinutes = autostopOffset;
             }
 
             android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
@@ -465,9 +428,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
     private int getPrayerEventIndex(String eventName) {
         if (getString(R.string.asr_label).equals(eventName)) {
-            SharedPreferences prefs = DeskClockApplication.getDefaultSharedPreferences(requireContext());
-            String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
-            return madhab.equals("HANAFI") ? 4 : 3; // 4: ASR_HANAFI, 3: ASR_SHAFI
+            Madhab madhab = NamazUtils.getMadhab(requireContext());
+            return madhab == Madhab.HANAFI ? 4 : 3; // 4: ASR_HANAFI, 3: ASR_SHAFI
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
         for (int i = 0; i < events.length; i++) {
@@ -488,6 +450,10 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             (dialog, which) -> {
                 try {
                     RelationalRule rule = parseRuleFromUi();
+                    Bundle args = getArguments();
+                    if (args != null && args.containsKey(ARG_RULE_ID)) {
+                        rule.id = args.getLong(ARG_RULE_ID);
+                    }
                     android.net.Uri defaultRingtone = com.best.deskclock.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
                     RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, true, defaultRingtone);
                     dismiss();
@@ -509,28 +475,33 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         RelationalRule rule = new RelationalRule();
         rule.enabled = true;
         rule.anchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.primaryEvent))];
-        int primaryOffset = Integer.parseInt(getText(mBinding.primaryOffsetValue));
+
+        int primaryOffset = parseMinutes(getText(mBinding.primaryOffsetValue));
         if (mPrimaryOffsetIdx == 0) primaryOffset *= -1;
         rule.offsetMinutes = primaryOffset;
+
         rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
-        rule.roundingIntervalMinutes = Integer.parseInt(getText(mBinding.primaryRoundValue));
+        rule.roundingIntervalMinutes = parseMinutes(getText(mBinding.primaryRoundValue));
 
         if (mBinding.safetyEnabledCheckbox.isChecked()) {
             RelationalRule.Clip clip = new RelationalRule.Clip();
             clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.MAX : RelationalRule.BoundaryType.MIN;
             clip.clipEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.safetyEvent))];
-            int safetyOffset = Integer.parseInt(getText(mBinding.safetyOffsetValue));
+
+            int safetyOffset = parseMinutes(getText(mBinding.safetyOffsetValue));
             if (mSafetyOffsetIdx == 0) safetyOffset *= -1;
             clip.clipOffsetMinutes = safetyOffset;
+
             clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
-            clip.clipRoundingIntervalMinutes = Integer.parseInt(getText(mBinding.safetyRoundValue));
+            clip.clipRoundingIntervalMinutes = parseMinutes(getText(mBinding.safetyRoundValue));
             rule.clip = clip;
         }
 
         if (mBinding.autostopEnabledCheckbox.isChecked()) {
             rule.autostopEnabled = true;
             rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.autostopEvent))];
-            int autostopOffset = Integer.parseInt(getText(mBinding.autostopOffsetValue));
+
+            int autostopOffset = parseMinutes(getText(mBinding.autostopOffsetValue));
             if (mAutostopOffsetIdx == 0) autostopOffset *= -1;
             rule.autostopOffsetMinutes = autostopOffset;
         }

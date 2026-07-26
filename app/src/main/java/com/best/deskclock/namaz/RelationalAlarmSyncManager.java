@@ -20,8 +20,6 @@ import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.data.Weekdays;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
-import com.best.deskclock.settings.PreferencesDefaultValues;
-import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.LogUtils;
 
@@ -74,8 +72,8 @@ public class RelationalAlarmSyncManager {
     }
 
     private static void validateRuleConflict(Context context, RelationalRule rule) throws RelationalRule.InvalidRuleException {
-        double[] coords = getCoordinates(context);
-        CalculationMethod method = getCalculationMethod(context);
+        double[] coords = NamazUtils.getCoordinates(context);
+        CalculationMethod method = NamazUtils.getCalculationMethod(context);
 
         Calendar now = Calendar.getInstance();
         NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(now.getTime(), coords[0], coords[1], method);
@@ -185,8 +183,8 @@ public class RelationalAlarmSyncManager {
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final boolean wasStyledDaysEnabled = alarm.isRepeatDayStyleEnabled(prefs);
 
-        double[] coords = getCoordinates(context);
-        CalculationMethod method = getCalculationMethod(context);
+        double[] coords = NamazUtils.getCoordinates(context);
+        CalculationMethod method = NamazUtils.getCalculationMethod(context);
 
         Calendar now = Calendar.getInstance();
         // Use minute precision for all comparisons to match AOSP Alarm behavior
@@ -352,31 +350,6 @@ public class RelationalAlarmSyncManager {
                 .build();
 
         nm.notify((int) System.currentTimeMillis(), notification);
-    }
-
-    private static double[] getCoordinates(Context context) {
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE);
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE);
-        try {
-            double lat = Double.parseDouble(latStr);
-            double lon = Double.parseDouble(lonStr);
-            return new double[]{lat, lon};
-        } catch (NumberFormatException e) {
-            LogUtils.e("Error parsing coordinates from preferences", e);
-            return new double[]{0.0, 0.0};
-        }
-    }
-
-    private static CalculationMethod getCalculationMethod(Context context) {
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
-        try {
-            return CalculationMethod.valueOf(methodStr);
-        } catch (IllegalArgumentException e) {
-            LogUtils.e("Invalid calculation method in preferences: " + methodStr, e);
-            return CalculationMethod.valueOf(PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
-        }
     }
 
     private static Calendar toCalendar(long millis) {
