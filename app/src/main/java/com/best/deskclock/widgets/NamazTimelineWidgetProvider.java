@@ -145,14 +145,16 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         final int targetHeightPx = portrait ? maxHeightPx : minHeightPx;
 
         boolean showSymbols = WidgetDAO.isNamazWidgetSymbolsVisible(prefs);
-        int mode = getLayoutMode(targetWidthPx / density, showSymbols);
+        float widthDp = targetWidthPx / density;
+        boolean isNarrow = widthDp <= 180;
+        int mode = getLayoutMode(widthDp, showSymbols);
 
         boolean isCountdownVisible = WidgetDAO.isNamazWidgetCountdownVisible(prefs);
         boolean isHeight1 = (options.getInt(OPTION_APPWIDGET_MIN_HEIGHT) < 100);
 
         // 3. Size Optimization (Binary Search)
         int maxFontSize = WidgetDAO.getNamazWidgetMaxFontSize(prefs);
-        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode, allPrayers, isCountdownVisible, isHeight1);
+        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode, allPrayers, isCountdownVisible, isHeight1, showSymbols, isNarrow);
 
         // 4. Styles Application
         configureBackground(rv, context, prefs, targetWidthPx, targetHeightPx);
@@ -162,7 +164,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         if (!isCountdownVisible) {
             rv.setViewVisibility(R.id.countdown_container, View.GONE);
             rv.setViewVisibility(R.id.timeline_container, View.VISIBLE);
-            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx, showSymbols, isNarrow);
         } else if (isHeight1) {
             rv.setViewVisibility(R.id.countdown_container, View.VISIBLE);
             rv.setViewVisibility(R.id.timeline_container, View.GONE);
@@ -171,7 +173,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             rv.setViewVisibility(R.id.countdown_container, View.VISIBLE);
             rv.setViewVisibility(R.id.timeline_container, View.VISIBLE);
             updateCountdown(rv, context, prefs, nextPrayer, sizes.mWidgetFontSizePx, sizes.mFontSizePx);
-            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx, showSymbols, isNarrow);
         }
 
         // 6. Click Action
@@ -218,7 +220,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     }
 
     private static void renderTimeline(RemoteViews rv, Context context, SharedPreferences prefs,
-                                      List<PrayerItem> prayers, int activeIndex, int mode, float fontSize) {
+                                      List<PrayerItem> prayers, int activeIndex, int mode, float fontSize,
+                                      boolean showSymbols, boolean isNarrow) {
         rv.removeAllViews(R.id.timeline_container);
 
         SimpleDateFormat timeFormat = new SimpleDateFormat(DateFormat.is24HourFormat(context) ? "HH:mm" : "h:mm a", Locale.getDefault());
@@ -237,6 +240,11 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                 : WidgetDAO.getNamazWidgetCustomTimelineStandardColor(prefs);
 
         int nextIndex = (activeIndex + 1) % prayers.size();
+
+        float effectiveFontSize = fontSize;
+        if (showSymbols && isNarrow) {
+            effectiveFontSize *= 0.9f;
+        }
 
         for (int i = 0; i < prayers.size(); i++) {
             PrayerItem prayer = prayers.get(i);
@@ -269,15 +277,15 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                 itemRv.setTextViewText(R.id.time_wide, time);
                 itemRv.setTextColor(R.id.label_wide, color);
                 itemRv.setTextColor(R.id.time_wide, color);
-                itemRv.setTextViewTextSize(R.id.label_wide, COMPLEX_UNIT_PX, fontSize);
-                itemRv.setTextViewTextSize(R.id.time_wide, COMPLEX_UNIT_PX, fontSize);
+                itemRv.setTextViewTextSize(R.id.label_wide, COMPLEX_UNIT_PX, effectiveFontSize);
+                itemRv.setTextViewTextSize(R.id.time_wide, COMPLEX_UNIT_PX, effectiveFontSize);
             } else {
                 itemRv.setTextViewText(R.id.label_narrow, name);
                 itemRv.setTextViewText(R.id.time_narrow, time);
                 itemRv.setTextColor(R.id.label_narrow, color);
                 itemRv.setTextColor(R.id.time_narrow, color);
-                itemRv.setTextViewTextSize(R.id.label_narrow, COMPLEX_UNIT_PX, fontSize * 0.8f);
-                itemRv.setTextViewTextSize(R.id.time_narrow, COMPLEX_UNIT_PX, fontSize);
+                itemRv.setTextViewTextSize(R.id.label_narrow, COMPLEX_UNIT_PX, effectiveFontSize * 0.8f);
+                itemRv.setTextViewTextSize(R.id.time_narrow, COMPLEX_UNIT_PX, effectiveFontSize);
             }
 
             rv.addView(R.id.timeline_container, itemRv);
@@ -354,7 +362,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx,
                                            int maxFontSize, int mode, List<PrayerItem> prayers,
-                                           boolean isCountdownVisible, boolean isHeight1) {
+                                           boolean isCountdownVisible, boolean isHeight1,
+                                           boolean showSymbols, boolean isNarrow) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
@@ -384,14 +393,14 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
 
         // Improved scaling: use a smaller ratio (1.5f) to let timeline items grow even more
-        DigitalWidgetSizes low = measure(template, 10, sizer, mode, prayers, isCountdownVisible, isHeight1);
-        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode, prayers, isCountdownVisible, isHeight1);
+        DigitalWidgetSizes low = measure(template, 10, sizer, mode, prayers, isCountdownVisible, isHeight1, showSymbols, isNarrow);
+        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode, prayers, isCountdownVisible, isHeight1, showSymbols, isNarrow);
 
         if (!high.hasViolations()) return high;
 
         while (low.getWidgetFontSizePx() < high.getWidgetFontSizePx() - 1) {
             int mid = (low.getWidgetFontSizePx() + high.getWidgetFontSizePx()) / 2;
-            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode, prayers, isCountdownVisible, isHeight1);
+            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode, prayers, isCountdownVisible, isHeight1, showSymbols, isNarrow);
             if (midSize.hasViolations()) high = midSize;
             else low = midSize;
         }
@@ -399,9 +408,14 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     }
 
     private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode, List<PrayerItem> prayers,
-                                     boolean isCountdownVisible, boolean isHeight1) {
+                                     boolean isCountdownVisible, boolean isHeight1, boolean showSymbols, boolean isNarrow) {
         DigitalWidgetSizes measured = template.newSize();
         measured.setWidgetFontSizePx(fontSizePx, 1.5f);
+
+        float effectiveFontSize = measured.mFontSizePx;
+        if (showSymbols && isNarrow && isCountdownVisible) {
+            effectiveFontSize *= 0.9f;
+        }
 
         View countdownContainer = sizer.findViewById(R.id.countdown_container);
         if (countdownContainer != null) {
@@ -416,7 +430,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         TextView labelView = sizer.findViewById(R.id.countdown_label);
         if (labelView != null) {
-            labelView.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+            labelView.setTextSize(COMPLEX_UNIT_PX, effectiveFontSize);
             labelView.setText("TO ASR SHAFI'I");
         }
 
@@ -434,11 +448,11 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                 if (mode == MODE_WIDE) {
                     if (tvWide != null) {
                         tvWide.setText(name);
-                        tvWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                        tvWide.setTextSize(COMPLEX_UNIT_PX, effectiveFontSize);
                     }
                     if (tvTimeWide != null) {
                         tvTimeWide.setText("11:59 PM");
-                        tvTimeWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                        tvTimeWide.setTextSize(COMPLEX_UNIT_PX, effectiveFontSize);
                     }
                     View modeWide = item.findViewById(R.id.mode_wide);
                     if (modeWide != null) modeWide.setVisibility(View.VISIBLE);
@@ -447,11 +461,11 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                 } else {
                     if (tvNarrow != null) {
                         tvNarrow.setText(name);
-                        tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx * 0.8f);
+                        tvNarrow.setTextSize(COMPLEX_UNIT_PX, effectiveFontSize * 0.8f);
                     }
                     if (tvTimeNarrow != null) {
                         tvTimeNarrow.setText("11:59 PM");
-                        tvTimeNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                        tvTimeNarrow.setTextSize(COMPLEX_UNIT_PX, effectiveFontSize);
                     }
                     View modeWide = item.findViewById(R.id.mode_wide);
                     if (modeWide != null) modeWide.setVisibility(View.GONE);
