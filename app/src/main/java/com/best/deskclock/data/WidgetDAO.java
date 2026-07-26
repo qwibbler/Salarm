@@ -740,6 +740,10 @@ public final class WidgetDAO {
         return prefs.getInt(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
     }
 
+    public static boolean isNamazWidgetCountdownVisible(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN, DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN);
+    }
+
     public static boolean isNamazWidgetShowBothAsrs(SharedPreferences prefs) {
         if (!prefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
             return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, DEFAULT_NAMAZ_SHOW_BOTH_ASR);

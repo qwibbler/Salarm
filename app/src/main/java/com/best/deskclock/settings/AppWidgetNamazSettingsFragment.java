@@ -63,6 +63,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
     CustomSliderPreference mNamazWidgetMaxFontSizePref;
 
     SwitchPreferenceCompat mShowBothAsrsPref;
+    SwitchPreferenceCompat mShowCountdownPref;
     SwitchPreferenceCompat mShowFajrPref;
     SwitchPreferenceCompat mShowSunrisePref;
     SwitchPreferenceCompat mShowDhuhrPref;
@@ -114,6 +115,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mNamazWidgetMaxFontSizePref = findPreference(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE);
 
         mShowBothAsrsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS);
+        mShowCountdownPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN);
         mShowFajrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_FAJR);
         mShowSunrisePref = findPreference(KEY_NAMAZ_WIDGET_SHOW_SUNRISE);
         mShowDhuhrPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_DHUHR);
@@ -159,7 +161,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
             mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
             mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
             mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
-            mNamazWidgetMaxFontSizePref, mShowAlarmsPref);
+            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref);
 
         nullifyAllPrefs();
 
@@ -176,7 +178,8 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
         switch (key) {
             case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
-                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_FAJR,
+                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN,
+                 KEY_NAMAZ_WIDGET_SHOW_FAJR,
                  KEY_NAMAZ_WIDGET_SHOW_SUNRISE, KEY_NAMAZ_WIDGET_SHOW_DHUHR,
                  KEY_NAMAZ_WIDGET_SHOW_ASR, KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI,
                  KEY_NAMAZ_WIDGET_SHOW_ASR_HANAFI, KEY_NAMAZ_WIDGET_SHOW_MAGHRIB,
@@ -335,6 +338,8 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
 
         mNamazWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
 
+        if (mShowCountdownPref != null) mShowCountdownPref.setOnPreferenceChangeListener(this);
+
         if (mShowBothAsrsPref != null) {
             if (!mPrefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
                 mShowBothAsrsPref.setChecked(mPrefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, false));
@@ -420,6 +425,8 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mDefaultItemActiveHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
         mDefaultItemNextHighlightColorPref.setChecked(WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
 
+        if (mShowCountdownPref != null) mShowCountdownPref.setChecked(WidgetDAO.isNamazWidgetCountdownVisible(mPrefs));
+
         if (mShowFajrPref != null) mShowFajrPref.setChecked(WidgetDAO.isNamazWidgetFajrVisible(mPrefs));
         if (mShowSunrisePref != null) mShowSunrisePref.setChecked(WidgetDAO.isNamazWidgetSunriseVisible(mPrefs));
         if (mShowDhuhrPref != null) mShowDhuhrPref.setChecked(WidgetDAO.isNamazWidgetDhuhrVisible(mPrefs));
@@ -467,6 +474,7 @@ public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Pr
         mCustomItemNextHighlightColorPref = null;
         mNamazWidgetMaxFontSizePref = null;
         mShowBothAsrsPref = null;
+        mShowCountdownPref = null;
         mShowFajrPref = null;
         mShowSunrisePref = null;
         mShowDhuhrPref = null;

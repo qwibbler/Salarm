@@ -281,8 +281,8 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_PRAYER_EVENT = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_DISMISS_ALARMS = false;
 
     // Namaz Compact Widget
     public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND = true;

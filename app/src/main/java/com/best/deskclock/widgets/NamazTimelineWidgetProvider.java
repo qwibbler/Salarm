@@ -146,17 +146,32 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         int mode = getLayoutMode(targetWidthPx / density);
 
+        boolean isCountdownVisible = WidgetDAO.isNamazWidgetCountdownVisible(prefs);
+        boolean isHeight1 = (options.getInt(OPTION_APPWIDGET_MIN_HEIGHT) < 100);
+
         // 3. Size Optimization (Binary Search)
         int maxFontSize = WidgetDAO.getNamazWidgetMaxFontSize(prefs);
-        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode, allPrayers);
+        DigitalWidgetSizes sizes = optimizeSizes(context, targetWidthPx, targetHeightPx, maxFontSize, mode, allPrayers, isCountdownVisible, isHeight1);
 
         // 4. Styles Application
         configureBackground(rv, context, prefs, targetWidthPx, targetHeightPx);
         configurePadding(rv, context, prefs);
 
         // 5. Content Rendering
-        updateCountdown(rv, context, prefs, nextPrayer, sizes.mWidgetFontSizePx, sizes.mFontSizePx);
-        renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+        if (!isCountdownVisible) {
+            rv.setViewVisibility(R.id.countdown_container, View.GONE);
+            rv.setViewVisibility(R.id.timeline_container, View.VISIBLE);
+            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+        } else if (isHeight1) {
+            rv.setViewVisibility(R.id.countdown_container, View.VISIBLE);
+            rv.setViewVisibility(R.id.timeline_container, View.GONE);
+            updateCountdown(rv, context, prefs, nextPrayer, sizes.mWidgetFontSizePx, sizes.mFontSizePx);
+        } else {
+            rv.setViewVisibility(R.id.countdown_container, View.VISIBLE);
+            rv.setViewVisibility(R.id.timeline_container, View.VISIBLE);
+            updateCountdown(rv, context, prefs, nextPrayer, sizes.mWidgetFontSizePx, sizes.mFontSizePx);
+            renderTimeline(rv, context, prefs, allPrayers, activeIndex, mode, sizes.mFontSizePx);
+        }
 
         // 6. Click Action
         Intent intent = new Intent(context, DeskClock.class);
@@ -336,17 +351,26 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     }
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx,
-                                           int maxFontSize, int mode, List<PrayerItem> prayers) {
+                                           int maxFontSize, int mode, List<PrayerItem> prayers,
+                                           boolean isCountdownVisible, boolean isHeight1) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
         View sizer = inflater.inflate(R.layout.appwidget_namaz_timeline_sizer, null);
 
+        View countdownContainer = sizer.findViewById(R.id.countdown_container);
+        if (countdownContainer != null) {
+            countdownContainer.setVisibility(isCountdownVisible ? View.VISIBLE : View.GONE);
+        }
+
         LinearLayout container = sizer.findViewById(R.id.timeline_container);
-        container.removeAllViews();
-        for (int i = 0; i < prayers.size(); i++) {
-            View item = inflater.inflate(R.layout.namaz_widget_item, container, false);
-            container.addView(item);
+        if (container != null) {
+            container.setVisibility((!isCountdownVisible || !isHeight1) ? View.VISIBLE : View.GONE);
+            container.removeAllViews();
+            for (int i = 0; i < prayers.size(); i++) {
+                View item = inflater.inflate(R.layout.namaz_widget_item, container, false);
+                container.addView(item);
+            }
         }
 
         SharedPreferences prefs = getDefaultSharedPreferences(context);
@@ -358,55 +382,80 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         DigitalWidgetSizes template = new DigitalWidgetSizes(targetWidthPx, targetHeightPx, (int)dpToPx(maxFontSize, context.getResources().getDisplayMetrics()));
 
         // Improved scaling: use a smaller ratio (1.5f) to let timeline items grow even more
-        DigitalWidgetSizes low = measure(template, 10, sizer, mode, prayers);
-        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode, prayers);
+        DigitalWidgetSizes low = measure(template, 10, sizer, mode, prayers, isCountdownVisible, isHeight1);
+        DigitalWidgetSizes high = measure(template, template.getLargestFontSizePx(), sizer, mode, prayers, isCountdownVisible, isHeight1);
 
         if (!high.hasViolations()) return high;
 
         while (low.getWidgetFontSizePx() < high.getWidgetFontSizePx() - 1) {
             int mid = (low.getWidgetFontSizePx() + high.getWidgetFontSizePx()) / 2;
-            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode, prayers);
+            DigitalWidgetSizes midSize = measure(template, mid, sizer, mode, prayers, isCountdownVisible, isHeight1);
             if (midSize.hasViolations()) high = midSize;
             else low = midSize;
         }
         return low;
     }
 
-    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode, List<PrayerItem> prayers) {
+    private DigitalWidgetSizes measure(DigitalWidgetSizes template, int fontSizePx, View sizer, int mode, List<PrayerItem> prayers,
+                                     boolean isCountdownVisible, boolean isHeight1) {
         DigitalWidgetSizes measured = template.newSize();
         measured.setWidgetFontSizePx(fontSizePx, 1.5f);
 
+        View countdownContainer = sizer.findViewById(R.id.countdown_container);
+        if (countdownContainer != null) {
+            countdownContainer.setVisibility(isCountdownVisible ? View.VISIBLE : View.GONE);
+        }
+
         TextView timeView = sizer.findViewById(R.id.countdown_time);
-        timeView.setTextSize(COMPLEX_UNIT_PX, measured.mWidgetFontSizePx);
-        timeView.setText("11h:59m");
+        if (timeView != null) {
+            timeView.setTextSize(COMPLEX_UNIT_PX, measured.mWidgetFontSizePx);
+            timeView.setText("11h:59m");
+        }
 
         TextView labelView = sizer.findViewById(R.id.countdown_label);
-        labelView.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
-        labelView.setText("TO ASR SHAFI'I");
+        if (labelView != null) {
+            labelView.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+            labelView.setText("TO ASR SHAFI'I");
+        }
 
         LinearLayout container = sizer.findViewById(R.id.timeline_container);
-        for (int i = 0; i < container.getChildCount(); i++) {
-            View item = container.getChildAt(i);
-            TextView tvWide = item.findViewById(R.id.label_wide);
-            TextView tvNarrow = item.findViewById(R.id.label_narrow);
-            TextView tvTimeWide = item.findViewById(R.id.time_wide);
-            TextView tvTimeNarrow = item.findViewById(R.id.time_narrow);
+        if (container != null) {
+            container.setVisibility((!isCountdownVisible || !isHeight1) ? View.VISIBLE : View.GONE);
+            for (int i = 0; i < container.getChildCount(); i++) {
+                View item = container.getChildAt(i);
+                TextView tvWide = item.findViewById(R.id.label_wide);
+                TextView tvNarrow = item.findViewById(R.id.label_narrow);
+                TextView tvTimeWide = item.findViewById(R.id.time_wide);
+                TextView tvTimeNarrow = item.findViewById(R.id.time_narrow);
 
-            String name = prayers.get(i).name;
-            if (mode == MODE_WIDE) {
-                tvWide.setText(name);
-                tvTimeWide.setText("11:59 PM");
-                tvWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
-                tvTimeWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
-                item.findViewById(R.id.mode_wide).setVisibility(View.VISIBLE);
-                item.findViewById(R.id.mode_narrow).setVisibility(View.GONE);
-            } else {
-                tvNarrow.setText(name);
-                tvTimeNarrow.setText("11:59 PM");
-                tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx * 0.8f);
-                tvTimeNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
-                item.findViewById(R.id.mode_wide).setVisibility(View.GONE);
-                item.findViewById(R.id.mode_narrow).setVisibility(View.VISIBLE);
+                String name = prayers.get(i).name;
+                if (mode == MODE_WIDE) {
+                    if (tvWide != null) {
+                        tvWide.setText(name);
+                        tvWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                    }
+                    if (tvTimeWide != null) {
+                        tvTimeWide.setText("11:59 PM");
+                        tvTimeWide.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                    }
+                    View modeWide = item.findViewById(R.id.mode_wide);
+                    if (modeWide != null) modeWide.setVisibility(View.VISIBLE);
+                    View modeNarrow = item.findViewById(R.id.mode_narrow);
+                    if (modeNarrow != null) modeNarrow.setVisibility(View.GONE);
+                } else {
+                    if (tvNarrow != null) {
+                        tvNarrow.setText(name);
+                        tvNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx * 0.8f);
+                    }
+                    if (tvTimeNarrow != null) {
+                        tvTimeNarrow.setText("11:59 PM");
+                        tvTimeNarrow.setTextSize(COMPLEX_UNIT_PX, measured.mFontSizePx);
+                    }
+                    View modeWide = item.findViewById(R.id.mode_wide);
+                    if (modeWide != null) modeWide.setVisibility(View.GONE);
+                    View modeNarrow = item.findViewById(R.id.mode_narrow);
+                    if (modeNarrow != null) modeNarrow.setVisibility(View.VISIBLE);
+                }
             }
         }
 
