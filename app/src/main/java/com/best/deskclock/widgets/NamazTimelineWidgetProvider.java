@@ -144,7 +144,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         final int targetWidthPx = portrait ? minWidthPx : maxWidthPx;
         final int targetHeightPx = portrait ? maxHeightPx : minHeightPx;
 
-        int mode = getLayoutMode(targetWidthPx / density);
+        boolean showSymbols = WidgetDAO.isNamazWidgetSymbolsVisible(prefs);
+        int mode = getLayoutMode(targetWidthPx / density, showSymbols);
 
         boolean isCountdownVisible = WidgetDAO.isNamazWidgetCountdownVisible(prefs);
         boolean isHeight1 = (options.getInt(OPTION_APPWIDGET_MIN_HEIGHT) < 100);
@@ -309,7 +310,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         }
     }
 
-    private static int getLayoutMode(float widthDp) {
+    private static int getLayoutMode(float widthDp, boolean showSymbols) {
+        if (showSymbols) return MODE_WIDE;
         if (widthDp <= 180) return MODE_NARROW;
         return MODE_WIDE;
     }
