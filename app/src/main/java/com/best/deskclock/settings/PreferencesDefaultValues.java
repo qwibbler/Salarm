@@ -285,15 +285,6 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;
 
-    // Namaz Compact Widget
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND = true;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING = true;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DEFAULT_COLOR = true;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS = false;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS = false;
-    public static final boolean DEFAULT_NAMAZ_COMPACT_WIDGET_DISMISS_ALARMS = false;
-
     // Namaz Countdown Widget
     public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;
     public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS = false;

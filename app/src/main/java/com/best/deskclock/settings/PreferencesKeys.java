@@ -275,7 +275,6 @@ public class PreferencesKeys {
     public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION = "key_next_alarm_widget_customization";
     public static final String KEY_NAMAZ_WIDGET_CUSTOMIZATION = "key_namaz_widget_customization";
     public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZATION = "key_namaz_countdown_widget_customization";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZATION = "key_namaz_compact_widget_customization";
 
     // Analog Widget
     public static final String KEY_ANALOG_WIDGET_CLOCK_DIAL = "key_analog_widget_clock_dial";
@@ -401,43 +400,6 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_SHOW_ASR_SHAFI = "key_namaz_widget_show_asr_shafi";
     public static final String KEY_NAMAZ_WIDGET_SHOW_MAGHRIB = "key_namaz_widget_show_maghrib";
     public static final String KEY_NAMAZ_WIDGET_SHOW_ISHA = "key_namaz_widget_show_isha";
-
-    // Namaz Compact Widget
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_compact_widget_display_text_uppercase";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_compact_widget_display_text_shadow";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_BACKGROUND = "key_namaz_compact_widget_display_background";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_compact_widget_customize_background_corner_radius";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_compact_widget_background_corner_radius";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_compact_widget_apply_horizontal_padding";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_compact_widget_default_background_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_compact_widget_custom_background_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR = "key_namaz_compact_widget_default_timeline_active_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR = "key_namaz_compact_widget_custom_timeline_active_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR = "key_namaz_compact_widget_default_timeline_next_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_compact_widget_custom_timeline_next_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_default_timeline_standard_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_compact_widget_custom_timeline_standard_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISPLAY_ITEM_HIGHLIGHT = "key_namaz_compact_widget_display_item_highlight";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_active_highlight_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_active_highlight_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_default_item_next_highlight_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_compact_widget_custom_item_next_highlight_color";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_compact_widget_maximum_font_size";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ALARMS = "key_namaz_compact_widget_show_alarms";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_SYMBOLS = "key_namaz_compact_widget_show_symbols";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_DISMISS_ALARMS = "key_namaz_compact_widget_dismiss_alarms";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_RULE_PREFIX = "key_namaz_compact_widget_show_rule_";
-
-    // Namaz Compact Widget Events
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_BOTH_ASRS = "key_namaz_compact_widget_show_both_asrs";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_FAJR = "key_namaz_compact_widget_show_fajr";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_SUNRISE = "key_namaz_compact_widget_show_sunrise";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_DHUHR = "key_namaz_compact_widget_show_dhuhr";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR = "key_namaz_compact_widget_show_asr";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_HANAFI = "key_namaz_compact_widget_show_asr_hanafi";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ASR_SHAFI = "key_namaz_compact_widget_show_asr_shafi";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_MAGHRIB = "key_namaz_compact_widget_show_maghrib";
-    public static final String KEY_NAMAZ_COMPACT_WIDGET_SHOW_ISHA = "key_namaz_compact_widget_show_isha";
 
     // Namaz Countdown Widget
     public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_countdown_widget_display_text_uppercase";

@@ -1550,7 +1550,6 @@
 
     <string name="namaz_timeline_widget_label">Namaz Times</string>
     <string name="namaz_countdown_widget_label">Namaz Countdown</string>
-    <string name="namaz_compact_widget_label">Namaz Times Compact</string>
     <string name="apply_padding_title">Apply padding</string>
     <string name="namaz_widget_highlight_item_title">Highlight current/next events</string>
     <string name="namaz_widget_highlight_active_default_color_title">Use default color for current event highlight</string>

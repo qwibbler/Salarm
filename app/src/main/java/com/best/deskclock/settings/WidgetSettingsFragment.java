@@ -4,7 +4,6 @@ package com.best.deskclock.settings;
 
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ANALOG_WIDGET_CUSTOMIZATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DIGITAL_WIDGET_CUSTOMIZATION;
-import static com.best.deskclock.settings.PreferencesKeys.KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_NAMAZ_WIDGET_CUSTOMIZATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_WIDGET_CUSTOMIZATION;
@@ -23,7 +22,6 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
     Preference mVerticalWidgetCustomizationPref;
     Preference mNextAlarmWidgetCustomizationPref;
     Preference mNamazWidgetCustomizationPref;
-    Preference mNamazCompactWidgetCustomizationPref;
 
     @Override
     protected String getFragmentTitle() {
@@ -41,7 +39,6 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
         mVerticalWidgetCustomizationPref = findPreference(KEY_VERTICAL_WIDGET_CUSTOMIZATION);
         mNextAlarmWidgetCustomizationPref = findPreference(KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION);
         mNamazWidgetCustomizationPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOMIZATION);
-        mNamazCompactWidgetCustomizationPref = findPreference(KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZATION);
 
         setupPreferences();
     }
@@ -49,7 +46,7 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
     @Override
     public void onDestroy() {
         nullifyPreferenceListeners(mAnalogWidgetCustomizationPref, mDigitalWidgetCustomizationPref, mVerticalWidgetCustomizationPref,
-            mNextAlarmWidgetCustomizationPref, mNamazWidgetCustomizationPref, mNamazCompactWidgetCustomizationPref);
+            mNextAlarmWidgetCustomizationPref, mNamazWidgetCustomizationPref);
 
         nullifyAllPrefs();
 
@@ -68,8 +65,6 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
             case KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNextAlarmSettingsFragment());
 
             case KEY_NAMAZ_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNamazSettingsFragment());
-
-            case KEY_NAMAZ_COMPACT_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNamazCompactSettingsFragment());
         }
 
         return true;
@@ -85,8 +80,6 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
         mNextAlarmWidgetCustomizationPref.setOnPreferenceClickListener(this);
 
         mNamazWidgetCustomizationPref.setOnPreferenceClickListener(this);
-
-        mNamazCompactWidgetCustomizationPref.setOnPreferenceClickListener(this);
     }
 
     private void nullifyAllPrefs() {
@@ -95,7 +88,6 @@ public class WidgetSettingsFragment extends ScreenFragment implements Preference
         mVerticalWidgetCustomizationPref = null;
         mNextAlarmWidgetCustomizationPref = null;
         mNamazWidgetCustomizationPref = null;
-        mNamazCompactWidgetCustomizationPref = null;
     }
 
 }
