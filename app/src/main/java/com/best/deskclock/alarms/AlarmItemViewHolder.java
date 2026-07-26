@@ -219,7 +219,12 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void bindRepeatText(Context context, Alarm alarm, AlarmInstance alarmInstance) {
-        if (alarmInstance != null
+        if (isPauseEffectivelyActive(alarm, alarmInstance)) {
+            String dateRangeStr = AlarmUtils.formatPauseDateRange(context, alarm.pauseStartDate, alarm.pauseEndDate);
+            String pauseText = context.getString(R.string.pause_alarm_range, dateRangeStr);
+            setDaysOfWeekText(pauseText);
+            mBinding.daysOfWeek.setContentDescription(pauseText);
+        } else if (alarmInstance != null
             && alarm.canPreemptivelyDismiss(context)
             && alarm.instanceState == AlarmInstance.SNOOZE_STATE) {
             mBinding.daysOfWeek.setTypeface(mGeneralBoldTypeface);
@@ -319,13 +324,7 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         String contentDesc = alarm.daysOfWeek.toAccessibilityString(context, weekdayOrder);
         CharSequence styledDaysText;
 
-        if (isPauseEffectivelyActive(alarm, alarmInstance)) {
-            String dateRangeStr = AlarmUtils.formatPauseDateRange(context, alarm.pauseStartDate, alarm.pauseEndDate);
-            String pauseText = context.getString(R.string.pause_alarm_range, dateRangeStr);
-
-            styledDaysText = pauseText;
-            contentDesc = pauseText;
-        } else if (alarm.enabled) {
+        if (alarm.enabled) {
             int nextAlarmDay = alarm.getNextAlarmDayOfWeek(alarmInstance);
 
             if (alarm.daysOfWeek.isAllDaysSelected()) {

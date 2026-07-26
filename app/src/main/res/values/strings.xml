@@ -1549,7 +1549,7 @@
     <string name="isha_label">Isha</string>
 
     <string name="namaz_widget_show_countdown_title">Show countdown</string>
-    <string name="namaz_widget_show_alarms_title">Show namaz alarms</string>
+    <string name="namaz_widget_show_alarms_title">Show upcoming namaz alarms</string>
     <string name="namaz_timeline_widget_label">Namaz Times</string>
     <string name="namaz_countdown_widget_label">Namaz Countdown</string>
     <string name="apply_padding_title">Apply padding</string>

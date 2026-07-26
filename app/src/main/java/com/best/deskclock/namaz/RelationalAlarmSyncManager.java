@@ -227,6 +227,15 @@ public class RelationalAlarmSyncManager {
 
         // Search for the next valid occurrence (up to 366 days)
         for (int i = 0; i < 366; i++) {
+            if (alarm.isDatePaused(candidateDate)) {
+                candidateDate.add(Calendar.DAY_OF_YEAR, 1);
+                candidateDate.set(Calendar.HOUR_OF_DAY, 0);
+                candidateDate.set(Calendar.MINUTE, 0);
+                candidateDate.set(Calendar.SECOND, 0);
+                candidateDate.set(Calendar.MILLISECOND, 0);
+                continue;
+            }
+
             NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(candidateDate.getTime(), coords[0], coords[1], method);
             result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
 
