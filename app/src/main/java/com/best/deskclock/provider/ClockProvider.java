@@ -279,7 +279,10 @@ public class ClockProvider extends ContentProvider {
         String primaryKey;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         switch (sURIMatcher.match(uri)) {
-            case ALARMS -> count = db.delete(ALARMS_TABLE_NAME, where, whereArgs);
+            case ALARMS -> {
+                deleteAssociatedRelationalRules(db, where, whereArgs);
+                count = db.delete(ALARMS_TABLE_NAME, where, whereArgs);
+            }
             case ALARMS_ID -> {
                 primaryKey = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(where)) {
@@ -287,6 +290,7 @@ public class ClockProvider extends ContentProvider {
                 } else {
                     where = AlarmsColumns._ID + "=" + primaryKey + " AND (" + where + ")";
                 }
+                deleteAssociatedRelationalRules(db, where, whereArgs);
                 count = db.delete(ALARMS_TABLE_NAME, where, whereArgs);
             }
             case INSTANCES -> count = db.delete(INSTANCES_TABLE_NAME, where, whereArgs);
@@ -304,6 +308,23 @@ public class ClockProvider extends ContentProvider {
 
         notifyChange(Objects.requireNonNull(getContext()).getContentResolver(), uri);
         return count;
+    }
+
+    private void deleteAssociatedRelationalRules(SQLiteDatabase db, String where, String[] whereArgs) {
+        final String[] columns = {AlarmsColumns.RELATIONAL_RULE_ID};
+        try (Cursor cursor = db.query(ALARMS_TABLE_NAME, columns, where, whereArgs, null, null, null)) {
+            if (cursor.moveToFirst()) {
+                do {
+                    long ruleId = cursor.getLong(0);
+                    if (ruleId > 0) {
+                        Context context = getContext();
+                        if (context != null) {
+                            com.best.deskclock.namaz.RelationalAlarmSyncManager.deleteRule(context, ruleId);
+                        }
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
     }
 
     /**

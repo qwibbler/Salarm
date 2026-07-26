@@ -29,4 +29,7 @@ public interface RelationalRuleDao {
 
     @Delete
     void delete(RelationalRule rule);
+
+    @Query("DELETE FROM relational_rules WHERE id = :id")
+    void deleteById(long id);
 }

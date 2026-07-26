@@ -37,6 +37,8 @@ import com.best.deskclock.data.WidgetDAO;
 import com.best.deskclock.namaz.NamazCalculator;
 import com.best.deskclock.namaz.NamazDatabase;
 import com.best.deskclock.namaz.RelationalRule;
+import com.best.deskclock.provider.Alarm;
+import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.utils.SdkUtils;
 import com.best.deskclock.utils.WidgetUtils;
@@ -573,20 +575,41 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     private static void addAlarmIfValid(Context context, List<PrayerItem> items, RelationalRule rule, NamazCalculator.NamazTimes times, Date now) {
         Date ruleTime = RelationalRule.evaluateTime(rule, times, new Date());
         if (ruleTime.getTime() > 0) {
-            // Check if this alarm occurrence is within +/- 24h of now
+            // Check if this alarm occurrence is within the NEXT 24h (with 1m grace for current/recent)
             long diff = ruleTime.getTime() - now.getTime();
-            if (Math.abs(diff) < TimeUnit.HOURS.toMillis(24)) {
-                com.best.deskclock.provider.Alarm alarm = com.best.deskclock.provider.Alarm.getAlarmByRuleId(context.getContentResolver(), rule.id);
+            if (diff > -TimeUnit.MINUTES.toMillis(1) && diff < TimeUnit.HOURS.toMillis(24)) {
+                Alarm alarm = Alarm.getAlarmByRuleId(context.getContentResolver(), rule.id);
 
-                // For repeating alarms, always show them if they are in the rolling 24h window
-                // For non-repeating, show them only if they are in the future or very recently past
-                if (alarm != null && !alarm.daysOfWeek.isRepeating()) {
-                    if (now.getTime() - ruleTime.getTime() > TimeUnit.MINUTES.toMillis(30)) {
-                        return; // Skip non-repeating if more than 30m old
+                if (alarm == null || !alarm.enabled) {
+                    return;
+                }
+
+                Calendar ruleCal = Calendar.getInstance();
+                ruleCal.setTime(ruleTime);
+                if (alarm.isDatePaused(ruleCal)) {
+                    return;
+                }
+
+                // Verify there is an active instance for this alarm at this specific time and DATE.
+                // This handles dismissal/rescheduling because the instance time will change.
+                boolean hasActiveInstance = false;
+                List<AlarmInstance> instances = AlarmInstance.getInstancesByAlarmId(context.getContentResolver(), alarm.id);
+                for (AlarmInstance instance : instances) {
+                    if (instance.mYear == ruleCal.get(Calendar.YEAR) &&
+                        instance.mMonth == ruleCal.get(Calendar.MONTH) &&
+                        instance.mDay == ruleCal.get(Calendar.DAY_OF_MONTH) &&
+                        instance.mHour == ruleCal.get(Calendar.HOUR_OF_DAY) &&
+                        instance.mMinute == ruleCal.get(Calendar.MINUTE)) {
+                        hasActiveInstance = true;
+                        break;
                     }
                 }
 
-                String label = (alarm != null && !alarm.label.isEmpty()) ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
+                if (!hasActiveInstance) {
+                    return;
+                }
+
+                String label = !alarm.label.isEmpty() ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
                 if (WidgetDAO.isNamazWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
                     items.add(new PrayerItem("🔔", label, ruleTime, rule.id));
                 } else {

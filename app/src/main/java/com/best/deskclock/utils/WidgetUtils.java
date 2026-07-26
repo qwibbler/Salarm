@@ -465,7 +465,9 @@ public class WidgetUtils {
         Class<?>[] widgetProviders = {
             DigitalAppWidgetProvider.class,
             NextAlarmAppWidgetProvider.class,
-            VerticalAppWidgetProvider.class
+            VerticalAppWidgetProvider.class,
+            com.best.deskclock.widgets.NamazTimelineWidgetProvider.class,
+            com.best.deskclock.widgets.NamazCountdownWidgetProvider.class
         };
 
         for (Class<?> provider : widgetProviders) {

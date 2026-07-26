@@ -16,12 +16,16 @@ import androidx.core.view.HapticFeedbackConstantsCompat;
 import com.best.deskclock.R;
 import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.namaz.NamazDatabase;
+import com.best.deskclock.namaz.RelationalAlarmSyncManager;
+import com.best.deskclock.namaz.RelationalRule;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.uicomponents.toast.SnackbarManager;
 import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.Utils;
+import com.best.deskclock.utils.WidgetUtils;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
@@ -38,6 +42,7 @@ public final class AlarmUpdateHandler {
 
     // For undo
     private Alarm mDeletedAlarm;
+    private RelationalRule mDeletedRule;
 
     private String mSyncToastLabel = null;
 
@@ -173,6 +178,8 @@ public final class AlarmUpdateHandler {
                     }
                 }
 
+                WidgetUtils.updateAllDigitalWidgets(mAppContext);
+
                 if (popToast && tempTime != null) {
                     final Long timeToDisplay = tempTime;
                     AppExecutors.getMainThread().post(() ->
@@ -225,12 +232,25 @@ public final class AlarmUpdateHandler {
                 // Nothing to do here, just return.
                 return;
             }
+
+            RelationalRule ruleToDelete = null;
+            if (alarm.relationalRuleId > 0) {
+                ruleToDelete = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
+            }
+
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
+
             final boolean deleted = Alarm.deleteAlarm(mAppContext.getContentResolver(), alarm.id);
 
+            if (deleted) {
+                WidgetUtils.updateAllDigitalWidgets(mAppContext);
+            }
+
+            final RelationalRule finalRule = ruleToDelete;
             AppExecutors.getMainThread().post(() -> {
                 if (deleted) {
                     mDeletedAlarm = alarm;
+                    mDeletedRule = finalRule;
                     showUndoBar();
                 }
             });
@@ -257,6 +277,7 @@ public final class AlarmUpdateHandler {
      */
     public void hideUndoBar() {
         mDeletedAlarm = null;
+        mDeletedRule = null;
         SnackbarManager.dismiss();
     }
 
@@ -266,16 +287,55 @@ public final class AlarmUpdateHandler {
             Snackbar.LENGTH_LONG).setAction(R.string.alarm_undo, v -> {
             if (mDeletedAlarm != null) {
                 final Alarm alarmToRestore = mDeletedAlarm;
+                final RelationalRule ruleToRestore = mDeletedRule;
 
                 mDeletedAlarm = null;
+                mDeletedRule = null;
 
                 Utils.performHapticFeedback(v, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
-                asyncAddAlarm(alarmToRestore);
+                if (ruleToRestore != null) {
+                    asyncRestoreRelationalAlarm(alarmToRestore, ruleToRestore);
+                } else {
+                    asyncAddAlarm(alarmToRestore);
+                }
             }
         });
 
         SnackbarManager.show(snackbar);
+    }
+
+    private void asyncRestoreRelationalAlarm(final Alarm alarm, final RelationalRule rule) {
+        AppExecutors.getDiskIO().execute(() -> {
+            // 1. Re-insert the rule to get a new ID
+            rule.id = 0;
+            alarm.relationalRuleId = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().insert(rule);
+
+            // 2. Add the alarm back to the provider
+            final Alarm newAlarm = alarm.addAlarm(mAppContext.getContentResolver());
+
+            // 3. Prepare for UI scroll
+            if (mScrollHandler != null) {
+                mScrollHandler.setSmoothScrollStableId(newAlarm.id);
+            }
+
+            // 4. Sync and schedule instances
+            RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
+
+            // 5. Update widgets
+            WidgetUtils.updateAllDigitalWidgets(mAppContext);
+
+            // 6. Show confirmation toast (similar to asyncAddAlarm)
+            final List<AlarmInstance> instances = AlarmInstance.getInstancesByAlarmId(
+                    mAppContext.getContentResolver(), newAlarm.id);
+
+            if (!instances.isEmpty()) {
+                final long timeToDisplay = instances.get(0).getAlarmTime().getTimeInMillis();
+                AppExecutors.getMainThread().post(() ->
+                        AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, timeToDisplay)
+                );
+            }
+        });
     }
 
     private AlarmInstance setupAlarmInstance(Alarm alarm) {

@@ -314,6 +314,18 @@ public class RelationalAlarmSyncManager {
         });
     }
 
+    public static void deleteRule(Context context, long ruleId) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                LogUtils.i("Deleting RelationalRule from Room database: " + ruleId);
+                NamazDatabase.getDatabase(appContext).relationalRuleDao().deleteById(ruleId);
+            } catch (Throwable t) {
+                LogUtils.e("Error deleting rule " + ruleId, t);
+            }
+        });
+    }
+
     private static void sendConflictNotification(Context context, String alarmName, long fallbackTime) {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -837,7 +837,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         return pauseStartDate > 0 && pauseEndDate > 0;
     }
 
-    private boolean isDatePaused(Calendar instanceTime) {
+    public boolean isDatePaused(Calendar instanceTime) {
         if (!isPauseSet()) {
             return false;
         }
