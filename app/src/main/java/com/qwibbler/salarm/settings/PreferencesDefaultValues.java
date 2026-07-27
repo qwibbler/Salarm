@@ -1,0 +1,308 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+package com.qwibbler.salarm.settings;
+
+import android.content.Context;
+import android.graphics.Color;
+
+import com.google.android.material.color.MaterialColors;
+
+import java.util.Calendar;
+import java.util.Set;
+
+public class PreferencesDefaultValues {
+
+    // **************
+    // ** SETTINGS **
+    // **************
+
+    // About
+    public static final boolean DEFAULT_DISPLAY_DEBUG_SETTINGS = false;
+
+    // Interface
+    public static final String SYSTEM_THEME = "0";
+    public static final String LIGHT_THEME = "1";
+    public static final String DARK_THEME = "2";
+    public static final String DEFAULT_DARK_MODE = "0";
+    public static final String AMOLED_DARK_MODE = "1";
+    public static final String DEFAULT_ACCENT_COLOR = "0";
+    public static final String BLUE_GRAY_ACCENT_COLOR = "1";
+    public static final String BROWN_ACCENT_COLOR = "2";
+    public static final String GREEN_ACCENT_COLOR = "3";
+    public static final String INDIGO_ACCENT_COLOR = "4";
+    public static final String ORANGE_ACCENT_COLOR = "5";
+    public static final String PINK_ACCENT_COLOR = "6";
+    public static final String RED_ACCENT_COLOR = "7";
+    public static final String BLACK_ACCENT_COLOR = "8";
+    public static final String PURPLE_ACCENT_COLOR = "9";
+    public static final String YELLOW_ACCENT_COLOR = "10";
+    public static final String BLUE_ACCENT_COLOR = "11";
+    public static final boolean DEFAULT_AUTO_NIGHT_ACCENT_COLOR = true;
+    public static final String DEFAULT_NIGHT_ACCENT_COLOR = "0";
+    public static final boolean DEFAULT_CARD_BACKGROUND = true;
+    public static final boolean DEFAULT_CARD_BORDER = false;
+    public static final String DEFAULT_SYSTEM_LANGUAGE_CODE = "system_language_code";
+    public static final String DEBUG_LANGUAGE_CODE = "en-US";
+    public static final String DEFAULT_TAB_TO_DISPLAY = "-1";
+    public static final int DEFAULT_TAB_TO_DISPLAY_INTEGER = -1;
+    public static final String TAB_TO_DISPLAY_ALARM = "0";
+    public static final String TAB_TO_DISPLAY_CLOCK = "1";
+    public static final String TAB_TO_DISPLAY_TIMER = "2";
+    public static final String TAB_TO_DISPLAY_STOPWATCH = "3";
+    public static final String TAB_TO_DISPLAY_NAMAZ = "4";
+    public static final String TAB_TO_DISPLAY_QIBLA = "5";
+    public static final boolean DEFAULT_VIBRATIONS = false;
+    public static final boolean DEFAULT_TOOLBAR_TITLE = true;
+    public static final String VISIBLE_TAB_ALARM = "alarm";
+    public static final String VISIBLE_TAB_CLOCK = "clock";
+    public static final String VISIBLE_TAB_TIMER = "timer";
+    public static final String VISIBLE_TAB_STOPWATCH = "stopwatch";
+    public static final String VISIBLE_TAB_NAMAZ = "namaz";
+    public static final String VISIBLE_TAB_QIBLA = "qibla";
+    public static final Set<String> DEFAULT_VISIBLE_TABS = Set.of(
+        VISIBLE_TAB_ALARM,
+        VISIBLE_TAB_CLOCK,
+        VISIBLE_TAB_TIMER,
+        VISIBLE_TAB_STOPWATCH,
+        VISIBLE_TAB_NAMAZ,
+        VISIBLE_TAB_QIBLA
+    );
+    public static final String DEFAULT_TAB_TITLE_VISIBILITY = "0";
+    public static final String TAB_TITLE_VISIBILITY_NEVER = "1";
+    public static final boolean DEFAULT_TAB_INDICATOR = true;
+    public static final String DEFAULT_TAB_ANIMATION = "tab_animation_default";
+    public static final String TAB_ANIMATION_CUBE = "tab_animation_cube";
+    public static final String TAB_ANIMATION_DEPTH = "tab_animation_depth";
+    public static final String TAB_ANIMATION_FLIP = "tab_animation_flip";
+    public static final String TAB_ANIMATION_GATE = "tab_animation_gate";
+    public static final String TAB_ANIMATION_ZOOM_OUT = "tab_animation_zoom_out";
+    public static final boolean DEFAULT_FADE_TRANSITIONS = false;
+    public static final boolean DEFAULT_KEEP_SCREEN_ON = false;
+
+    // Clock
+    public static final String DEFAULT_CLOCK_STYLE = "digital";
+    public static final boolean DEFAULT_DISPLAY_CLOCK_SECONDS = false;
+    public static final boolean DEFAULT_TEXT_UPPERCASE_DISPLAYED = false;
+    public static final String DEFAULT_SORT_CITIES_BY_ASCENDING_TIME_ZONE = "0";
+    public static final String SORT_CITIES_BY_DESCENDING_TIME_ZONE = "1";
+    public static final String SORT_CITIES_BY_NAME = "2";
+    public static final String SORT_CITIES_MANUALLY = "3";
+    public static final boolean DEFAULT_ENABLE_CITY_NOTE = false;
+    public static final boolean DEFAULT_AUTO_HOME_CLOCK = true;
+    public static final String DEFAULT_HOME_TIME_ZONE = null;
+
+    // Alarm
+    public static final String DEFAULT_TIME_PICKER_STYLE = "analog";
+    public static final String SPINNER_TIME_PICKER_STYLE = "spinner";
+    public static final String DEFAULT_DATE_PICKER_STYLE = "calendar";
+    public static final String SPINNER_DATE_PICKER_STYLE = "spinner";
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE = true;
+    public static final int DEFAULT_AUTO_SILENCE_DURATION = 600;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION = true;
+    public static final int DEFAULT_ALARM_SNOOZE_DURATION = 10;
+    public static final int ALARM_SNOOZE_DURATION_DISABLED = -1;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = true;
+    public static final String DEFAULT_MISSED_ALARM_REPEAT_LIMIT = "-1";
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION = true;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_VOLUME = false;
+    public static final int DEFAULT_ALARM_VOLUME = 5;
+    public static final boolean DEFAULT_ADVANCED_AUDIO_PLAYBACK = false;
+    public static final boolean DEFAULT_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE = false;
+    public static final boolean DEFAULT_SYSTEM_MEDIA_VOLUME = true;
+    public static final int DEFAULT_EXTERNAL_AUDIO_DEVICE_VOLUME = 70;
+    public static final String DEFAULT_VOLUME_BEHAVIOR = "-1";
+    public static final String VOLUME_BEHAVIOR_CHANGE_VOLUME = "0";
+    public static final String VOLUME_BEHAVIOR_SNOOZE = "1";
+    public static final String VOLUME_BEHAVIOR_DISMISS = "2";
+    public static final String DEFAULT_POWER_BEHAVIOR = "0";
+    public static final String POWER_BEHAVIOR_SNOOZE = "1";
+    public static final String POWER_BEHAVIOR_DISMISS = "2";
+    public static final String DEFAULT_FLIP_ACTION = "0";
+    public static final String DEFAULT_SHAKE_ACTION = "0";
+    public static final int DEFAULT_SHAKE_INTENSITY = 16;
+    public static final String DEFAULT_SORT_BY_ALARM_TIME = "0";
+    public static final String SORT_ALARM_BY_NEXT_ALARM_TIME = "1";
+    public static final String SORT_ALARM_BY_NAME = "2";
+    public static final String SORT_ALARM_BY_DESCENDING_CREATION_ORDER = "3";
+    public static final String SORT_ALARM_BY_ASCENDING_CREATION_ORDER = "4";
+    public static final String SORT_ALARM_MANUALLY = "5";
+    public static final boolean DEFAULT_DISPLAY_ENABLED_ALARMS_FIRST = false;
+    public static final boolean DEFAULT_ENABLE_ALARM_FAB_LONG_PRESS = false;
+    public static final String DEFAULT_WEEK_START = String.valueOf(Calendar.getInstance().getFirstDayOfWeek());
+    public static final boolean DEFAULT_DISPLAY_DISMISS_BUTTON = true;
+    public static final int DEFAULT_ALARM_NOTIFICATION_REMINDER = 30;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN = false;
+    public static final String DEFAULT_VIBRATION_PATTERN = "default";
+    public static final String VIBRATION_PATTERN_SOFT = "soft";
+    public static final String VIBRATION_PATTERN_STRONG = "strong";
+    public static final String VIBRATION_PATTERN_HEARTBEAT = "heartbeat";
+    public static final String VIBRATION_PATTERN_ESCALATING = "escalating";
+    public static final String VIBRATION_PATTERN_TICK_TOCK = "tick_tock";
+    public static final int DEFAULT_VIBRATION_START_DELAY = 0;
+    public static final boolean DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT = false;
+    public static final boolean DEFAULT_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS = false;
+    public static final boolean DEFAULT_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM = false;
+    public static final boolean DEFAULT_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT = false;
+    public static final boolean DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING = true;
+
+    // Namaz
+    public static final String DEFAULT_NAMAZ_LATITUDE = "0.0";
+    public static final String DEFAULT_NAMAZ_LONGITUDE = "0.0";
+    public static final String DEFAULT_NAMAZ_MADHAB = "HANAFI";
+    public static final String DEFAULT_NAMAZ_CALC_METHOD = "KARACHI";
+    public static final String DEFAULT_NAMAZ_LOCATION_MODE = "GPS";
+    public static final String DEFAULT_NAMAZ_CITY_NAME = "Unknown";
+    public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR = false;
+
+    // Alarm Display Customization
+    public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;
+    public static final boolean DEFAULT_SWIPE_ACTION = true;
+    public static final boolean DEFAULT_DISPLAY_SNOOZE_SELECTOR = false;
+    public static final int DEFAULT_ALARM_BACKGROUND_COLOR = Color.parseColor("#FF191C1E");
+    public static final int DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR = Color.BLACK;
+    public static final int DEFAULT_SLIDE_ZONE_COLOR = Color.parseColor("#FF2E3337");
+    public static final int DEFAULT_ALARM_CLOCK_COLOR = Color.WHITE;
+    public static final int DEFAULT_ALARM_TITLE_COLOR = Color.WHITE;
+    public static final int DEFAULT_SNOOZE_TITLE_COLOR = Color.WHITE;
+    public static final int DEFAULT_DISMISS_TITLE_COLOR = Color.WHITE;
+    public static final int DEFAULT_SNOOZE_ZONE_COLOR = Color.parseColor("#80FFFFFF");
+    public static final int DEFAULT_SNOOZE_BUTTON_COLOR = Color.parseColor("#80FFFFFF");
+    public static final int DEFAULT_SNOOZE_TEXT_COLOR = Color.parseColor("#FFFFFFFF");
+    public static final int DEFAULT_ALARM_TITLE_FONT_SIZE_PREF = 30;
+    public static final int DEFAULT_ALARM_SHADOW_COLOR = Color.parseColor("#80FFFFFF");
+    public static final int DEFAULT_RINGTONE_TITLE_COLOR = Color.WHITE;
+    public static final boolean DEFAULT_ENABLE_BLUR_EFFECT = false;
+    public static final int DEFAULT_BLUR_INTENSITY = 20;
+
+    public static int getDefaultAlarmInversePrimaryColor(Context context) {
+        return MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryInverse, Color.BLACK);
+    }
+
+    // Timer
+    public static final String DEFAULT_TIMER_CREATION_VIEW_STYLE = "keypad";
+    public static final String TIMER_CREATION_VIEW_SPINNER_STYLE = "spinner";
+    public static final boolean DEFAULT_DISPLAY_COMPACT_TIMERS = false;
+    public static final boolean DEFAULT_DISPLAY_TIMER_END_TIME = false;
+    public static final boolean DEFAULT_INVERT_TIMER_BUTTON_POSITIONS = false;
+    public static final boolean DEFAULT_TRANSPARENT_BACKGROUND_FOR_EXPIRED_TIMER = false;
+    public static final boolean DEFAULT_DISPLAY_TIMER_STATE_INDICATOR = false;
+    public static final int DEFAULT_RUNNING_TIMER_INDICATOR_COLOR = Color.parseColor("#FF99CC00");
+    public static final int DEFAULT_PAUSED_TIMER_INDICATOR_COLOR = Color.parseColor("#FFFFBB33");
+    public static final int DEFAULT_EXPIRED_TIMER_INDICATOR_COLOR = Color.parseColor("#FFFF4444");
+    public static final int DEFAULT_MISSED_TIMER_INDICATOR_COLOR = Color.parseColor("#FFAA66CC");
+    public static final int DEFAULT_TIMER_AUTO_SILENCE_DURATION = 30; // 30 seconds
+    public static final boolean DEFAULT_TIMER_VIBRATE = false;
+    public static final int DEFAULT_TIMER_RINGTONE_TITLE_COLOR = Color.GRAY;
+    public static final int DEFAULT_TIMER_SHADOW_COLOR = Color.parseColor("#BF888888");
+    public static final boolean DEFAULT_TIMER_VOLUME_BUTTONS_ACTION = false;
+    public static final boolean DEFAULT_TIMER_POWER_BUTTON_ACTION = false;
+    public static final boolean DEFAULT_TIMER_FLIP_ACTION = false;
+    public static final boolean DEFAULT_TIMER_SHAKE_ACTION = false;
+    public static final int DEFAULT_TIMER_SHAKE_INTENSITY = 16;
+    public static final boolean DEFAULT_SINGLE_TIMER_MODE = false;
+    public static final String DEFAULT_SORT_TIMER_MANUALLY = "0";
+    public static final String SORT_TIMER_BY_ASCENDING_DURATION = "1";
+    public static final String SORT_TIMER_BY_DESCENDING_DURATION = "2";
+    public static final String SORT_TIMER_BY_NAME = "3";
+    public static final int DEFAULT_TIMER_ADD_TIME_BUTTON_VALUE = 60;
+    public static final boolean DEFAULT_DISPLAY_WARNING_BEFORE_DELETING_TIMER = false;
+
+    // Stopwatch
+    public static final String DEFAULT_SW_ACTION = "0";
+    public static final String SW_ACTION_START_PAUSE = "1";
+    public static final String SW_ACTION_RESET = "2";
+    public static final String SW_ACTION_LAP = "3";
+    public static final String SW_ACTION_SHARE = "4";
+
+    // Screensaver
+    public static final boolean DEFAULT_DISPLAY_SCREENSAVER_CLOCK_SECONDS = false;
+    public static final boolean DEFAULT_DISPLAY_SCREENSAVER_BATTERY = false;
+    public static final boolean DEFAULT_SCREENSAVER_CLOCK_DYNAMIC_COLORS = false;
+    public static final int DEFAULT_SCREENSAVER_CUSTOM_COLOR = Color.WHITE;
+    public static final int DEFAULT_SCREENSAVER_BRIGHTNESS = 40;
+    public static final boolean DEFAULT_SCREENSAVER_TEXT_UPPERCASE_DISPLAYED = false;
+    public static final boolean DEFAULT_SCREENSAVER_FORMATTING = false;
+    public static final boolean DEFAULT_SCREENSAVER_KEEP_SCREEN_ON = false;
+
+    // Common settings values
+    public static final String DEFAULT_CLOCK_DIAL = "dial_with_numbers";
+    public static final String CLOCK_DIAL_WITH_ROMAN_NUMBERS = "dial_with_roman_numbers";
+    public static final String DEFAULT_CLOCK_DIAL_MATERIAL = "dial_sun";
+    public static final String DEFAULT_CLOCK_SECOND_HAND = "default";
+    public static final String CLOCK_SECOND_HAND_VINTAGE = "second_hand_vintage";
+    public static final String CLOCK_SECOND_HAND_LOLLIPOP = "second_hand_lollipop";
+    public static final int TIMEOUT_NEVER = -1;
+    public static final int TIMEOUT_END_OF_RINGTONE = -2;
+    public static final int DEFAULT_VOLUME_CRESCENDO_DURATION = 0;
+    public static final boolean DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE = true;
+    public static final boolean DEFAULT_DISPLAY_RINGTONE_TITLE = false;
+    public static final boolean DEFAULT_DISPLAY_TEXT_SHADOW = false;
+    public static final int DEFAULT_SHADOW_OFFSET = 10;
+    public static final int DEFAULT_DIGITAL_CLOCK_FONT_SIZE = 70;
+    public static final int DEFAULT_ANALOG_CLOCK_SIZE = 70;
+
+    // Permission management
+    public static final boolean DEFAULT_ENABLE_FOREGROUND_SERVICE = false;
+
+    // **************
+    // ** WIDGETS **
+    // **************
+
+    // Analog Widget
+    public static final String DEFAULT_ANALOG_WIDGET_CLOCK_DIAL = "default";
+    public static final String ANALOG_WIDGET_CLOCK_DIAL_WITH_NUMBERS = "dial_with_numbers";
+    public static final String ANALOG_WIDGET_CLOCK_DIAL_WITHOUT_NUMBERS = "dial_without_numbers";
+    public static final String ANALOG_WIDGET_CLOCK_DIAL_WITH_ROMAN_NUMBERS = "dial_with_roman_numbers";
+    public static final String ANALOG_WIDGET_CLOCK_DIAL_SUN = "dial_sun";
+    public static final String ANALOG_WIDGET_CLOCK_DIAL_FLOWER = "dial_flower";
+
+    // Digital Widget
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_SECONDS = false;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_HIDE_AM_PM = false;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_BACKGROUND = true;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_DATE = true;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_TOP_DATE = false;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM = true;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM_TITLE = true;
+    public static final boolean DEFAULT_DIGITAL_WIDGET_WORLD_CITIES_DISPLAYED = true;
+
+    // Vertical Widget
+    public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_DATE = true;
+    public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_NEXT_ALARM = true;
+
+    // Namaz Widget
+    public static final boolean DEFAULT_NAMAZ_WIDGET_DISPLAY_BACKGROUND = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_SHADOW_DISPLAYED = false;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;
+    public static final Set<String> DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS = Set.of(
+        "fajr",
+        "sunrise",
+        "dhuhr",
+        "asr",
+        "maghrib",
+        "isha"
+    );
+
+    // Namaz Countdown Widget
+    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;
+    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS = false;
+    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = true;
+
+    // Common widget values
+    public static final boolean DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;
+    public static final boolean DEFAULT_WIDGET_TEXT_SHADOW_DISPLAYED = false;
+    public static final boolean DEFAULT_ANALOG_WIDGET_WITH_SECOND_HAND = false;
+    public static final boolean DEFAULT_WIDGETS_DEFAULT_COLOR = true;
+    public static final int DEFAULT_WIDGETS_BACKGROUND_COLOR = Color.parseColor("#70000000");
+    public static final boolean DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = false;
+    public static final int DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS = 24;
+    public static final int DEFAULT_WIDGETS_CUSTOM_COLOR = Color.WHITE;
+    public static final int DEFAULT_WIDGETS_FONT_SIZE = 70;
+    public static final boolean DEFAULT_WIDGETS_APPLY_HORIZONTAL_PADDING = true;
+}

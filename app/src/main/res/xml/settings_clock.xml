@@ -44,7 +44,7 @@
             app:singleLineTitle="false"
             tools:isPreferenceVisible="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_analog_clock_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/analog_clock_size_title"
@@ -93,7 +93,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_digital_clock_font_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/clock_font_size"

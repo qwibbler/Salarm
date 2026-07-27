@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <com.best.deskclock.settings.custompreference.CustomAboutTitlePreference
+    <com.qwibbler.salarm.settings.custompreference.CustomAboutTitlePreference
         android:key="key_about_title"
         android:layout="@layout/settings_about_title"
         android:selectable="false"

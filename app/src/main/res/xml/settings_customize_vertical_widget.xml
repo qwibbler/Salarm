@@ -44,7 +44,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_vertical_widget_background_corner_radius"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/background_corner_radius_title"
@@ -93,7 +93,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_vertical_widget_custom_background_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/background_color_title"
@@ -109,7 +109,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_vertical_widget_custom_hours_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/hour_color_title"
@@ -125,7 +125,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_vertical_widget_custom_minutes_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/minute_color_title"
@@ -141,7 +141,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_vertical_widget_custom_date_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/date_color_title"
@@ -157,7 +157,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_vertical_widget_custom_next_alarm_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/next_alarm_color_title"
@@ -172,7 +172,7 @@
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_vertical_widget_maximum_clock_font_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/max_clock_font_size_title"

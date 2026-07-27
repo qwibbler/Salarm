@@ -4,5 +4,5 @@
 -->
 
 <dream xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="com.best.deskclock.settings.ScreensaverSettingsActivity"
+    android:settingsActivity="com.qwibbler.salarm.settings.ScreensaverSettingsActivity"
     android:previewImage="@mipmap/ic_launcher" />

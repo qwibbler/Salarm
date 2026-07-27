@@ -11,4 +11,4 @@
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
     android:widgetFeatures="reconfigurable|configuration_optional"
-    android:configure="com.best.deskclock.widgets.WidgetConfiguration$NamazWidgetConfiguration" />
+    android:configure="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazWidgetConfiguration" />

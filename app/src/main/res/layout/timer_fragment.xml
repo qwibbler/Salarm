@@ -41,13 +41,13 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.best.deskclock.timer.TimerSetupView
+    <com.qwibbler.salarm.timer.TimerSetupView
         android:id="@+id/timer_setup_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone" />
 
-    <com.best.deskclock.timer.CustomTimerSpinnerSetupView
+    <com.qwibbler.salarm.timer.CustomTimerSpinnerSetupView
         android:id="@+id/timer_spinner_setup_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

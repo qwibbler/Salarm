@@ -6,7 +6,7 @@
 -->
 
 <!-- This TimerItem includes the circle because ample space exists. -->
-<com.best.deskclock.timer.TimerItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.qwibbler.salarm.timer.TimerItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -72,7 +72,7 @@
         app:layout_constraintTop_toBottomOf="@+id/timer_label"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.best.deskclock.uicomponents.CircleButtonsLayout
+        <com.qwibbler.salarm.uicomponents.CircleButtonsLayout
             android:id="@+id/circle_container"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -96,7 +96,7 @@
                 app:indicatorColor="?attr/colorSecondary"
                 tools:progress="600" />
 
-            <com.best.deskclock.uicomponents.AutoSizingTextView
+            <com.qwibbler.salarm.uicomponents.AutoSizingTextView
                 android:id="@+id/timer_time_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -110,7 +110,7 @@
                 android:textDirection="locale"
                 tools:text="01:23" />
 
-        </com.best.deskclock.uicomponents.CircleButtonsLayout>
+        </com.qwibbler.salarm.uicomponents.CircleButtonsLayout>
 
         <com.google.android.material.button.MaterialButton
             style="?attr/materialIconButtonFilledStyle"
@@ -187,4 +187,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.best.deskclock.timer.TimerItem>
+</com.qwibbler.salarm.timer.TimerItem>

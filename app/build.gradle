@@ -6,7 +6,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.best.deskclock"
+        applicationId = "com.qwibbler.salarm"
         minSdk = 23
         targetSdk = 36
         versionCode = 2035
@@ -120,7 +120,7 @@ android {
 
     ndkVersion = '29.0.14206865'
 
-    namespace = 'com.best.deskclock'
+    namespace = 'com.qwibbler.salarm'
 }
 
 dependencies {

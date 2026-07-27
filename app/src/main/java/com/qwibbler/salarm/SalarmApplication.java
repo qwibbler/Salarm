@@ -1,0 +1,183 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ * modified
+ * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
+ */
+
+package com.qwibbler.salarm;
+
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DARK_THEME;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEBUG_LANGUAGE_CODE;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.LIGHT_THEME;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.PURPLE_ACCENT_COLOR;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.RED_ACCENT_COLOR;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SYSTEM_THEME;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ACCENT_COLOR;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_LANGUAGE_CODE;
+
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
+import androidx.preference.PreferenceManager;
+
+import com.qwibbler.salarm.controller.Controller;
+import com.qwibbler.salarm.data.DataModel;
+import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.events.LogEventTracker;
+import com.qwibbler.salarm.uidata.UiDataModel;
+import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.utils.NotificationUtils;
+import com.qwibbler.salarm.utils.SdkUtils;
+
+import java.io.File;
+import java.util.Objects;
+
+public class SalarmApplication extends Application implements Application.ActivityLifecycleCallbacks {
+
+    private static SalarmApplication sInstance;
+
+    private int mStartedActivities = 0;
+    private boolean mIsChangingConfiguration = false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        sInstance = this;
+
+        initDebugAndNightlyDefaults();
+
+        String theme = SettingsDAO.getTheme(getDefaultSharedPreferences(this));
+        applySystemNightMode(theme);
+
+        DataModel.getDataModel().init();
+        UiDataModel.getUiDataModel().init();
+        Controller.getController().init();
+        Controller.getController().addEventTracker(new LogEventTracker());
+        Controller.getController().updateShortcuts();
+
+        if (SdkUtils.isAtLeastAndroid8()) {
+            NotificationUtils.updateNotificationChannels(this);
+        }
+
+        registerActivityLifecycleCallbacks(this);
+    }
+
+    @Override
+    public void onActivityStarted(@NonNull Activity activity) {
+        if (mStartedActivities == 0 && !mIsChangingConfiguration) {
+            DataModel.getDataModel().setApplicationInForeground(true);
+        }
+
+        mIsChangingConfiguration = false;
+        mStartedActivities++;
+    }
+
+    @Override
+    public void onActivityStopped(@NonNull Activity activity) {
+        mStartedActivities--;
+
+        if (mStartedActivities == 0) {
+            if (!activity.isChangingConfigurations()) {
+                DataModel.getDataModel().setApplicationInForeground(false);
+            } else {
+                mIsChangingConfiguration = true;
+            }
+        }
+    }
+
+    @Override public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {}
+    @Override public void onActivityResumed(@NonNull Activity activity) {}
+    @Override public void onActivityPaused(@NonNull Activity activity) {}
+    @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+    @Override public void onActivityDestroyed(@NonNull Activity activity) {}
+
+    private void initDebugAndNightlyDefaults() {
+        SharedPreferences prefs = getDefaultSharedPreferences(this);
+        if (!prefs.contains(KEY_ACCENT_COLOR)) {
+            if (BuildConfig.IS_DEBUG_BUILD) {
+                prefs.edit().putString(KEY_ACCENT_COLOR, RED_ACCENT_COLOR).apply();
+            } else if (BuildConfig.IS_NIGHTLY_BUILD) {
+                prefs.edit().putString(KEY_ACCENT_COLOR, PURPLE_ACCENT_COLOR).apply();
+            }
+        }
+
+        if (!prefs.contains(KEY_LANGUAGE_CODE)) {
+            if (BuildConfig.IS_DEBUG_BUILD || BuildConfig.IS_NIGHTLY_BUILD) {
+                prefs.edit().putString(KEY_LANGUAGE_CODE, DEBUG_LANGUAGE_CODE).apply();
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(DEBUG_LANGUAGE_CODE));
+            }
+        }
+    }
+
+    private void applySystemNightMode(String theme) {
+        switch (theme) {
+            case SYSTEM_THEME -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            case LIGHT_THEME -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            case DARK_THEME -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+    }
+
+    public static Context getAppContext() {
+        return sInstance;
+    }
+
+    /**
+     * Returns the default {@link SharedPreferences} instance from the underlying storage context.
+     */
+    public static SharedPreferences getDefaultSharedPreferences(Context context) {
+        final Context appContext = context.getApplicationContext();
+        final Context storageContext;
+
+        final String name = appContext.getPackageName() + "_preferences";
+        final String oldName = "com.best.deskclock_preferences";
+
+        if (SdkUtils.isAtLeastAndroid7()) {
+            // All N devices have split storage areas. Migrate the existing preferences into the new
+            // device encrypted storage area if that has not yet occurred.
+            storageContext = appContext.createDeviceProtectedStorageContext();
+            final String prefsFilename = storageContext.getDataDir() + "/shared_prefs/" + name + ".xml";
+            final File prefs = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
+
+            if (!prefs.exists()) {
+                if (storageContext.moveSharedPreferencesFrom(appContext, name)) {
+                    LogUtils.i("Migrated " + name + " to device protected storage.");
+                } else if (storageContext.moveSharedPreferencesFrom(appContext, oldName)) {
+                    LogUtils.i("Migrated " + oldName + " from credential storage.");
+                }
+
+                // Ensure the file is named correctly if we moved from oldName or it was already in device protected storage
+                final String oldPrefsFilename = storageContext.getDataDir() + "/shared_prefs/" + oldName + ".xml";
+                final File oldPrefs = new File(Objects.requireNonNull(Uri.parse(oldPrefsFilename).getPath()));
+                if (!prefs.exists() && oldPrefs.exists()) {
+                    if (oldPrefs.renameTo(prefs)) {
+                        LogUtils.i("Successfully rebranded preferences from " + oldName + " to " + name);
+                    }
+                }
+            }
+        } else {
+            storageContext = appContext;
+            final String prefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + name + ".xml";
+            final File prefs = new File(prefsFilename);
+            if (!prefs.exists()) {
+                final String oldPrefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + oldName + ".xml";
+                final File oldPrefs = new File(oldPrefsFilename);
+                if (oldPrefs.exists()) {
+                    if (oldPrefs.renameTo(prefs)) {
+                        LogUtils.i("Successfully rebranded preferences from " + oldName + " to " + name);
+                    }
+                }
+            }
+        }
+
+        return PreferenceManager.getDefaultSharedPreferences(storageContext);
+    }
+
+}

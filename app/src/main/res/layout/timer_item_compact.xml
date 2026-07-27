@@ -5,7 +5,7 @@
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
 
-<com.best.deskclock.timer.TimerItemCompact xmlns:android="http://schemas.android.com/apk/res/android"
+<com.qwibbler.salarm.timer.TimerItemCompact xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -71,7 +71,7 @@
         app:layout_constraintTop_toBottomOf="@+id/timer_label"
         app:layout_constraintBottom_toTopOf="@+id/timer_end_time">
 
-        <com.best.deskclock.uicomponents.AutoSizingTextView
+        <com.qwibbler.salarm.uicomponents.AutoSizingTextView
             android:id="@+id/timer_time_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -181,4 +181,4 @@
         app:layout_goneMarginTop="12dp"
         tools:progress="650" />
 
-</com.best.deskclock.timer.TimerItemCompact>
+</com.qwibbler.salarm.timer.TimerItemCompact>

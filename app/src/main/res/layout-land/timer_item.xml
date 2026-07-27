@@ -6,7 +6,7 @@
 -->
 
 <!-- This TimerItem excludes the circle because not enough space exists. -->
-<com.best.deskclock.timer.TimerItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.qwibbler.salarm.timer.TimerItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
@@ -102,7 +102,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/reset_or_edit_button">
 
-            <com.best.deskclock.uicomponents.AutoSizingTextView
+            <com.qwibbler.salarm.uicomponents.AutoSizingTextView
                 android:id="@+id/timer_time_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -172,4 +172,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.best.deskclock.timer.TimerItem>
+</com.qwibbler.salarm.timer.TimerItem>

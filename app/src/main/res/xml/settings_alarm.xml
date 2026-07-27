@@ -61,7 +61,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AutoSilenceDurationPreference
+        <com.qwibbler.salarm.settings.custompreference.AutoSilenceDurationPreference
             android:key="key_auto_silence_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/auto_silence_title"
@@ -76,7 +76,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AlarmSnoozeDurationPreference
+        <com.qwibbler.salarm.settings.custompreference.AlarmSnoozeDurationPreference
             android:key="key_alarm_snooze_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/snooze_duration_title"
@@ -109,7 +109,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AlarmVolumePreference
+        <com.qwibbler.salarm.settings.custompreference.AlarmVolumePreference
             android:key="key_volume_setting"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/alarm_volume_title"
@@ -125,7 +125,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.VolumeCrescendoDurationPreference
+        <com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference
             android:key="key_alarm_volume_crescendo_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/crescendo_duration_title"
@@ -166,7 +166,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_external_audio_device_volume"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/external_audio_device_volume_title"
@@ -193,7 +193,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.VibrationPatternPreference
+        <com.qwibbler.salarm.settings.custompreference.VibrationPatternPreference
             android:key="key_vibration_pattern"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/vibration_pattern_title"
@@ -208,7 +208,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.VibrationStartDelayPreference
+        <com.qwibbler.salarm.settings.custompreference.VibrationStartDelayPreference
             android:key="key_vibration_start_delay"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/vibration_start_delay_title"
@@ -271,7 +271,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_shake_intensity"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/shake_intensity_title"
@@ -333,7 +333,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AlarmNotificationReminderPreference
+        <com.qwibbler.salarm.settings.custompreference.AlarmNotificationReminderPreference
             android:key="key_alarm_notification_reminder"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/alarm_notification_reminder_title"

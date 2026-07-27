@@ -51,14 +51,14 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AutoSilenceDurationPreference
+        <com.qwibbler.salarm.settings.custompreference.AutoSilenceDurationPreference
             android:key="key_timer_auto_silence_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/auto_silence_title"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.AlarmVolumePreference
+        <com.qwibbler.salarm.settings.custompreference.AlarmVolumePreference
             android:key="key_volume_setting"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/alarm_volume_title"
@@ -66,7 +66,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.VolumeCrescendoDurationPreference
+        <com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference
             android:key="key_timer_volume_crescendo_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/crescendo_duration_title"
@@ -99,7 +99,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_external_audio_device_volume"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/external_audio_device_volume_title"
@@ -165,7 +165,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_timer_shake_intensity"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/shake_intensity_title"
@@ -201,7 +201,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.TimerAddTimeButtonValuePreference
+        <com.qwibbler.salarm.settings.custompreference.TimerAddTimeButtonValuePreference
             android:key="key_timer_add_time_button_value"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/default_time_to_add_to_timer_title"

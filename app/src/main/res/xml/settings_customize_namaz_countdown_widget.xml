@@ -52,7 +52,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_namaz_countdown_widget_background_corner_radius"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/background_corner_radius_title"
@@ -85,7 +85,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_countdown_widget_custom_background_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/background_color_title"
@@ -101,7 +101,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_countdown_widget_custom_time_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Countdown time color"
@@ -117,7 +117,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_countdown_widget_custom_label_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Countdown label color"
@@ -132,7 +132,7 @@
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_namaz_countdown_widget_maximum_font_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/max_clock_font_size_title"

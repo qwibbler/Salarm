@@ -55,7 +55,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_analog_widget_custom_dial_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/dial_color_title"
@@ -71,7 +71,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_analog_widget_custom_hour_hand_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/hour_hand_color_title"
@@ -87,7 +87,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_analog_widget_custom_minute_hand_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/minute_hand_color_title"
@@ -103,7 +103,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_analog_widget_custom_second_hand_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/second_hand_color_title"

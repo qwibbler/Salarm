@@ -17,5 +17,5 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetFeatures="configuration_optional|reconfigurable"
-    android:configure="com.best.deskclock.widgets.WidgetConfiguration$AnalogWidgetConfiguration"
+    android:configure="com.qwibbler.salarm.widgets.WidgetConfiguration$AnalogWidgetConfiguration"
     tools:targetApi="p" />

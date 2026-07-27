@@ -1,0 +1,268 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ * modified
+ * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
+ */
+
+package com.qwibbler.salarm.worldclock;
+
+import static androidx.core.util.TypedValueCompat.dpToPx;
+import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+
+import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.BaseActivity;
+import com.qwibbler.salarm.data.DataModel;
+import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.databinding.CitiesActivityBinding;
+import com.qwibbler.salarm.databinding.CityListHeaderMainTitleBinding;
+import com.qwibbler.salarm.utils.InsetsUtils;
+import com.qwibbler.salarm.utils.SdkUtils;
+import com.qwibbler.salarm.utils.ThemeUtils;
+
+/**
+ * This activity allows the user to alter the cities selected for display.
+ * <p/>
+ * Note, it is possible for two instances of this Activity to exist simultaneously:
+ * <p/>
+ * <ul>
+ * <li>Clock Tab-> Tap Floating Action Button</li>
+ * <li>Digital Widget -> Tap any city clock</li>
+ * </ul>
+ * <p/>
+ * As a result, {@link #onResume()} conservatively refreshes itself from the backing
+ * {@link DataModel} which may have changed since this activity was last displayed.
+ */
+public final class CitySelectionActivity extends BaseActivity {
+
+    private static final String KEY_SEARCH_QUERY = "search_query";
+
+    private CitiesActivityBinding mBinding;
+
+    /**
+     * The adapter that presents all the selected and unselected cities.
+     */
+    private CityAdapter mCitiesAdapter;
+
+    private SharedPreferences mPrefs;
+
+    public SearchView mSearchView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mBinding = CitiesActivityBinding.inflate(getLayoutInflater());
+
+        // To manually manage insets
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        ThemeUtils.allowDisplayCutout(getWindow());
+
+        mPrefs = getDefaultSharedPreferences(this);
+        Typeface typeface = ThemeUtils.loadFont(SettingsDAO.getGeneralFont(mPrefs));
+
+        setContentView(mBinding.getRoot());
+
+        setSupportActionBar(mBinding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        mSearchView = new SearchView(this);
+        mSearchView.setLayoutParams(new Toolbar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        mSearchView.setQueryHint(getString(R.string.city_search_hint));
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        mSearchView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+        mSearchView.setBackground(ThemeUtils.pillBackgroundFromAttr(this, com.google.android.material.R.attr.colorSecondaryContainer));
+
+        // Apply custom font to the search text
+        TextView searchText = mSearchView.findViewById(androidx.appcompat.R.id.search_src_text);
+        searchText.setTypeface(typeface);
+
+        // Use a rounded icon for the search icon
+        ImageView searchIcon = mSearchView.findViewById(androidx.appcompat.R.id.search_mag_icon);
+        if (searchIcon != null) {
+            searchIcon.setImageResource(R.drawable.ic_search);
+        }
+
+        // Hide the bottom bar of the search field
+        View searchPlate = mSearchView.findViewById(androidx.appcompat.R.id.search_plate);
+        if (searchPlate != null) {
+            searchPlate.setBackground(null);
+        }
+
+        mBinding.toolbar.addView(mSearchView);
+
+        mCitiesAdapter = new CityAdapter(this);
+
+        mSearchView.post(() -> mSearchView.clearFocus());
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                mCitiesAdapter.filter(query);
+                updateFastScrolling();
+                return true;
+            }
+        });
+
+        CityListHeaderMainTitleBinding headerBinding =
+            CityListHeaderMainTitleBinding.inflate(getLayoutInflater(), mBinding.citiesList, false);
+        headerBinding.cityListHeaderMainTitle.setTypeface(typeface);
+        headerBinding.cityListHeaderMainTitle.setOnClickListener(null);
+
+        mBinding.citiesList.addHeaderView(headerBinding.getRoot());
+
+        mBinding.citiesList.setAdapter(mCitiesAdapter);
+
+        applyWindowInsets();
+
+        updateFastScrolling();
+
+        if (savedInstanceState != null) {
+            String query = savedInstanceState.getString(KEY_SEARCH_QUERY, "");
+            mSearchView.setQuery(query, false);
+        }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+                if (SettingsDAO.isFadeTransitionsEnabled(mPrefs)) {
+                    if (SdkUtils.isAtLeastAndroid14()) {
+                        overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out);
+                    } else {
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                    }
+                } else {
+                    if (SdkUtils.isAtLeastAndroid14()) {
+                        overrideActivityTransition(
+                            OVERRIDE_TRANSITION_CLOSE, R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
+                    } else {
+                        overridePendingTransition(R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+
+        bundle.putString(KEY_SEARCH_QUERY, mSearchView.getQuery().toString());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Recompute the contents of the adapter before displaying on screen.
+        mCitiesAdapter.refresh();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Save the selected cities.
+        DataModel.getDataModel().setSelectedCities(mCitiesAdapter.getSelectedCities());
+    }
+
+    @Override
+    protected void onDestroy() {
+        mSearchView = null;
+
+        mBinding = null;
+
+        super.onDestroy();
+    }
+
+    @SuppressLint("AlwaysShowAction")
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, 0, Menu.NONE, getMenuTitle()).setIcon(R.drawable.ic_sort).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+        mBinding.toolbar.post(() -> ThemeUtils.applyToolbarTooltips(mBinding.toolbar));
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Save the new sort order.
+        DataModel.getDataModel().toggleCitySort();
+
+        item.setTitle(getMenuTitle());
+
+        // Section headers are influenced by sort order and must be cleared.
+        mCitiesAdapter.clearSectionHeaders();
+
+        // Honor the new sort order in the adapter.
+        mCitiesAdapter.filter(mSearchView.getQuery().toString());
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * This method adjusts the space occupied by system elements (such as the status bar,
+     * navigation bar or screen notch) and adjust the display of the application interface
+     * accordingly.
+     */
+    private void applyWindowInsets() {
+        InsetsUtils.doOnApplyWindowInsets(mBinding.citySelectionRootView, (v, insets) -> {
+            // Get the system bar and notch insets
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+
+            v.setPadding(bars.left, bars.top, bars.right, 0);
+
+            int bottomPadding = (int) dpToPx(10, getResources().getDisplayMetrics());
+            mBinding.citiesList.setPadding(0, 0, 0, bars.bottom + bottomPadding);
+        });
+    }
+
+    private int getMenuTitle() {
+        if (SettingsDAO.getCitySort(mPrefs) == DataModel.CitySort.NAME) {
+            return R.string.menu_item_sort_by_gmt_offset;
+        } else {
+            return R.string.menu_item_sort_by_name;
+        }
+    }
+
+    /**
+     * Fast scrolling is only enabled while no filtering is happening.
+     */
+    private void updateFastScrolling() {
+        final boolean enabled = !mCitiesAdapter.isFiltering();
+        mBinding.citiesList.setFastScrollAlwaysVisible(enabled);
+        mBinding.citiesList.setFastScrollEnabled(enabled);
+    }
+
+}

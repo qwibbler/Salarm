@@ -89,7 +89,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_namaz_widget_background_corner_radius"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/background_corner_radius_title"
@@ -122,7 +122,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_background_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/background_color_title"
@@ -138,7 +138,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_countdown_time_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Countdown time color"
@@ -154,7 +154,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_countdown_label_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Countdown label color"
@@ -170,7 +170,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_timeline_active_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Timeline active event color"
@@ -186,7 +186,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_timeline_next_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Timeline next event color"
@@ -202,7 +202,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_timeline_standard_color"
             android:layout="@layout/settings_preference_layout"
             android:title="Timeline standard event color"
@@ -226,7 +226,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_item_active_highlight_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/namaz_widget_highlight_active_custom_color_title"
@@ -242,7 +242,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_widget_custom_item_next_highlight_color"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/namaz_widget_highlight_next_custom_color_title"
@@ -257,7 +257,7 @@
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_namaz_widget_maximum_font_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/max_clock_font_size_title"

@@ -1,0 +1,500 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
+package com.qwibbler.salarm.settings;
+
+import static android.app.Activity.OVERRIDE_TRANSITION_OPEN;
+import static android.app.Activity.RESULT_OK;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
+import static com.qwibbler.salarm.settings.PreferencesKeys.*;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.core.view.HapticFeedbackConstantsCompat;
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
+import androidx.preference.SwitchPreferenceCompat;
+
+import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.DataModel.ClockStyle;
+import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
+import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
+import com.qwibbler.salarm.uicomponents.toast.CustomToast;
+import com.qwibbler.salarm.utils.SdkUtils;
+import com.qwibbler.salarm.utils.ThemeUtils;
+import com.qwibbler.salarm.utils.Utils;
+import com.google.android.material.color.MaterialColors;
+
+public class AlarmDisplayCustomizationFragment extends ScreenFragment
+    implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
+
+    String[] mAlarmClockStyleValues;
+    String mAnalogClock;
+    String mMaterialAnalogClock;
+    String mDigitalClock;
+
+    ListPreference mAlarmClockStylePref;
+    ListPreference mAlarmClockDialPref;
+    ListPreference mAlarmClockDialMaterialPref;
+    CustomSliderPreference mAnalogClockSizePref;
+    ListPreference mAlarmClockSecondHandPref;
+    SwitchPreferenceCompat mDisplaySecondsPref;
+    SwitchPreferenceCompat mSwipeActionPref;
+    SwitchPreferenceCompat mDisplaySnoozeSelectorPref;
+    ColorPickerPreference mBackgroundColorPref;
+    ColorPickerPreference mBackgroundAmoledColorPref;
+    ColorPickerPreference mAlarmClockColorPref;
+    ColorPickerPreference mAlarmSecondHandColorPref;
+    ColorPickerPreference mSlideZoneColorPref;
+    ColorPickerPreference mAlarmButtonColorPref;
+    ColorPickerPreference mSnoozeTitleColorPref;
+    ColorPickerPreference mSnoozeButtonColorPref;
+    ColorPickerPreference mDismissTitleColorPref;
+    ColorPickerPreference mDismissButtonColorPref;
+    ColorPickerPreference mSnoozeZoneColorPref;
+    ColorPickerPreference mSnoozeMinusButtonColorPref;
+    ColorPickerPreference mSnoozePlusButtonColorPref;
+    ColorPickerPreference mSnoozeSelectorTextColorPref;
+    ColorPickerPreference mSnoozeMinusSymbolColorPref;
+    ColorPickerPreference mSnoozePlusSymbolColorPref;
+    CustomSliderPreference mAlarmDigitalClockFontSizePref;
+    SwitchPreferenceCompat mDisplayTextShadowPref;
+    ColorPickerPreference mShadowColorPref;
+    CustomSliderPreference mShadowOffsetPref;
+    SwitchPreferenceCompat mDisplayAlarmActionMessagePref;
+    SwitchPreferenceCompat mDisplayRingtoneTitlePref;
+    ColorPickerPreference mRingtoneTitleColorPref;
+    Preference mAlarmBackgroundImagePref;
+    SwitchPreferenceCompat mEnableAlarmBlurEffectPref;
+    CustomSliderPreference mAlarmBlurIntensityPref;
+    Preference mAlarmPreviewPref;
+
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() != RESULT_OK) {
+                return;
+            }
+
+            Intent intent = result.getData();
+            final Uri sourceUri = intent == null ? null : intent.getData();
+            if (sourceUri == null) {
+                return;
+            }
+
+            final Context appContext = requireContext().getApplicationContext();
+
+            // Take persistent permission
+            appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            String safeTitle = Utils.toSafeFileName(FILE_ALARM_BACKGROUND);
+            String oldImagePath = mPrefs.getString(KEY_ALARM_BACKGROUND_IMAGE, null);
+
+            AppExecutors.getDiskIO().execute(() -> {
+                // Delete the old image if it exists
+                clearFile(oldImagePath);
+
+                // Copy the new image to the device's protected storage
+                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+
+                // Save the new path
+                if (copiedUri != null) {
+                    mPrefs.edit().putString(KEY_ALARM_BACKGROUND_IMAGE, copiedUri.getPath()).apply();
+                }
+
+                AppExecutors.getMainThread().post(() -> {
+                    if (copiedUri != null) {
+                        CustomToast.show(appContext, R.string.background_image_toast_message_selected);
+                    } else {
+                        CustomToast.show(appContext, "Error importing image");
+                    }
+
+                    if (!isAdded()
+                        || mAlarmBackgroundImagePref == null
+                        || mEnableAlarmBlurEffectPref == null
+                        || mAlarmBlurIntensityPref == null) {
+                        return;
+                    }
+
+                    if (copiedUri != null) {
+                        mAlarmBackgroundImagePref.setTitle(getString(R.string.background_image_title_variant));
+                        mAlarmBackgroundImagePref.setSummary(getString(R.string.background_image_summary));
+                        mEnableAlarmBlurEffectPref.setVisible(SdkUtils.isAtLeastAndroid12());
+                        mAlarmBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12() && SettingsDAO.isAlarmBlurEffectEnabled(mPrefs));
+                    } else {
+                        mAlarmBackgroundImagePref.setTitle(getString(R.string.background_image_title));
+                        mAlarmBackgroundImagePref.setSummary(null);
+                        mEnableAlarmBlurEffectPref.setVisible(false);
+                        mAlarmBlurIntensityPref.setVisible(false);
+                    }
+                });
+            });
+        });
+
+    @Override
+    protected String getFragmentTitle() {
+        return getString(R.string.display_settings_title);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        addPreferencesFromResource(R.xml.settings_alarm_display);
+
+        mAlarmClockStylePref = findPreference(KEY_ALARM_CLOCK_STYLE);
+        mAlarmClockDialPref = findPreference(KEY_ALARM_CLOCK_DIAL);
+        mAlarmClockDialMaterialPref = findPreference(KEY_ALARM_CLOCK_DIAL_MATERIAL);
+        mAnalogClockSizePref = findPreference(KEY_ALARM_ANALOG_CLOCK_SIZE);
+        mDisplaySecondsPref = findPreference(KEY_DISPLAY_ALARM_SECOND_HAND);
+        mAlarmClockSecondHandPref = findPreference(KEY_ALARM_CLOCK_SECOND_HAND);
+        mSwipeActionPref = findPreference(KEY_SWIPE_ACTION);
+        mDisplaySnoozeSelectorPref = findPreference(KEY_DISPLAY_SNOOZE_SELECTOR);
+        mBackgroundColorPref = findPreference(KEY_ALARM_BACKGROUND_COLOR);
+        mBackgroundAmoledColorPref = findPreference(KEY_ALARM_BACKGROUND_AMOLED_COLOR);
+        mAlarmClockColorPref = findPreference(KEY_ALARM_CLOCK_COLOR);
+        mAlarmSecondHandColorPref = findPreference(KEY_ALARM_SECOND_HAND_COLOR);
+        mSlideZoneColorPref = findPreference(KEY_SLIDE_ZONE_COLOR);
+        mAlarmButtonColorPref = findPreference(KEY_ALARM_BUTTON_COLOR);
+        mSnoozeTitleColorPref = findPreference(KEY_SNOOZE_TITLE_COLOR);
+        mSnoozeButtonColorPref = findPreference(KEY_SNOOZE_BUTTON_COLOR);
+        mDismissTitleColorPref = findPreference(KEY_DISMISS_TITLE_COLOR);
+        mDismissButtonColorPref = findPreference(KEY_DISMISS_BUTTON_COLOR);
+        mSnoozeZoneColorPref = findPreference(KEY_SNOOZE_ZONE_COLOR);
+        mSnoozeMinusButtonColorPref = findPreference(KEY_SNOOZE_MINUS_BUTTON_COLOR);
+        mSnoozePlusButtonColorPref = findPreference(KEY_SNOOZE_PLUS_BUTTON_COLOR);
+        mSnoozeSelectorTextColorPref = findPreference(KEY_SNOOZE_SELECTOR_TEXT_COLOR);
+        mSnoozeMinusSymbolColorPref = findPreference(KEY_SNOOZE_MINUS_SYMBOL_COLOR);
+        mSnoozePlusSymbolColorPref = findPreference(KEY_SNOOZE_PLUS_SYMBOL_COLOR);
+        mAlarmDigitalClockFontSizePref = findPreference(KEY_ALARM_DIGITAL_CLOCK_FONT_SIZE);
+        mDisplayTextShadowPref = findPreference(KEY_ALARM_DISPLAY_TEXT_SHADOW);
+        mShadowColorPref = findPreference(KEY_ALARM_SHADOW_COLOR);
+        mShadowOffsetPref = findPreference(KEY_ALARM_SHADOW_OFFSET);
+        mDisplayAlarmActionMessagePref = findPreference(KEY_DISPLAY_ALARM_ACTION_MESSAGE);
+        mDisplayRingtoneTitlePref = findPreference(KEY_DISPLAY_RINGTONE_TITLE);
+        mRingtoneTitleColorPref = findPreference(KEY_RINGTONE_TITLE_COLOR);
+        mAlarmBackgroundImagePref = findPreference(KEY_ALARM_BACKGROUND_IMAGE);
+        mEnableAlarmBlurEffectPref = findPreference(KEY_ENABLE_ALARM_BLUR_EFFECT);
+        mAlarmBlurIntensityPref = findPreference(KEY_ALARM_BLUR_INTENSITY);
+        mAlarmPreviewPref = findPreference(KEY_ALARM_PREVIEW);
+
+        mAlarmClockStyleValues = getResources().getStringArray(R.array.clock_style_values);
+        mAnalogClock = mAlarmClockStyleValues[0];
+        mMaterialAnalogClock = mAlarmClockStyleValues[1];
+        mDigitalClock = mAlarmClockStyleValues[2];
+
+        setupPreferences();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        restoreCustomFileDialogIfNeeded(KEY_ALARM_BACKGROUND_IMAGE, mAlarmBackgroundImagePref, imagePickerLauncher, () -> {
+            mEnableAlarmBlurEffectPref.setVisible(false);
+            mAlarmBlurIntensityPref.setVisible(false);
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        nullifyPreferenceListeners(mAlarmClockStylePref, mAlarmClockDialPref, mAlarmClockDialMaterialPref, mAnalogClockSizePref,
+            mAlarmClockSecondHandPref, mDisplaySecondsPref, mSwipeActionPref, mDisplaySnoozeSelectorPref, mBackgroundColorPref,
+            mBackgroundAmoledColorPref, mAlarmClockColorPref, mAlarmSecondHandColorPref, mSlideZoneColorPref, mAlarmButtonColorPref,
+            mSnoozeTitleColorPref, mSnoozeButtonColorPref, mDismissTitleColorPref, mDismissButtonColorPref, mSnoozeZoneColorPref,
+            mSnoozeMinusButtonColorPref, mSnoozePlusButtonColorPref, mSnoozeSelectorTextColorPref, mSnoozeMinusSymbolColorPref,
+            mSnoozePlusSymbolColorPref, mAlarmDigitalClockFontSizePref, mDisplayTextShadowPref, mShadowColorPref, mShadowOffsetPref,
+            mDisplayAlarmActionMessagePref, mDisplayRingtoneTitlePref, mRingtoneTitleColorPref, mAlarmBackgroundImagePref,
+            mEnableAlarmBlurEffectPref, mAlarmBlurIntensityPref, mAlarmPreviewPref
+        );
+
+        nullifyAllPrefs();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference pref, Object newValue) {
+        switch (pref.getKey()) {
+            case KEY_ALARM_CLOCK_STYLE -> {
+                boolean isAnalogClock = newValue.equals(mAnalogClock);
+                boolean isMaterialAnalogClock = newValue.equals(mMaterialAnalogClock);
+                boolean isDigitalClock = newValue.equals(mDigitalClock);
+                boolean isSecondHandDisplayed = SettingsDAO.isAlarmSecondHandDisplayed(mPrefs);
+
+                final int clockIndex = mAlarmClockStylePref.findIndexOfValue((String) newValue);
+                mAlarmClockStylePref.setSummary(mAlarmClockStylePref.getEntries()[clockIndex]);
+
+                mAlarmClockDialPref.setVisible(isAnalogClock);
+                mAlarmClockDialMaterialPref.setVisible(isMaterialAnalogClock);
+                mAlarmClockColorPref.setVisible(!isMaterialAnalogClock);
+                mAnalogClockSizePref.setVisible(!isDigitalClock);
+                mAlarmDigitalClockFontSizePref.setVisible(isDigitalClock);
+                mDisplaySecondsPref.setVisible(!isDigitalClock);
+                mAlarmClockSecondHandPref.setVisible(isAnalogClock && isSecondHandDisplayed);
+                mAlarmSecondHandColorPref.setVisible(isAnalogClock && isSecondHandDisplayed);
+            }
+
+            case KEY_ALARM_CLOCK_DIAL, KEY_ALARM_CLOCK_DIAL_MATERIAL, KEY_ALARM_CLOCK_SECOND_HAND -> {
+                final ListPreference preference = (ListPreference) pref;
+                final int index = preference.findIndexOfValue((String) newValue);
+                preference.setSummary(preference.getEntries()[index]);
+            }
+
+            case KEY_DISPLAY_ALARM_SECOND_HAND -> {
+                boolean isSecondHandDisplayed = (boolean) newValue;
+                ClockStyle alarmClockStyle = SettingsDAO.getAlarmClockStyle(mPrefs);
+
+                mAlarmClockSecondHandPref.setVisible(isSecondHandDisplayed && alarmClockStyle == ClockStyle.ANALOG);
+                mAlarmSecondHandColorPref.setVisible(isSecondHandDisplayed && alarmClockStyle != ClockStyle.ANALOG_MATERIAL);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_SWIPE_ACTION -> {
+                boolean isSwipeActionEnabled = (boolean) newValue;
+
+                mSlideZoneColorPref.setVisible(isSwipeActionEnabled);
+                mSnoozeTitleColorPref.setVisible(isSwipeActionEnabled);
+                mSnoozeButtonColorPref.setVisible(!isSwipeActionEnabled);
+                mDismissTitleColorPref.setVisible(isSwipeActionEnabled);
+                mDismissButtonColorPref.setVisible(!isSwipeActionEnabled);
+                mAlarmButtonColorPref.setVisible(isSwipeActionEnabled);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_DISPLAY_SNOOZE_SELECTOR -> {
+                boolean isSnoozeSelectorDisplayed = (boolean) newValue;
+
+                mSnoozeZoneColorPref.setVisible(isSnoozeSelectorDisplayed);
+                mSnoozeMinusButtonColorPref.setVisible(isSnoozeSelectorDisplayed);
+                mSnoozePlusButtonColorPref.setVisible(isSnoozeSelectorDisplayed);
+                mSnoozeSelectorTextColorPref.setVisible(isSnoozeSelectorDisplayed);
+                mSnoozeMinusSymbolColorPref.setVisible(isSnoozeSelectorDisplayed);
+                mSnoozePlusSymbolColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_ALARM_DISPLAY_TEXT_SHADOW -> {
+                boolean isTextShadowDisplayed = (boolean) newValue;
+                mShadowColorPref.setVisible(isTextShadowDisplayed);
+                mShadowOffsetPref.setVisible(isTextShadowDisplayed);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_DISPLAY_RINGTONE_TITLE -> {
+                mRingtoneTitleColorPref.setVisible((boolean) newValue);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_ENABLE_ALARM_BLUR_EFFECT -> {
+                mAlarmBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
+                    && (boolean) newValue
+                    && SettingsDAO.getAlarmBackgroundImage(mPrefs) != null);
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
+
+            case KEY_DISPLAY_ALARM_ACTION_MESSAGE -> Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onPreferenceClick(@NonNull Preference pref) {
+        final Context context = getActivity();
+        if (context == null) {
+            return false;
+        }
+
+        switch (pref.getKey()) {
+            case KEY_ALARM_BACKGROUND_IMAGE -> selectCustomFile(mAlarmBackgroundImagePref, imagePickerLauncher,
+                SettingsDAO.getAlarmBackgroundImage(mPrefs), KEY_ALARM_BACKGROUND_IMAGE, false, () -> {
+                    mEnableAlarmBlurEffectPref.setVisible(false);
+                    mAlarmBlurIntensityPref.setVisible(false);
+                });
+
+            case KEY_ALARM_PREVIEW -> {
+                startActivity(new Intent(context, AlarmDisplayPreviewActivity.class));
+                if (SettingsDAO.isFadeTransitionsEnabled(mPrefs)) {
+                    if (SdkUtils.isAtLeastAndroid14()) {
+                        requireActivity().overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.fade_out);
+                    } else {
+                        requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                    }
+                } else {
+                    if (SdkUtils.isAtLeastAndroid14()) {
+                        requireActivity().overrideActivityTransition(
+                            OVERRIDE_TRANSITION_OPEN, R.anim.activity_slide_from_right, R.anim.activity_slide_to_left);
+                    } else {
+                        requireActivity().overridePendingTransition(R.anim.activity_slide_from_right, R.anim.activity_slide_to_left);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void setupPreferences() {
+        final boolean isAnalogClock = mAlarmClockStylePref.getValue().equals(mAnalogClock);
+        final boolean isMaterialAnalogClock = mAlarmClockStylePref.getValue().equals(mMaterialAnalogClock);
+        final boolean isDigitalClock = mAlarmClockStylePref.getValue().equals(mDigitalClock);
+        final boolean isSecondHandDisplayed = SettingsDAO.isAlarmSecondHandDisplayed(mPrefs);
+        final boolean isSwipeActionEnabled = SettingsDAO.isSwipeActionEnabled(mPrefs);
+        final boolean isSnoozeSelectorDisplayed = SettingsDAO.isSnoozeSelectorDisplayed(mPrefs);
+        final boolean isTextShadowDisplayed = SettingsDAO.isAlarmTextShadowDisplayed(mPrefs);
+        final String alarmBackgroundImage = SettingsDAO.getAlarmBackgroundImage(mPrefs);
+
+        mAlarmClockStylePref.setSummary(mAlarmClockStylePref.getEntry());
+        mAlarmClockStylePref.setOnPreferenceChangeListener(this);
+
+        mAlarmClockDialPref.setVisible(isAnalogClock);
+        mAlarmClockDialPref.setSummary(mAlarmClockDialPref.getEntry());
+        mAlarmClockDialPref.setOnPreferenceChangeListener(this);
+
+        mAlarmClockDialMaterialPref.setVisible(isMaterialAnalogClock);
+        mAlarmClockDialMaterialPref.setSummary(mAlarmClockDialMaterialPref.getEntry());
+        mAlarmClockDialMaterialPref.setOnPreferenceChangeListener(this);
+
+        final boolean isAmoledMode = ThemeUtils.isNight(getResources()) && SettingsDAO.getDarkMode(mPrefs).equals(AMOLED_DARK_MODE);
+        mBackgroundAmoledColorPref.setVisible(isAmoledMode);
+
+        mBackgroundColorPref.setVisible(!isAmoledMode);
+
+        mAlarmClockColorPref.setVisible(!isMaterialAnalogClock);
+
+        mAnalogClockSizePref.setVisible(!isDigitalClock);
+
+        mDisplaySecondsPref.setVisible(!isDigitalClock);
+        mDisplaySecondsPref.setOnPreferenceChangeListener(this);
+
+        mAlarmClockSecondHandPref.setVisible(isAnalogClock && isSecondHandDisplayed);
+        mAlarmClockSecondHandPref.setSummary(mAlarmClockSecondHandPref.getEntry());
+        mAlarmClockSecondHandPref.setOnPreferenceChangeListener(this);
+
+        mSwipeActionPref.setOnPreferenceChangeListener(this);
+
+        mDisplaySnoozeSelectorPref.setOnPreferenceChangeListener(this);
+
+        int color = MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorPrimaryInverse, Color.BLACK);
+        mAlarmSecondHandColorPref.setVisible(isAnalogClock && isSecondHandDisplayed);
+        mAlarmSecondHandColorPref.setDefaultValue(color);
+
+        mSlideZoneColorPref.setVisible(isSwipeActionEnabled);
+
+        mAlarmButtonColorPref.setVisible(isSwipeActionEnabled);
+        mAlarmButtonColorPref.setDefaultValue(color);
+
+        mSnoozeTitleColorPref.setVisible(isSwipeActionEnabled);
+
+        mSnoozeButtonColorPref.setVisible(!isSwipeActionEnabled);
+        mSnoozeButtonColorPref.setDefaultValue(color);
+
+        mDismissTitleColorPref.setVisible(isSwipeActionEnabled);
+
+        mDismissButtonColorPref.setVisible(!isSwipeActionEnabled);
+        mDismissButtonColorPref.setDefaultValue(color);
+
+        mSnoozeZoneColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mSnoozeMinusButtonColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mSnoozePlusButtonColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mSnoozeSelectorTextColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mSnoozeMinusSymbolColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mSnoozePlusSymbolColorPref.setVisible(isSnoozeSelectorDisplayed);
+
+        mAlarmDigitalClockFontSizePref.setVisible(isDigitalClock);
+
+        mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
+
+        mShadowColorPref.setVisible(isTextShadowDisplayed);
+
+        mShadowOffsetPref.setVisible(isTextShadowDisplayed);
+
+        mDisplayAlarmActionMessagePref.setOnPreferenceChangeListener(this);
+
+        mDisplayRingtoneTitlePref.setOnPreferenceChangeListener(this);
+
+        mRingtoneTitleColorPref.setVisible(SettingsDAO.isRingtoneTitleDisplayed(mPrefs));
+
+        if (alarmBackgroundImage == null) {
+            mAlarmBackgroundImagePref.setTitle(getString(R.string.background_image_title));
+            mAlarmBackgroundImagePref.setSummary(null);
+        } else {
+            mAlarmBackgroundImagePref.setTitle(getString(R.string.background_image_title_variant));
+            mAlarmBackgroundImagePref.setSummary(getString(R.string.background_image_summary));
+        }
+
+        mAlarmBackgroundImagePref.setOnPreferenceClickListener(this);
+
+        mEnableAlarmBlurEffectPref.setVisible(SdkUtils.isAtLeastAndroid12() && alarmBackgroundImage != null);
+        mEnableAlarmBlurEffectPref.setOnPreferenceChangeListener(this);
+
+        mAlarmBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
+            && alarmBackgroundImage != null
+            && SettingsDAO.isAlarmBlurEffectEnabled(mPrefs));
+
+        mAlarmPreviewPref.setOnPreferenceClickListener(this);
+    }
+
+    private void nullifyAllPrefs() {
+        mAlarmClockStylePref = null;
+        mAlarmClockDialPref = null;
+        mAlarmClockDialMaterialPref = null;
+        mAnalogClockSizePref = null;
+        mAlarmClockSecondHandPref = null;
+        mDisplaySecondsPref = null;
+        mSwipeActionPref = null;
+        mDisplaySnoozeSelectorPref = null;
+        mBackgroundColorPref = null;
+        mBackgroundAmoledColorPref = null;
+        mAlarmClockColorPref = null;
+        mAlarmSecondHandColorPref = null;
+        mSlideZoneColorPref = null;
+        mAlarmButtonColorPref = null;
+        mSnoozeTitleColorPref = null;
+        mSnoozeButtonColorPref = null;
+        mDismissTitleColorPref = null;
+        mDismissButtonColorPref = null;
+        mSnoozeZoneColorPref = null;
+        mSnoozeMinusButtonColorPref = null;
+        mSnoozePlusButtonColorPref = null;
+        mSnoozeSelectorTextColorPref = null;
+        mSnoozeMinusSymbolColorPref = null;
+        mSnoozePlusSymbolColorPref = null;
+        mAlarmDigitalClockFontSizePref = null;
+        mDisplayTextShadowPref = null;
+        mShadowColorPref = null;
+        mShadowOffsetPref = null;
+        mDisplayAlarmActionMessagePref = null;
+        mDisplayRingtoneTitlePref = null;
+        mRingtoneTitleColorPref = null;
+        mAlarmBackgroundImagePref = null;
+        mEnableAlarmBlurEffectPref = null;
+        mAlarmBlurIntensityPref = null;
+        mAlarmPreviewPref = null;
+
+        mAlarmClockStyleValues = null;
+        mAnalogClock = null;
+        mMaterialAnalogClock = null;
+        mDigitalClock = null;
+    }
+
+}

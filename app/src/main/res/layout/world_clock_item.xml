@@ -39,7 +39,7 @@
         tools:background="@drawable/bg_card_for_preview"
         tools:backgroundTint="?attr/colorSecondary" />
 
-    <com.best.deskclock.uicomponents.AnalogClock
+    <com.qwibbler.salarm.uicomponents.AnalogClock
         android:id="@+id/analog_clock"
         android:layout_width="@dimen/city_analog_clock_size"
         android:layout_height="@dimen/city_analog_clock_size"

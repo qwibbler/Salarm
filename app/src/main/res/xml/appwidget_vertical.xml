@@ -17,5 +17,5 @@
     android:updatePeriodMillis="0"
     android:widgetCategory="keyguard|home_screen"
     android:widgetFeatures="configuration_optional|reconfigurable"
-    android:configure="com.best.deskclock.widgets.WidgetConfiguration$VerticalWidgetConfiguration"
+    android:configure="com.qwibbler.salarm.widgets.WidgetConfiguration$VerticalWidgetConfiguration"
     tools:targetApi="p" />

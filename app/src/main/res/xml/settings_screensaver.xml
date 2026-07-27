@@ -52,7 +52,7 @@
             app:singleLineTitle="false"
             tools:isPreferenceVisible="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_screensaver_analog_clock_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/analog_clock_size_title"
@@ -105,7 +105,7 @@
             app:singleLineTitle="false"
             tools:isPreferenceVisible="true" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_screensaver_clock_color_picker"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/clock_color_title"
@@ -113,7 +113,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_screensaver_battery_color_picker"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/battery_color_title"
@@ -121,7 +121,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_screensaver_date_color_picker"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/date_color_title"
@@ -129,7 +129,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.ColorPickerPreference
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_screensaver_next_alarm_color_picker"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/next_alarm_color_title"
@@ -137,7 +137,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_screensaver_brightness"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/screensaver_brightness_title"
@@ -154,7 +154,7 @@
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_screensaver_digital_clock_font_size"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/clock_font_size"
@@ -265,7 +265,7 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_screensaver_blur_intensity"
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/blur_intensity_title"

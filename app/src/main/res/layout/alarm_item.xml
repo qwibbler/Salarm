@@ -38,7 +38,7 @@
         tools:text="@string/category_alarm"
         tools:ignore="TextContrastCheck" />
 
-    <com.best.deskclock.uicomponents.TextTime
+    <com.qwibbler.salarm.uicomponents.TextTime
         android:id="@+id/digital_clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
