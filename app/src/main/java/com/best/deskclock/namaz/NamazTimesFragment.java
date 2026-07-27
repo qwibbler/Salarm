@@ -4,9 +4,11 @@ import static com.best.deskclock.uidata.UiDataModel.Tab.NAMAZ;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,6 +30,7 @@ import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.base.DeskClockFragment;
 import com.best.deskclock.settings.PreferencesKeys;
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.text.SimpleDateFormat;
@@ -437,10 +441,23 @@ public class NamazTimesFragment extends DeskClockFragment {
             // Only highlight if it's today
             boolean isToday = isSameDay(mSelectedDate, Calendar.getInstance());
 
-            if (isToday && isCurrent && getContext() != null) {
-                holder.itemView.setBackgroundColor(getContext().getColor(R.color.md_theme_primaryContainer));
+            if (isToday && isCurrent) {
+                @ColorInt int highlightColor = MaterialColors.getColor(context,
+                        com.google.android.material.R.attr.colorPrimaryContainer, Color.BLUE);
+                @ColorInt int onHighlightColor = MaterialColors.getColor(context,
+                        com.google.android.material.R.attr.colorOnPrimaryContainer, Color.WHITE);
+                holder.itemView.setBackgroundColor(highlightColor);
+                holder.name.setTextColor(onHighlightColor);
+                holder.time.setTextColor(onHighlightColor);
             } else {
-                holder.itemView.setBackground(null);
+                TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+                holder.itemView.setBackgroundResource(outValue.resourceId);
+
+                @ColorInt int defaultTextColor = MaterialColors.getColor(context,
+                        android.R.attr.textColorPrimary, Color.BLACK);
+                holder.name.setTextColor(defaultTextColor);
+                holder.time.setTextColor(defaultTextColor);
             }
         }
 
