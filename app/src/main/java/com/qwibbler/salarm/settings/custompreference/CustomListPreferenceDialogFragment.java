@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.qwibbler.salarm.settings;
+package com.qwibbler.salarm.settings.custompreference;
 
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;

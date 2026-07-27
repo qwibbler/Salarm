@@ -2,7 +2,6 @@
 
 package com.qwibbler.salarm.settings;
 
-import static android.app.Activity.OVERRIDE_TRANSITION_OPEN;
 import static android.app.Activity.RESULT_OK;
 import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 
@@ -21,15 +20,17 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
-public class TimerDisplayCustomizationFragment extends ScreenFragment
+public class TimerDisplayCustomizationFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     SwitchPreferenceCompat mDisplayCompactTimersPref;
@@ -49,7 +50,6 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
     ColorPickerPreference mShadowColorPref;
     CustomSliderPreference mShadowOffsetPref;
     Preference mTimerBackgroundImagePref;
-    SwitchPreferenceCompat mEnableTimerBlurEffectPref;
     CustomSliderPreference mTimerBlurIntensityPref;
     Preference mTimerPreviewPref;
 
@@ -70,15 +70,15 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_TIMER_BACKGROUND);
+            String safeTitle = FileUtils.toSafeFileName(FILE_TIMER_BACKGROUND);
             String oldImagePath = mPrefs.getString(KEY_TIMER_BACKGROUND_IMAGE, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old image if it exists
-                clearFile(oldImagePath);
+                FileUtils.clearFile(oldImagePath);
 
                 // Copy the new image to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {
@@ -94,18 +94,15 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
 
                     if (!isAdded()
                         || mTimerBackgroundImagePref == null
-                        || mEnableTimerBlurEffectPref == null
                         || mTimerBlurIntensityPref == null) {
                         return;
                     }
 
                     if (copiedUri != null) {
                         mTimerBackgroundImagePref.setTitle(getString(R.string.background_image_title_variant));
-                        mEnableTimerBlurEffectPref.setVisible(SdkUtils.isAtLeastAndroid12());
-                        mTimerBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12() && SettingsDAO.isTimerBlurEffectEnabled(mPrefs));
+                        mTimerBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12());
                     } else {
                         mTimerBackgroundImagePref.setTitle(getString(R.string.background_image_title));
-                        mEnableTimerBlurEffectPref.setVisible(false);
                         mTimerBlurIntensityPref.setVisible(false);
                     }
                 });
@@ -140,7 +137,6 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
         mShadowColorPref = findPreference(KEY_TIMER_SHADOW_COLOR);
         mShadowOffsetPref = findPreference(KEY_TIMER_SHADOW_OFFSET);
         mTimerBackgroundImagePref = findPreference(KEY_TIMER_BACKGROUND_IMAGE);
-        mEnableTimerBlurEffectPref = findPreference(KEY_ENABLE_TIMER_BLUR_EFFECT);
         mTimerBlurIntensityPref = findPreference(KEY_TIMER_BLUR_INTENSITY);
         mTimerPreviewPref = findPreference(KEY_TIMER_PREVIEW);
 
@@ -151,10 +147,8 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
     public void onResume() {
         super.onResume();
 
-        restoreCustomFileDialogIfNeeded(KEY_TIMER_BACKGROUND_IMAGE, mTimerBackgroundImagePref, imagePickerLauncher, () -> {
-            mEnableTimerBlurEffectPref.setVisible(false);
-            mTimerBlurIntensityPref.setVisible(false);
-        });
+        restoreCustomFileDialogIfNeeded(KEY_TIMER_BACKGROUND_IMAGE, mTimerBackgroundImagePref, imagePickerLauncher, () ->
+            mTimerBlurIntensityPref.setVisible(false));
     }
 
     @Override
@@ -163,7 +157,7 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
             mTransparentBackgroundPref, mDisplayTimerStateIndicatorPref, mDisplayRingtoneTitlePref, mTimerColorCategory,
             mRunningTimerIndicatorColorPref, mPausedTimerIndicatorColorPref, mExpiredTimerIndicatorColorPref,
             mMissedTimerIndicatorColorPref, mRingtoneTitleColorPref, mTimerFontCategory, mDisplayTextShadowPref, mShadowColorPref,
-            mShadowOffsetPref, mTimerBackgroundImagePref, mEnableTimerBlurEffectPref, mTimerBlurIntensityPref, mTimerPreviewPref);
+            mShadowOffsetPref, mTimerBackgroundImagePref, mTimerBlurIntensityPref, mTimerPreviewPref);
 
         nullifyAllPrefs();
 
@@ -177,25 +171,22 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
             case KEY_TRANSPARENT_BACKGROUND_FOR_EXPIRED_TIMER -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 boolean isNotBackgroundTransparent = !(boolean) newValue;
                 boolean isNotTimerBackgroundImageNull = SettingsDAO.getTimerBackgroundImage(mPrefs) != null;
                 boolean isAtLeastAndroid12 = SdkUtils.isAtLeastAndroid12();
 
                 mTimerBackgroundImagePref.setVisible(isNotBackgroundTransparent);
 
-                mEnableTimerBlurEffectPref.setVisible(isAtLeastAndroid12
-                    && isNotBackgroundTransparent
-                    && isNotTimerBackgroundImageNull);
-
                 mTimerBlurIntensityPref.setVisible(isAtLeastAndroid12
                     && isNotBackgroundTransparent
-                    && isNotTimerBackgroundImageNull
-                    && SettingsDAO.isTimerBlurEffectEnabled(mPrefs));
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                    && isNotTimerBackgroundImageNull);
             }
 
             case KEY_DISPLAY_TIMER_STATE_INDICATOR -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 boolean isTimerStateIndicatorDisplayed = (boolean) newValue;
 
                 mTimerColorCategory.setVisible(isTimerStateIndicatorDisplayed || SettingsDAO.isTimerRingtoneTitleDisplayed(mPrefs));
@@ -203,11 +194,11 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
                 mPausedTimerIndicatorColorPref.setVisible(isTimerStateIndicatorDisplayed);
                 mExpiredTimerIndicatorColorPref.setVisible(isTimerStateIndicatorDisplayed);
                 mMissedTimerIndicatorColorPref.setVisible(isTimerStateIndicatorDisplayed);
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
             case KEY_DISPLAY_TIMER_RINGTONE_TITLE -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 boolean isRingtoneTitleDisplayed = (boolean) newValue;
                 boolean isTextShadowDisplayed = SettingsDAO.isTimerTextShadowDisplayed(mPrefs);
 
@@ -217,25 +208,15 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
                 mDisplayTextShadowPref.setVisible(isRingtoneTitleDisplayed);
                 mShadowColorPref.setVisible(isRingtoneTitleDisplayed && isTextShadowDisplayed);
                 mShadowOffsetPref.setVisible(isRingtoneTitleDisplayed && isTextShadowDisplayed);
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
             case KEY_TIMER_DISPLAY_TEXT_SHADOW -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 boolean displayTextShadow = (boolean) newValue;
 
                 mShadowColorPref.setVisible(displayTextShadow);
                 mShadowOffsetPref.setVisible(displayTextShadow);
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
-            }
-
-            case KEY_ENABLE_TIMER_BLUR_EFFECT -> {
-                mTimerBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
-                    && (boolean) newValue
-                    && SettingsDAO.getTimerBackgroundImage(mPrefs) != null);
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
         }
 
@@ -251,27 +232,13 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
 
         switch (pref.getKey()) {
             case KEY_TIMER_BACKGROUND_IMAGE -> selectCustomFile(mTimerBackgroundImagePref, imagePickerLauncher,
-                SettingsDAO.getTimerBackgroundImage(mPrefs), KEY_TIMER_BACKGROUND_IMAGE, false, () -> {
-                    mEnableTimerBlurEffectPref.setVisible(false);
-                    mTimerBlurIntensityPref.setVisible(false);
-                });
+                SettingsDAO.getTimerBackgroundImage(mPrefs), KEY_TIMER_BACKGROUND_IMAGE, false, () ->
+                    mTimerBlurIntensityPref.setVisible(false));
 
             case KEY_TIMER_PREVIEW -> {
-                startActivity(new Intent(context, TimerDisplayPreviewActivity.class));
-                if (SettingsDAO.isFadeTransitionsEnabled(mPrefs)) {
-                    if (SdkUtils.isAtLeastAndroid14()) {
-                        requireActivity().overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.fade_out);
-                    } else {
-                        requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    }
-                } else {
-                    if (SdkUtils.isAtLeastAndroid14()) {
-                        requireActivity().overrideActivityTransition(
-                            OVERRIDE_TRANSITION_OPEN, R.anim.activity_slide_from_right, R.anim.activity_slide_to_left);
-                    } else {
-                        requireActivity().overridePendingTransition(R.anim.activity_slide_from_right, R.anim.activity_slide_to_left);
-                    }
-                }
+                Intent previewIntent = new Intent(context, TimerDisplayPreviewActivity.class);
+
+                ThemeUtils.startActivityWithTransition(requireContext(), previewIntent);
             }
         }
 
@@ -327,15 +294,9 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
             : R.string.background_image_title_variant));
         mTimerBackgroundImagePref.setOnPreferenceClickListener(this);
 
-        mEnableTimerBlurEffectPref.setVisible(isAtLeastAndroid12
-            && isNotBackgroundTransparent
-            && !isTimerBackgroundImageNull);
-        mEnableTimerBlurEffectPref.setOnPreferenceChangeListener(this);
-
         mTimerBlurIntensityPref.setVisible(isAtLeastAndroid12
             && isNotBackgroundTransparent
-            && !isTimerBackgroundImageNull
-            && SettingsDAO.isTimerBlurEffectEnabled(mPrefs));
+            && !isTimerBackgroundImageNull);
 
         mTimerPreviewPref.setOnPreferenceClickListener(this);
     }
@@ -358,7 +319,6 @@ public class TimerDisplayCustomizationFragment extends ScreenFragment
         mShadowColorPref = null;
         mShadowOffsetPref = null;
         mTimerBackgroundImagePref = null;
-        mEnableTimerBlurEffectPref = null;
         mTimerBlurIntensityPref = null;
         mTimerPreviewPref = null;
     }

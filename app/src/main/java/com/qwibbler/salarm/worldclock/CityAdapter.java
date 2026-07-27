@@ -27,6 +27,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.CityListHeaderBinding;
 import com.qwibbler.salarm.databinding.CityListItemBinding;
 import com.qwibbler.salarm.utils.ThemeUtils;
+import androidx.core.view.ViewCompat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -286,10 +287,10 @@ public class CityAdapter extends BaseAdapter implements View.OnClickListener, Co
 
         if (checked) {
             mUserSelectedCities.add(city);
-            b.announceForAccessibility(mContext.getString(R.string.city_checked, city.getName()));
+            ViewCompat.setStateDescription(b, mContext.getString(R.string.city_checked, city.getName()));
         } else {
             mUserSelectedCities.remove(city);
-            b.announceForAccessibility(mContext.getString(R.string.city_unchecked, city.getName()));
+            ViewCompat.setStateDescription(b, mContext.getString(R.string.city_unchecked, city.getName()));
 
             // Delete the associated note
             mPrefs.edit().remove(KEY_CITY_NOTE + city.getId()).apply();

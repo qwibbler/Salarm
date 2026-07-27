@@ -117,6 +117,9 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_POWER_BEHAVIOR = "0";
     public static final String POWER_BEHAVIOR_SNOOZE = "1";
     public static final String POWER_BEHAVIOR_DISMISS = "2";
+    public static final String DEFAULT_HEADPHONES_BUTTON_BEHAVIOR = "0";
+    public static final String HEADPHONES_BUTTON_BEHAVIOR_SNOOZE = "1";
+    public static final String HEADPHONES_BUTTON_BEHAVIOR_DISMISS = "2";
     public static final String DEFAULT_FLIP_ACTION = "0";
     public static final String DEFAULT_SHAKE_ACTION = "0";
     public static final int DEFAULT_SHAKE_INTENSITY = 16;
@@ -132,12 +135,6 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_DISPLAY_DISMISS_BUTTON = true;
     public static final int DEFAULT_ALARM_NOTIFICATION_REMINDER = 30;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN = false;
-    public static final String DEFAULT_VIBRATION_PATTERN = "default";
-    public static final String VIBRATION_PATTERN_SOFT = "soft";
-    public static final String VIBRATION_PATTERN_STRONG = "strong";
-    public static final String VIBRATION_PATTERN_HEARTBEAT = "heartbeat";
-    public static final String VIBRATION_PATTERN_ESCALATING = "escalating";
-    public static final String VIBRATION_PATTERN_TICK_TOCK = "tick_tock";
     public static final int DEFAULT_VIBRATION_START_DELAY = 0;
     public static final boolean DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT = false;
     public static final boolean DEFAULT_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS = false;
@@ -171,8 +168,10 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_ALARM_TITLE_FONT_SIZE_PREF = 30;
     public static final int DEFAULT_ALARM_SHADOW_COLOR = Color.parseColor("#80FFFFFF");
     public static final int DEFAULT_RINGTONE_TITLE_COLOR = Color.WHITE;
-    public static final boolean DEFAULT_ENABLE_BLUR_EFFECT = false;
-    public static final int DEFAULT_BLUR_INTENSITY = 20;
+    public static final String DEFAULT_ALARM_BACKGROUND_IMAGE = null;
+    public static final String DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE = "";
+    public static final int DEFAULT_BLUR_INTENSITY = 0;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE = false;
 
     public static int getDefaultAlarmInversePrimaryColor(Context context) {
         return MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryInverse, Color.BLACK);
@@ -191,11 +190,15 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_EXPIRED_TIMER_INDICATOR_COLOR = Color.parseColor("#FFFF4444");
     public static final int DEFAULT_MISSED_TIMER_INDICATOR_COLOR = Color.parseColor("#FFAA66CC");
     public static final int DEFAULT_TIMER_AUTO_SILENCE_DURATION = 30; // 30 seconds
+    public static final boolean DEFAULT_ENABLE_PER_TIMER_AUTO_SILENCE = true;
+    public static final boolean DEFAULT_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION = true;
     public static final boolean DEFAULT_TIMER_VIBRATE = false;
+    public static final boolean DEFAULT_ENABLE_PER_TIMER_VIBRATION_PATTERN = true;
     public static final int DEFAULT_TIMER_RINGTONE_TITLE_COLOR = Color.GRAY;
     public static final int DEFAULT_TIMER_SHADOW_COLOR = Color.parseColor("#BF888888");
     public static final boolean DEFAULT_TIMER_VOLUME_BUTTONS_ACTION = false;
     public static final boolean DEFAULT_TIMER_POWER_BUTTON_ACTION = false;
+    public static final boolean DEFAULT_TIMER_HEADPHONES_BUTTON_ACTION = false;
     public static final boolean DEFAULT_TIMER_FLIP_ACTION = false;
     public static final boolean DEFAULT_TIMER_SHAKE_ACTION = false;
     public static final int DEFAULT_TIMER_SHAKE_INTENSITY = 16;
@@ -205,7 +208,7 @@ public class PreferencesDefaultValues {
     public static final String SORT_TIMER_BY_DESCENDING_DURATION = "2";
     public static final String SORT_TIMER_BY_NAME = "3";
     public static final int DEFAULT_TIMER_ADD_TIME_BUTTON_VALUE = 60;
-    public static final boolean DEFAULT_DISPLAY_WARNING_BEFORE_DELETING_TIMER = false;
+    public static final boolean DEFAULT_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER = false;
 
     // Stopwatch
     public static final String DEFAULT_SW_ACTION = "0";
@@ -235,11 +238,18 @@ public class PreferencesDefaultValues {
     public static final int TIMEOUT_END_OF_RINGTONE = -2;
     public static final int DEFAULT_VOLUME_CRESCENDO_DURATION = 0;
     public static final boolean DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE = true;
+    public static final boolean DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE = true;
     public static final boolean DEFAULT_DISPLAY_RINGTONE_TITLE = false;
     public static final boolean DEFAULT_DISPLAY_TEXT_SHADOW = false;
     public static final int DEFAULT_SHADOW_OFFSET = 10;
     public static final int DEFAULT_DIGITAL_CLOCK_FONT_SIZE = 70;
     public static final int DEFAULT_ANALOG_CLOCK_SIZE = 70;
+    public static final String DEFAULT_VIBRATION_PATTERN = "default";
+    public static final String VIBRATION_PATTERN_SOFT = "soft";
+    public static final String VIBRATION_PATTERN_STRONG = "strong";
+    public static final String VIBRATION_PATTERN_HEARTBEAT = "heartbeat";
+    public static final String VIBRATION_PATTERN_ESCALATING = "escalating";
+    public static final String VIBRATION_PATTERN_TICK_TOCK = "tick_tock";
 
     // Permission management
     public static final boolean DEFAULT_ENABLE_FOREGROUND_SERVICE = false;

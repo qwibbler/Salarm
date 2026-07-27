@@ -23,6 +23,7 @@ import android.service.quicksettings.TileService;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -39,9 +40,11 @@ import androidx.preference.Preference;
 import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.KeepAliveService;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.tiles.AlarmTileService;
 import com.qwibbler.salarm.tiles.StopwatchTileService;
 import com.qwibbler.salarm.tiles.TimerTileService;
@@ -50,10 +53,12 @@ import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.uidata.UiDataModel;
 import com.qwibbler.salarm.utils.BackupAndRestoreUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.PermissionUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
+import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
 import org.json.JSONException;
@@ -65,6 +70,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -117,7 +123,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         outState.putBoolean(KEY_APPBAR_EXPANDED, mIsAppBarExpanded);
     }
 
-    public static class SettingsFragment extends ScreenFragment implements Preference.OnPreferenceClickListener {
+    public static class SettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceClickListener {
 
         private static final String BACKUP_JSON_FILE_NAME = "settings.json";
 
@@ -264,21 +270,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
                 @Override
                 public void handleOnBackPressed() {
-                    requireActivity().finish();
-                    if (SettingsDAO.isFadeTransitionsEnabled(mPrefs)) {
-                        if (SdkUtils.isAtLeastAndroid14()) {
-                            requireActivity().overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out);
-                        } else {
-                            requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                        }
-                    } else {
-                        if (SdkUtils.isAtLeastAndroid14()) {
-                            requireActivity().overrideActivityTransition(
-                                OVERRIDE_TRANSITION_CLOSE, R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-                        } else {
-                            requireActivity().overridePendingTransition(R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-                        }
-                    }
+                    ThemeUtils.finishActivityWithTransition(requireActivity());
                 }
             });
         }
@@ -465,6 +457,13 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
                 appendFileToZip(zipOutputStream, mPrefs.getString(KEY_DIGITAL_CLOCK_FONT, null));
                 appendFileToZip(zipOutputStream, mPrefs.getString(KEY_SCREENSAVER_DIGITAL_CLOCK_FONT, null));
                 appendFileToZip(zipOutputStream, mPrefs.getString(KEY_SCREENSAVER_BACKGROUND_IMAGE, null));
+
+                List<Alarm> alarms = Alarm.getAlarms(context.getContentResolver(), null);
+                for (Alarm alarm : alarms) {
+                    if (!TextUtils.isEmpty(alarm.backgroundImage)) {
+                        appendFileToZip(zipOutputStream, alarm.backgroundImage);
+                    }
+                }
             }
         }
 
@@ -506,7 +505,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             editor.remove(KEY_SCREENSAVER_BACKGROUND_IMAGE);
             editor.commit();
 
-            wipeAllCustomFiles(context);
+            FileUtils.wipeAllCustomFiles(context);
         }
 
         private void restorePreferences(Context context, Uri uri) throws IOException, JSONException {
@@ -527,10 +526,10 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             }
         }
 
-        private void restoreFileFromZip(Context context, ZipInputStream zipInputStream, String fileName)
-            throws IOException {
+        private void restoreFileFromZip(Context context, ZipInputStream zipInputStream, String fileName) throws IOException {
 
-            File outputFile = new File(context.getFilesDir(), fileName);
+            final Context safeContext = Utils.getSafeStorageContext(context);
+            File outputFile = new File(safeContext.getFilesDir(), fileName);
 
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 byte[] buffer = new byte[4096];
@@ -540,13 +539,13 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
                 }
             }
 
-            final String prefKey = getCustomFilePrefKey(fileName);
+            final String prefKey = FileUtils.getCustomFilePrefKey(fileName);
 
             if (prefKey != null) {
                 String oldFilePath = mPrefs.getString(prefKey, null);
 
                 if (oldFilePath != null && !oldFilePath.equals(outputFile.getAbsolutePath())) {
-                    clearFile(oldFilePath);
+                    FileUtils.clearFile(oldFilePath);
                 }
 
                 mPrefs.edit().putString(prefKey, outputFile.getAbsolutePath()).apply();

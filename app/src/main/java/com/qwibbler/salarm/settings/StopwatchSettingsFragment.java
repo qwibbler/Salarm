@@ -23,12 +23,14 @@ import androidx.preference.Preference;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
-public class StopwatchSettingsFragment extends ScreenFragment
+public class StopwatchSettingsFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     Preference mStopwatchFontPref;
@@ -54,18 +56,18 @@ public class StopwatchSettingsFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_STOPWATCH_FONT);
+            String safeTitle = FileUtils.toSafeFileName(FILE_STOPWATCH_FONT);
             String oldFontPath = mPrefs.getString(KEY_SW_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
-                clearFile(oldFontPath);
+                FileUtils.clearFile(oldFontPath);
 
                 // Clear the font cache
                 ThemeUtils.removeFontFromCache(oldFontPath);
 
                 // Copy the new font to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {

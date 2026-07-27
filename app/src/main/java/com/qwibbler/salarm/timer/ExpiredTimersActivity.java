@@ -7,9 +7,11 @@
 package com.qwibbler.salarm.timer;
 
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,6 +30,7 @@ import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -62,6 +65,7 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
+import com.qwibbler.salarm.utils.Utils;
 
 import java.io.File;
 import java.util.List;
@@ -92,6 +96,8 @@ public class ExpiredTimersActivity extends BaseActivity {
     private int mMargin10;
     private int mMargin2;
     private long mActivityStartTime;
+    private MediaSession mMediaSession;
+    private boolean mPowerBtnReceiverRegistered = false;
 
     /**
      * Scheduled to update the timers while at least one is expired.
@@ -108,7 +114,7 @@ public class ExpiredTimersActivity extends BaseActivity {
      */
     private ViewGroup mExpiredTimersScrollView;
 
-    private final BroadcastReceiver PowerBtnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mPowerBtnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null && intent.getAction() != null) {
@@ -120,9 +126,7 @@ public class ExpiredTimersActivity extends BaseActivity {
                         return;
                     }
 
-                    if (SettingsDAO.isExpiredTimerResetWithPowerButton(mPrefs)) {
-                        DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_hardware_button);
-                    }
+                    DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_hardware_button);
                 }
             }
         }
@@ -157,13 +161,18 @@ public class ExpiredTimersActivity extends BaseActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         // Register Power button (screen off) intent receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        if (SdkUtils.isAtLeastAndroid13()) {
-            registerReceiver(PowerBtnReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(PowerBtnReceiver, filter);
+        if (SettingsDAO.isExpiredTimerResetWithPowerButton(mPrefs)) {
+            IntentFilter powerFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+            if (SdkUtils.isAtLeastAndroid13()) {
+                registerReceiver(mPowerBtnReceiver, powerFilter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(mPowerBtnReceiver, powerFilter);
+            }
+
+            mPowerBtnReceiverRegistered = true;
         }
+
+        initHeadphonesButton();
 
         final List<Timer> expiredTimers = getExpiredTimers();
 
@@ -174,16 +183,14 @@ public class ExpiredTimersActivity extends BaseActivity {
             return;
         }
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+
         if (SdkUtils.isAtLeastAndroid81()) {
             setTurnScreenOn(true);
             setShowWhenLocked(true);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         } else {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+            //noinspection deprecation
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         }
 
         // Honor rotation on tablets; fix the orientation on phones.
@@ -226,9 +233,10 @@ public class ExpiredTimersActivity extends BaseActivity {
                     if (bitmap != null) {
                         mBinding.timerBackgroundImage.setImageBitmap(bitmap);
 
-                        if (SdkUtils.isAtLeastAndroid12() && SettingsDAO.isTimerBlurEffectEnabled(mPrefs)) {
-                            float intensity = SettingsDAO.getTimerBlurIntensity(mPrefs);
-                            RenderEffect blur = RenderEffect.createBlurEffect(intensity, intensity, Shader.TileMode.CLAMP);
+                        float blurIntensity = SettingsDAO.getTimerBlurIntensity(mPrefs);
+
+                        if (SdkUtils.isAtLeastAndroid12() && blurIntensity != DEFAULT_BLUR_INTENSITY) {
+                            RenderEffect blur = RenderEffect.createBlurEffect(blurIntensity, blurIntensity, Shader.TileMode.CLAMP);
                             mBinding.timerBackgroundImage.setRenderEffect(blur);
                         }
                     } else {
@@ -249,7 +257,7 @@ public class ExpiredTimersActivity extends BaseActivity {
             addTimer(timer);
         }
 
-        AlarmUtils.hideSystemBarsOfTriggeredAlarms(getWindow(), getWindow().getDecorView());
+        ThemeUtils.hideSystemBars(getWindow(), getWindow().getDecorView());
 
         applyWindowInsets();
 
@@ -271,6 +279,11 @@ public class ExpiredTimersActivity extends BaseActivity {
 
     @Override
     public void onDestroy() {
+        if (mPowerBtnReceiverRegistered) {
+            unregisterReceiver(mPowerBtnReceiver);
+            mPowerBtnReceiverRegistered = false;
+        }
+
         DataModel.getDataModel().removeTimerListener(mTimerChangeWatcher);
 
         mRegularTypeface = null;
@@ -281,25 +294,54 @@ public class ExpiredTimersActivity extends BaseActivity {
 
         mBinding = null;
 
+        if (mMediaSession != null) {
+            mMediaSession.setActive(false);
+            mMediaSession.release();
+            mMediaSession = null;
+        }
+
         super.onDestroy();
     }
 
     @Override
     public boolean dispatchKeyEvent(@NonNull KeyEvent event) {
         switch (event.getKeyCode()) {
-            case KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_MUTE,
-                 KeyEvent.KEYCODE_CAMERA, KeyEvent.KEYCODE_FOCUS, KeyEvent.KEYCODE_HEADSETHOOK -> {
-                if (event.getAction() == KeyEvent.ACTION_UP) {
-                    final boolean isExpiredTimerResetWithVolumeButtons = SettingsDAO.isExpiredTimerResetWithVolumeButtons(mPrefs);
-                    if (isExpiredTimerResetWithVolumeButtons) {
+            case KeyEvent.KEYCODE_VOLUME_UP,
+                 KeyEvent.KEYCODE_VOLUME_DOWN,
+                 KeyEvent.KEYCODE_VOLUME_MUTE,
+                 KeyEvent.KEYCODE_CAMERA,
+                 KeyEvent.KEYCODE_FOCUS -> {
+                if (SettingsDAO.isExpiredTimerResetWithVolumeButtons(mPrefs)) {
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
                         DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_hardware_button);
                     }
+                    return true;
                 }
-                return true;
+            }
+
+            case KeyEvent.KEYCODE_HEADSETHOOK -> {
+                if (SettingsDAO.isExpiredTimerResetWithHeadphonesButton(mPrefs)) {
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_hardware_button);
+                    }
+                    return true;
+                }
             }
         }
 
         return super.dispatchKeyEvent(event);
+    }
+
+    private void initHeadphonesButton() {
+        boolean isAdvancedPlayback = SettingsDAO.isAdvancedAudioPlaybackEnabled(mPrefs);
+        boolean isAutoRouting = SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs);
+        boolean isExpiredTimerResetWithHeadphonesButton = SettingsDAO.isExpiredTimerResetWithHeadphonesButton(mPrefs);
+
+        if (isAdvancedPlayback && isAutoRouting && isExpiredTimerResetWithHeadphonesButton) {
+            mMediaSession = RingtoneUtils.createMediaSession(this, "TimerMediaSession", () ->
+                DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_hardware_button)
+            );
+        }
     }
 
     /**
@@ -403,7 +445,6 @@ public class ExpiredTimersActivity extends BaseActivity {
         final View view;
         final TextView labelView;
         final View addTimeButton;
-        final View deleteButton;
         final View resetButton;
         final View stopButton;
 
@@ -421,14 +462,13 @@ public class ExpiredTimersActivity extends BaseActivity {
 
             labelView = compactBinding.timerLabel;
             addTimeButton = compactBinding.timerAddTimeButton;
-            deleteButton = compactBinding.deleteTimerButton;
-            resetButton = compactBinding.resetOrEditButton;
+            resetButton = compactBinding.resetButton;
             stopButton = compactBinding.playPauseButton;
         } else {
             TimerItemBinding normalBinding = TimerItemBinding.inflate(getLayoutInflater(), mBinding.expiredTimersList, false);
 
             view = normalBinding.getRoot();
-            ((TimerItem) view).setButtonPosition(mAreTimerButtonPositionsInverted);
+            ((TimerItem) view).setButtonPosition(mAreTimerButtonPositionsInverted, mIsTablet, !mIsPortrait, false);
             ((TimerItem) view).setGeneralFonts(mRegularTypeface, mBoldTypeface);
             ((TimerItem) view).setTimerTimeFont(mTimerTimeTypeface);
             ((TimerItem) view).setIndicatorStateDisplay(mIsIndicatorStateDisplayed);
@@ -437,8 +477,7 @@ public class ExpiredTimersActivity extends BaseActivity {
 
             labelView = normalBinding.timerLabel;
             addTimeButton = normalBinding.timerAddTimeButton;
-            deleteButton = normalBinding.deleteTimerButton;
-            resetButton = normalBinding.resetOrEditButton;
+            resetButton = normalBinding.resetButton;
             stopButton = normalBinding.playPauseButton;
         }
 
@@ -456,9 +495,8 @@ public class ExpiredTimersActivity extends BaseActivity {
             DataModel.getDataModel().addCustomTimeToTimer(timer1);
         });
 
-        // Add logic to hide the "Delete" and "Reset" buttons
-        deleteButton.setVisibility(GONE);
-        resetButton.setVisibility(GONE);
+        // Add logic to hide the "Reset" buttons
+        resetButton.setVisibility(INVISIBLE);
 
         // Add logic to the "Stop" button
         stopButton.setOnClickListener(v -> {

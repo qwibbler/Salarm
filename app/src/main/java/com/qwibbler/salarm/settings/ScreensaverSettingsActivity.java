@@ -23,6 +23,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.events.Events;
@@ -31,6 +32,7 @@ import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
 import com.qwibbler.salarm.uicomponents.CollapsingToolbarBaseActivity;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
@@ -58,7 +60,7 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
         }
     }
 
-    public static class ScreensaverSettingsFragment extends ScreenFragment
+    public static class ScreensaverSettingsFragment extends BaseSettingsScreenFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
         ColorPickerPreference mClockColorPref;
@@ -86,10 +88,9 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
         Preference mDigitalClockFontPref;
         SwitchPreferenceCompat mKeepScreenOnPref;
         Preference mScreensaverBackgroundImagePref;
-        SwitchPreferenceCompat mEnableScreensaverBlurEffectPref;
         CustomSliderPreference mScreensaverBlurIntensityPref;
-        Preference mScreensaverPreview;
-        Preference mScreensaverMainSettings;
+        Preference mScreensaverPreviewPref;
+        Preference mScreensaverMainSettingsPref;
 
         String[] mClockStyleValues;
         String mAnalogClock;
@@ -113,18 +114,18 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 // Take persistent permission
                 appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                String safeTitle = Utils.toSafeFileName(FILE_SCREENSAVER_DIGITAL_CLOCK_FONT);
+                String safeTitle = FileUtils.toSafeFileName(FILE_SCREENSAVER_DIGITAL_CLOCK_FONT);
                 String oldFontPath = mPrefs.getString(KEY_SCREENSAVER_DIGITAL_CLOCK_FONT, null);
 
                 AppExecutors.getDiskIO().execute(() -> {
                     // Delete the old font if it exists
-                    clearFile(oldFontPath);
+                    FileUtils.clearFile(oldFontPath);
 
                     // Clear the font cache
                     ThemeUtils.removeFontFromCache(oldFontPath);
 
                     // Copy the new font to the device's protected storage
-                    Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                    Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                     // Save the new path
                     if (copiedUri != null) {
@@ -168,20 +169,19 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 // Take persistent permission
                 appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                String safeTitle = Utils.toSafeFileName(FILE_SCREENSAVER_BACKGROUND);
+                String safeTitle = FileUtils.toSafeFileName(FILE_SCREENSAVER_BACKGROUND);
                 String oldImagePath = mPrefs.getString(KEY_SCREENSAVER_BACKGROUND_IMAGE, null);
 
                 AppExecutors.getDiskIO().execute(() -> {
                     // Delete the old image if it exists
-                    clearFile(oldImagePath);
+                    FileUtils.clearFile(oldImagePath);
 
                     // Copy the new image to the device's protected storage
-                    Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                    Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                     AppExecutors.getMainThread().post(() -> {
                         if (!isAdded()
                             || mScreensaverBackgroundImagePref == null
-                            || mEnableScreensaverBlurEffectPref == null
                             || mScreensaverBlurIntensityPref == null) {
                             return;
                         }
@@ -190,15 +190,12 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                         if (copiedUri != null) {
                             mPrefs.edit().putString(KEY_SCREENSAVER_BACKGROUND_IMAGE, copiedUri.getPath()).apply();
                             mScreensaverBackgroundImagePref.setTitle(getString(R.string.background_image_title_variant));
-                            mEnableScreensaverBlurEffectPref.setVisible(SdkUtils.isAtLeastAndroid12());
-                            mScreensaverBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
-                                && SettingsDAO.isScreensaverBlurEffectEnabled(mPrefs));
+                            mScreensaverBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12());
 
                             CustomToast.show(appContext, R.string.background_image_toast_message_selected);
                         } else {
                             CustomToast.show(appContext, "Error importing image");
                             mScreensaverBackgroundImagePref.setTitle(getString(R.string.background_image_title));
-                            mEnableScreensaverBlurEffectPref.setVisible(false);
                             mScreensaverBlurIntensityPref.setVisible(false);
                         }
                     });
@@ -241,10 +238,9 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
             mItalicNextAlarmPref = findPreference(KEY_SCREENSAVER_NEXT_ALARM_IN_ITALIC);
             mKeepScreenOnPref = findPreference(KEY_SCREENSAVER_KEEP_SCREEN_ON);
             mScreensaverBackgroundImagePref = findPreference(KEY_SCREENSAVER_BACKGROUND_IMAGE);
-            mEnableScreensaverBlurEffectPref = findPreference(KEY_ENABLE_SCREENSAVER_BLUR_EFFECT);
             mScreensaverBlurIntensityPref = findPreference(KEY_SCREENSAVER_BLUR_INTENSITY);
-            mScreensaverPreview = findPreference(KEY_SCREENSAVER_PREVIEW);
-            mScreensaverMainSettings = findPreference(KEY_SCREENSAVER_DAYDREAM_SETTINGS);
+            mScreensaverPreviewPref = findPreference(KEY_SCREENSAVER_PREVIEW);
+            mScreensaverMainSettingsPref = findPreference(KEY_SCREENSAVER_DAYDREAM_SETTINGS);
 
             mClockStyleValues = getResources().getStringArray(R.array.clock_style_values);
             mAnalogClock = mClockStyleValues[0];
@@ -260,10 +256,8 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
 
             restoreCustomFileDialogIfNeeded(KEY_SCREENSAVER_DIGITAL_CLOCK_FONT, mDigitalClockFontPref, fontPickerLauncher, null);
 
-            restoreCustomFileDialogIfNeeded(KEY_SCREENSAVER_BACKGROUND_IMAGE, mScreensaverBackgroundImagePref, imagePickerLauncher, () -> {
-                mEnableScreensaverBlurEffectPref.setVisible(false);
-                mScreensaverBlurIntensityPref.setVisible(false);
-            });
+            restoreCustomFileDialogIfNeeded(KEY_SCREENSAVER_BACKGROUND_IMAGE, mScreensaverBackgroundImagePref, imagePickerLauncher, () ->
+                mScreensaverBlurIntensityPref.setVisible(false));
         }
 
         @Override
@@ -273,7 +267,7 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 mDigitalClockFontSizePref, mDisplayTextUppercasePref, mBoldDigitalClockPref, mClockDynamicColorPref,
                 mItalicDigitalClockPref, mBoldBatteryPref, mItalicBatteryPref, mBoldDatePref, mItalicDatePref, mBoldNextAlarmPref,
                 mItalicNextAlarmPref, mAnalogClockSizePref, mDigitalClockFontPref, mKeepScreenOnPref, mScreensaverBackgroundImagePref,
-                mEnableScreensaverBlurEffectPref, mScreensaverBlurIntensityPref, mScreensaverPreview, mScreensaverMainSettings);
+                mScreensaverBlurIntensityPref, mScreensaverPreviewPref, mScreensaverMainSettingsPref);
 
             nullifyAllPrefs();
 
@@ -317,13 +311,13 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 }
 
                 case KEY_DISPLAY_SCREENSAVER_BATTERY -> {
+                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                     boolean isBatteryVisible = (boolean) newValue;
 
                     mBatteryColorPref.setVisible(isBatteryVisible);
                     mBoldBatteryPref.setVisible(isBatteryVisible);
                     mItalicBatteryPref.setVisible(isBatteryVisible);
-
-                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 }
 
                 case KEY_SCREENSAVER_CLOCK_DIAL, KEY_SCREENSAVER_CLOCK_DIAL_MATERIAL, KEY_SCREENSAVER_CLOCK_SECOND_HAND -> {
@@ -333,10 +327,9 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 }
 
                 case KEY_DISPLAY_SCREENSAVER_CLOCK_SECONDS -> {
+                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                     mClockSecondHandPref.setVisible((boolean) newValue
                         && SettingsDAO.getScreensaverClockStyle(mPrefs) == DataModel.ClockStyle.ANALOG);
-
-                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 }
 
                 case KEY_SCREENSAVER_DISPLAY_TEXT_UPPERCASE, KEY_SCREENSAVER_DIGITAL_CLOCK_IN_BOLD, KEY_SCREENSAVER_DIGITAL_CLOCK_IN_ITALIC,
@@ -345,22 +338,14 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                      KEY_SCREENSAVER_KEEP_SCREEN_ON -> Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 case KEY_SCREENSAVER_CLOCK_DYNAMIC_COLORS -> {
+                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                     boolean areNotDynamicColors = !(boolean) newValue;
 
                     mClockColorPref.setVisible(areNotDynamicColors);
                     mBatteryColorPref.setVisible(areNotDynamicColors);
                     mDateColorPref.setVisible(areNotDynamicColors);
                     mNextAlarmColorPref.setVisible(areNotDynamicColors);
-
-                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
-                }
-
-                case KEY_ENABLE_SCREENSAVER_BLUR_EFFECT -> {
-                    mScreensaverBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
-                        && (boolean) newValue
-                        && SettingsDAO.getScreensaverBackgroundImage(mPrefs) != null);
-
-                    Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 }
             }
 
@@ -385,10 +370,8 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                     SettingsDAO.getScreensaverDigitalClockFont(mPrefs), KEY_SCREENSAVER_DIGITAL_CLOCK_FONT, true, null);
 
                 case KEY_SCREENSAVER_BACKGROUND_IMAGE -> selectCustomFile(mScreensaverBackgroundImagePref, imagePickerLauncher,
-                    SettingsDAO.getScreensaverBackgroundImage(mPrefs), KEY_SCREENSAVER_BACKGROUND_IMAGE, false, () -> {
-                        mEnableScreensaverBlurEffectPref.setVisible(false);
-                        mScreensaverBlurIntensityPref.setVisible(false);
-                    });
+                    SettingsDAO.getScreensaverBackgroundImage(mPrefs), KEY_SCREENSAVER_BACKGROUND_IMAGE, false, () ->
+                        mScreensaverBlurIntensityPref.setVisible(false));
             }
 
             return true;
@@ -473,16 +456,11 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
                 : R.string.background_image_title_variant));
             mScreensaverBackgroundImagePref.setOnPreferenceClickListener(this);
 
-            mEnableScreensaverBlurEffectPref.setVisible(SdkUtils.isAtLeastAndroid12() && screensaverBackgroundImage != null);
-            mEnableScreensaverBlurEffectPref.setOnPreferenceChangeListener(this);
+            mScreensaverBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12() && screensaverBackgroundImage != null);
 
-            mScreensaverBlurIntensityPref.setVisible(SdkUtils.isAtLeastAndroid12()
-                && screensaverBackgroundImage != null
-                && SettingsDAO.isScreensaverBlurEffectEnabled(mPrefs));
+            mScreensaverPreviewPref.setOnPreferenceClickListener(this);
 
-            mScreensaverPreview.setOnPreferenceClickListener(this);
-
-            mScreensaverMainSettings.setOnPreferenceClickListener(this);
+            mScreensaverMainSettingsPref.setOnPreferenceClickListener(this);
         }
 
         private void nullifyAllPrefs() {
@@ -511,10 +489,9 @@ public final class ScreensaverSettingsActivity extends CollapsingToolbarBaseActi
             mDigitalClockFontPref = null;
             mKeepScreenOnPref = null;
             mScreensaverBackgroundImagePref = null;
-            mEnableScreensaverBlurEffectPref = null;
             mScreensaverBlurIntensityPref = null;
-            mScreensaverPreview = null;
-            mScreensaverMainSettings = null;
+            mScreensaverPreviewPref = null;
+            mScreensaverMainSettingsPref = null;
 
             mClockStyleValues = null;
             mAnalogClock = null;

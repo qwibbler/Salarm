@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 app:layout_constraintTop_toBottomOf="@id/repeat_days_group">
 
                 <com.google.android.material.textview.MaterialTextView
@@ -465,6 +465,84 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/alarm_background_image_layout"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/alarm_volume_layout">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alarm_background_image_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="10dp"
+                    android:drawableStart="@drawable/ic_image"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:focusable="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@string/background_image_title" />
+
+                <com.google.android.material.button.MaterialButton
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:id="@+id/alarm_background_image_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_gravity="center"
+                    android:text="@string/delete"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:includeFontPadding="false"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_hide_image"
+                    app:strokeColor="?attr/colorOnSurfaceVariant"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/alarm_blur_intensity_layout"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="2dp"
+                android:paddingHorizontal="10dp"
+                app:layout_constraintTop_toBottomOf="@id/alarm_background_image_layout">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alarm_blur_intensity_title"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:paddingStart="@null"
+                    android:paddingEnd="10dp"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:focusable="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@string/blur_intensity_title"
+                    tools:drawableStart="@drawable/ic_blur_increase" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/alarm_blur_intensity_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:focusable="true"
+                    android:maxLines="1"
+                    tools:text="20" />
+
+            </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
@@ -475,46 +553,61 @@
         android:paddingHorizontal="14dp"
         android:paddingVertical="10dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/delete_button"
-            android:layout_width="wrap_content"
+        <com.google.android.material.button.MaterialButtonGroup
+            android:id="@+id/toggleButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingTop="0dp"
-            android:paddingBottom="0dp"
-            android:backgroundTint="@color/colorAlert"
-            android:text="@string/delete"
-            android:textColor="?attr/colorOnError"
-            android:textAllCaps="false"
-            android:includeFontPadding="false"
-            app:icon="@drawable/ic_delete"
-            app:iconTint="?attr/colorOnError"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/duplicate_button"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
-            app:layout_constrainedWidth="true"
-            tools:ignore="TextContrastCheck" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/duplicate_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="0dp"
-            android:paddingBottom="0dp"
-            android:backgroundTint="?attr/colorPrimary"
-            android:text="@string/duplicate"
-            android:textColor="?attr/colorSurfaceContainerLowest"
-            android:textAllCaps="false"
-            android:includeFontPadding="false"
-            app:icon="@drawable/ic_duplicate"
-            app:iconTint="?attr/colorSurfaceContainerLowest"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/delete_button"
-            app:layout_constrainedWidth="true"
-            tools:textStyle="bold" />
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAlert"
+                app:icon="@drawable/ic_delete"
+                app:iconTint="?attr/colorOnError"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialButtonOutlinedStyle"
+                android:id="@+id/duplicate_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:icon="@drawable/ic_duplicate"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:strokeColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialButtonOutlinedStyle"
+                android:id="@+id/preview_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:icon="@drawable/ic_preview"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:strokeColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorGranted"
+                app:icon="@drawable/ic_save"
+                app:iconTint="?attr/colorSurfaceContainerLowest"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+
+        </com.google.android.material.button.MaterialButtonGroup>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

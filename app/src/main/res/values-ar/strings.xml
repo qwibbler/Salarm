@@ -260,7 +260,6 @@
     <string name="delay_picker_dialog_title">المنبه في…</string>
     <string name="alarm_label_box_title">تسمية المنبه</string>
     <string name="label_default">إفتراضي</string>
-    <string name="duplicate">كرّر</string>
     <string name="label_new_image">صورة جديدة</string>
     <string name="label_new_font">خط جديد</string>
     <string name="warning">تحذير</string>
@@ -380,16 +379,13 @@
     <string name="vibration_pattern_escalating">تصاعد الوضع</string>
     <string name="vibration_pattern_tick_tock">تك-توك</string>
     <string name="vibration_start_delay_title">تأخير قبل بدء الاهتزاز</string>
-    <string name="vibration_start_delay_none">عادي</string>
+    <string name="label_none">عادي</string>
     <string name="vibration_start_delay_warning_box_text">أدخل قيمة من 0 إلى 10 دقائق</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">فعِّل الاهتزازات عند تأجيل المنبه أو إهماله</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">اهتزاز مزدوج عند تأجيل المنبه واهتزاز واحد عند إهماله</string>
     <string name="sort_timer_ascending_duration">حسب المدة (ترتيب تصاعدي)</string>
     <string name="sort_timer_descending_duration">حسب المدة (ترتيب تنازلي)</string>
     <string name="default_time_to_add_to_timer_title">الوقت الافتراضي للإضافة إلى المؤقتات</string>
-    <string name="display_warning_before_deleting_timer_title">أظهر تحذير قبل حذف المؤقت</string>
-    <string name="warning_dialog_title">احذف المؤقت</string>
-    <string name="warning_dialog_message">أمتأكد أنك تريد حذف المؤقت \"%s\"؟</string>
     <string name="screensaver_settings_summary">قم بتخصيص نمط شاشة التوقف ونوع الخط ولونه</string>
     <string name="screensaver_daydream_settings">حدِّد/فعِّل شاشة التوقف</string>
     <string name="screensaver_daydream_settings_summary">يفتح إعدادات شاشة التوقف الرئيسية لنظام أندرويد</string>
@@ -437,7 +433,6 @@
     <string name="background_image_dialog_title">صورة الخلفية</string>
     <string name="background_image_toast_message_selected">تم اختيار الصورة بنجاح</string>
     <string name="background_image_toast_message_deleted">تم حذف الصورة بنجاح</string>
-    <string name="enable_blur_effect_title">قم بتطبيق تأثير التمويه على صورة الخلفية</string>
     <string name="enable_per_alarm_crescendo_duration_title">استخدم مدة زيادة مستوى الصوت المخصصة لكل منبه</string>
     <string name="enable_per_alarm_crescendo_duration_dialog_message">ستتم إعادة ضبط مدة زيادة مستوى صوت التنبيه المخصص.%s</string>
     <string name="enable_per_alarm_auto_silence_title">استخدم مدة إيقاف المنبه مخصصة لكل منبه</string>
@@ -642,7 +637,6 @@
     <string name="snooze_selector_text_color_title">لون نص محدد التأجيل</string>
     <string name="snooze_minus_symbol_color_title">لون رمز \"-\"</string>
     <string name="snooze_plus_symbol_color_title">لون رمز \"+\"</string>
-    <string name="background_image_summary">قم بتعيين لون خلفية شفافة لرؤية الصورة</string>
     <string name="alarm_volume_low">صوت المنبه منخفض</string>
     <string name="fix_alarm_volume">أصلح</string>
     <string name="display_snooze_selector_title">اعرض محدد وقت التأجيل</string>

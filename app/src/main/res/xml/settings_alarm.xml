@@ -140,6 +140,13 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/advanced_audio_playback_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
         <SwitchPreferenceCompat
             android:key="key_advanced_audio_playback"
             android:layout="@layout/settings_preference_layout"
@@ -245,6 +252,16 @@
             android:key="key_power_button"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/power_button_title"
+            android:entries="@array/action_setting_entries"
+            android:entryValues="@array/side_button_setting_values"
+            android:defaultValue="0"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_headphones_button"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/headphones_button_title"
             android:entries="@array/action_setting_entries"
             android:entryValues="@array/side_button_setting_values"
             android:defaultValue="0"

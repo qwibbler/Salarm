@@ -229,7 +229,6 @@
     <string name="stopwatch_channel">Stopper</string>
     <string name="timer_channel">Taimer</string>
     <string name="alarm_label_box_title">Äratuse silt</string>
-    <string name="duplicate">Tee koopia</string>
     <string name="selected">Valitud</string>
     <string name="more_options">Rohkem valikuid</string>
     <string name="settings_permission_message">Üks või enam olulist õigust on puudu. Kui vajalikud õigused jäävadki puudu, siis rakendus ei pruugi korralikult toimida.</string>
@@ -420,9 +419,6 @@
     <string name="yellow_accent_color">Kollane</string>
     <string name="day_accent_color_title">Aktsentvärv päevaseks režiimiks</string>
     <string name="display_ringtone_title">Näita helina nime</string>
-    <string name="display_warning_before_deleting_timer_title">Enne taimeri kustutamist näita hoiatust</string>
-    <string name="warning_dialog_title">Kustuta taimer</string>
-    <string name="warning_dialog_message">Kas sa oled kindel, et soovid kustutada „%s“ taimeri?</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">Kasuta värinat, kui äratus on edasilükatud või katkestatud</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">Kasuta topeltvärinat, kui äratus on edasilükatud või ühekordset värinat, kui äratus on katkestatud</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">Äratuse käivitumisel lülita tagumine välklamp sisse</string>
@@ -546,7 +542,7 @@
     <string name="vibration_pattern_escalating">Kasvav</string>
     <string name="vibration_pattern_tick_tock">Tika-taka</string>
     <string name="vibration_start_delay_title">Viivitus enne värina algust</string>
-    <string name="vibration_start_delay_none">Puudub</string>
+    <string name="label_none">Puudub</string>
     <string name="vibration_start_delay_warning_box_text">Sisesta väärtus vahemikust 0 kuni 10 minutit</string>
     <string name="confirm_action_prompt">\n\nKas sa soovid jätkata?</string>
     <string name="enable_per_alarm_snooze_duration_title">Kasuta iga äratuse jaoks oma uinumise kestust</string>
@@ -570,7 +566,6 @@
     <string name="blur_intensity_title">Hägustamise tugevus</string>
     <string name="background_image_title">Vali taustapilt</string>
     <string name="background_image_toast_message_selected">Pildi valimine õnnestus</string>
-    <string name="enable_blur_effect_title">Kasuta taustapildi puhul hägustamist</string>
     <string name="display_text_shadow_title">Kuva teksti varjutust</string>
     <string name="shadow_color_title">Varjutuse värv</string>
     <string name="shadow_offset_title">Varjutuse nihe</string>
@@ -648,7 +643,6 @@
     <string name="snooze_selector_text_color_title">„Lükka edasi“ valiku teksti värv</string>
     <string name="display_snooze_selector_title">Näita „Lükka edasi“ valikut</string>
     <string name="missed_timer_indicator_color_title">Vahelejäänud taimeri tunnusvärv</string>
-    <string name="background_image_summary">Pildi nägemiseks muuda taustavärv läbipaistvaks</string>
     <string name="display_low_alarm_volume_warning_title">Näita hoiatust, kui äratuse helivaljus on sätitud vaikseks</string>
     <string name="enable_delete_occasional_alarm_by_default_dialog_message">„Kustuta äratus peale loobumist“ funktsionaalsus lülitatakse kõikide äratuste puhul välja. %s</string>
     <string name="toast_message_restore_error">Taastamine ei õnnestunud</string>

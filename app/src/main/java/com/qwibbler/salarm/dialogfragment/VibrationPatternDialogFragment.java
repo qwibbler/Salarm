@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.data.Timer;
 import com.qwibbler.salarm.databinding.VibrationPatternDialogBinding;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -38,6 +39,7 @@ public class VibrationPatternDialogFragment extends DialogFragment {
 
     private static final String ARG_PREF_KEY = "arg_pref_key";
     public static final String REQUEST_KEY = "vibration_request_key";
+    private static final String ARG_TIMER_ID = "arg_timer_id";
     public static final String RESULT_PATTERN_KEY = "result_pattern_key";
     public static final String RESULT_PREF_KEY = "result_pref_key";
     private static final String VIBRATION_PATTERN = "vibration_pattern";
@@ -74,6 +76,24 @@ public class VibrationPatternDialogFragment extends DialogFragment {
     public static VibrationPatternDialogFragment newInstance(String vibrationPattern) {
         final Bundle args = new Bundle();
 
+        args.putString(VIBRATION_PATTERN, vibrationPattern);
+
+        final VibrationPatternDialogFragment fragment = new VibrationPatternDialogFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * Creates a new instance of {@link VibrationPatternDialogFragment} for use
+     * in the timer editing panel, where the vibration pattern is configured for a specific timer.
+     *
+     * @param timerId          The {@link Timer} id whose vibration pattern will be edited.
+     * @param vibrationPattern The vibration pattern.
+     */
+    public static VibrationPatternDialogFragment newInstance(int timerId, String vibrationPattern) {
+        final Bundle args = new Bundle();
+
+        args.putInt(ARG_TIMER_ID, timerId);
         args.putString(VIBRATION_PATTERN, vibrationPattern);
 
         final VibrationPatternDialogFragment fragment = new VibrationPatternDialogFragment();
@@ -167,6 +187,7 @@ public class VibrationPatternDialogFragment extends DialogFragment {
                             VibrationEffect effect = VibrationEffect.createWaveform(pattern, 0);
                             mVibrator.vibrate(effect);
                         } else {
+                            //noinspection deprecation
                             mVibrator.vibrate(pattern, 0);
                         }
                     }

@@ -12,9 +12,6 @@ import static com.qwibbler.salarm.data.DataModel.PowerButtonBehavior.DISMISS;
 import static com.qwibbler.salarm.data.DataModel.PowerButtonBehavior.NOTHING;
 import static com.qwibbler.salarm.data.DataModel.PowerButtonBehavior.SNOOZE;
 import static com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior.CHANGE_VOLUME;
-import static com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior.DISMISS_ALARM;
-import static com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior.DO_NOTHING;
-import static com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior.SNOOZE_ALARM;
 import static com.qwibbler.salarm.data.Weekdays.Order.MON_TO_SUN;
 import static com.qwibbler.salarm.data.Weekdays.Order.SAT_TO_FRI;
 import static com.qwibbler.salarm.data.Weekdays.Order.SUN_TO_SAT;
@@ -34,6 +31,7 @@ import androidx.annotation.NonNull;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.DataModel.CitySort;
 import com.qwibbler.salarm.data.DataModel.ClockStyle;
+import com.qwibbler.salarm.data.DataModel.HeadphonesButtonBehavior;
 import com.qwibbler.salarm.data.DataModel.PowerButtonBehavior;
 import com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -679,15 +677,6 @@ public final class SettingsDAO {
     }
 
     /**
-     * @return {@code true} if a blur effect should be applied to the screensaver image.
-     * {@code false} otherwise.
-     */
-    public static boolean isScreensaverBlurEffectEnabled(SharedPreferences prefs) {
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_ENABLE_SCREENSAVER_BLUR_EFFECT, DEFAULT_ENABLE_BLUR_EFFECT);
-    }
-
-    /**
      * @return the blur intensity applied to the screensaver image.
      */
     public static int getScreensaverBlurIntensity(SharedPreferences prefs) {
@@ -699,7 +688,7 @@ public final class SettingsDAO {
      * @return the uri of the selected ringtone or the {@code defaultUri} if no explicit selection
      * has yet been made.
      */
-    static Uri getTimerRingtoneUri(SharedPreferences prefs, Uri defaultUri) {
+    public static Uri getTimerRingtoneUri(SharedPreferences prefs, Uri defaultUri) {
         final String uriString = prefs.getString(KEY_TIMER_RINGTONE, null);
         return uriString == null ? defaultUri : Uri.parse(uriString);
     }
@@ -707,8 +696,16 @@ public final class SettingsDAO {
     /**
      * @return the duration for which a timer can ring before expiring and being reset.
      */
-    static int getTimerAutoSilenceDuration(SharedPreferences prefs) {
+    public static int getTimerAutoSilenceDuration(SharedPreferences prefs) {
         return prefs.getInt(KEY_TIMER_AUTO_SILENCE_DURATION, DEFAULT_TIMER_AUTO_SILENCE_DURATION);
+    }
+
+    /**
+     * @return {@code true} if a custom auto silence duration cannot be set for each timer. {@code false} otherwise.
+     */
+    public static boolean isPerTimerAutoSilenceDisabled(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_timer.xml
+        return !prefs.getBoolean(KEY_ENABLE_PER_TIMER_AUTO_SILENCE, DEFAULT_ENABLE_PER_TIMER_AUTO_SILENCE);
     }
 
     /**
@@ -717,6 +714,21 @@ public final class SettingsDAO {
     public static boolean isTimerVibrate(SharedPreferences prefs) {
         // Default value must match the one in res/xml/settings_timer.xml
         return prefs.getBoolean(KEY_TIMER_VIBRATE, DEFAULT_TIMER_VIBRATE);
+    }
+
+    /**
+     * @return the vibration pattern applied to timers.
+     */
+    public static String getTimerVibrationPattern(SharedPreferences prefs) {
+        return prefs.getString(KEY_TIMER_VIBRATION_PATTERN, DEFAULT_VIBRATION_PATTERN);
+    }
+
+    /**
+     * @return {@code true} if a custom vibration pattern can be set for each timer. {@code false} otherwise.
+     */
+    public static boolean isPerTimerVibrationPatternDisabled(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_timer.xml
+        return !prefs.getBoolean(KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN, DEFAULT_ENABLE_PER_TIMER_VIBRATION_PATTERN);
     }
 
     /**
@@ -769,15 +781,6 @@ public final class SettingsDAO {
     }
 
     /**
-     * @return {@code true} if a blur effect should be applied to the image when the timer is expired.
-     * {@code false} otherwise.
-     */
-    public static boolean isTimerBlurEffectEnabled(SharedPreferences prefs) {
-        // Default value must match the one in res/xml/settings_timer_display.xml
-        return prefs.getBoolean(KEY_ENABLE_TIMER_BLUR_EFFECT, DEFAULT_ENABLE_BLUR_EFFECT);
-    }
-
-    /**
      * @return the blur intensity applied to the image when the timer is expired.
      */
     public static int getTimerBlurIntensity(SharedPreferences prefs) {
@@ -799,6 +802,14 @@ public final class SettingsDAO {
     public static boolean isExpiredTimerResetWithPowerButton(SharedPreferences prefs) {
         // Default value must match the one in res/xml/settings_timer.xml
         return prefs.getBoolean(KEY_TIMER_POWER_BUTTON_ACTION, DEFAULT_TIMER_POWER_BUTTON_ACTION);
+    }
+
+    /**
+     * @return {@code true} if the expired timer is reset with the headphones Play/Pause button. {@code false} otherwise.
+     */
+    public static boolean isExpiredTimerResetWithHeadphonesButton(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_timer.xml
+        return prefs.getBoolean(KEY_TIMER_HEADPHONES_BUTTON_ACTION, DEFAULT_TIMER_HEADPHONES_BUTTON_ACTION);
     }
 
     /**
@@ -846,6 +857,15 @@ public final class SettingsDAO {
      */
     public static int getDefaultTimeToAddToTimer(SharedPreferences prefs) {
         return prefs.getInt(KEY_TIMER_ADD_TIME_BUTTON_VALUE, DEFAULT_TIMER_ADD_TIME_BUTTON_VALUE);
+    }
+
+    /**
+     * @return {@code true} if the back flash should turn on when the timer is expired.
+     * {@code false} otherwise.
+     */
+    public static boolean shouldTurnOnBackFlashForExpiredTimer(SharedPreferences pref) {
+        // Default value must match the one in res/xml/settings_timer.xml
+        return pref.getBoolean(KEY_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER, DEFAULT_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER);
     }
 
     /**
@@ -934,14 +954,6 @@ public final class SettingsDAO {
     public static int getMissedTimerIndicatorColor(SharedPreferences prefs) {
         // Default value must match the one in res/xml/settings_timer_display.xml
         return prefs.getInt(KEY_MISSED_TIMER_INDICATOR_COLOR, DEFAULT_MISSED_TIMER_INDICATOR_COLOR);
-    }
-
-    /**
-     * @return {@code true} if a warning is displayed before deleting a timer. {@code false} otherwise.
-     */
-    public static boolean isWarningDisplayedBeforeDeletingTimer(SharedPreferences prefs) {
-        // Default value must match the one in res/xml/settings_timer.xml
-        return prefs.getBoolean(KEY_DISPLAY_WARNING_BEFORE_DELETING_TIMER, DEFAULT_DISPLAY_WARNING_BEFORE_DELETING_TIMER);
     }
 
     /**
@@ -1036,6 +1048,15 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if a custom volume increase duration cannot be set for each alarm.
+     * {@code false} otherwise.
+     */
+    public static boolean isPerTimerCrescendoDurationDisabled(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_timer.xml
+        return !prefs.getBoolean(KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION, DEFAULT_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION);
+    }
+
+    /**
      * @return {@code true} if swipe action is enabled to dismiss or snooze alarms. {@code false} otherwise.
      */
     public static boolean isSwipeActionEnabled(SharedPreferences pref) {
@@ -1089,10 +1110,10 @@ public final class SettingsDAO {
         // Default value must match the one in res/xml/settings_alarm.xml
         final String value = prefs.getString(KEY_VOLUME_BUTTONS, DEFAULT_VOLUME_BEHAVIOR);
         return switch (value) {
-            case DEFAULT_VOLUME_BEHAVIOR -> DO_NOTHING;
-            case VOLUME_BEHAVIOR_CHANGE_VOLUME -> CHANGE_VOLUME;
-            case VOLUME_BEHAVIOR_SNOOZE -> SNOOZE_ALARM;
-            case VOLUME_BEHAVIOR_DISMISS -> DISMISS_ALARM;
+            case DEFAULT_VOLUME_BEHAVIOR -> VolumeButtonBehavior.NOTHING;
+            case VOLUME_BEHAVIOR_CHANGE_VOLUME -> VolumeButtonBehavior.CHANGE_VOLUME;
+            case VOLUME_BEHAVIOR_SNOOZE -> VolumeButtonBehavior.SNOOZE;
+            case VOLUME_BEHAVIOR_DISMISS -> VolumeButtonBehavior.DISMISS;
             default -> throw new IllegalArgumentException("Unknown volume button behavior: " + value);
         };
     }
@@ -1104,16 +1125,29 @@ public final class SettingsDAO {
         // Default value must match the one in res/xml/settings_alarm.xml
         final String value = prefs.getString(KEY_POWER_BUTTON, DEFAULT_POWER_BEHAVIOR);
         return switch (value) {
-            case DEFAULT_POWER_BEHAVIOR -> NOTHING;
-            case POWER_BEHAVIOR_SNOOZE -> SNOOZE;
-            case POWER_BEHAVIOR_DISMISS -> DISMISS;
+            case DEFAULT_POWER_BEHAVIOR -> PowerButtonBehavior.NOTHING;
+            case POWER_BEHAVIOR_SNOOZE -> PowerButtonBehavior.SNOOZE;
+            case POWER_BEHAVIOR_DISMISS -> PowerButtonBehavior.DISMISS;
             default -> throw new IllegalArgumentException("Unknown power button behavior: " + value);
         };
     }
 
     /**
-     * @return {@code true} if a custom auto silence duration cannot be set for each alarm.
-     * {@code false} otherwise.
+     * @return the behavior to execute when headphones button is pressed while firing an alarm
+     */
+    public static HeadphonesButtonBehavior getHeadphonesButtonBehavior(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_alarm.xml
+        final String value = prefs.getString(KEY_HEADPHONES_BUTTON, DEFAULT_HEADPHONES_BUTTON_BEHAVIOR);
+        return switch (value) {
+            case DEFAULT_HEADPHONES_BUTTON_BEHAVIOR -> HeadphonesButtonBehavior.NOTHING;
+            case HEADPHONES_BUTTON_BEHAVIOR_SNOOZE -> HeadphonesButtonBehavior.SNOOZE;
+            case HEADPHONES_BUTTON_BEHAVIOR_DISMISS -> HeadphonesButtonBehavior.DISMISS;
+            default -> throw new IllegalArgumentException("Unknown media button behavior: " + value);
+        };
+    }
+
+    /**
+     * @return {@code true} if a custom auto silence duration cannot be set for each alarm. {@code false} otherwise.
      */
     public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs) {
         // Default value must match the one in res/xml/settings_alarm.xml
@@ -1531,6 +1565,14 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if the alarm title is displayed on a single line. {@code false} otherwise.
+     */
+    public static boolean isAlarmTitleDisplayedOnSingleLine(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_alarm_display.xml
+        return prefs.getBoolean(KEY_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
+    }
+
+    /**
      * @return {@code true} if the ringtone title should be displayed on the lock screen when the alarm is triggered.
      * {@code false} otherwise.
      */
@@ -1551,16 +1593,7 @@ public final class SettingsDAO {
      * @return the URI of the image to be displayed on the lock screen when the alarm is triggered.
      */
     public static String getAlarmBackgroundImage(SharedPreferences prefs) {
-        return prefs.getString(KEY_ALARM_BACKGROUND_IMAGE, null);
-    }
-
-    /**
-     * @return {@code true} if a blur effect should be applied to the image when the alarm is triggered.
-     * {@code false} otherwise.
-     */
-    public static boolean isAlarmBlurEffectEnabled(SharedPreferences prefs) {
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_ENABLE_ALARM_BLUR_EFFECT, DEFAULT_ENABLE_BLUR_EFFECT);
+        return prefs.getString(KEY_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
     }
 
     /**
@@ -1569,6 +1602,15 @@ public final class SettingsDAO {
     public static int getAlarmBlurIntensity(SharedPreferences prefs) {
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
+    }
+
+    /**
+     * @return {@code true} if a background image should be used for each alarm when the alarm is triggered.
+     * {@code false} otherwise.
+     */
+    public static boolean isPerAlarmBackgroundImageEnable(SharedPreferences prefs) {
+        // Default value must match the one in res/xml/settings_alarm_display.xml
+        return prefs.getBoolean(KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
     }
 
     private static ClockStyle getClockStyle(SharedPreferences prefs, String key) {

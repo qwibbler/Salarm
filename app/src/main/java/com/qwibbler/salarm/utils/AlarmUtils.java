@@ -13,14 +13,11 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.View;
-import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.view.ViewCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
@@ -44,31 +41,44 @@ import java.util.concurrent.TimeUnit;
  */
 public class AlarmUtils {
 
+
+    /**
+     * Key to pass the temporary alarm hour (int) to the preview screen.
+     */
+    public static final String EXTRA_PREVIEW_HOUR = "extra_preview_hour";
+
+    /**
+     * Key to pass the temporary alarm minute (int) to the preview screen.
+     */
+    public static final String EXTRA_PREVIEW_MINUTE = "extra_preview_minute";
+
+    /**
+     * Key to pass the temporary alarm label (String) to the preview screen.
+     */
+    public static final String EXTRA_PREVIEW_LABEL = "extra_preview_label";
+
+    /**
+     * Key to pass the temporary ringtone URI (String) to the preview screen.
+     * An empty string represents a silent ringtone.
+     */
+    public static final String EXTRA_PREVIEW_RINGTONE = "extra_preview_ringtone";
+
+    /**
+     * Key to pass the temporary background image path (String) to the preview screen.
+     */
+    public static final String EXTRA_PREVIEW_BACKGROUND_IMAGE = "extra_preview_background_image";
+
+    /**
+     * Key to pass the temporary blur intensity value (int) to the preview screen.
+     */
+    public static final String EXTRA_PREVIEW_BLUR_INTENSITY = "extra_preview_blur_intensity";
+
     /**
      * Intent action sent when the alarm has been either created or updated in the Clock app.
      * <p>
      * This action will display the next alarm of this app only in the clock tab and screensaver.
      */
     public static final String ACTION_NEXT_ALARM_CHANGED_BY_CLOCK = "com.qwibbler.salarm.NEXT_ALARM_CHANGED_BY_CLOCK";
-
-    /**
-     * Hide system bars when alarm goes off or timer expires.
-     */
-    public static void hideSystemBarsOfTriggeredAlarms(Window window, View view) {
-        if (SdkUtils.isAtLeastAndroid10()) {
-            WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, view);
-            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            controller.hide(WindowInsetsCompat.Type.systemBars());
-        } else {
-            view.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            );
-        }
-    }
 
     public static void showDismissToast(Context context, Alarm alarm, AlarmInstance instance) {
         final Context localizedContext = Utils.getLocalizedContext(context);
@@ -438,7 +448,7 @@ public class AlarmUtils {
         final long alarmTimeDelta = alarmTime - System.currentTimeMillis();
         final String text = formatElapsedTimeUntilAlarm(snackbarAnchor.getContext(), alarmTimeDelta);
         SnackbarManager.show(Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_SHORT));
-        snackbarAnchor.announceForAccessibility(text);
+        ViewCompat.setStateDescription(snackbarAnchor, text);
     }
 
 }

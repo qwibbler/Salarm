@@ -40,6 +40,7 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.alarms.AlarmUpdateHandler;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
@@ -62,6 +63,7 @@ import com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPref
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.DeviceUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -69,7 +71,7 @@ import com.qwibbler.salarm.utils.Utils;
 
 import java.util.List;
 
-public class AlarmSettingsFragment extends ScreenFragment
+public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private static final String KEY_PENDING_DIALOG_PREF_KEY = "pending_dialog_pref_key";
@@ -99,7 +101,7 @@ public class AlarmSettingsFragment extends ScreenFragment
     SwitchPreferenceCompat mEnablePerAlarmVolumeCrescendoDurationPref;
     SwitchPreferenceCompat mAdvancedAudioPlaybackPref;
     SwitchPreferenceCompat mAutoRoutingToExternalAudioDevicePref;
-    SwitchPreferenceCompat mSystemMediaVolume;
+    SwitchPreferenceCompat mSystemMediaVolumePref;
     CustomSliderPreference mExternalAudioDeviceVolumePref;
     PreferenceCategory mAlarmVibrationCategory;
     VibrationPatternPreference mVibrationPatternPref;
@@ -108,6 +110,7 @@ public class AlarmSettingsFragment extends ScreenFragment
     SwitchPreferenceCompat mEnableSnoozedOrDismissedAlarmVibrationsPref;
     ListPreference mVolumeButtonsPref;
     ListPreference mPowerButtonPref;
+    ListPreference mHeadphonesButtonPref;
     ListPreference mFlipActionPref;
     ListPreference mShakeActionPref;
     CustomSliderPreference mShakeIntensityPref;
@@ -137,18 +140,18 @@ public class AlarmSettingsFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_ALARM_FONT);
+            String safeTitle = FileUtils.toSafeFileName(FILE_ALARM_FONT);
             String oldFontPath = mPrefs.getString(KEY_ALARM_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
-                clearFile(oldFontPath);
+                FileUtils.clearFile(oldFontPath);
 
                 // Clear the font cache
                 ThemeUtils.removeFontFromCache(oldFontPath);
 
                 // Copy the new font to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {
@@ -207,7 +210,7 @@ public class AlarmSettingsFragment extends ScreenFragment
         mEnablePerAlarmVolumeCrescendoDurationPref = findPreference(KEY_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
         mAdvancedAudioPlaybackPref = findPreference(KEY_ADVANCED_AUDIO_PLAYBACK);
         mAutoRoutingToExternalAudioDevicePref = findPreference(KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
-        mSystemMediaVolume = findPreference(KEY_SYSTEM_MEDIA_VOLUME);
+        mSystemMediaVolumePref = findPreference(KEY_SYSTEM_MEDIA_VOLUME);
         mExternalAudioDeviceVolumePref = findPreference(KEY_EXTERNAL_AUDIO_DEVICE_VOLUME);
         mAlarmVibrationCategory = findPreference(KEY_ALARM_VIBRATION_CATEGORY);
         mEnableAlarmVibrationsByDefaultPref = findPreference(KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
@@ -216,6 +219,7 @@ public class AlarmSettingsFragment extends ScreenFragment
         mEnableSnoozedOrDismissedAlarmVibrationsPref = findPreference(KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
         mVolumeButtonsPref = findPreference(KEY_VOLUME_BUTTONS);
         mPowerButtonPref = findPreference(KEY_POWER_BUTTON);
+        mHeadphonesButtonPref = findPreference(KEY_HEADPHONES_BUTTON);
         mFlipActionPref = findPreference(KEY_FLIP_ACTION);
         mShakeActionPref = findPreference(KEY_SHAKE_ACTION);
         mShakeIntensityPref = findPreference(KEY_SHAKE_INTENSITY);
@@ -292,11 +296,11 @@ public class AlarmSettingsFragment extends ScreenFragment
             mMaterialDatePickerStylePref, mAlarmRingtonePref, mAlarmAutoSilencePref, mEnablePerAlarmAutoSilencePref,
             mAlarmSnoozeDurationPref, mEnablePerAlarmSnoozeDurationPref, mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref,
             mAlarmVolumePref, mEnablePerAlarmVolumePref, mAlarmVolumeCrescendoDurationPref, mEnablePerAlarmVolumeCrescendoDurationPref,
-            mAdvancedAudioPlaybackPref, mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolume, mExternalAudioDeviceVolumePref,
+            mAdvancedAudioPlaybackPref, mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolumePref, mExternalAudioDeviceVolumePref,
             mAlarmVibrationCategory, mEnableAlarmVibrationsByDefaultPref, mVibrationPatternPref, mEnablePerAlarmVibrationPatternPref,
-            mEnableSnoozedOrDismissedAlarmVibrationsPref, mVolumeButtonsPref, mPowerButtonPref, mFlipActionPref, mShakeActionPref,
-            mShakeIntensityPref, mSortAlarmPref, mDisplayEnabledAlarmsFirstPref, mEnableAlarmFabLongPressPref, mWeekStartPref,
-            mDisplayDismissButtonPref, mTurnOnBackFlashForTriggeredAlarmPref, mDeleteOccasionalAlarmByDefaultPref,
+            mEnableSnoozedOrDismissedAlarmVibrationsPref, mVolumeButtonsPref, mPowerButtonPref, mHeadphonesButtonPref, mFlipActionPref,
+            mShakeActionPref, mShakeIntensityPref, mSortAlarmPref, mDisplayEnabledAlarmsFirstPref, mEnableAlarmFabLongPressPref,
+            mWeekStartPref, mDisplayDismissButtonPref, mTurnOnBackFlashForTriggeredAlarmPref, mDeleteOccasionalAlarmByDefaultPref,
             mDisplayLowAlarmVolumeWarningPref);
 
         mAudioManager = null;
@@ -435,25 +439,37 @@ public class AlarmSettingsFragment extends ScreenFragment
 
             case KEY_ADVANCED_AUDIO_PLAYBACK -> {
                 stopRingtonePreview();
-                mAutoRoutingToExternalAudioDevicePref.setVisible((boolean) newValue);
-                mSystemMediaVolume.setVisible((boolean) newValue && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs));
-                mExternalAudioDeviceVolumePref.setVisible((boolean) newValue
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                boolean isAdvancedAudioPlaybackEnabled = (boolean) newValue;
+
+                mAutoRoutingToExternalAudioDevicePref.setVisible(isAdvancedAudioPlaybackEnabled);
+                mSystemMediaVolumePref.setVisible(isAdvancedAudioPlaybackEnabled && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs));
+                mExternalAudioDeviceVolumePref.setVisible(isAdvancedAudioPlaybackEnabled
                     && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs)
                     && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mHeadphonesButtonPref.setVisible(isAdvancedAudioPlaybackEnabled
+                    && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs));
             }
 
             case KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE -> {
                 stopRingtonePreview();
-                mSystemMediaVolume.setVisible((boolean) newValue);
-                mExternalAudioDeviceVolumePref.setVisible((boolean) newValue && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
+
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                boolean isAutoRoutingToExternalAudioDevice = (boolean) newValue;
+
+                mSystemMediaVolumePref.setVisible(isAutoRoutingToExternalAudioDevice);
+                mExternalAudioDeviceVolumePref.setVisible(isAutoRoutingToExternalAudioDevice
+                    && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
+                mHeadphonesButtonPref.setVisible(isAutoRoutingToExternalAudioDevice);
             }
 
             case KEY_SYSTEM_MEDIA_VOLUME -> {
                 stopRingtonePreview();
-                mExternalAudioDeviceVolumePref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mExternalAudioDeviceVolumePref.setVisible(!(boolean) newValue);
             }
 
             case KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT -> {
@@ -473,9 +489,8 @@ public class AlarmSettingsFragment extends ScreenFragment
                 }
             }
 
-            case KEY_VOLUME_BUTTONS, KEY_POWER_BUTTON, KEY_FLIP_ACTION,
-                 KEY_MATERIAL_TIME_PICKER_STYLE, KEY_MATERIAL_DATE_PICKER_STYLE,
-                 KEY_SORT_ALARM, KEY_VIBRATION_PATTERN -> {
+            case KEY_VOLUME_BUTTONS, KEY_POWER_BUTTON, KEY_HEADPHONES_BUTTON, KEY_FLIP_ACTION, KEY_MATERIAL_TIME_PICKER_STYLE,
+                 KEY_MATERIAL_DATE_PICKER_STYLE, KEY_SORT_ALARM, KEY_VIBRATION_PATTERN -> {
                 final ListPreference preference = (ListPreference) pref;
                 final int index = preference.findIndexOfValue((String) newValue);
                 preference.setSummary(preference.getEntries()[index]);
@@ -622,8 +637,8 @@ public class AlarmSettingsFragment extends ScreenFragment
         mAutoRoutingToExternalAudioDevicePref.setVisible(isAdvancedAudioPlaybackEnabled);
         mAutoRoutingToExternalAudioDevicePref.setOnPreferenceChangeListener(this);
 
-        mSystemMediaVolume.setVisible(isAdvancedAudioPlaybackEnabled && isAutoRoutingToExternalAudioDevice);
-        mSystemMediaVolume.setOnPreferenceChangeListener(this);
+        mSystemMediaVolumePref.setVisible(isAdvancedAudioPlaybackEnabled && isAutoRoutingToExternalAudioDevice);
+        mSystemMediaVolumePref.setOnPreferenceChangeListener(this);
 
         mExternalAudioDeviceVolumePref.setVisible(isAdvancedAudioPlaybackEnabled
             && isAutoRoutingToExternalAudioDevice
@@ -643,6 +658,10 @@ public class AlarmSettingsFragment extends ScreenFragment
 
         mPowerButtonPref.setOnPreferenceChangeListener(this);
         mPowerButtonPref.setSummary(mPowerButtonPref.getEntry());
+
+        mHeadphonesButtonPref.setVisible(isAdvancedAudioPlaybackEnabled && isAutoRoutingToExternalAudioDevice);
+        mHeadphonesButtonPref.setOnPreferenceChangeListener(this);
+        mHeadphonesButtonPref.setSummary(mHeadphonesButtonPref.getEntry());
 
         SensorManager sensorManager = requireContext().getApplicationContext().getSystemService(SensorManager.class);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
@@ -1027,7 +1046,7 @@ public class AlarmSettingsFragment extends ScreenFragment
         mEnablePerAlarmVolumeCrescendoDurationPref = null;
         mAdvancedAudioPlaybackPref = null;
         mAutoRoutingToExternalAudioDevicePref = null;
-        mSystemMediaVolume = null;
+        mSystemMediaVolumePref = null;
         mExternalAudioDeviceVolumePref = null;
         mAlarmVibrationCategory = null;
         mEnableAlarmVibrationsByDefaultPref = null;
@@ -1036,6 +1055,7 @@ public class AlarmSettingsFragment extends ScreenFragment
         mEnableSnoozedOrDismissedAlarmVibrationsPref = null;
         mVolumeButtonsPref = null;
         mPowerButtonPref = null;
+        mHeadphonesButtonPref = null;
         mFlipActionPref = null;
         mShakeActionPref = null;
         mShakeIntensityPref = null;

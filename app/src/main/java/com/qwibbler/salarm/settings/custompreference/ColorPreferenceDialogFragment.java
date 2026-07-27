@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package com.qwibbler.salarm.settings;
+package com.qwibbler.salarm.settings.custompreference;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SCREENSAVER_BATTERY_COLOR_PICKER;
@@ -24,7 +24,6 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.SettingsDAO;
-import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;

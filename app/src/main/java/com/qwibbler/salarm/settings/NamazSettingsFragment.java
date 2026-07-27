@@ -16,6 +16,7 @@ import androidx.preference.Preference;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.namaz.CitySearchDialogFragment;
 import com.qwibbler.salarm.namaz.NamazLocationManager;
 import com.qwibbler.salarm.namaz.RelationalAlarmSyncManager;
@@ -23,7 +24,7 @@ import com.qwibbler.salarm.namaz.RelationalAlarmSyncManager;
 /**
  * Settings fragment for Namaz-related configurations.
  */
-public class NamazSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class NamazSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final ActivityResultLauncher<String[]> locationPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(), result -> {

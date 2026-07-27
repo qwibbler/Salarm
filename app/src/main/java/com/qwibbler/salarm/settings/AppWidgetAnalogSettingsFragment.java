@@ -20,6 +20,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -27,7 +28,7 @@ import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.AnalogAppWidgetProvider;
 
-public class AppWidgetAnalogSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
+public class AppWidgetAnalogSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener {
 
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 
@@ -132,6 +133,8 @@ public class AppWidgetAnalogSettingsFragment extends ScreenFragment implements P
             }
 
             case KEY_ANALOG_WIDGET_WITH_SECOND_HAND -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 final boolean isSecondHandDisplayed = (boolean) newValue;
                 final String clockDial = WidgetDAO.getAnalogWidgetClockDial(mPrefs);
                 final boolean isSunOrFlowerClockDial = clockDial.equals(ANALOG_WIDGET_CLOCK_DIAL_SUN)
@@ -140,27 +143,26 @@ public class AppWidgetAnalogSettingsFragment extends ScreenFragment implements P
                 mClockSecondHandPref.setVisible(isSecondHandDisplayed && !isSunOrFlowerClockDial);
                 mDefaultSecondHandColorPref.setVisible(isSecondHandDisplayed);
                 mSecondHandColorPref.setVisible(isSecondHandDisplayed && !WidgetDAO.isAnalogWidgetDefaultSecondHandColor(mPrefs));
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
             case KEY_ANALOG_WIDGET_DEFAULT_DIAL_COLOR -> {
-                mDialColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mDialColorPref.setVisible(!(boolean) newValue);
             }
 
             case KEY_ANALOG_WIDGET_DEFAULT_HOUR_HAND_COLOR -> {
-                mHourHandColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mHourHandColorPref.setVisible(!(boolean) newValue);
             }
 
             case KEY_ANALOG_WIDGET_DEFAULT_MINUTE_HAND_COLOR -> {
-                mMinuteHandColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mMinuteHandColorPref.setVisible(!(boolean) newValue);
             }
 
             case KEY_ANALOG_WIDGET_DEFAULT_SECOND_HAND_COLOR -> {
-                mSecondHandColorPref.setVisible(!(boolean) newValue && WidgetDAO.isSecondHandDisplayedOnAnalogWidget(mPrefs));
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mSecondHandColorPref.setVisible(!(boolean) newValue && WidgetDAO.isSecondHandDisplayedOnAnalogWidget(mPrefs));
             }
         }
 

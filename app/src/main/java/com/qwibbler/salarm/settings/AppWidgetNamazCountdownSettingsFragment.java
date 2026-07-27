@@ -16,6 +16,7 @@ import androidx.preference.Preference;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
@@ -24,7 +25,7 @@ import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.NamazCountdownWidgetProvider;
 
-public class AppWidgetNamazCountdownSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
+public class AppWidgetNamazCountdownSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener {
 
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 

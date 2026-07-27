@@ -278,7 +278,6 @@
     <string name="settings_language_turkish">טורקית</string>
     <string name="settings_language_korean">קוריאנית</string>
     <string name="settings_language_czech">צ׳כית</string>
-    <string name="duplicate">שכפול</string>
     <string name="settings_language_chinese_traditional_tw">סינית (מסורתית, טאיוואן)</string>
     <string name="settings_vibration_title">הפעלת מחוות רטט</string>
     <string name="tab_title_visibility_always">תמיד</string>
@@ -306,7 +305,6 @@
     <string name="reset_settings_title">איפוס ההגדרות</string>
     <string name="restart_app_dialog_title_for_reset">האיפוס הושלם</string>
     <string name="dialog_close">סגירה</string>
-    <string name="warning_dialog_message">למחוק את הטיימר „%s”?</string>
     <string name="screensaver_clock_dynamic_colors_title">צבעי שעון דינמיים</string>
     <string name="clock_color_title">צבע שעון</string>
     <string name="screensaver_brightness_title">בהירות</string>
@@ -384,7 +382,7 @@
     <string name="system_media_volume_title">שימוש בעוצמת הקול למדיה של המערכת</string>
     <string name="enable_alarm_vibrations_by_default_setting_title">הפעלת רטט בעת פעולות התראה</string>
     <string name="enable_per_alarm_vibration_pattern_title">שימוש בדפוס רטט מותאם אישית לכל התראה בנפרד</string>
-    <string name="vibration_start_delay_none">ללא</string>
+    <string name="label_none">ללא</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">הפעלת הפנס האחורי בעת פעולות התראה</string>
     <string name="material_time_picker_style_title">סגנון חלונית לבחירת שעה</string>
     <string name="date_picker_style_title">סגנון חלונית לבחירת תאריך</string>
@@ -401,7 +399,6 @@
     <string name="background_image_title_variant">שינוי או מחיקה של תמונת הרקע</string>
     <string name="background_image_toast_message_selected">התמונה יובאה בהצלחה</string>
     <string name="background_image_toast_message_deleted">התמונה נמחקה בהצלחה</string>
-    <string name="enable_blur_effect_title">החלת אפקט טשטוש על תמונת הרקע</string>
     <string name="snooze_duration_none">ללא</string>
     <string name="swipe_action_title">החלקה לכיבוי התראות או דחייתן עם „נודניק”</string>
     <string name="power_button_title">כפתור ההפעלה</string>
@@ -466,7 +463,6 @@
     <string name="snooze_plus_button_color_title">צבע הכפתור „+”</string>
     <string name="snooze_minus_symbol_color_title">צבע הסימן „-”</string>
     <string name="snooze_plus_symbol_color_title">צבע הסימן „+”</string>
-    <string name="background_image_summary">יש להגדיר רקע שקוף בשביל לראות את התמונה</string>
     <string name="settings_tab_to_display">לשונית להצגה בעת פתיחת היישום</string>
     <string name="settings_vibration_summary">רק חלק מכפתורי הממשק מושפעים (למשל: כפתור ההתחלה/השהיה של טיימר או המתגים)</string>
     <string name="clock_dial_with_roman_numbers">עם ספרות לטיניות</string>
@@ -501,8 +497,6 @@
     <string name="description_direction_both_for_occasional_alarm">החלקה שמאלה לדחייה עם „נודניק” או ימינה בשביל לכבות ולמחוק את ההתראה</string>
     <string name="sort_timer_ascending_duration">לפי משך זמן (בסדר עולה)</string>
     <string name="sort_timer_descending_duration">לפי משך זמן (בסדר יורד)</string>
-    <string name="display_warning_before_deleting_timer_title">הצגת אזהרה לפני מחיקת טיימר</string>
-    <string name="warning_dialog_title">מחיקת טיימר</string>
     <string name="screensaver_settings_summary">התאמה אישית של הסגנון, הגופן והצבע של שומר המסך</string>
     <string name="screensaver_daydream_settings">בחירת/הפעלת שומר מסך</string>
     <string name="screensaver_daydream_settings_summary">לפתיחת ההגדרות הראשיות של שומר המסך באנדרואיד</string>

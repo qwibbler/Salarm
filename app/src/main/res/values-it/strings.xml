@@ -316,7 +316,6 @@
     <string name="city_name_default_color_title">Usa colore predefinito per il nome della città</string>
     <string name="max_clock_font_size_title">Dimensione massima caratteri dell\'orologio principale</string>
     <string name="city_clock_default_color_title">Usa colore predefinito per orologio della città</string>
-    <string name="duplicate">Duplica</string>
     <string name="display_background_border_summary">Visualizza un bordo di sfondo per alcuni elementi dell\'applicazione (sveglie, città, pulsante del timer, ecc.)</string>
     <string name="settings_vibration_title">Abilita vibrazioni</string>
     <string name="add_label">Aggiungi etichetta</string>
@@ -436,11 +435,8 @@
     <string name="settings_language_chinese_simplified_cn">Cinese (semplificato, PRC)</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">Doppia vibrazione quando la sveglia viene rinviata e vibrazione singola quando la sveglia viene spenta</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">Attivazione del flash posteriore quando viene attivata la sveglia</string>
-    <string name="display_warning_before_deleting_timer_title">Mostra un avviso prima di rimuovere un timer</string>
-    <string name="warning_dialog_title">Rimuovi timer</string>
     <string name="about_translate_link">Traduci su Codeberg</string>
     <string name="translate_dialog_message">Visita la pagina su Codeberg:\n\n%s</string>
-    <string name="warning_dialog_message">Si è sicuri di voler rimuovere il timer \"%s\"?</string>
     <string name="clock_style_spinner">Rotativo</string>
     <string name="clock_style_analog_material">Analogico (Material)</string>
     <string name="show_lockscreen_dialog_text">Sui dispositivi Xiaomi, è necessario abilitare manualmente l\'autorizzazione \"Mostra sulla schermata di blocco\" dalle impostazioni del dispositivo affinché l\'applicazione funzioni correttamente.</string>
@@ -515,7 +511,7 @@
     <string name="vibration_pattern_escalating">Crescendo</string>
     <string name="vibration_pattern_tick_tock">Tic-Toc</string>
     <string name="vibration_start_delay_title">Ritardo prima dell\'inizio della vibrazione</string>
-    <string name="vibration_start_delay_none">Nessuno</string>
+    <string name="label_none">Nessuno</string>
     <string name="sort_alarm_title">Ordina le sveglie</string>
     <string name="sort_alarm_time">Per orario sveglia</string>
     <string name="sort_next_alarm_time">All\'ora della prossima sveglia</string>

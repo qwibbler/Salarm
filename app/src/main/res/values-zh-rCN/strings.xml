@@ -229,7 +229,6 @@
     <string name="first_launch_main_feature_title">主要特点</string>
     <string name="app_slogan">基于 AOSP 的 100% FOSS 时钟</string>
     <string name="permission_dialog_revoke_title">撤销访问权限</string>
-    <string name="duplicate">重复</string>
     <string name="selected">已选择</string>
     <string name="more_options">更多选项</string>
     <string name="about_title">关于</string>
@@ -404,9 +403,6 @@
     <string name="yellow_accent_color">黄色</string>
     <string name="day_accent_color_title">日间模式的强调色</string>
     <string name="display_ringtone_title">显示铃声标题</string>
-    <string name="warning_dialog_message">确定要删除“%s”定时器吗？</string>
-    <string name="display_warning_before_deleting_timer_title">删除定时器之前显示警告</string>
-    <string name="warning_dialog_title">删除定时器</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">闹钟暂停时双次振动，闹钟关闭时单次振动</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">闹钟暂停或关闭时启用振动</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">闹钟触发时打开后置闪光灯</string>
@@ -530,7 +526,7 @@
     <string name="vibration_pattern_escalating">逐渐增强</string>
     <string name="vibration_pattern_tick_tock">钟摆振动</string>
     <string name="vibration_start_delay_title">振动开始前的延迟时间</string>
-    <string name="vibration_start_delay_none">无</string>
+    <string name="label_none">无</string>
     <string name="vibration_start_delay_warning_box_text">请输入 0 到 10 分钟之间的值</string>
     <string name="confirm_action_prompt">\n\n要继续吗？</string>
     <string name="enable_per_alarm_snooze_duration_title">为每个闹钟使用自定义暂停时长</string>
@@ -554,7 +550,6 @@
     <string name="blur_intensity_title">模糊强度</string>
     <string name="background_image_title">选择背景图片</string>
     <string name="background_image_toast_message_selected">图片已成功选择</string>
-    <string name="enable_blur_effect_title">对背景图片应用模糊效果</string>
     <string name="display_text_shadow_title">显示文本阴影</string>
     <string name="shadow_color_title">阴影颜色</string>
     <string name="shadow_offset_title">阴影偏移</string>
@@ -605,7 +600,6 @@
     <string name="snooze_selector_text_color_title">暂停选择器文本颜色</string>
     <string name="snooze_minus_symbol_color_title">“-”符号颜色</string>
     <string name="snooze_plus_symbol_color_title">“+”符号颜色</string>
-    <string name="background_image_summary">设置透明背景颜色以查看图片</string>
     <string name="alarm_volume_low">闹钟音量过低</string>
     <string name="fix_alarm_volume">修复</string>
     <string name="display_snooze_selector_title">显示暂停选择器</string>

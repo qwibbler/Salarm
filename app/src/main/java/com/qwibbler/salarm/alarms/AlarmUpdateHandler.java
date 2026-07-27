@@ -8,6 +8,7 @@ package com.qwibbler.salarm.alarms;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -23,6 +24,7 @@ import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
 import com.qwibbler.salarm.utils.AlarmUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
@@ -30,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * API for asynchronously mutating a single alarm.
@@ -282,10 +285,17 @@ public final class AlarmUpdateHandler {
     }
 
     private void showUndoBar() {
+        final Alarm alarmBeingDeleted = mDeletedAlarm;
+        final AtomicBoolean isUndone = new AtomicBoolean(false);
+
         final Context localizedContext = Utils.getLocalizedContext(mAppContext);
         final Snackbar snackbar = Snackbar.make(mSnackbarAnchor, localizedContext.getString(R.string.alarm_deleted),
             Snackbar.LENGTH_LONG).setAction(R.string.alarm_undo, v -> {
+            isUndone.set(true);
+
             if (mDeletedAlarm != null) {
+                Utils.performHapticFeedback(v, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 final Alarm alarmToRestore = mDeletedAlarm;
                 final RelationalRule ruleToRestore = mDeletedRule;
 
@@ -298,6 +308,25 @@ public final class AlarmUpdateHandler {
                     asyncRestoreRelationalAlarm(alarmToRestore, ruleToRestore);
                 } else {
                     asyncAddAlarm(alarmToRestore);
+                }
+            }
+        });
+
+        // Remove the alarm background image if the alarm is deleted and not restored using the Undo button.
+        snackbar.addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                // Permanently delete the background image of the deleted alarm if the user does not click the Undo button.
+                if (!isUndone.get()) {
+                    if (alarmBeingDeleted != null && !TextUtils.isEmpty(alarmBeingDeleted.backgroundImage)) {
+                        final String imagePath = alarmBeingDeleted.backgroundImage;
+
+                        // Delete the file in the background to avoid blocking the interface.
+                        AppExecutors.getDiskIO().execute(() -> {
+                            FileUtils.clearFile(imagePath);
+                            LogUtils.i("Background image file permanently deleted : " + imagePath);
+                        });
+                    }
                 }
             }
         });

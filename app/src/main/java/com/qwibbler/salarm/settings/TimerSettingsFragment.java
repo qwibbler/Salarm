@@ -22,6 +22,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.HapticFeedbackConstantsCompat;
@@ -29,25 +30,30 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Timer;
 import com.qwibbler.salarm.dialogfragment.AutoSilenceDurationDialogFragment;
 import com.qwibbler.salarm.dialogfragment.TimerAddTimeButtonDialogFragment;
+import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.qwibbler.salarm.ringtone.RingtonePickerActivity;
 import com.qwibbler.salarm.settings.custompreference.AlarmVolumePreference;
 import com.qwibbler.salarm.settings.custompreference.AutoSilenceDurationPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
 import com.qwibbler.salarm.settings.custompreference.TimerAddTimeButtonValuePreference;
+import com.qwibbler.salarm.settings.custompreference.VibrationPatternPreference;
 import com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.DeviceUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
@@ -55,14 +61,16 @@ import com.qwibbler.salarm.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimerSettingsFragment extends ScreenFragment
+public class TimerSettingsFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private static final String KEY_SHOW_SINGLE_TIMER_WARNING = "show_single_timer_warning";
     private static final String KEY_PENDING_SINGLE_MODE_VALUE = "pending_single_mode_value";
+    private static final String KEY_PENDING_DIALOG_PREF_KEY = "pending_dialog_pref_key";
 
     private boolean mShowSingleTimerWarning = false;
     private boolean mPendingSingleModeValue = false;
+    private String mPendingDialogPrefKey = null;
 
     private AudioManager mAudioManager;
     private AudioDeviceCallback mAudioDeviceCallback;
@@ -74,20 +82,26 @@ public class TimerSettingsFragment extends ScreenFragment
     Preference mTimerDurationFontPref;
     ListPreference mTimerCreationViewStylePref;
     Preference mTimerRingtonePref;
+    SwitchPreferenceCompat mEnablePerTimerAutoSilencePref;
     AlarmVolumePreference mAlarmVolumePref;
+    SwitchPreferenceCompat mEnablePerTimerVolumeCrescendoDurationPref;
+    PreferenceCategory mAdvancedAudioPlaybackCategoryPref;
     SwitchPreferenceCompat mAdvancedAudioPlaybackPref;
     SwitchPreferenceCompat mAutoRoutingToExternalAudioDevicePref;
-    SwitchPreferenceCompat mSystemMediaVolume;
+    SwitchPreferenceCompat mSystemMediaVolumePref;
     CustomSliderPreference mExternalAudioDeviceVolumePref;
+    PreferenceCategory mTimerVibrationCategory;
     SwitchPreferenceCompat mTimerVibratePref;
+    SwitchPreferenceCompat mEnablePerTimerVibrationPatternPref;
     SwitchPreferenceCompat mTimerVolumeButtonsActionPref;
     SwitchPreferenceCompat mTimerPowerButtonActionPref;
+    SwitchPreferenceCompat mTimerHeadphonesButtonActionPref;
     SwitchPreferenceCompat mTimerFlipActionPref;
     SwitchPreferenceCompat mTimerShakeActionPref;
     CustomSliderPreference mTimerShakeIntensityPref;
     SwitchPreferenceCompat mSingleTimerModePref;
     ListPreference mSortTimerPref;
-    SwitchPreferenceCompat mDisplayWarningBeforeDeletingTimerPref;
+    SwitchPreferenceCompat mTurnOnBackFlashForExpiredTimerPref;
     SwitchPreferenceCompat mDisplayLowAlarmVolumeWarningPref;
 
     private final ActivityResultLauncher<Intent> fontPickerLauncher =
@@ -107,18 +121,18 @@ public class TimerSettingsFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_TIMER_FONT);
+            String safeTitle = FileUtils.toSafeFileName(FILE_TIMER_FONT);
             String oldFontPath = mPrefs.getString(KEY_TIMER_DURATION_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
-                clearFile(oldFontPath);
+                FileUtils.clearFile(oldFontPath);
 
                 // Clear the font cache
                 ThemeUtils.removeFontFromCache(oldFontPath);
 
                 // Copy the new font to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {
@@ -160,20 +174,26 @@ public class TimerSettingsFragment extends ScreenFragment
         mTimerDurationFontPref = findPreference(KEY_TIMER_DURATION_FONT);
         mTimerCreationViewStylePref = findPreference(KEY_TIMER_CREATION_VIEW_STYLE);
         mTimerRingtonePref = findPreference(KEY_TIMER_RINGTONE);
+        mEnablePerTimerAutoSilencePref = findPreference(KEY_ENABLE_PER_TIMER_AUTO_SILENCE);
         mAlarmVolumePref = findPreference(KEY_ALARM_VOLUME_SETTING);
+        mEnablePerTimerVolumeCrescendoDurationPref = findPreference(KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION);
+        mAdvancedAudioPlaybackCategoryPref = findPreference(KEY_TIMER_ADVANCED_AUDIO_PLAYBACK_CATEGORY);
         mAdvancedAudioPlaybackPref = findPreference(KEY_ADVANCED_AUDIO_PLAYBACK);
         mAutoRoutingToExternalAudioDevicePref = findPreference(KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
-        mSystemMediaVolume = findPreference(KEY_SYSTEM_MEDIA_VOLUME);
+        mSystemMediaVolumePref = findPreference(KEY_SYSTEM_MEDIA_VOLUME);
         mExternalAudioDeviceVolumePref = findPreference(KEY_EXTERNAL_AUDIO_DEVICE_VOLUME);
+        mTimerVibrationCategory = findPreference(KEY_TIMER_VIBRATION_CATEGORY);
         mTimerVibratePref = findPreference(KEY_TIMER_VIBRATE);
+        mEnablePerTimerVibrationPatternPref = findPreference(KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN);
         mTimerVolumeButtonsActionPref = findPreference(KEY_TIMER_VOLUME_BUTTONS_ACTION);
         mTimerPowerButtonActionPref = findPreference(KEY_TIMER_POWER_BUTTON_ACTION);
+        mTimerHeadphonesButtonActionPref = findPreference(KEY_TIMER_HEADPHONES_BUTTON_ACTION);
         mTimerFlipActionPref = findPreference(KEY_TIMER_FLIP_ACTION);
         mTimerShakeActionPref = findPreference(KEY_TIMER_SHAKE_ACTION);
         mTimerShakeIntensityPref = findPreference(KEY_TIMER_SHAKE_INTENSITY);
         mSingleTimerModePref = findPreference(KEY_SINGLE_TIMER_MODE);
         mSortTimerPref = findPreference(KEY_SORT_TIMER);
-        mDisplayWarningBeforeDeletingTimerPref = findPreference(KEY_DISPLAY_WARNING_BEFORE_DELETING_TIMER);
+        mTurnOnBackFlashForExpiredTimerPref = findPreference(KEY_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER);
         mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING);
 
         mIsAlarmTabHidden = !SettingsDAO.isAlarmTabVisible(mPrefs);
@@ -186,6 +206,7 @@ public class TimerSettingsFragment extends ScreenFragment
         if (savedInstanceState != null) {
             mShowSingleTimerWarning = savedInstanceState.getBoolean(KEY_SHOW_SINGLE_TIMER_WARNING, false);
             mPendingSingleModeValue = savedInstanceState.getBoolean(KEY_PENDING_SINGLE_MODE_VALUE, false);
+            mPendingDialogPrefKey = savedInstanceState.getString(KEY_PENDING_DIALOG_PREF_KEY, null);
         }
 
         setupPreferences();
@@ -197,6 +218,7 @@ public class TimerSettingsFragment extends ScreenFragment
 
         outState.putBoolean(KEY_SHOW_SINGLE_TIMER_WARNING, mShowSingleTimerWarning);
         outState.putBoolean(KEY_PENDING_SINGLE_MODE_VALUE, mPendingSingleModeValue);
+        outState.putString(KEY_PENDING_DIALOG_PREF_KEY, mPendingDialogPrefKey);
     }
 
     @Override
@@ -210,9 +232,13 @@ public class TimerSettingsFragment extends ScreenFragment
     public void onResume() {
         super.onResume();
 
-        if (mShowSingleTimerWarning && (mActiveDialog == null || !mActiveDialog.isShowing())) {
-            mActiveDialog = singleModeWarningDialog(mPendingSingleModeValue);
-            mActiveDialog.show();
+        if (mActiveDialog == null || !mActiveDialog.isShowing()) {
+            if (mShowSingleTimerWarning) {
+                mActiveDialog = singleModeWarningDialog(mPendingSingleModeValue);
+                mActiveDialog.show();
+            } else if (mPendingDialogPrefKey != null) {
+                triggerDisableSettingDialog(mPendingDialogPrefKey);
+            }
         }
 
         restoreCustomFileDialogIfNeeded(KEY_TIMER_DURATION_FONT, mTimerDurationFontPref, fontPickerLauncher, null);
@@ -249,10 +275,11 @@ public class TimerSettingsFragment extends ScreenFragment
     @Override
     public void onDestroy() {
         nullifyPreferenceListeners(mTimerDisplayCustomizationPref, mTimerDurationFontPref, mTimerCreationViewStylePref, mTimerRingtonePref,
-            mAlarmVolumePref, mAdvancedAudioPlaybackPref, mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolume,
-            mExternalAudioDeviceVolumePref, mTimerVibratePref, mTimerVolumeButtonsActionPref, mTimerPowerButtonActionPref,
-            mTimerFlipActionPref, mTimerShakeActionPref, mTimerShakeIntensityPref, mSortTimerPref, mDisplayWarningBeforeDeletingTimerPref,
-            mDisplayLowAlarmVolumeWarningPref);
+            mEnablePerTimerAutoSilencePref, mAlarmVolumePref, mEnablePerTimerVolumeCrescendoDurationPref, mAdvancedAudioPlaybackPref,
+            mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolumePref, mExternalAudioDeviceVolumePref, mTimerVibrationCategory,
+            mTimerVibratePref, mEnablePerTimerVibrationPatternPref, mTimerVolumeButtonsActionPref, mTimerPowerButtonActionPref,
+            mTimerHeadphonesButtonActionPref, mTimerFlipActionPref, mTimerShakeActionPref, mTimerShakeIntensityPref, mSortTimerPref,
+            mTurnOnBackFlashForExpiredTimerPref, mDisplayLowAlarmVolumeWarningPref);
 
         nullifyAllPrefs();
 
@@ -262,7 +289,7 @@ public class TimerSettingsFragment extends ScreenFragment
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         switch (pref.getKey()) {
-            case KEY_TIMER_CREATION_VIEW_STYLE, KEY_SORT_TIMER -> {
+            case KEY_TIMER_CREATION_VIEW_STYLE, KEY_TIMER_VIBRATION_PATTERN, KEY_SORT_TIMER -> {
                 final ListPreference preference = (ListPreference) pref;
                 final int index = preference.findIndexOfValue((String) newValue);
                 preference.setSummary(preference.getEntries()[index]);
@@ -270,47 +297,160 @@ public class TimerSettingsFragment extends ScreenFragment
 
             case KEY_TIMER_RINGTONE -> mTimerRingtonePref.setSummary(DataModel.getDataModel().getTimerRingtoneTitle());
 
+            case KEY_ENABLE_PER_TIMER_AUTO_SILENCE -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                if ((boolean) newValue) {
+                    for (Timer timer : timerList) {
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            SettingsDAO.getTimerAutoSilenceDuration(mPrefs),
+                            timer.getVolumeCrescendoDuration(),
+                            timer.isVibrate(),
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        );
+                    }
+                } else {
+                    triggerDisableSettingDialog(KEY_ENABLE_PER_TIMER_AUTO_SILENCE);
+                    return false;
+                }
+            }
+
+            case KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                if ((boolean) newValue) {
+                    for (Timer timer : timerList) {
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            SettingsDAO.getTimerVolumeCrescendoDuration(mPrefs),
+                            timer.isVibrate(),
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        );
+                    }
+                } else {
+                    triggerDisableSettingDialog(KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION);
+                    return false;
+                }
+            }
+
             case KEY_ADVANCED_AUDIO_PLAYBACK -> {
                 stopRingtonePreview();
-                mAutoRoutingToExternalAudioDevicePref.setVisible(mIsAlarmTabHidden && (boolean) newValue);
-                mSystemMediaVolume.setVisible(mIsAlarmTabHidden
-                    && (boolean) newValue
+
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                boolean isAdvancedAudioPlaybackEnabled = (boolean) newValue;
+
+                mAutoRoutingToExternalAudioDevicePref.setVisible(isAdvancedAudioPlaybackEnabled);
+                mSystemMediaVolumePref.setVisible(isAdvancedAudioPlaybackEnabled
                     && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs));
-                mExternalAudioDeviceVolumePref.setVisible(mIsAlarmTabHidden
-                    && (boolean) newValue
+                mExternalAudioDeviceVolumePref.setVisible(isAdvancedAudioPlaybackEnabled
                     && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs)
                     && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
             case KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE -> {
                 stopRingtonePreview();
-                mSystemMediaVolume.setVisible(mIsAlarmTabHidden && (boolean) newValue);
-                mExternalAudioDeviceVolumePref.setVisible(mIsAlarmTabHidden
-                    && (boolean) newValue
-                    && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
+
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                boolean isAutoRoutingToExternalAudioDevice = (boolean) newValue;
+
+                mSystemMediaVolumePref.setVisible(isAutoRoutingToExternalAudioDevice);
+                mExternalAudioDeviceVolumePref.setVisible(isAutoRoutingToExternalAudioDevice
+                    && SettingsDAO.shouldUseCustomMediaVolume(mPrefs)
+                );
             }
 
             case KEY_SYSTEM_MEDIA_VOLUME -> {
                 stopRingtonePreview();
-                mExternalAudioDeviceVolumePref.setVisible(mIsAlarmTabHidden && !(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mExternalAudioDeviceVolumePref.setVisible(!(boolean) newValue);
             }
 
             case KEY_TIMER_SHAKE_ACTION -> {
-                mTimerShakeIntensityPref.setVisible((boolean) newValue);
-
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mTimerShakeIntensityPref.setVisible((boolean) newValue);
+            }
+
+            case KEY_TIMER_VIBRATE -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                if ((boolean) newValue) {
+                    for (Timer timer : timerList) {
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            timer.getVolumeCrescendoDuration(),
+                            true,
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        );
+                    }
+                } else {
+                    triggerDisableSettingDialog(KEY_TIMER_VIBRATE);
+                    return false;
+                }
+            }
+
+            case KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                if ((boolean) newValue) {
+                    for (Timer timer : timerList) {
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            timer.getVolumeCrescendoDuration(),
+                            timer.isVibrate(),
+                            SettingsDAO.getVibrationPattern(mPrefs),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        );
+                    }
+                } else {
+                    triggerDisableSettingDialog(KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN);
+                    return false;
+                }
             }
 
             case KEY_SINGLE_TIMER_MODE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 boolean newValueBool = (boolean) newValue;
 
                 if (DataModel.getDataModel().getTimers().isEmpty()) {
                     mSortTimerPref.setVisible(!newValueBool);
-                    mDisplayWarningBeforeDeletingTimerPref.setVisible(!newValueBool);
                 } else {
                     mShowSingleTimerWarning = true;
                     mPendingSingleModeValue = newValueBool;
@@ -322,8 +462,30 @@ public class TimerSettingsFragment extends ScreenFragment
                 }
             }
 
-            case KEY_TIMER_VIBRATE, KEY_TIMER_VOLUME_BUTTONS_ACTION, KEY_TIMER_POWER_BUTTON_ACTION, KEY_TIMER_FLIP_ACTION,
-                 KEY_DISPLAY_WARNING_BEFORE_DELETING_TIMER, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING ->
+            case KEY_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                for (Timer timer : timerList) {
+                    DataModel.getDataModel().updateAllTimerSettings(
+                        timer,
+                        timer.getLabel(),
+                        timer.getButtonTime(),
+                        timer.getRingtoneUri(),
+                        timer.getAutoSilence(),
+                        timer.getVolumeCrescendoDuration(),
+                        timer.isVibrate(),
+                        timer.getVibrationPattern(),
+                        (boolean) newValue,
+                        timer.getTurnOffMedia(),
+                        timer.getDeleteAfterUse()
+                    );
+                }
+            }
+
+            case KEY_TIMER_VOLUME_BUTTONS_ACTION, KEY_TIMER_POWER_BUTTON_ACTION, KEY_TIMER_HEADPHONES_BUTTON_ACTION, KEY_TIMER_FLIP_ACTION,
+                 KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
         }
 
@@ -343,7 +505,7 @@ public class TimerSettingsFragment extends ScreenFragment
             case KEY_TIMER_DURATION_FONT -> selectCustomFile(mTimerDurationFontPref, fontPickerLauncher,
                 SettingsDAO.getTimerDurationFont(mPrefs), KEY_TIMER_DURATION_FONT, true, null);
 
-            case KEY_TIMER_RINGTONE -> startActivity(RingtonePickerActivity.createTimerRingtonePickerIntent(context));
+            case KEY_TIMER_RINGTONE -> startActivity(RingtonePickerActivity.createTimerRingtonePickerIntentForSettings(context));
         }
 
         return true;
@@ -360,6 +522,10 @@ public class TimerSettingsFragment extends ScreenFragment
             VolumeCrescendoDurationDialogFragment dialogFragment =
                 VolumeCrescendoDurationDialogFragment.newInstance(pref.getKey(), currentDelay);
             VolumeCrescendoDurationDialogFragment.show(getParentFragmentManager(), dialogFragment);
+        } else if (pref instanceof VibrationPatternPreference vibrationPatternPreference) {
+            String currentValue = vibrationPatternPreference.getPattern();
+            VibrationPatternDialogFragment dialogFragment = VibrationPatternDialogFragment.newInstance(pref.getKey(), currentValue);
+            VibrationPatternDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else if (pref instanceof TimerAddTimeButtonValuePreference timerAddTimeButtonValuePreference) {
             int currentValue = timerAddTimeButtonValuePreference.getAddTimeButtonValue();
             TimerAddTimeButtonDialogFragment dialogFragment = TimerAddTimeButtonDialogFragment.newInstance(pref.getKey(), currentValue);
@@ -385,32 +551,43 @@ public class TimerSettingsFragment extends ScreenFragment
 
         mTimerRingtonePref.setOnPreferenceClickListener(this);
 
+        mEnablePerTimerAutoSilencePref.setOnPreferenceChangeListener(this);
+
         mAlarmVolumePref.setVisible(mIsAlarmTabHidden);
         if (mAlarmVolumePref.isVisible()) {
             mAlarmVolumePref.setEnabled(!mHasExternalAudioDeviceConnected);
         }
 
-        mAdvancedAudioPlaybackPref.setVisible(mIsAlarmTabHidden);
+        mEnablePerTimerVolumeCrescendoDurationPref.setOnPreferenceChangeListener(this);
+
+        mAdvancedAudioPlaybackCategoryPref.setVisible(mIsAlarmTabHidden);
+
         mAdvancedAudioPlaybackPref.setOnPreferenceChangeListener(this);
 
-        mAutoRoutingToExternalAudioDevicePref.setVisible(mIsAlarmTabHidden && isAdvancedAudioPlaybackEnabled);
+        mAutoRoutingToExternalAudioDevicePref.setVisible(isAdvancedAudioPlaybackEnabled);
         mAutoRoutingToExternalAudioDevicePref.setOnPreferenceChangeListener(this);
 
-        mSystemMediaVolume.setVisible(mIsAlarmTabHidden && isAdvancedAudioPlaybackEnabled && isAutoRoutingToExternalAudioDevice);
-        mSystemMediaVolume.setOnPreferenceChangeListener(this);
+        mSystemMediaVolumePref.setVisible(isAdvancedAudioPlaybackEnabled && isAutoRoutingToExternalAudioDevice);
+        mSystemMediaVolumePref.setOnPreferenceChangeListener(this);
 
-        mExternalAudioDeviceVolumePref.setVisible(mIsAlarmTabHidden
-            && isAdvancedAudioPlaybackEnabled
+        mExternalAudioDeviceVolumePref.setVisible(isAdvancedAudioPlaybackEnabled
             && isAutoRoutingToExternalAudioDevice
             && SettingsDAO.shouldUseCustomMediaVolume(mPrefs));
         mExternalAudioDeviceVolumePref.setEnabled(mExternalAudioDeviceVolumePref.isVisible() && mHasExternalAudioDeviceConnected);
 
-        mTimerVibratePref.setVisible(DeviceUtils.hasVibrator(requireContext()));
+        mTimerVibrationCategory.setVisible(DeviceUtils.hasVibrator(requireContext()));
+
         mTimerVibratePref.setOnPreferenceChangeListener(this);
+
+        mEnablePerTimerVibrationPatternPref.setOnPreferenceChangeListener(this);
 
         mTimerVolumeButtonsActionPref.setOnPreferenceChangeListener(this);
 
         mTimerPowerButtonActionPref.setOnPreferenceChangeListener(this);
+
+        mTimerHeadphonesButtonActionPref.setVisible(SettingsDAO.isAdvancedAudioPlaybackEnabled(mPrefs)
+            && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs));
+        mTimerHeadphonesButtonActionPref.setOnPreferenceChangeListener(this);
 
         SensorManager sensorManager = requireContext().getApplicationContext().getSystemService(SensorManager.class);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
@@ -430,8 +607,8 @@ public class TimerSettingsFragment extends ScreenFragment
         mSortTimerPref.setOnPreferenceChangeListener(this);
         mSortTimerPref.setSummary(mSortTimerPref.getEntry());
 
-        mDisplayWarningBeforeDeletingTimerPref.setVisible(!SettingsDAO.isSingleTimerModeEnabled(mPrefs));
-        mDisplayWarningBeforeDeletingTimerPref.setOnPreferenceChangeListener(this);
+        mTurnOnBackFlashForExpiredTimerPref.setVisible(DeviceUtils.hasBackFlash(requireContext()));
+        mTurnOnBackFlashForExpiredTimerPref.setOnPreferenceChangeListener(this);
 
         mDisplayLowAlarmVolumeWarningPref.setOnPreferenceChangeListener(this);
     }
@@ -450,6 +627,26 @@ public class TimerSettingsFragment extends ScreenFragment
                     AutoSilenceDurationPreference pref = findPreference(key);
                     if (pref != null) {
                         pref.setAutoSilenceDuration(newValue);
+
+                        if (SettingsDAO.isPerTimerAutoSilenceDisabled(mPrefs)) {
+                            List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                            for (Timer timer : timerList) {
+                                DataModel.getDataModel().updateAllTimerSettings(
+                                    timer,
+                                    timer.getLabel(),
+                                    timer.getButtonTime(),
+                                    timer.getRingtoneUri(),
+                                    newValue,
+                                    timer.getVolumeCrescendoDuration(),
+                                    timer.isVibrate(),
+                                    timer.getVibrationPattern(),
+                                    timer.isFlashOn(),
+                                    timer.getTurnOffMedia(),
+                                    timer.getDeleteAfterUse()
+                                );
+                            }
+                        }
                     }
                 }
             });
@@ -464,6 +661,60 @@ public class TimerSettingsFragment extends ScreenFragment
                     VolumeCrescendoDurationPreference pref = findPreference(key);
                     if (pref != null) {
                         pref.setVolumeCrescendoDuration(newValue);
+
+                        if (SettingsDAO.isPerTimerCrescendoDurationDisabled(mPrefs)) {
+                            List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                            for (Timer timer : timerList) {
+                                DataModel.getDataModel().updateAllTimerSettings(
+                                    timer,
+                                    timer.getLabel(),
+                                    timer.getButtonTime(),
+                                    timer.getRingtoneUri(),
+                                    timer.getAutoSilence(),
+                                    newValue,
+                                    timer.isVibrate(),
+                                    timer.getVibrationPattern(),
+                                    timer.isFlashOn(),
+                                    timer.getTurnOffMedia(),
+                                    timer.getDeleteAfterUse()
+                                );
+                            }
+                        }
+                    }
+                }
+            });
+
+        // Vibration pattern preference
+        parentFragmentManager.setFragmentResultListener(VibrationPatternDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            (requestKey, bundle) -> {
+                String key = bundle.getString(VibrationPatternDialogFragment.RESULT_PREF_KEY);
+                String newValue = bundle.getString(VibrationPatternDialogFragment.RESULT_PATTERN_KEY);
+
+                if (key != null) {
+                    VibrationPatternPreference pref = findPreference(key);
+                    if (pref != null) {
+                        pref.setPattern(newValue);
+
+                        if (SettingsDAO.isPerTimerVibrationPatternDisabled(mPrefs)) {
+                            List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                            for (Timer timer : timerList) {
+                                DataModel.getDataModel().updateAllTimerSettings(
+                                    timer,
+                                    timer.getLabel(),
+                                    timer.getButtonTime(),
+                                    timer.getRingtoneUri(),
+                                    timer.getAutoSilence(),
+                                    timer.getVolumeCrescendoDuration(),
+                                    timer.isVibrate(),
+                                    newValue,
+                                    timer.isFlashOn(),
+                                    timer.getTurnOffMedia(),
+                                    timer.getDeleteAfterUse()
+                                );
+                            }
+                        }
                     }
                 }
             });
@@ -483,6 +734,132 @@ public class TimerSettingsFragment extends ScreenFragment
             });
     }
 
+    private void triggerDisableSettingDialog(String prefKey) {
+        if (!isAdded() || isDetached()) {
+            return;
+        }
+
+        List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+        mPendingDialogPrefKey = prefKey;
+
+        if (!timerList.isEmpty()) {
+            switch (prefKey) {
+                case KEY_TIMER_VIBRATE -> showDisablePerTimerSettingDialog(R.string.timer_vibrate_dialog_message, KEY_TIMER_VIBRATE,
+                    mTimerVibratePref, timer ->
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            timer.getVolumeCrescendoDuration(),
+                            false,
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        )
+                );
+
+                case KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN -> showDisablePerTimerSettingDialog(
+                    R.string.enable_per_alarm_vibration_pattern_dialog_message, KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN,
+                    mEnablePerTimerVibrationPatternPref, timer ->
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            timer.getVolumeCrescendoDuration(),
+                            timer.isVibrate(),
+                            SettingsDAO.getTimerVibrationPattern(mPrefs),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        )
+                );
+
+                case KEY_ENABLE_PER_TIMER_AUTO_SILENCE -> showDisablePerTimerSettingDialog(
+                    R.string.enable_per_alarm_auto_silence_dialog_message, KEY_ENABLE_PER_TIMER_AUTO_SILENCE,
+                    mEnablePerTimerAutoSilencePref, timer ->
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            SettingsDAO.getTimerAutoSilenceDuration(mPrefs),
+                            timer.getVolumeCrescendoDuration(),
+                            timer.isVibrate(),
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        )
+                );
+
+                case KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION -> showDisablePerTimerSettingDialog(
+                    R.string.enable_per_alarm_crescendo_duration_dialog_message, KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION,
+                    mEnablePerTimerVolumeCrescendoDurationPref, timer ->
+                        DataModel.getDataModel().updateAllTimerSettings(
+                            timer,
+                            timer.getLabel(),
+                            timer.getButtonTime(),
+                            timer.getRingtoneUri(),
+                            timer.getAutoSilence(),
+                            SettingsDAO.getTimerVolumeCrescendoDuration(mPrefs),
+                            timer.isVibrate(),
+                            timer.getVibrationPattern(),
+                            timer.isFlashOn(),
+                            timer.getTurnOffMedia(),
+                            timer.getDeleteAfterUse()
+                        )
+                );
+            }
+        } else {
+            mPrefs.edit().putBoolean(prefKey, false).apply();
+
+            Preference pref = findPreference(prefKey);
+            if (pref instanceof SwitchPreferenceCompat switchPreferenceCompat) {
+                switchPreferenceCompat.setChecked(false);
+            }
+        }
+    }
+
+    private void showDisablePerTimerSettingDialog(@StringRes int messageResId, String prefKey, SwitchPreferenceCompat switchPref,
+                                                  TimerUpdater timerUpdater) {
+
+        String confirmAction = getString(R.string.confirm_action_prompt);
+
+        mActiveDialog = CustomDialog.create(
+            requireContext(),
+            null,
+            AppCompatResources.getDrawable(requireContext(), R.drawable.ic_error),
+            getString(R.string.warning),
+            getString(messageResId, confirmAction),
+            null,
+            getString(android.R.string.ok),
+            (d, w) -> {
+                List<Timer> timerList = DataModel.getDataModel().getTimers();
+
+                for (Timer timer : timerList) {
+                    timerUpdater.update(timer);
+                }
+
+                mPrefs.edit().putBoolean(prefKey, false).apply();
+                switchPref.setChecked(false);
+            },
+            getString(android.R.string.cancel),
+            null,
+            null,
+            null,
+            (alertDialog -> alertDialog.setOnDismissListener(d -> mPendingDialogPrefKey = null)),
+            CustomDialog.SoftInputMode.NONE
+        );
+
+        mActiveDialog.show();
+    }
+
     private AlertDialog singleModeWarningDialog(boolean newValue) {
         String confirmAction = getString(R.string.confirm_action_prompt);
 
@@ -498,11 +875,10 @@ public class TimerSettingsFragment extends ScreenFragment
                 List<Timer> timersToDelete = new ArrayList<>(DataModel.getDataModel().getTimers());
 
                 for (Timer timer : timersToDelete) {
-                    DataModel.getDataModel().removeTimer(timer);
+                    DataModel.getDataModel().removeTimer(timer, R.string.label_salarm);
                 }
 
                 mSortTimerPref.setVisible(!newValue);
-                mDisplayWarningBeforeDeletingTimerPref.setVisible(!newValue);
                 mPrefs.edit().putBoolean(KEY_SINGLE_TIMER_MODE, newValue).apply();
                 mSingleTimerModePref.setChecked(newValue);
 
@@ -571,7 +947,7 @@ public class TimerSettingsFragment extends ScreenFragment
 
     private void updateRingtonePreferences() {
         mTimerRingtonePref.setSummary(DataModel.getDataModel().getTimerRingtoneTitle());
-        mTimerRingtonePref.setIntent(RingtonePickerActivity.createTimerRingtonePickerIntent(requireContext()));
+        mTimerRingtonePref.setIntent(RingtonePickerActivity.createTimerRingtonePickerIntentForSettings(requireContext()));
     }
 
     private void nullifyAllPrefs() {
@@ -579,20 +955,34 @@ public class TimerSettingsFragment extends ScreenFragment
         mTimerDurationFontPref = null;
         mTimerCreationViewStylePref = null;
         mTimerRingtonePref = null;
+        mEnablePerTimerAutoSilencePref = null;
         mAlarmVolumePref = null;
+        mEnablePerTimerVolumeCrescendoDurationPref = null;
+        mAdvancedAudioPlaybackCategoryPref = null;
         mAdvancedAudioPlaybackPref = null;
         mAutoRoutingToExternalAudioDevicePref = null;
-        mSystemMediaVolume = null;
+        mSystemMediaVolumePref = null;
         mExternalAudioDeviceVolumePref = null;
+        mTimerVibrationCategory = null;
         mTimerVibratePref = null;
+        mEnablePerTimerVibrationPatternPref = null;
         mTimerVolumeButtonsActionPref = null;
         mTimerPowerButtonActionPref = null;
+        mTimerHeadphonesButtonActionPref = null;
         mTimerFlipActionPref = null;
         mTimerShakeActionPref = null;
         mTimerShakeIntensityPref = null;
         mSortTimerPref = null;
-        mDisplayWarningBeforeDeletingTimerPref = null;
+        mTurnOnBackFlashForExpiredTimerPref = null;
         mDisplayLowAlarmVolumeWarningPref = null;
+    }
+
+    /**
+     * Interface for updating timer properties when pressing the OK button in the dialog box
+     * that appears when the "per timer" settings are disabled.
+     */
+    private interface TimerUpdater {
+        void update(Timer timer);
     }
 
 }

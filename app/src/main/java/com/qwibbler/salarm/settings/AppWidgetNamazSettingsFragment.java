@@ -27,6 +27,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.namaz.NamazDatabase;
 import com.qwibbler.salarm.namaz.RelationalRule;
@@ -43,7 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AppWidgetNamazSettingsFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener {
+public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener {
 
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 

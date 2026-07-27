@@ -234,15 +234,25 @@ final class TimerModel {
     }
 
     /**
-     * @param length         the length of the timer in milliseconds
-     * @param label          describes the purpose of the timer
-     * @param buttonTime     the time indicated in the timer add time button
-     * @param deleteAfterUse {@code true} indicates the timer should be deleted when it is reset
+     * @param length            the length of the timer in milliseconds
+     * @param label             describes the purpose of the timer
+     * @param buttonTime        the time indicated in the timer add time button
+     * @param ringtone          the timer ringtone
+     * @param autoSilence       the auto silence duration
+     * @param crescendoDuration the volume crescendo duration
+     * @param isVibrate         {@code true} indicates the timer should vibrate when it is expired
+     * @param vibrationPattern  the vibration pattern
+     * @param isFlashOn         {@code true} indicates the flash should turn on when the timer is expired
+     * @param turnOffMedia      {@code true} indicates the media should turn off when the timer is expired
+     * @param deleteAfterUse    {@code true} indicates the timer should be deleted when it is reset
      * @return the newly added timer
      */
-    Timer addTimer(long length, String label, String buttonTime, boolean deleteAfterUse) {
+    Timer addTimer(long length, String label, String buttonTime, Uri ringtone, int autoSilence, int crescendoDuration, boolean isVibrate,
+                   String vibrationPattern, boolean isFlashOn, boolean turnOffMedia, boolean deleteAfterUse) {
+
         // Create the timer instance.
-        Timer timer = new Timer(-1, RESET, length, length, Timer.UNUSED, Timer.UNUSED, length, label, buttonTime, deleteAfterUse);
+        Timer timer = new Timer(-1, RESET, length, length, Timer.UNUSED, Timer.UNUSED, length, label, buttonTime, ringtone,
+            autoSilence, crescendoDuration, isVibrate, vibrationPattern, isFlashOn, turnOffMedia, deleteAfterUse);
 
         // Add the timer to permanent storage.
         timer = TimerDAO.addTimer(mPrefs, timer);
@@ -283,6 +293,8 @@ final class TimerModel {
     }
 
     /**
+     * Updates a given timer.
+     *
      * @param timer an updated timer to store
      */
     void updateTimer(Timer timer) {
@@ -303,13 +315,18 @@ final class TimerModel {
     }
 
     /**
-     * @param timer an existing timer to be removed
+     * Deletes a given timer.
+     *
+     * @param timer        the timer to be deleted
+     * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
-    void removeTimer(Timer timer) {
-        doRemoveTimer(timer);
+    void removeTimer(Timer timer, @StringRes int eventLabelId) {
+        doRemoveTimer(timer, eventLabelId);
 
         // Update the timer notifications after removing the timer data.
-        if (timer.isExpired()) {
+        if (timer.isMissed()) {
+            updateMissedNotification();
+        } else if (timer.isExpired()) {
             updateHeadsUpNotification();
         } else {
             updateNotification();
@@ -320,17 +337,13 @@ final class TimerModel {
     }
 
     /**
-     * If the given {@code timer} is expired and marked for deletion after use then this method
-     * removes the timer. The timer is otherwise transitioned to the reset state and continues
-     * to exist.
+     * Resets a given timer.
      *
      * @param timer        the timer to be reset
-     * @param allowDelete  {@code true} if the timer is allowed to be deleted instead of reset
-     *                     (e.g. one use timers)
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
-    public void resetTimer(Timer timer, boolean allowDelete, @StringRes int eventLabelId) {
-        doResetOrDeleteTimer(timer, allowDelete, eventLabelId);
+    public void resetTimer(Timer timer, @StringRes int eventLabelId) {
+        doResetTimer(timer, eventLabelId);
 
         // Update the notification after updating the timer data.
         if (timer.isMissed()) {
@@ -343,6 +356,20 @@ final class TimerModel {
 
         // Update the timer tile after updating the timer data.
         updateQuickSettingsTile();
+    }
+
+    /**
+     * Resets or deletes a given timer based on its "delete after use" setting.
+     *
+     * @param timer        the timer to be reset or deleted
+     * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
+     */
+    public void resetOrDeleteTimer(Timer timer, @StringRes int eventLabelId) {
+        if (timer.getDeleteAfterUse()) {
+            removeTimer(timer, eventLabelId);
+        } else {
+            resetTimer(timer, eventLabelId);
+        }
     }
 
     /**
@@ -382,8 +409,7 @@ final class TimerModel {
     }
 
     /**
-     * Reset all expired timers. Exactly one parameter should be filled, with preference given to
-     * eventLabelId.
+     * Resets or deletes all expired timers.
      *
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
@@ -393,7 +419,12 @@ final class TimerModel {
 
         for (Timer timer : timers) {
             if (timer.isExpired()) {
-                doResetOrDeleteTimer(timer, true, eventLabelId);
+                if (timer.getDeleteAfterUse()) {
+                    doRemoveTimer(timer, eventLabelId);
+                } else {
+                    doResetTimer(timer, eventLabelId);
+                }
+
                 hasChanged = true;
             }
         }
@@ -408,15 +439,19 @@ final class TimerModel {
     }
 
     /**
-     * Reset all missed timers.
+     * Resets or deletes all missed timers.
      *
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
-    void resetMissedTimers(@StringRes int eventLabelId) {
+    void resetOrDeleteMissedTimers(@StringRes int eventLabelId) {
         final List<Timer> timers = new ArrayList<>(getTimers());
         for (Timer timer : timers) {
             if (timer.isMissed()) {
-                doResetOrDeleteTimer(timer, true, eventLabelId);
+                if (timer.getDeleteAfterUse()) {
+                    doRemoveTimer(timer, eventLabelId);
+                } else {
+                    doResetTimer(timer, eventLabelId);
+                }
             }
         }
 
@@ -486,13 +521,13 @@ final class TimerModel {
     /**
      * @return the duration for which a timer can ring before expiring and being reset
      */
-    long getTimerAutoSilenceDuration() {
-        return SettingsDAO.getTimerAutoSilenceDuration(mPrefs);
+    long getTimerAutoSilenceDuration(Timer timer) {
+        return timer.getAutoSilence();
     }
 
     private List<Timer> getMutableTimers() {
         if (mTimers == null) {
-            mTimers = TimerDAO.getTimers(mPrefs);
+            mTimers = TimerDAO.getTimers(mPrefs, getDefaultTimerRingtoneUri());
         }
 
         return mTimers;
@@ -502,7 +537,7 @@ final class TimerModel {
      * Load timers from SharedPreferences after a restore or reset of settings
      */
     public void loadTimers() {
-        mTimers = TimerDAO.getTimers(mPrefs);
+        mTimers = TimerDAO.getTimers(mPrefs, getDefaultTimerRingtoneUri());
     }
 
     private List<Timer> getMutableExpiredTimers() {
@@ -545,11 +580,23 @@ final class TimerModel {
     private Timer doUpdateTimer(Timer timer) {
         // Retrieve the cached form of the timer.
         final List<Timer> timers = getMutableTimers();
-        final int index = timers.indexOf(timer);
+
+        int index = -1;
+        for (int i = 0; i < timers.size(); i++) {
+            if (timers.get(i).getId() == timer.getId()) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            return timer;
+        }
+
         final Timer before = timers.get(index);
 
         // If no change occurred, ignore this update.
-        if (timer == before) {
+        if (timer.equals(before)) {
             return timer;
         }
 
@@ -583,12 +630,16 @@ final class TimerModel {
     }
 
     /**
-     * This method removes timer data without updating notifications. This is useful in bulk-remove
+     * Removes timer data without updating notifications. This is useful in bulk-remove
      * scenarios so the notifications are only rebuilt once.
      *
      * @param timer an existing timer to be removed
      */
-    private void doRemoveTimer(Timer timer) {
+    private void doRemoveTimer(Timer timer, @StringRes int eventLabelId) {
+        if (eventLabelId != 0) {
+            Events.sendTimerEvent(R.string.action_delete, eventLabelId);
+        }
+
         // Cancel the specific notification before clearing the timer from memory.
         int notificationId = mNotificationModel.getUnexpiredTimerNotificationId(timer.getId());
         mNotificationManager.cancel(notificationId);
@@ -598,7 +649,14 @@ final class TimerModel {
 
         // Remove the timer from the cache.
         final List<Timer> timers = getMutableTimers();
-        final int index = timers.indexOf(timer);
+
+        int index = -1;
+        for (int i = 0; i < timers.size(); i++) {
+            if (timers.get(i).getId() == timer.getId()) {
+                index = i;
+                break;
+            }
+        }
 
         // If the timer cannot be located there is nothing to remove.
         if (index == -1) {
@@ -630,26 +688,12 @@ final class TimerModel {
     }
 
     /**
-     * This method updates/removes timer data without updating notifications. This is useful in
-     * bulk-update scenarios so the notifications are only rebuilt once.
-     * <p>
-     * If the given {@code timer} is expired and marked for deletion after use then this method
-     * removes the timer. The timer is otherwise transitioned to the reset state and continues
-     * to exist.
+     * Resets timer data without updating notifications.
      *
-     * @param timer        the timer to be reset
-     * @param allowDelete  {@code true} if the timer is allowed to be deleted instead of reset
-     *                     (e.g. one use timers)
-     * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
+     * @param timer an existing timer to be reset
      */
-    private void doResetOrDeleteTimer(Timer timer, boolean allowDelete, @StringRes int eventLabelId) {
-        if (SettingsDAO.isSingleTimerModeEnabled(mPrefs)
-            || (allowDelete && (timer.isExpired() || timer.isMissed()) && timer.getDeleteAfterUse())) {
-            doRemoveTimer(timer);
-            if (eventLabelId != 0) {
-                Events.sendTimerEvent(R.string.action_delete, eventLabelId);
-            }
-        } else if (!timer.isReset()) {
+    private void doResetTimer(Timer timer, @StringRes int eventLabelId) {
+        if (!timer.isReset()) {
             final Timer reset = timer.reset();
             doUpdateTimer(reset);
             if (eventLabelId != 0) {
@@ -748,10 +792,14 @@ final class TimerModel {
         }
 
         // If the timer is the first to expire, start ringing.
-        if (afterState == EXPIRED && mRingingIds.add(after.getId()) && mRingingIds.size() == 1) {
-            AlarmAlertWakeLock.acquireCpuWakeLock(mContext);
-            TimerKlaxon.start();
-            stopRingtoneAfterDelay();
+        if (afterState == EXPIRED && mRingingIds.add(after.getId())) {
+            if (mRingingIds.size() == 1) {
+                AlarmAlertWakeLock.acquireCpuWakeLock(mContext);
+            }
+
+            TimerKlaxon.start(after);
+
+            stopRingtoneAfterDelay(after);
         }
 
         // If the expired timer was the last to reset, stop ringing.
@@ -770,19 +818,23 @@ final class TimerModel {
     /**
      * Stop timer ringing after a duration selected in Timers settings.
      */
-    private void stopRingtoneAfterDelay() {
+    private void stopRingtoneAfterDelay(Timer timer) {
         long duration;
 
         // Timer silence has been set to "Never"
-        if (getTimerAutoSilenceDuration() == TIMEOUT_NEVER) {
+        if (getTimerAutoSilenceDuration(timer) == TIMEOUT_NEVER) {
             return;
         }
 
         // Timer silence has been set to "At the end of the ringtone"
-        if (getTimerAutoSilenceDuration() == TIMEOUT_END_OF_RINGTONE) {
+        if (getTimerAutoSilenceDuration(timer) == TIMEOUT_END_OF_RINGTONE) {
             duration = RingtoneUtils.getRingtoneDuration(mContext, mTimerRingtoneUri);
         } else {
-            duration = getTimerAutoSilenceDuration() * 1000;
+            duration = getTimerAutoSilenceDuration(timer) * 1000L;
+        }
+
+        if (mAutoSilenceRunnable != null) {
+            mMainHandler.removeCallbacks(mAutoSilenceRunnable);
         }
 
         mAutoSilenceRunnable = () -> {

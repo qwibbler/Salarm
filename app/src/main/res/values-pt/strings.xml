@@ -235,7 +235,6 @@
     <string name="settings_vibration_summary">Apenas alguns botões da interface são afetados (ex: o botão play/pause ou os interruptores do timer)</string>
     <string name="settings_vibration_title">Habilitar vibrações</string>
     <string name="title_accent_color">Cor do acento</string>
-    <string name="duplicate">Duplicar</string>
     <string name="alarm_label_box_title">Nome do Alarme</string>
     <string name="interface_customization_settings">Interface</string>
     <string name="interface_customization_summary">Ajustar estilo e cor aplicados para o app</string>
@@ -435,9 +434,6 @@
     <string name="yellow_accent_color">Amarelo</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">Habilitar vibrações quando o alarme for adiado ou dispensado</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">Ligue o flash traseiro quando o alarme for disparado</string>
-    <string name="display_warning_before_deleting_timer_title">Exibir um aviso antes de excluir um cronômetro</string>
-    <string name="warning_dialog_title">Excluir timer</string>
-    <string name="warning_dialog_message">Você tem certeza que quer excluir o timer \"%s\"?</string>
     <string name="alarm_flash">Flash</string>
     <string name="about_translate_link">Traduza no Codeberg</string>
     <string name="translate_dialog_message">Visite a página do Codeberg:\n\n%s</string>
@@ -510,6 +506,6 @@
     <string name="vibration_pattern_escalating">Aumentando</string>
     <string name="vibration_pattern_tick_tock">Tick-Tock</string>
     <string name="vibration_start_delay_title">Atraso antes do início da vibração</string>
-    <string name="vibration_start_delay_none">Nenhum</string>
+    <string name="label_none">Nenhum</string>
     <string name="vibration_start_delay_warning_box_text">Digite um valor de 0 a 10 minutos</string>
 </resources>

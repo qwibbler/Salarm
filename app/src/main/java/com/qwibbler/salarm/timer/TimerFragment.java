@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -41,9 +42,10 @@ import android.widget.ImageView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.os.BundleCompat;
 import androidx.core.view.HapticFeedbackConstantsCompat;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -81,8 +83,7 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
     private static final String EXTRA_TIMER_SETUP = "com.qwibbler.salarm.action.TIMER_SETUP";
 
     private static final String KEY_TIMER_SETUP_STATE = "timer_setup_input";
-    private static final String KEY_TIMER_ID_TO_DELETE = "timer_id_to_delete";
-    private int mTimerIdToDelete = -1;
+
     private boolean mAreSettingsChanged = false;
     private final SharedPreferences.OnSharedPreferenceChangeListener mPrefListener = (prefs, key) -> {
         if (key != null) {
@@ -113,7 +114,6 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
     private ViewGroup mCurrentView;
     private TimerItemTouchHelper mTouchHelperCallback;
     private ItemTouchHelper mItemTouchHelper;
-    private AlertDialog mActiveDialog = null;
     private boolean mIsTablet;
     private boolean mIsLandscape;
 
@@ -196,11 +196,7 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
 
         if (savedInstanceState != null) {
             // If timer setup state is present, retrieve it to be later honored.
-            mTimerSetupState = SdkUtils.isAtLeastAndroid13()
-                ? savedInstanceState.getSerializable(KEY_TIMER_SETUP_STATE, int[].class)
-                : savedInstanceState.getSerializable(KEY_TIMER_SETUP_STATE);
-
-            mTimerIdToDelete = savedInstanceState.getInt(KEY_TIMER_ID_TO_DELETE, -1);
+            mTimerSetupState = BundleCompat.getSerializable(savedInstanceState, KEY_TIMER_SETUP_STATE, int[].class);
         }
 
         requireActivity().getOnBackPressedDispatcher().addCallback(
@@ -336,23 +332,6 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
                         mTimerSetupState = null;
                     }
                 }
-
-                if (mTimerIdToDelete != -1 && (mActiveDialog == null || !mActiveDialog.isShowing())) {
-                    Timer timerToDelete = null;
-                    for (Timer timer : DataModel.getDataModel().getTimers()) {
-                        if (timer.getId() == mTimerIdToDelete) {
-                            timerToDelete = timer;
-                            break;
-                        }
-                    }
-
-                    if (timerToDelete != null) {
-                        mActiveDialog = warningDialogBeforeDeletingTimer(timerToDelete);
-                        mActiveDialog.show();
-                    } else {
-                        mTimerIdToDelete = -1;
-                    }
-                }
             });
         }
     }
@@ -373,12 +352,6 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
 
     @Override
     public void onDestroyView() {
-        if (mActiveDialog != null && mActiveDialog.isShowing()) {
-            mActiveDialog.setOnDismissListener(null);
-            mActiveDialog.dismiss();
-            mActiveDialog = null;
-        }
-
         DataModel.getDataModel().removeTimerListener(mAdapter);
         DataModel.getDataModel().removeTimerListener(mTimerWatcher);
 
@@ -404,8 +377,6 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
             mTimerSetupState = mBinding.timerSetupView.getState();
             outState.putSerializable(KEY_TIMER_SETUP_STATE, mTimerSetupState);
         }
-
-        outState.putInt(KEY_TIMER_ID_TO_DELETE, mTimerIdToDelete);
     }
 
     @Override
@@ -449,10 +420,10 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
             // If no timers yet exist, the user is forced to create the first one.
             left.setVisibility(hasTimers() ? VISIBLE : INVISIBLE);
             left.setOnClickListener(v -> {
+                Utils.performHapticFeedback(v, HapticFeedbackConstantsCompat.CLOCK_TICK);
                 resetTimerCreationViews();
                 animateToView(mBinding.timerContentView, false);
-                left.announceForAccessibility(getString(R.string.timer_canceled));
-                Utils.performHapticFeedback(v, HapticFeedbackConstantsCompat.CLOCK_TICK);
+                ViewCompat.setStateDescription(left, getString(R.string.timer_canceled));
             });
         }
     }
@@ -466,7 +437,7 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
                 if (!DataModel.getDataModel().getTimers().isEmpty()) {
                     Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
-                    DataModel.getDataModel().removeTimer(timers.get(0));
+                    DataModel.getDataModel().removeTimer(timers.get(0), R.string.label_salarm);
                 }
             } else {
                 animateToView(getTimerCreationView(), true);
@@ -475,12 +446,33 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
             mCreatingTimer = true;
 
             try {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 // Create the new timer.
                 final long timerLength = getTimeInMillis();
                 String defaultLabel = Utils.buildDefaultTimerLabel(requireContext(), timerLength);
                 String defaultTimeToAddToTimer = String.valueOf(SettingsDAO.getDefaultTimeToAddToTimer(mPrefs));
+                String vibrationPattern = SettingsDAO.getTimerVibrationPattern(mPrefs);
+                Uri ringtoneUri = DataModel.getDataModel().getTimerRingtoneUri();
+                int autoSilenceDuration = SettingsDAO.getTimerAutoSilenceDuration(mPrefs);
+                int volumeCrescendoDuration = SettingsDAO.getTimerVolumeCrescendoDuration(mPrefs);
+                boolean isVibrate = SettingsDAO.isTimerVibrate(mPrefs);
+                boolean isFlashOn = SettingsDAO.shouldTurnOnBackFlashForExpiredTimer(mPrefs);
+
                 final Timer timer = DataModel.getDataModel().addTimer(
-                    timerLength, defaultLabel, defaultTimeToAddToTimer, mSettings.isSingleTimerMode);
+                    timerLength,
+                    defaultLabel,
+                    defaultTimeToAddToTimer,
+                    ringtoneUri,
+                    autoSilenceDuration,
+                    volumeCrescendoDuration,
+                    isVibrate,
+                    vibrationPattern,
+                    isFlashOn,
+                    false,
+                    mSettings.isSingleTimerMode
+                );
+
                 Events.sendTimerEvent(R.string.action_create, R.string.label_salarm);
 
                 // Start the new timer.
@@ -767,43 +759,6 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
         mAreSettingsChanged = false;
     }
 
-    public void confirmAndDeleteTimer(Timer timer) {
-        if (SettingsDAO.isWarningDisplayedBeforeDeletingTimer(mPrefs)) {
-            mTimerIdToDelete = timer.getId();
-            mActiveDialog = warningDialogBeforeDeletingTimer(timer);
-            mActiveDialog.show();
-        } else {
-            DataModel.getDataModel().removeTimer(timer);
-        }
-    }
-
-    private AlertDialog warningDialogBeforeDeletingTimer(Timer timer) {
-        // Get the title of the timer if there is one; otherwise, get the total duration.
-        final String dialogMessage;
-        if (timer.getLabel().isEmpty()) {
-            dialogMessage = getString(R.string.warning_dialog_message, timer.getTotalDuration());
-        } else {
-            dialogMessage = getString(R.string.warning_dialog_message, timer.getLabel());
-        }
-
-        return CustomDialog.create(
-            requireContext(),
-            null,
-            AppCompatResources.getDrawable(requireContext(), R.drawable.ic_delete),
-            getString(R.string.warning_dialog_title),
-            dialogMessage,
-            null,
-            getString(android.R.string.ok),
-            (d, w) -> DataModel.getDataModel().removeTimer(timer),
-            getString(android.R.string.cancel),
-            null,
-            null,
-            null,
-            (alertDialog -> alertDialog.setOnDismissListener(d -> mTimerIdToDelete =  -1)),
-            CustomDialog.SoftInputMode.NONE
-        );
-    }
-
     private boolean hasTimers() {
         return !DataModel.getDataModel().getTimers().isEmpty();
     }
@@ -829,6 +784,11 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
         } else {
             mItemTouchHelper.attachToRecyclerView(null);
         }
+    }
+
+    public void confirmAndDeleteTimer(Timer timer) {
+        DataModel.getDataModel().removeTimer(timer, R.string.label_salarm);
+        Events.sendTimerEvent(R.string.action_delete, R.string.label_salarm);
     }
 
     private void adjustWakeLock() {
@@ -883,6 +843,9 @@ public final class TimerFragment extends SalarmFragment implements RunnableFragm
                     gridLayoutManager.setSpanCount(newSpanCount);
                 }
             }
+
+            // Scroll to the newly created or duplicated timer.
+            mBinding.timerRecyclerView.smoothScrollToPosition(mAdapter.getTimerPosition(timer.getId()));
 
             // Required to attach the ItemTouchHelper when there is more than one timer.
             handleItemTouchHelper();

@@ -7,9 +7,12 @@
 package com.qwibbler.salarm.settings;
 
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_PATTERN;
 
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -81,8 +84,6 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
      */
     private ViewGroup mExpiredTimersScrollView;
 
-    private boolean mIsFadeTransitionsEnabled;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,8 +122,6 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
 
         getWindow().setBackgroundDrawable(new ColorDrawable(ThemeUtils.getNightBackgroundColor(this, activeAccentColor)));
 
-        mIsFadeTransitionsEnabled = SettingsDAO.isFadeTransitionsEnabled(mPrefs);
-
         if (mBinding.expiredTimersScrollVertical != null) {
             mExpiredTimersScrollView = mBinding.expiredTimersScrollVertical;
         } else {
@@ -150,8 +149,10 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
                     if (bitmap != null) {
                         mBinding.timerBackgroundImage.setImageBitmap(bitmap);
 
-                        if (SdkUtils.isAtLeastAndroid12() && SettingsDAO.isTimerBlurEffectEnabled(mPrefs)) {
-                            float intensity = SettingsDAO.getTimerBlurIntensity(mPrefs);
+                        float intensity = SettingsDAO.getTimerBlurIntensity(mPrefs);
+
+                        if (SdkUtils.isAtLeastAndroid12() && intensity != DEFAULT_BLUR_INTENSITY) {
+
                             RenderEffect blur = RenderEffect.createBlurEffect(intensity, intensity, Shader.TileMode.CLAMP);
                             mBinding.timerBackgroundImage.setRenderEffect(blur);
                         }
@@ -169,13 +170,30 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
         }
 
         // Creating a dummy timer
-        Timer fakeTimer = new Timer(-1, Timer.State.EXPIRED, 60_000L, 60_000L, System.currentTimeMillis(),
-            System.currentTimeMillis(), 0L, "Timer preview", "60", false);
+        Timer fakeTimer = new Timer(
+            -1,
+            Timer.State.EXPIRED,
+            60_000L,
+            60_000L,
+            System.currentTimeMillis(),
+            System.currentTimeMillis(),
+            0L,
+            "Timer preview",
+            "60",
+            null,
+            1,
+            0,
+            false,
+            DEFAULT_VIBRATION_PATTERN,
+            false,
+            false,
+            false
+        );
 
         // Add dummy timer to view
         addTimer(fakeTimer);
 
-        AlarmUtils.hideSystemBarsOfTriggeredAlarms(getWindow(), getWindow().getDecorView());
+        ThemeUtils.hideSystemBars(getWindow(), getWindow().getDecorView());
 
         applyWindowInsets();
 
@@ -280,7 +298,6 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
 
         final View view;
         final TextView labelView;
-        final View deleteButton;
         final View resetButton;
         final View stopButton;
 
@@ -297,8 +314,7 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
             ((TimerItemCompact) view).bindTimer(timer, false);
 
             labelView = compactBinding.timerLabel;
-            deleteButton = compactBinding.deleteTimerButton;
-            resetButton = compactBinding.resetOrEditButton;
+            resetButton = compactBinding.resetButton;
             stopButton = compactBinding.playPauseButton;
 
             compactBinding.linearProgressIndicator.animate().cancel();
@@ -310,7 +326,7 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
             TimerItemBinding normalBinding = TimerItemBinding.inflate(getLayoutInflater(), mBinding.expiredTimersList, false);
 
             view = normalBinding.getRoot();
-            ((TimerItem) view).setButtonPosition(mAreTimerButtonPositionsInverted);
+            ((TimerItem) view).setButtonPosition(mAreTimerButtonPositionsInverted, mIsTablet, !mIsPortrait, false);
             ((TimerItem) view).setGeneralFonts(mRegularTypeface, mBoldTypeface);
             ((TimerItem) view).setTimerTimeFont(mTimerTimeTypeface);
             ((TimerItem) view).setIndicatorStateDisplay(mIsIndicatorStateDisplayed);
@@ -318,8 +334,7 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
             ((TimerItem) view).bindTimer(timer, false);
 
             labelView = normalBinding.timerLabel;
-            deleteButton = normalBinding.deleteTimerButton;
-            resetButton = normalBinding.resetOrEditButton;
+            resetButton = normalBinding.resetButton;
             stopButton = normalBinding.playPauseButton;
 
             if (normalBinding.circularProgressIndicator != null) {
@@ -339,9 +354,8 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
         // Hide the label hint for expired timers.
         labelView.setVisibility(VISIBLE);
 
-        // Add logic to hide the "Delete" and "Reset" buttons
-        deleteButton.setVisibility(GONE);
-        resetButton.setVisibility(GONE);
+        // Add logic to hide the "Reset" buttons
+        resetButton.setVisibility(INVISIBLE);
 
         // Add logic to the "Stop" button
         stopButton.setOnClickListener(v -> finishActivity());
@@ -374,19 +388,6 @@ public class TimerDisplayPreviewActivity extends BaseActivity {
     }
 
     private void finishActivity() {
-        finish();
-        if (mIsFadeTransitionsEnabled) {
-            if (SdkUtils.isAtLeastAndroid14()) {
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out);
-            } else {
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            }
-        } else {
-            if (SdkUtils.isAtLeastAndroid14()) {
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-            } else {
-                overridePendingTransition(R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-            }
-        }
+        ThemeUtils.finishActivityWithTransition(this);
     }
 }

@@ -32,7 +32,6 @@ import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.events.LogEventTracker;
 import com.qwibbler.salarm.uidata.UiDataModel;
-import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 
@@ -148,9 +147,9 @@ public class SalarmApplication extends Application implements Application.Activi
 
             if (!prefs.exists()) {
                 if (storageContext.moveSharedPreferencesFrom(appContext, name)) {
-                    LogUtils.i("Migrated " + name + " to device protected storage.");
+                    android.util.Log.i("SalarmApplication", "Migrated " + name + " to device protected storage.");
                 } else if (storageContext.moveSharedPreferencesFrom(appContext, oldName)) {
-                    LogUtils.i("Migrated " + oldName + " from credential storage.");
+                    android.util.Log.i("SalarmApplication", "Migrated " + oldName + " from credential storage.");
                 }
 
                 // Ensure the file is named correctly if we moved from oldName or it was already in device protected storage
@@ -158,7 +157,7 @@ public class SalarmApplication extends Application implements Application.Activi
                 final File oldPrefs = new File(Objects.requireNonNull(Uri.parse(oldPrefsFilename).getPath()));
                 if (!prefs.exists() && oldPrefs.exists()) {
                     if (oldPrefs.renameTo(prefs)) {
-                        LogUtils.i("Successfully rebranded preferences from " + oldName + " to " + name);
+                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
                     }
                 }
             }
@@ -171,7 +170,7 @@ public class SalarmApplication extends Application implements Application.Activi
                 final File oldPrefs = new File(oldPrefsFilename);
                 if (oldPrefs.exists()) {
                     if (oldPrefs.renameTo(prefs)) {
-                        LogUtils.i("Successfully rebranded preferences from " + oldName + " to " + name);
+                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
                     }
                 }
             }

@@ -27,6 +27,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.KeepAliveService;
 import com.qwibbler.salarm.controller.Controller;
 import com.qwibbler.salarm.data.SettingsDAO;
@@ -36,6 +37,7 @@ import com.qwibbler.salarm.tiles.StopwatchTileService;
 import com.qwibbler.salarm.tiles.TimerTileService;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.DeviceUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -49,7 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class InterfaceCustomizationFragment extends ScreenFragment
+public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private static boolean isLanguageChanged = false;
@@ -90,18 +92,18 @@ public class InterfaceCustomizationFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_GENERAL_FONT);
+            String safeTitle = FileUtils.toSafeFileName(FILE_GENERAL_FONT);
             String oldFontPath = mPrefs.getString(KEY_GENERAL_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
-                clearFile(oldFontPath);
+                FileUtils.clearFile(oldFontPath);
 
                 // Clear the font cache
                 ThemeUtils.removeFontFromCache(oldFontPath);
 
                 // Copy the new font to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {
@@ -333,6 +335,7 @@ public class InterfaceCustomizationFragment extends ScreenFragment
         } else {
             mVibrationPref.setVisible(true);
 
+            //noinspection deprecation
             boolean isSystemHapticFeedbackEnabled = Settings.System.getInt(
                 requireContext().getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 1) == 1;
 

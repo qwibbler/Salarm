@@ -251,7 +251,6 @@
     <string name="yellow_accent_color">Žlutá</string>
     <string name="day_accent_color_title">Barva aplikace pro denní režim</string>
     <string name="title_theme">Motiv</string>
-    <string name="duplicate">Duplikovat</string>
     <string name="label_default">Výchozí</string>
     <string name="light_theme">Světlý</string>
     <string name="selected">Zvolené</string>
@@ -442,11 +441,8 @@
     <string name="FSN_dialog_title">Oznámení na celé obrazovce</string>
     <string name="timer_flip_action_title">Otočte zařízení pro zastavení budíku</string>
     <string name="settings_vibration_title">Povolit vibrace</string>
-    <string name="warning_dialog_title">Odstranit časovač</string>
-    <string name="warning_dialog_message">Opravdu chcete odstranit časovač „%s“?</string>
     <string name="screensaver_daydream_settings">Vybrat/povolit spořič obrazovky</string>
     <string name="first_launch_button_now">Nyní</string>
-    <string name="display_warning_before_deleting_timer_title">Zobrazit varování před odstraněním časovače</string>
     <string name="sort_manually">Ručně (táhnutím)</string>
     <string name="first_launch_version">Verze %s</string>
     <string name="date_default_color_title">Použít výchozí barvu pro datum</string>
@@ -552,7 +548,7 @@
     <string name="vibration_pattern_escalating">Zvyšující se</string>
     <string name="vibration_pattern_tick_tock">Tik tak</string>
     <string name="vibration_start_delay_title">Zpoždění před začátkem vibrací</string>
-    <string name="vibration_start_delay_none">Žádné</string>
+    <string name="label_none">Žádné</string>
     <string name="vibration_start_delay_warning_box_text">Zadejte hodnotu od 0 do 10 minut</string>
     <string name="confirm_action_prompt">\n\nChcete pokračovat?</string>
     <string name="enable_per_alarm_snooze_duration_title">Použít vlastní dobu odložení pro každý budík</string>
@@ -576,7 +572,6 @@
     <string name="blur_intensity_title">Intenzita rozostření</string>
     <string name="background_image_title">Vyberte obrázek na pozadí</string>
     <string name="background_image_toast_message_selected">Obrázek úspěšně vybrán</string>
-    <string name="enable_blur_effect_title">Použít efekt rozostření na obrázek na pozadí</string>
     <string name="display_text_shadow_title">Zobrazit stín textu</string>
     <string name="shadow_color_title">Barva stínu</string>
     <string name="shadow_offset_title">Posunutí stínu</string>
@@ -627,7 +622,6 @@
     <string name="snooze_selector_text_color_title">Barva textu výběru odložení</string>
     <string name="snooze_minus_symbol_color_title">Barva symbolu „-“</string>
     <string name="snooze_plus_symbol_color_title">Barva symbolu „+“</string>
-    <string name="background_image_summary">Pro zobrazení obrázku nastavte průhlednou barvu pozadí</string>
     <string name="alarm_volume_low">Hlasitost budíku je nízká</string>
     <string name="fix_alarm_volume">Opravit</string>
     <string name="display_snooze_selector_title">Zobrazit výběr odložení</string>

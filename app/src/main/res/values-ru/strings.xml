@@ -273,7 +273,6 @@
     <string name="selected">Выбрано</string>
     <string name="more_options">Другие параметры</string>
     <string name="FSN_dialog_title">Уведомления в полноэкранном режиме</string>
-    <string name="duplicate">Дублировать</string>
     <string name="settings_permission_summary">Нажмите здесь, чтобы открыть страницу управления разрешениями.</string>
     <string name="settings_vibration_title">Вибрация вкл.</string>
     <string name="miscellaneous_category_title">Прочее</string>
@@ -447,9 +446,6 @@
     <string name="timer_shake_action_title">Останавливать завершенные таймеры при встряхивании устройства</string>
     <string name="snooze_duration_none">Нет</string>
     <string name="toast_message_for_backup">Резервное копирование завершено</string>
-    <string name="display_warning_before_deleting_timer_title">Показывать предупреждение перед удалением таймера</string>
-    <string name="warning_dialog_title">Удалить таймер</string>
-    <string name="warning_dialog_message">Удалить таймер \"%s\"?</string>
     <string name="sort_manually">Вручную (перетаскиванием)</string>
     <string name="about_translate_link">Перевести на Codeberg</string>
     <string name="translate_dialog_message">Посетите страницу проекта на Codeberg:\n\n%s</string>
@@ -536,7 +532,7 @@
     <string name="vibration_pattern_escalating">Нарастающий</string>
     <string name="vibration_pattern_tick_tock">Тик-так</string>
     <string name="vibration_start_delay_title">Задержка перед вибросигналом</string>
-    <string name="vibration_start_delay_none">Нет</string>
+    <string name="label_none">Нет</string>
     <string name="vibration_start_delay_warning_box_text">Введите значение от 0 до 10 минут</string>
     <string name="sort_alarm_title">Сортировка будильников</string>
     <string name="sort_alarm_time">По времени</string>
@@ -555,7 +551,6 @@
     <string name="background_image_dialog_title">Фоновое изображение</string>
     <string name="background_image_toast_message_selected">Изображение выбрано</string>
     <string name="background_image_toast_message_deleted">Изображение удалено</string>
-    <string name="enable_blur_effect_title">Применять эффект размытия к фоновому изображению</string>
     <string name="enable_per_alarm_crescendo_duration_title">Индивидуальная продолжительность увеличения громкости для каждого будильника</string>
     <string name="enable_per_alarm_crescendo_duration_dialog_message">Индивидуальные значения продолжительности увеличения громкости будильников будут сброшены.%s</string>
     <string name="enable_per_alarm_auto_silence_title">Индивидуальная продолжительность автовыключения для каждого будильника</string>
@@ -629,7 +624,6 @@
     <string name="snooze_selector_text_color_title">Цвет текста при выборе отложения</string>
     <string name="snooze_minus_symbol_color_title">Цвет символа «−»</string>
     <string name="snooze_plus_symbol_color_title">Цвет символа «+»</string>
-    <string name="background_image_summary">Чтобы увидеть изображение, установите прозрачный цвет фона</string>
     <string name="alarm_volume_low">Низкая громкость будильника</string>
     <string name="fix_alarm_volume">Исправить</string>
     <string name="display_snooze_selector_title">Показывать выбор отложения</string>
@@ -683,4 +677,5 @@
     <string name="display_timer_end_time_title">Показать время остановки таймера</string>
     <string name="timer_missed_channel">Пропущенные таймеры</string>
     <string name="tab_animation_zoom_out">Отъезд</string>
+    <string name="settings_language_hebrew">Иврит</string>
 </resources>

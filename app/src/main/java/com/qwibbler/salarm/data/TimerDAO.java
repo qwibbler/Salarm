@@ -9,6 +9,7 @@ package com.qwibbler.salarm.data;
 import static com.qwibbler.salarm.data.Timer.State.RESET;
 
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import com.qwibbler.salarm.data.Timer.State;
 
@@ -72,12 +73,47 @@ public final class TimerDAO {
     /**
      * Prefix for a key to a preference that stores the time of the timer button.
      */
-    private static final String BUTTON_TIME = "timer_button_time";
+    public static final String BUTTON_TIME = "timer_button_time_";
+
+    /**
+     * Prefix for a key to a preference that stores the timer ringtone.
+     */
+    public static final String TIMER_RINGTONE = "timer_ringtone_";
+
+    /**
+     * Prefix for a key to a preference that stores the timer auto silence.
+     */
+    private static final String AUTO_SILENCE = "timer_auto_silence_";
+
+    /**
+     * Prefix for a key to a preference that stores the timer auto silence.
+     */
+    private static final String VOLUME_CRESCENDO = "timer_volume_crescendo_";
+
+    /**
+     * Prefix for a key to a preference that signals the timer should vibrate when it expires.
+     */
+    private static final String VIBRATE = "timer_vibrate_";
+
+    /**
+     * Prefix for a key to a preference that signals the timer should vibrate with a vibration pattern when it expires.
+     */
+    private static final String VIBRATION_PATTERN = "timer_vibration_pattern_";
+
+    /**
+     * Prefix for a key to a preference that signals the flash should turn on when timers expire.
+     */
+    private static final String FLASH_ON = "timer_flash_on_";
+
+    /**
+     * Prefix for a key to a preference that signals media should stop when timers expire.
+     */
+    private static final String TURN_OFF_MEDIA = "timer_turn_off_media_";
 
     /**
      * Prefix for a key to a preference that signals the timer should be deleted on first reset.
      */
-    private static final String DELETE_AFTER_USE = "delete_after_use_";
+    public static final String DELETE_AFTER_USE = "timer_delete_after_use_";
 
     private TimerDAO() {
     }
@@ -85,10 +121,17 @@ public final class TimerDAO {
     /**
      * @return the timers from permanent storage
      */
-    static List<Timer> getTimers(SharedPreferences prefs) {
+    static List<Timer> getTimers(SharedPreferences prefs, Uri defaultUri) {
         // Read the set of timer ids.
         final Set<String> timerIds = prefs.getStringSet(TIMER_IDS, Collections.emptySet());
         final List<Timer> timers = new ArrayList<>(timerIds.size());
+        final boolean defaultVibrateFallback = SettingsDAO.isTimerVibrate(prefs);
+        final String defaultVibrationPatternFallback = SettingsDAO.getTimerVibrationPattern(prefs);
+        final boolean defaultFlashOnFallback = SettingsDAO.shouldTurnOnBackFlashForExpiredTimer(prefs);
+        final String addTimeButtonValueFallback = String.valueOf(SettingsDAO.getDefaultTimeToAddToTimer(prefs));
+        final Uri ringtoneFallback = SettingsDAO.getTimerRingtoneUri(prefs, defaultUri);
+        final int autoSilenceDurationFallback = SettingsDAO.getTimerAutoSilenceDuration(prefs);
+        final int volumeCrescendoDurationFallback = SettingsDAO.getTimerVolumeCrescendoDuration(prefs);
 
         // Build a timer using the data associated with each timer id.
         for (String timerId : timerIds) {
@@ -105,10 +148,26 @@ public final class TimerDAO {
                 final long lastWallClockTime = prefs.getLong(LAST_WALL_CLOCK_TIME + id, Timer.UNUSED);
                 final long remainingTime = prefs.getLong(REMAINING_TIME + id, totalLength);
                 final String label = prefs.getString(LABEL + id, null);
-                final String buttonTime = prefs.getString(BUTTON_TIME + id, "1");
+                final String buttonTime = prefs.getString(BUTTON_TIME + id, addTimeButtonValueFallback);
+
+                String uriString = prefs.getString(TIMER_RINGTONE + id, null);
+
+                if (uriString == null || uriString.isEmpty() || uriString.equals("null")) {
+                    uriString = ringtoneFallback.toString();
+                }
+
+                final Uri ringtone = Uri.parse(uriString);
+
+                final int autoSilenceDuration = prefs.getInt(AUTO_SILENCE + id, autoSilenceDurationFallback);
+                final int volumeCrescendoDuration = prefs.getInt(VOLUME_CRESCENDO + id, volumeCrescendoDurationFallback);
+                final boolean vibrate = prefs.getBoolean(VIBRATE + id, defaultVibrateFallback);
+                final String vibrationPattern = prefs.getString(VIBRATION_PATTERN + id, defaultVibrationPatternFallback);
+                final boolean flashOn = prefs.getBoolean(FLASH_ON + id, defaultFlashOnFallback);
+                final boolean turnOffMedia = prefs.getBoolean(TURN_OFF_MEDIA + id, false);
                 final boolean deleteAfterUse = prefs.getBoolean(DELETE_AFTER_USE + id, false);
 
                 timers.add(new Timer(id, state, length, totalLength, lastStartTime, lastWallClockTime, remainingTime, label, buttonTime,
+                    ringtone, autoSilenceDuration, volumeCrescendoDuration, vibrate, vibrationPattern, flashOn, turnOffMedia,
                     deleteAfterUse)
                 );
             }
@@ -141,13 +200,25 @@ public final class TimerDAO {
         editor.putLong(REMAINING_TIME + id, timer.getRemainingTime());
         editor.putString(LABEL + id, timer.getLabel());
         editor.putString(BUTTON_TIME + id, timer.getButtonTime());
+
+        String ringtoneString = (timer.getRingtoneUri() != null) ? timer.getRingtoneUri().toString() : "";
+        editor.putString(TIMER_RINGTONE + id, ringtoneString);
+
+        editor.putInt(AUTO_SILENCE + id, timer.getAutoSilence());
+        editor.putInt(VOLUME_CRESCENDO + id, timer.getVolumeCrescendoDuration());
+        editor.putBoolean(VIBRATE + id, timer.isVibrate());
+        editor.putString(VIBRATION_PATTERN + id, timer.getVibrationPattern());
+        editor.putBoolean(FLASH_ON + id, timer.isFlashOn());
+        editor.putBoolean(TURN_OFF_MEDIA + id, timer.getTurnOffMedia());
         editor.putBoolean(DELETE_AFTER_USE + id, timer.getDeleteAfterUse());
 
         editor.apply();
 
         // Return a new timer with the generated timer id present.
         return new Timer(id, timer.getState(), timer.getLength(), timer.getTotalLength(), timer.getLastStartTime(),
-            timer.getLastWallClockTime(), timer.getRemainingTime(), timer.getLabel(), timer.getButtonTime(), timer.getDeleteAfterUse()
+            timer.getLastWallClockTime(), timer.getRemainingTime(), timer.getLabel(), timer.getButtonTime(), timer.getRingtoneUri(),
+            timer.getAutoSilence(), timer.getVolumeCrescendoDuration(), timer.isVibrate(), timer.getVibrationPattern(), timer.isFlashOn(),
+            timer.getTurnOffMedia(), timer.getDeleteAfterUse()
         );
     }
 
@@ -167,6 +238,16 @@ public final class TimerDAO {
         editor.putLong(REMAINING_TIME + id, timer.getRemainingTime());
         editor.putString(LABEL + id, timer.getLabel());
         editor.putString(BUTTON_TIME + id, timer.getButtonTime());
+
+        String ringtoneString = (timer.getRingtoneUri() != null) ? timer.getRingtoneUri().toString() : "";
+        editor.putString(TIMER_RINGTONE + id, ringtoneString);
+
+        editor.putInt(AUTO_SILENCE + id, timer.getAutoSilence());
+        editor.putInt(VOLUME_CRESCENDO + id, timer.getVolumeCrescendoDuration());
+        editor.putBoolean(VIBRATE + id, timer.isVibrate());
+        editor.putString(VIBRATION_PATTERN + id, timer.getVibrationPattern());
+        editor.putBoolean(FLASH_ON + id, timer.isFlashOn());
+        editor.putBoolean(TURN_OFF_MEDIA + id, timer.getTurnOffMedia());
         editor.putBoolean(DELETE_AFTER_USE + id, timer.getDeleteAfterUse());
 
         editor.apply();
@@ -199,6 +280,13 @@ public final class TimerDAO {
         editor.remove(REMAINING_TIME + id);
         editor.remove(LABEL + id);
         editor.remove(BUTTON_TIME + id);
+        editor.remove(TIMER_RINGTONE + id);
+        editor.remove(AUTO_SILENCE + id);
+        editor.remove(VOLUME_CRESCENDO + id);
+        editor.remove(VIBRATE + id);
+        editor.remove(VIBRATION_PATTERN + id);
+        editor.remove((FLASH_ON + id));
+        editor.remove(TURN_OFF_MEDIA + id);
         editor.remove(DELETE_AFTER_USE + id);
 
         editor.apply();

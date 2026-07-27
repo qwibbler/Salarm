@@ -8,6 +8,7 @@ package com.qwibbler.salarm.alarms;
 
 import static android.media.AudioManager.STREAM_ALARM;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 
 import android.content.Context;
@@ -299,6 +300,8 @@ public final class AlarmTimeClickHandler {
         alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(mPrefs);
         alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(mPrefs);
         alarm.alarmVolume = audioManager.getStreamVolume(STREAM_ALARM);
+        alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(mPrefs);
 
         return alarm;
     }

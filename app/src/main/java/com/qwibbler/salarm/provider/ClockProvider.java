@@ -107,11 +107,17 @@ public class ClockProvider extends ContentProvider {
             ALARMS_TABLE_NAME + "." + AlarmsColumns.PAUSE_END_DATE);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.RELATIONAL_RULE_ID,
             ALARMS_TABLE_NAME + "." + AlarmsColumns.RELATIONAL_RULE_ID);
+        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.BACKGROUND_IMAGE,
+            ALARMS_TABLE_NAME + "." + AlarmsColumns.BACKGROUND_IMAGE);
+        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.BLUR_INTENSITY,
+            ALARMS_TABLE_NAME + "." + AlarmsColumns.BLUR_INTENSITY);
 
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_STATE,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_STATE);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns._ID,
             INSTANCES_TABLE_NAME + "." + InstancesColumns._ID);
+        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_ID,
+            INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_ID);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.YEAR,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.YEAR);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.MONTH,
@@ -132,6 +138,8 @@ public class ClockProvider extends ContentProvider {
             INSTANCES_TABLE_NAME + "." + InstancesColumns.VIBRATION_PATTERN);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.FLASH,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.FLASH);
+        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.RINGTONE,
+            INSTANCES_TABLE_NAME + "." + InstancesColumns.RINGTONE);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.AUTO_SILENCE_DURATION,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.AUTO_SILENCE_DURATION);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.SNOOZE_DURATION,

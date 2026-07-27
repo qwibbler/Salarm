@@ -268,7 +268,6 @@
     <string name="notifications_permission_title">УВІМКНУТИ СПОВІЩЕННЯ</string>
     <string name="selected">Вибрано</string>
     <string name="more_options">Додаткові опції</string>
-    <string name="duplicate">Дублювати</string>
     <string name="settings_permission_summary">Натисніть тут, щоб відкрити сторінку керування дозволами.</string>
     <string name="settings_permission_message">Відмовлено в одному або декількох важливих дозволах. Якщо їх не надати, це може призвести до збоїв у роботі.</string>
     <string name="screensaver_preview_summary">Запускає заставку негайно</string>
@@ -435,9 +434,6 @@
     <string name="purple_accent_color">Фіолетовий</string>
     <string name="yellow_accent_color">Жовтий</string>
     <string name="day_accent_color_title">Акцентний колір для денного режиму</string>
-    <string name="warning_dialog_message">Ви дійсно хочете видалити таймер «%s»?</string>
-    <string name="display_warning_before_deleting_timer_title">Показувати попередження при видаленні таймера</string>
-    <string name="warning_dialog_title">Видалення таймера</string>
     <string name="display_ringtone_title">Показувати назву мелодії сигналу</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">Вібрувати двічі при відкладенні будильника, вібрувати один раз при вимкненні будильника</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">Увімкнути вібрацію, коли будильник відкладено або вимкнено</string>
@@ -556,7 +552,7 @@
     <string name="enable_alarm_fab_long_press_title">Увімкнути тривале натискання кнопки дії для створення будильників із затримкою</string>
     <string name="enable_alarm_fab_long_press_summary">Якщо вимкнено, для створення будильників відображатимуться дві кнопки</string>
     <string name="vibration_start_delay_title">Затримка перед вібрацією</string>
-    <string name="vibration_start_delay_none">Немає</string>
+    <string name="label_none">Немає</string>
     <string name="vibration_start_delay_warning_box_text">Уведіть значення від 0 до 10 хвилин</string>
     <string name="vibration_pattern_title">Ритм вібрації</string>
     <string name="vibration_pattern_heartbeat">Серцебиття</string>
@@ -586,7 +582,6 @@
     <string name="blur_intensity_title">Інтенсивність розмиття</string>
     <string name="background_image_title">Вибрати фонове зображення</string>
     <string name="background_image_toast_message_selected">Зображення успішно вибрано</string>
-    <string name="enable_blur_effect_title">Застосувати ефект розмиття до фонового зображення</string>
     <string name="display_text_shadow_title">Показувати тінь тексту</string>
     <string name="shadow_color_title">Колір тіні</string>
     <string name="shadow_offset_title">Зсув тіні</string>
@@ -656,7 +651,6 @@
     <string name="foreground_service_channel">Сповіщення на передньому плані</string>
     <string name="foreground_service_message">Працює у фоновому режимі</string>
     <string name="alarm_volume_low">Низька гучність будильника</string>
-    <string name="background_image_summary">Щоб побачити зображення, встановіть прозорий колір фону</string>
     <string name="snooze_selector_text_color_title">Колір тексту при виборі відкладення</string>
     <string name="display_snooze_selector_title">Показувати вибір відкладення</string>
     <string name="settings_language_arabic">Арабська</string>

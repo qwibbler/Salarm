@@ -14,6 +14,7 @@ import static com.qwibbler.salarm.alarms.alarmselection.AlarmSelectionActivity.E
 import static com.qwibbler.salarm.alarms.alarmselection.AlarmSelectionActivity.EXTRA_ALARMS;
 import static com.qwibbler.salarm.provider.AlarmInstance.FIRED_STATE;
 import static com.qwibbler.salarm.provider.AlarmInstance.SNOOZE_STATE;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_TAB_TO_DISPLAY_INTEGER;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_ALARM;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_TIMER;
@@ -404,7 +405,12 @@ public class HandleApiCalls extends Activity {
         if (dataUri != null) {
             final Timer selectedTimer = getSelectedTimer(dataUri);
             if (selectedTimer != null) {
-                DataModel.getDataModel().resetOrDeleteTimer(selectedTimer, R.string.label_intent);
+                if (selectedTimer.getDeleteAfterUse()) {
+                    DataModel.getDataModel().removeTimer(selectedTimer, R.string.label_intent);
+                } else {
+                    DataModel.getDataModel().resetTimer(selectedTimer, R.string.label_intent);
+                }
+
                 Controller.getController().notifyVoiceSuccess(
                     this, getResources().getQuantityString(R.plurals.expired_timers_dismissed, 1));
                 LOGGER.i("Timer dismissed: " + selectedTimer);
@@ -415,12 +421,21 @@ public class HandleApiCalls extends Activity {
         } else {
             final List<Timer> expiredTimers = DataModel.getDataModel().getExpiredTimers();
             if (!expiredTimers.isEmpty()) {
-                for (Timer timer : expiredTimers) {
-                    DataModel.getDataModel().resetOrDeleteTimer(timer, R.string.label_intent);
-                }
                 final int numberOfTimers = expiredTimers.size();
-                final String timersDismissedMessage = getResources().getQuantityString(
-                    R.plurals.expired_timers_dismissed, numberOfTimers, numberOfTimers);
+                boolean allDeleted = true;
+
+                for (Timer timer : expiredTimers) {
+                    if (!timer.getDeleteAfterUse()) {
+                        allDeleted = false;
+                        break;
+                    }
+                }
+
+                DataModel.getDataModel().resetOrDeleteExpiredTimers(R.string.label_intent);
+
+                final int pluralResId = allDeleted ? R.plurals.expired_timers_deleted : R.plurals.expired_timers_dismissed;
+                final String timersDismissedMessage = getResources().getQuantityString(pluralResId, numberOfTimers, numberOfTimers);
+
                 Controller.getController().notifyVoiceSuccess(this, timersDismissedMessage);
                 LOGGER.i(timersDismissedMessage);
             } else {
@@ -512,8 +527,28 @@ public class HandleApiCalls extends Activity {
 
         // Create a new timer if one could not be reused.
         if (timer == null) {
-            String defaultTimeToAddToTimer = String.valueOf(SettingsDAO.getDefaultTimeToAddToTimer(getDefaultSharedPreferences(mAppContext)));
-            timer = DataModel.getDataModel().addTimer(lengthMillis, label, defaultTimeToAddToTimer, skipUi);
+            SharedPreferences prefs = getDefaultSharedPreferences(mAppContext);
+            String defaultTimeToAddToTimer = String.valueOf(SettingsDAO.getDefaultTimeToAddToTimer(prefs));
+            String vibrationPattern = SettingsDAO.getTimerVibrationPattern(prefs);
+            Uri ringtoneUri = DataModel.getDataModel().getTimerRingtoneUri();
+            int autoSilenceDuration = SettingsDAO.getTimerAutoSilenceDuration(prefs);
+            int volumeCrescendoDuration = SettingsDAO.getTimerVolumeCrescendoDuration(mPrefs);
+            boolean isVibrate = SettingsDAO.isTimerVibrate(prefs);
+            boolean isFlashOn = SettingsDAO.shouldTurnOnBackFlashForExpiredTimer(mPrefs);
+
+            timer = DataModel.getDataModel().addTimer(lengthMillis,
+                label,
+                defaultTimeToAddToTimer,
+                ringtoneUri,
+                autoSilenceDuration,
+                volumeCrescendoDuration,
+                isVibrate,
+                vibrationPattern,
+                isFlashOn,
+                false,
+                skipUi
+            );
+
             Events.sendTimerEvent(R.string.action_create, R.string.label_intent);
         }
 
@@ -585,6 +620,8 @@ public class HandleApiCalls extends Activity {
         alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs);
         alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs);
         alarm.alarmVolume = audioManager.getStreamVolume(STREAM_ALARM);
+        alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs);
     }
 
     private static String getLabelFromIntent(Intent intent, String defaultLabel) {

@@ -7,10 +7,12 @@
 package com.qwibbler.salarm.settings;
 
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -32,7 +34,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,8 +52,11 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.TextViewCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.BaseActivity;
@@ -63,14 +68,14 @@ import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
 import com.qwibbler.salarm.utils.FormattedTextUtils;
+import com.qwibbler.salarm.utils.InsetsUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 
 import java.io.File;
 
-public class AlarmDisplayPreviewActivity extends BaseActivity
-    implements View.OnClickListener, View.OnTouchListener {
+public class AlarmDisplayPreviewActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
 
     private static final int DEFAULT_SNOOZE_VALUE = 10;
     private static final float TEXT_FADE_START_THRESHOLD = 0.5f;
@@ -106,7 +111,6 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
     private float mInitialTouchX = 0;
     private Vibrator mVibrator;
     private boolean mAreSnoozedOrDismissedAlarmVibrationsEnabled;
-    private boolean mIsFadeTransitionsEnabled;
     private boolean mIsTextShadowDisplayed;
     private int mShadowColor;
     private int mShadowOffset;
@@ -140,7 +144,6 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
 
         mIsSwipeActionEnabled = SettingsDAO.isSwipeActionEnabled(mPrefs);
         mIsSnoozeSelectorDisplayed = SettingsDAO.isSnoozeSelectorDisplayed(mPrefs);
-        mIsFadeTransitionsEnabled = SettingsDAO.isFadeTransitionsEnabled(mPrefs);
         mAlarmTitleFontSize = SettingsDAO.getAlarmTitleFontSize(mPrefs);
         mAlarmTitleColor = SettingsDAO.getAlarmTitleColor(mPrefs);
         mAlarmButtonColor = SettingsDAO.getAlarmButtonColor(mPrefs, this);
@@ -181,7 +184,9 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
             }
         });
 
-        AlarmUtils.hideSystemBarsOfTriggeredAlarms(getWindow(), getWindow().getDecorView());
+        applyWindowInsets();
+
+        ThemeUtils.hideSystemBars(getWindow(), getWindow().getDecorView());
     }
 
     @Override
@@ -315,6 +320,18 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
         return true;
     }
 
+    /**
+     * This method adjusts the space occupied by the status bar, and adjust the display of the clock layout accordingly.
+     */
+    private void applyWindowInsets() {
+        InsetsUtils.doOnApplyWindowInsets(mBinding.clockLayout, (v, insets) -> {
+            // Get the system bar and notch insets
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
+
+            v.setPadding(0, bars.top, 0, 0);
+        });
+    }
+
     private void initDefaultSnoozeValue() {
         mDefaultSnoozeMinutes = DEFAULT_SNOOZE_VALUE;
         mSnoozeMinutes = mDefaultSnoozeMinutes;
@@ -329,23 +346,34 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
         int alarmBackgroundColor = isAmoledMode
             ? SettingsDAO.getAlarmBackgroundAmoledColor(mPrefs)
             : SettingsDAO.getAlarmBackgroundColor(mPrefs);
-        final String imagePath = SettingsDAO.getAlarmBackgroundImage(mPrefs);
+
+        String previewImage = getIntent().getStringExtra(AlarmUtils.EXTRA_PREVIEW_BACKGROUND_IMAGE);
+        final String imagePath = TextUtils.isEmpty(previewImage)
+            ? SettingsDAO.getAlarmBackgroundImage(mPrefs)
+            : previewImage;
 
         // Apply a background image and a blur effect.
-        if (imagePath != null) {
+        if (TextUtils.isEmpty(imagePath)) {
+            getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
+        } else {
             mBinding.alarmBackgroundImage.setVisibility(View.VISIBLE);
 
             File imageFile = new File(imagePath);
+
             if (imageFile.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
                 if (bitmap != null) {
                     mBinding.alarmBackgroundImage.setImageBitmap(bitmap);
-                    mBinding.alarmBackgroundImage.setColorFilter(alarmBackgroundColor);
 
-                    if (SdkUtils.isAtLeastAndroid12() && SettingsDAO.isAlarmBlurEffectEnabled(mPrefs)) {
-                        float intensity = SettingsDAO.getAlarmBlurIntensity(mPrefs);
-                        RenderEffect blur = RenderEffect.createBlurEffect(intensity, intensity, Shader.TileMode.CLAMP);
-                        mBinding.alarmBackgroundImage.setRenderEffect(blur);
+                    if (SdkUtils.isAtLeastAndroid12()) {
+                        int blurIntensity =
+                            getIntent().getIntExtra(AlarmUtils.EXTRA_PREVIEW_BLUR_INTENSITY, SettingsDAO.getAlarmBlurIntensity(mPrefs));
+
+                        if (blurIntensity != DEFAULT_BLUR_INTENSITY) {
+                            RenderEffect blur = RenderEffect.createBlurEffect(blurIntensity, blurIntensity, Shader.TileMode.CLAMP);
+
+                            mBinding.alarmBackgroundImage.setRenderEffect(blur);
+                        }
                     }
                 } else {
                     LogUtils.e("Bitmap null for path: " + imagePath);
@@ -355,8 +383,6 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
                 LogUtils.e("Image file not found: " + imagePath);
                 getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
             }
-        } else {
-            getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
         }
     }
 
@@ -371,6 +397,9 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
 
         ClockUtils.setClockStyle(alarmClockStyle, mBinding.digitalClock, mBinding.analogClock);
 
+        int previewHour = getIntent().getIntExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, -1);
+        int previewMinute = getIntent().getIntExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, -1);
+
         if (alarmClockStyle == DataModel.ClockStyle.DIGITAL) {
             ClockUtils.setDigitalClockFont(mBinding.digitalClock, SettingsDAO.getAlarmFont(mPrefs));
             ClockUtils.setDigitalClockTimeFormat(mBinding.digitalClock, 0.4f, false, true, false, false, false);
@@ -381,9 +410,17 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
             if (mIsTextShadowDisplayed) {
                 mBinding.digitalClock.setShadowLayer(mShadowRadius, mShadowOffset, mShadowOffset, mShadowColor);
             }
+
+            if (previewHour != -1 && previewMinute != -1) {
+                mBinding.digitalClock.setStaticTime(previewHour, previewMinute);
+            }
         } else {
             ClockUtils.adjustAnalogClockSize(mBinding.analogClock, SettingsDAO.getAlarmAnalogClockSize(mPrefs));
             ClockUtils.setAnalogClockSecondsEnabled(alarmClockStyle, mBinding.analogClock, isAlarmSecondHandDisplayed);
+
+            if (previewHour != -1 && previewMinute != -1) {
+                mBinding.analogClock.setStaticTime(previewHour, previewMinute);
+            }
         }
     }
 
@@ -391,12 +428,34 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
      * Initializes the alarm title.
      */
     private void initAlarmTitle() {
-        mBinding.alarmTitle.setText(R.string.app_label);
+        String previewLabel = getIntent().getStringExtra(AlarmUtils.EXTRA_PREVIEW_LABEL);
+
+        mBinding.alarmTitle.setText(TextUtils.isEmpty(previewLabel) ? getString(R.string.app_label) : previewLabel);
         mBinding.alarmTitle.setTypeface(mGeneralBoldTypeface);
         mBinding.alarmTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAlarmTitleFontSize);
         mBinding.alarmTitle.setTextColor(mAlarmTitleColor);
-        // Allow text scrolling (all other attributes are indicated in the "alarm_activity.xml" file)
-        mBinding.alarmTitle.setSelected(true);
+
+        if (SettingsDAO.isAlarmTitleDisplayedOnSingleLine(mPrefs)) {
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(mBinding.alarmTitle, TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE);
+            mBinding.alarmTitle.setSingleLine(true);
+            mBinding.alarmTitle.setSelected(true); // Allow text scrolling
+            mBinding.alarmTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            mBinding.alarmTitle.setMarqueeRepeatLimit(-1);
+            mBinding.alarmTitle.setHorizontallyScrolling(true);
+        } else {
+            mBinding.alarmTitle.setSingleLine(false);
+            mBinding.alarmTitle.setSelected(false);
+            mBinding.alarmTitle.setEllipsize(null);
+            mBinding.alarmTitle.setHorizontallyScrolling(false);
+
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                mBinding.alarmTitle,
+                12,
+                (int) mAlarmTitleFontSize,
+                2,
+                TypedValue.COMPLEX_UNIT_SP
+            );
+        }
 
         // Display a shadow if enabled in the settings
         if (mIsTextShadowDisplayed) {
@@ -535,7 +594,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
      * Initializes the button mode.
      */
     private void initButtonModeUI() {
-        mBinding.slideZoneLayout.setVisibility(GONE);
+        mBinding.slideZoneLayout.setVisibility(INVISIBLE);
 
         initSnoozeAndDismissButtons();
     }
@@ -808,6 +867,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
         if (SdkUtils.isAtLeastAndroid8()) {
             mVibrator.vibrate(VibrationEffect.createWaveform(new long[]{700, 500}, VibrationEffect.DEFAULT_AMPLITUDE));
         } else {
+            //noinspection deprecation
             mVibrator.vibrate(new long[]{700, 500}, -1);
         }
     }
@@ -819,6 +879,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
         if (SdkUtils.isAtLeastAndroid8()) {
             mVibrator.vibrate(VibrationEffect.createWaveform(new long[]{700, 200, 100, 500}, VibrationEffect.DEFAULT_AMPLITUDE));
         } else {
+            //noinspection deprecation
             mVibrator.vibrate(new long[]{700, 200, 100, 500}, -1);
         }
     }
@@ -827,9 +888,25 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
      * Display ringtone title if enabled in <i>"Customize alarm display"</i> settings.
      */
     private void displayRingtoneTitle() {
-        final Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        final Ringtone ringtone = RingtoneManager.getRingtone(this, ringtoneUri);
-        final Drawable musicIcon = AppCompatResources.getDrawable(this, R.drawable.ic_music_note);
+        final String previewRingtoneStr = getIntent().getStringExtra(AlarmUtils.EXTRA_PREVIEW_RINGTONE);
+        final Uri ringtoneUri;
+        String ringtoneTitleText;
+        final Drawable musicIcon;
+
+        if (previewRingtoneStr == null) {
+            ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        } else {
+            ringtoneUri = previewRingtoneStr.isEmpty() ? null : Uri.parse(previewRingtoneStr);
+        }
+
+        if (ringtoneUri == null) {
+            ringtoneTitleText = getString(R.string.silent_ringtone_title);
+            musicIcon = AppCompatResources.getDrawable(this, R.drawable.ic_ringtone_silent);
+        } else {
+            ringtoneTitleText = DataModel.getDataModel().getRingtoneTitle(ringtoneUri);
+            musicIcon = AppCompatResources.getDrawable(this, R.drawable.ic_music_note);
+        }
+
         int iconSize = (int) dpToPx(24, getResources().getDisplayMetrics());
         final int ringtoneTitleColor = SettingsDAO.getRingtoneTitleColor(mPrefs);
 
@@ -870,7 +947,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
             }
         }
 
-        mBinding.ringtoneTitle.setText(ringtone.getTitle(this));
+        mBinding.ringtoneTitle.setText(ringtoneTitleText);
         mBinding.ringtoneTitle.setTypeface(mGeneralBoldTypeface);
         mBinding.ringtoneTitle.setTextColor(ringtoneTitleColor);
         // Allow text scrolling (all other attributes are indicated in the "alarm_activity.xml" file)
@@ -912,20 +989,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity
     }
 
     private void finishActivity() {
-        finish();
-        if (mIsFadeTransitionsEnabled) {
-            if (SdkUtils.isAtLeastAndroid14()) {
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out);
-            } else {
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            }
-        } else {
-            if (SdkUtils.isAtLeastAndroid14()) {
-                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-            } else {
-                overridePendingTransition(R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-            }
-        }
+        ThemeUtils.finishActivityWithTransition(this);
     }
 
 }

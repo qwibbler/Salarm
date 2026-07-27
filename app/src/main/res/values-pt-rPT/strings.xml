@@ -242,7 +242,6 @@
     <string name="delay_picker_dialog_title">Alarme em…</string>
     <string name="alarm_label_box_title">Etiqueta do alarme</string>
     <string name="label_default">Predefinição</string>
-    <string name="duplicate">Duplicar</string>
     <string name="warning">Aviso</string>
     <string name="label_hours">Horas</string>
     <string name="label_minutes">MInutos</string>
@@ -301,7 +300,6 @@
     <string name="sort_timer_ascending_duration">Por duração (ordem ascendente)</string>
     <string name="sort_timer_descending_duration">Por duração (ordem descendente)</string>
     <string name="default_time_to_add_to_timer_title">Hora predefinida para adicionar ao temporizador</string>
-    <string name="warning_dialog_title">Eliminar temporizador</string>
     <string name="screensaver_daydream_settings">Selecionar/ativar protetor de ecrã</string>
     <string name="clock_color_title">Cor do relógio</string>
     <string name="screensaver_daydream_settings_summary">Abre as definições do protetor principal de Android</string>
@@ -483,7 +481,7 @@
     <string name="vibration_pattern_strong">Forte</string>
     <string name="vibration_pattern_heartbeat">Batida de coração</string>
     <string name="vibration_pattern_tick_tock">Tick Tock</string>
-    <string name="vibration_start_delay_none">Nenhum</string>
+    <string name="label_none">Nenhum</string>
     <string name="turn_on_back_flash_for_triggered_alarm_title">Ligar lanterna de volta quando o alarme é iniciado</string>
     <string name="label_new_font">Nova fonte</string>
     <string name="settings_permission_message">Uma ou mais permissões essenciais foram recusadas. Não permiti-las pode resultar em falhas na aplicação.</string>

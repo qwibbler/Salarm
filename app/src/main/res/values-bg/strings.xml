@@ -234,7 +234,6 @@
     <string name="delay_picker_dialog_title">Будилник след…</string>
     <string name="alarm_label_box_title">Наименование</string>
     <string name="label_default">Стандартно</string>
-    <string name="duplicate">Копиране</string>
     <string name="label_new_image">Ново изображение</string>
     <string name="warning">Предупреждение</string>
     <string name="label_hours">Часове</string>
@@ -346,7 +345,7 @@
     <string name="vibration_pattern_escalating">Усилваща</string>
     <string name="vibration_pattern_tick_tock">Тик-так</string>
     <string name="vibration_start_delay_title">Изчакване преди вибриране</string>
-    <string name="vibration_start_delay_none">Без</string>
+    <string name="label_none">Без</string>
     <string name="vibration_start_delay_warning_box_text">Въведете стойност между 0 и 10 минути</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">Вибриране при отложен или изключен будилник</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">Двойно вибриране при отложен будилник и единично при изключен</string>
@@ -385,7 +384,6 @@
     <string name="background_image_dialog_title">Фоново изображение</string>
     <string name="background_image_toast_message_selected">Изображението е избрано</string>
     <string name="background_image_toast_message_deleted">Изображението е премахнато</string>
-    <string name="enable_blur_effect_title">Замъгляване на фоновото изображение</string>
     <string name="enable_per_alarm_crescendo_duration_title">Отделни стойности на времето за увеличаване на звука за всеки будилник</string>
     <string name="enable_per_alarm_crescendo_duration_dialog_message">Потребителското време за увеличаване на звука ще бъде нулирано.%s</string>
     <string name="enable_per_alarm_auto_silence_title">Отделни стойности на самоизключване за всеки будилник</string>
@@ -478,9 +476,6 @@
     <string name="sort_timer_ascending_duration">По продължителност (възходящо)</string>
     <string name="sort_timer_descending_duration">По продължителност (низходящо)</string>
     <string name="default_time_to_add_to_timer_title">Стандартно допълнително време</string>
-    <string name="display_warning_before_deleting_timer_title">Потвърждаване преди премахване на отброяване</string>
-    <string name="warning_dialog_title">Премахване на отброяване</string>
-    <string name="warning_dialog_message">Желаете ли отброяването „%s“ да бъде премахнато?</string>
     <string name="screensaver_daydream_settings">Избиране или включване на заставката</string>
     <string name="screensaver_daydream_settings_summary">Отваря настройките на Андроид</string>
     <string name="screensaver_clock_dynamic_colors_title">Динамични цветове на часовника</string>

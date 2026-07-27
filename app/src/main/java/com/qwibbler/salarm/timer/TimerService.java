@@ -16,16 +16,29 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+
+import androidx.annotation.NonNull;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Timer;
 import com.qwibbler.salarm.events.Events;
+import com.qwibbler.salarm.utils.DeviceUtils;
 import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.utils.SdkUtils;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * <p>This service exists solely to allow {@link android.app.AlarmManager} and timer notifications
@@ -99,9 +112,21 @@ public final class TimerService extends Service {
 
     private SharedPreferences mPrefs;
 
+    private CameraManager mCameraManager;
+    private String mCameraId;
+    private boolean mFlashState = false;
+    private boolean mIsFlashActive = false;
+    private boolean mIsUserFlashlightOn = false;
+    private CameraManager.TorchCallback mTorchCallback;
+    private Handler mHandler;
+    private Runnable mFlashRunnable;
+
     private SensorManager mSensorManager;
     private boolean mIsFlipActionEnabled;
     private boolean mIsShakeActionEnabled;
+
+    private AudioManager mAudioManager;
+    private AudioFocusRequest mAudioFocusRequest;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -117,6 +142,42 @@ public final class TimerService extends Service {
         mSensorManager = getApplicationContext().getSystemService(SensorManager.class);
         mIsFlipActionEnabled = SettingsDAO.isFlipActionForTimersEnabled(mPrefs);
         mIsShakeActionEnabled = SettingsDAO.isShakeActionForTimersEnabled(mPrefs);
+
+        mAudioManager = getApplicationContext().getSystemService(AudioManager.class);
+
+        mCameraManager = getApplicationContext().getSystemService(CameraManager.class);
+        mHandler = new Handler(Looper.getMainLooper());
+
+        getBackCameraId();
+
+        mTorchCallback = new CameraManager.TorchCallback() {
+            @Override
+            public void onTorchModeChanged(@NonNull String cameraId, boolean enabled) {
+                super.onTorchModeChanged(cameraId, enabled);
+                if (mCameraId != null && mCameraId.equals(cameraId)) {
+                    // Update the initial state if it is not the alarm that is causing the flash to blink.
+                    if (!mIsFlashActive) {
+                        mIsUserFlashlightOn = enabled;
+                    }
+                }
+            }
+        };
+
+        if (mCameraManager != null) {
+            mCameraManager.registerTorchCallback(mTorchCallback, mHandler);
+        }
+
+        mFlashRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Toggle flash state
+                mFlashState = !mFlashState;
+                toggleFlash(mFlashState);
+
+                // Repeat action after 500ms
+                mHandler.postDelayed(this, 500);
+            }
+        };
     }
 
     @Override
@@ -135,7 +196,7 @@ public final class TimerService extends Service {
                         return START_NOT_STICKY;
                     }
                     case ACTION_RESET_MISSED_TIMERS -> {
-                        DataModel.getDataModel().resetMissedTimers(label);
+                        DataModel.getDataModel().resetOrDeleteMissedTimers(label);
                         return START_NOT_STICKY;
                     }
                 }
@@ -166,20 +227,35 @@ public final class TimerService extends Service {
                         DataModel.getDataModel().addCustomTimeToTimer(timer);
                     }
                     case ACTION_RESET_TIMER -> {
-                        DataModel.getDataModel().resetOrDeleteTimer(timer, label);
+                        DataModel.getDataModel().resetTimer(timer, label);
                         detachListeners();
                     }
                     case ACTION_TIMER_EXPIRED -> {
                         Events.sendTimerEvent(R.string.action_fire, label);
                         DataModel.getDataModel().expireTimer(this, timer);
+                        turnOnFlash(timer);
+                        stopMedia(timer);
                         attachListeners();
                     }
                 }
             }
         } finally {
             // This service is foreground when expired timers exist and stopped when none exist.
-            if (DataModel.getDataModel().getExpiredTimers().isEmpty()) {
+            final List<Timer> expiredTimers = DataModel.getDataModel().getExpiredTimers();
+
+            if (expiredTimers.isEmpty()) {
                 stopSelf();
+            } else {
+                Timer currentActiveTimer = expiredTimers.get(expiredTimers.size() - 1);
+
+                if (currentActiveTimer.isFlashOn()) {
+                    if (!mIsUserFlashlightOn && !mIsFlashActive) {
+                        mIsFlashActive = true;
+                        mHandler.post(mFlashRunnable);
+                    }
+                } else {
+                    stopFlash();
+                }
             }
         }
 
@@ -189,7 +265,111 @@ public final class TimerService extends Service {
     @Override
     public void onDestroy() {
         LogUtils.v("TimerService.onDestroy() called");
+        super.onDestroy();
+
         detachListeners();
+
+        stopFlash();
+
+        if (mCameraManager != null && mTorchCallback != null) {
+            mCameraManager.unregisterTorchCallback(mTorchCallback);
+        }
+
+        if (mAudioManager != null) {
+            try {
+                if (SdkUtils.isAtLeastAndroid8() && mAudioFocusRequest != null) {
+                    mAudioManager.abandonAudioFocusRequest(mAudioFocusRequest);
+                    mAudioFocusRequest = null;
+                } else {
+                    //noinspection deprecation
+                    mAudioManager.abandonAudioFocus(null);
+                }
+            } catch (Exception e) {
+                LogUtils.e("TimerService - Failed to abandon audio focus", e);
+            }
+        }
+    }
+
+    private void turnOnFlash(Timer timer) {
+        if (!timer.isFlashOn()) {
+            // If the last timer added to the list of expired timers does not have the flash enabled
+            // while another timer is triggered with the flash on, stop the flash.
+            stopFlash();
+            return;
+        }
+
+        if (mIsUserFlashlightOn) {
+            LogUtils.v("Flashlight is already on by user. Bypassing timer flash.");
+        } else if (!mIsFlashActive) {
+            mIsFlashActive = true;
+            mHandler.post(mFlashRunnable);
+        }
+    }
+
+    private void stopFlash() {
+        mHandler.removeCallbacks(mFlashRunnable);
+
+        if (mIsFlashActive && DeviceUtils.hasBackFlash(this)) {
+            toggleFlash(false);
+        }
+
+        mIsFlashActive = false;
+    }
+
+    private void getBackCameraId() {
+        try {
+            for (String id : mCameraManager.getCameraIdList()) {
+                CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(id);
+                Integer lensFacing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                // Check if it is the rear camera
+                if (lensFacing != null && lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
+                    mCameraId = id;
+                    break;
+                }
+            }
+
+            if (mCameraId == null) {
+                LogUtils.e("mCameraId is null");
+            }
+        } catch (CameraAccessException e) {
+            LogUtils.e("TimerService.onCreate - Failed to access the flash unit", e);
+        }
+    }
+
+    private void toggleFlash(boolean state) {
+        try {
+            if (DeviceUtils.hasBackFlash(this) && mCameraId != null) {
+                mCameraManager.setTorchMode(mCameraId, state);
+            }
+        } catch (CameraAccessException e) {
+            LogUtils.e("TimerService.toggleFlash - Failed to access the flash unit", e);
+        }
+    }
+
+    private void stopMedia(Timer timer) {
+        if (mAudioManager == null || !timer.getTurnOffMedia()) {
+            return;
+        }
+
+        LogUtils.i("TimerService - Media paused for sleep timer");
+
+        try {
+            // Requesting audio focus ensures that media is paused.
+            if (SdkUtils.isAtLeastAndroid8()) {
+                mAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build())
+                    .build();
+                mAudioManager.requestAudioFocus(mAudioFocusRequest);
+            } else {
+                //noinspection deprecation
+                mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+            }
+        } catch (Exception e) {
+            LogUtils.e("TimerService - Failed to dispatch media pause or request audio focus", e);
+        }
     }
 
     private final ResettableSensorEventListener mFlipListener = new ResettableSensorEventListener() {

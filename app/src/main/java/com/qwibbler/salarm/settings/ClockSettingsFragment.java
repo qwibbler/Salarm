@@ -21,16 +21,18 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.TimeZones;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.DigitalAppWidgetProvider;
 
-public class ClockSettingsFragment extends ScreenFragment
+public class ClockSettingsFragment extends BaseSettingsScreenFragment
     implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     String[] mClockStyleValues;
@@ -70,15 +72,15 @@ public class ClockSettingsFragment extends ScreenFragment
             // Take persistent permission
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            String safeTitle = Utils.toSafeFileName(FILE_DIGITAL_CLOCK_FONT);
+            String safeTitle = FileUtils.toSafeFileName(FILE_DIGITAL_CLOCK_FONT);
             String oldFontPath = mPrefs.getString(KEY_DIGITAL_CLOCK_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
-                clearFile(oldFontPath);
+                FileUtils.clearFile(oldFontPath);
 
                 // Copy the new font to the device's protected storage
-                Uri copiedUri = Utils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
+                Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, sourceUri, safeTitle);
 
                 // Save the new path
                 if (copiedUri != null) {
@@ -184,15 +186,13 @@ public class ClockSettingsFragment extends ScreenFragment
             }
 
             case KEY_DISPLAY_CLOCK_SECONDS -> {
-                mClockSecondHandPref.setVisible((boolean) newValue && SettingsDAO.getClockStyle(mPrefs) == DataModel.ClockStyle.ANALOG);
-
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mClockSecondHandPref.setVisible((boolean) newValue && SettingsDAO.getClockStyle(mPrefs) == DataModel.ClockStyle.ANALOG);
             }
 
             case KEY_AUTO_HOME_CLOCK -> {
-                mHomeTimeZonePref.setEnabled((boolean) newValue);
-
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mHomeTimeZonePref.setEnabled((boolean) newValue);
             }
 
             case KEY_DISPLAY_TEXT_UPPERCASE -> Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);

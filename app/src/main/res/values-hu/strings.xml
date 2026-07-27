@@ -269,7 +269,6 @@
     <string name="delete_occasional_alarm_after_use_title">Ébresztő elvetésekor annak törlése</string>
     <string name="delay_picker_dialog_title">Ébresztő késleltetés…</string>
     <string name="alarm_label_box_title">Ébresztő címe</string>
-    <string name="duplicate">Duplikálás</string>
     <string name="label_new_image">Új kép</string>
     <string name="label_new_font">Új betűtípus</string>
     <string name="warning">Figyelem</string>
@@ -380,7 +379,7 @@
     <string name="vibration_pattern_escalating">Felgyorsuló</string>
     <string name="vibration_pattern_tick_tock">Tik-Tak</string>
     <string name="vibration_start_delay_title">Késleltetve kezd rezegni</string>
-    <string name="vibration_start_delay_none">Nincs</string>
+    <string name="label_none">Nincs</string>
     <string name="vibration_start_delay_warning_box_text">Adjon meg egy értéket 0 és 10 perc között</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_title">Rezgés engedélyezése szundi vagy ébresztő elvetésekor</string>
     <string name="enable_snoozed_or_dismissed_alarm_vibrations_summary">Dupla rezgés szundikor, és egyszeri rezgés amikor az ébresztést elveti</string>
@@ -419,7 +418,6 @@
     <string name="background_image_dialog_title">Háttérkép</string>
     <string name="background_image_toast_message_selected">Kép sikeresen kiválasztva</string>
     <string name="background_image_toast_message_deleted">Kép sikeresen törölve</string>
-    <string name="enable_blur_effect_title">Homályosítás effekt a háttérképen</string>
     <string name="enable_per_alarm_crescendo_duration_title">Egyedi hangerő növekedési időtartam használata ébresztőnként</string>
     <string name="enable_per_alarm_crescendo_duration_dialog_message">Egyedi ébresztő hangerő növekedési időtartam visszaáll az eredeti értékre.%s</string>
     <string name="enable_per_alarm_auto_silence_title">Egyedi ébresztő megállási időtartam használata ébresztőnként</string>
@@ -497,9 +495,6 @@
     <string name="sort_timer_ascending_duration">Hossz szerint (emelkedő sorrendben)</string>
     <string name="sort_timer_descending_duration">Hossz szerint (csökkenő sorrendben)</string>
     <string name="default_time_to_add_to_timer_title">Alap időzítőhöz adható időintervallum</string>
-    <string name="display_warning_before_deleting_timer_title">Figyelmeztetés megjelenítése időzítő törlése előtt</string>
-    <string name="warning_dialog_title">Időzítő törlése</string>
-    <string name="warning_dialog_message">Biztosan törölni kívánja a(z) \"%s\" időzítőt?</string>
     <string name="screensaver_settings_summary">Képernyővédő stílus, szín és betűtípus beállítások</string>
     <string name="screensaver_daydream_settings">Képernyőkímélő kiválasztása/bekapcsolása</string>
     <string name="screensaver_daydream_settings_summary">Megnyitja az alap Android képernyőkímélő beállításokat</string>

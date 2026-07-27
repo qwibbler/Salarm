@@ -43,6 +43,7 @@ import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.KeepAliveService;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.provider.Alarm;
@@ -53,6 +54,7 @@ import com.qwibbler.salarm.tiles.TimerTileService;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.BackupAndRestoreUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -74,7 +76,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class AboutFragment extends ScreenFragment implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
+public class AboutFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private static final String KEY_SHOW_RESET_SETTINGS_DIALOG = "show_reset_settings_dialog";
     private static final String KEY_PENDING_LINK_DIALOG = "pending_link_dialog";
@@ -294,6 +296,8 @@ public class AboutFragment extends ScreenFragment implements Preference.OnPrefer
     @Override
     public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
         if (KEY_ENABLE_LOCAL_LOGGING.equals(preference.getKey())) {
+            Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
             if (newValue.equals(false)) {
                 tapCountOnVersion = 0;
 
@@ -305,8 +309,6 @@ public class AboutFragment extends ScreenFragment implements Preference.OnPrefer
             }
 
             requireActivity().recreate();
-
-            Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
         }
 
         return true;
@@ -475,7 +477,7 @@ public class AboutFragment extends ScreenFragment implements Preference.OnPrefer
             releaseAllCustomRingtonePermissions();
             deleteAllCustomRingtoneFiles();
 
-            wipeAllCustomFiles(appContext);
+            FileUtils.wipeAllCustomFiles(appContext);
 
             LogUtils.clearSavedLocalLogs(appContext);
 
@@ -556,7 +558,7 @@ public class AboutFragment extends ScreenFragment implements Preference.OnPrefer
             String uriString = mPrefs.getString(RINGTONE_URI + id, null);
             if (uriString != null) {
                 Uri uri = Uri.parse(uriString);
-                clearFile(uri.getPath());
+                FileUtils.clearFile(uri.getPath());
             }
         }
     }

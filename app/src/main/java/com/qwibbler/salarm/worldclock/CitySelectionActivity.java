@@ -154,21 +154,7 @@ public final class CitySelectionActivity extends BaseActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                finish();
-                if (SettingsDAO.isFadeTransitionsEnabled(mPrefs)) {
-                    if (SdkUtils.isAtLeastAndroid14()) {
-                        overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.fade_in, R.anim.fade_out);
-                    } else {
-                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    }
-                } else {
-                    if (SdkUtils.isAtLeastAndroid14()) {
-                        overrideActivityTransition(
-                            OVERRIDE_TRANSITION_CLOSE, R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-                    } else {
-                        overridePendingTransition(R.anim.activity_slide_from_left, R.anim.activity_slide_to_right);
-                    }
-                }
+                ThemeUtils.finishActivityWithTransition(CitySelectionActivity.this);
             }
         });
     }

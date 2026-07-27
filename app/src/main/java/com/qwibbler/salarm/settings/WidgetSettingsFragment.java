@@ -14,8 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 
-public class WidgetSettingsFragment extends ScreenFragment implements Preference.OnPreferenceClickListener {
+public class WidgetSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceClickListener {
 
     Preference mAnalogWidgetCustomizationPref;
     Preference mDigitalWidgetCustomizationPref;

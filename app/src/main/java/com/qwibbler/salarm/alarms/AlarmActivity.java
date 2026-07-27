@@ -7,11 +7,13 @@
 package com.qwibbler.salarm.alarms;
 
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -40,11 +42,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.media.AudioManager;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -57,12 +61,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.TextViewCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.BaseActivity;
 import com.qwibbler.salarm.data.DataModel;
+import com.qwibbler.salarm.data.DataModel.HeadphonesButtonBehavior;
 import com.qwibbler.salarm.data.DataModel.PowerButtonBehavior;
 import com.qwibbler.salarm.data.DataModel.VolumeButtonBehavior;
 import com.qwibbler.salarm.data.SettingsDAO;
@@ -75,6 +84,7 @@ import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
 import com.qwibbler.salarm.utils.FormattedTextUtils;
+import com.qwibbler.salarm.utils.InsetsUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -117,6 +127,8 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     private boolean mAlarmHandled;
     private VolumeButtonBehavior mVolumeBehavior;
     private PowerButtonBehavior mPowerBehavior;
+    private HeadphonesButtonBehavior mHeadphonesButtonBehavior;
+    private MediaSession mMediaSession;
     private long mActivityStartTime;
     private float mAlarmTitleFontSize;
     private int mAlarmTitleColor;
@@ -164,7 +176,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         }
     };
 
-    private final BroadcastReceiver PowerBtnReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mPowerBtnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -203,6 +215,21 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         mPrefs = getDefaultSharedPreferences(storageContext);
         mGeneralBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getGeneralFont(mPrefs));
+        mVolumeBehavior = SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs);
+        mPowerBehavior = SettingsDAO.getAlarmPowerButtonBehavior(mPrefs);
+        mHeadphonesButtonBehavior = SettingsDAO.getHeadphonesButtonBehavior(mPrefs);
+
+        // Register Power button (screen off) intent receiver
+        if (mPowerBehavior != PowerButtonBehavior.NOTHING) {
+            IntentFilter powerFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+            if (SdkUtils.isAtLeastAndroid13()) {
+                registerReceiver(mPowerBtnReceiver, powerFilter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(mPowerBtnReceiver, powerFilter);
+            }
+
+            mPowerBtnReceiverRegistered = true;
+        }
 
         setVolumeControlStream(AudioManager.STREAM_ALARM);
 
@@ -210,39 +237,21 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         initDefaultSnoozeValue();
 
+        initHeadphonesButton();
+
         LOGGER.i("Displaying alarm for instance: %s", mAlarmInstance);
-
-        // Get the volume/camera button behavior setting
-        mVolumeBehavior = SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs);
-
-        // Get the power button behavior setting
-        mPowerBehavior = SettingsDAO.getAlarmPowerButtonBehavior(mPrefs);
-
-        // Register Power button (screen off) intent receiver
-        if (mPowerBehavior != PowerButtonBehavior.NOTHING) {
-            IntentFilter powerFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-            if (SdkUtils.isAtLeastAndroid13()) {
-                registerReceiver(PowerBtnReceiver, powerFilter, Context.RECEIVER_NOT_EXPORTED);
-            } else {
-                registerReceiver(PowerBtnReceiver, powerFilter);
-            }
-
-            mPowerBtnReceiverRegistered = true;
-        }
 
         // To manually manage insets
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+
         if (SdkUtils.isAtLeastAndroid81()) {
             setTurnScreenOn(true);
             setShowWhenLocked(true);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         } else {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+            //noinspection deprecation
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         }
 
         // Honor rotation on tablets; fix the orientation on phones.
@@ -290,7 +299,9 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         initRingtoneTitle();
 
-        AlarmUtils.hideSystemBarsOfTriggeredAlarms(getWindow(), getWindow().getDecorView());
+        applyWindowInsets();
+
+        ThemeUtils.hideSystemBars(getWindow(), getWindow().getDecorView());
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -320,11 +331,13 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             final IntentFilter filter = new IntentFilter(AlarmService.ALARM_DONE_ACTION);
             filter.addAction(AlarmService.ALARM_SNOOZE_ACTION);
             filter.addAction(AlarmService.ALARM_DISMISS_ACTION);
+
             if (SdkUtils.isAtLeastAndroid13()) {
                 registerReceiver(mReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             } else {
                 registerReceiver(mReceiver, filter);
             }
+
             mReceiverRegistered = true;
         }
 
@@ -349,12 +362,18 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onDestroy() {
         if (mPowerBtnReceiverRegistered) {
-            unregisterReceiver(PowerBtnReceiver);
+            unregisterReceiver(mPowerBtnReceiver);
             mPowerBtnReceiverRegistered = false;
         }
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
+        }
+
+        if (mMediaSession != null) {
+            mMediaSession.setActive(false);
+            mMediaSession.release();
+            mMediaSession = null;
         }
 
         super.onDestroy();
@@ -368,24 +387,46 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         final int keyCode = keyEvent.getKeyCode();
         switch (keyCode) {
             // Volume keys and camera keys dismiss the alarm.
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-            case KeyEvent.KEYCODE_HEADSETHOOK:
-            case KeyEvent.KEYCODE_CAMERA:
-            case KeyEvent.KEYCODE_FOCUS:
+            case KeyEvent.KEYCODE_VOLUME_UP,
+                 KeyEvent.KEYCODE_VOLUME_DOWN,
+                 KeyEvent.KEYCODE_VOLUME_MUTE,
+                 KeyEvent.KEYCODE_CAMERA,
+                 KeyEvent.KEYCODE_FOCUS -> {
                 if (!mAlarmHandled) {
                     switch (mVolumeBehavior) {
-                        case DO_NOTHING -> {
+                        case NOTHING -> {
                             return keyEvent.getAction() != KeyEvent.ACTION_UP;
                         }
-                        case SNOOZE_ALARM -> {
+                        case SNOOZE -> {
                             if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                                 snooze();
                             }
                             return true;
                         }
-                        case DISMISS_ALARM -> {
+                        case DISMISS -> {
+                            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                                dismiss();
+                            }
+                            return true;
+                        }
+                        case CHANGE_VOLUME -> { /* Do nothing */ }
+                    }
+                }
+            }
+
+            case KeyEvent.KEYCODE_HEADSETHOOK -> {
+                if (!mAlarmHandled) {
+                    switch (mHeadphonesButtonBehavior) {
+                        case NOTHING -> {
+                            return keyEvent.getAction() != KeyEvent.ACTION_UP;
+                        }
+                        case SNOOZE -> {
+                            if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                                snooze();
+                            }
+                            return true;
+                        }
+                        case DISMISS -> {
                             if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                                 dismiss();
                             }
@@ -393,7 +434,9 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
                         }
                     }
                 }
+            }
         }
+
         return super.dispatchKeyEvent(keyEvent);
     }
 
@@ -535,6 +578,18 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         return true;
     }
 
+    /**
+     * This method adjusts the space occupied by the status bar, and adjust the display of the clock layout accordingly.
+     */
+    private void applyWindowInsets() {
+        InsetsUtils.doOnApplyWindowInsets(mBinding.clockLayout, (v, insets) -> {
+            // Get the system bar and notch insets
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.displayCutout());
+
+            v.setPadding(0, bars.top, 0, 0);
+        });
+    }
+
     private void initAlarmAndInstance() {
         final long instanceId = AlarmInstance.getId(getIntent().getData());
         mAlarmInstance = AlarmInstance.getInstance(getContentResolver(), instanceId);
@@ -559,6 +614,23 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mDefaultSnoozeMinutes = mAlarm.snoozeDuration;
     }
 
+    private void initHeadphonesButton() {
+        boolean isAdvancedPlayback = SettingsDAO.isAdvancedAudioPlaybackEnabled(mPrefs);
+        boolean isAutoRouting = SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs);
+
+        if (isAdvancedPlayback && isAutoRouting) {
+            mMediaSession = RingtoneUtils.createMediaSession(this, "AlarmMediaSession", () -> {
+                if (!mAlarmHandled) {
+                    switch (mHeadphonesButtonBehavior) {
+                        case SNOOZE -> snooze();
+                        case DISMISS -> dismiss();
+                        case NOTHING -> { /* Do nothing */ }
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * Initializes the background.
      */
@@ -568,22 +640,33 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         int alarmBackgroundColor = isAmoledMode
             ? SettingsDAO.getAlarmBackgroundAmoledColor(mPrefs)
             : SettingsDAO.getAlarmBackgroundColor(mPrefs);
-        final String imagePath = SettingsDAO.getAlarmBackgroundImage(mPrefs);
+        final boolean isPerAlarmBackgroundImageEnable = SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs);
+        String imagePath = SettingsDAO.getAlarmBackgroundImage(mPrefs);
+
+        if (isPerAlarmBackgroundImageEnable && !TextUtils.isEmpty(mAlarm.backgroundImage)) {
+            imagePath = mAlarm.backgroundImage;
+        }
 
         // Apply a background image and a blur effect.
-        if (imagePath != null) {
-            mBinding.alarmBackgroundImage.setVisibility(View.VISIBLE);
+        if (TextUtils.isEmpty(imagePath)) {
+            mBinding.alarmBackgroundImage.setVisibility(GONE);
+            getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
+        } else {
+            mBinding.alarmBackgroundImage.setVisibility(VISIBLE);
 
             File imageFile = new File(imagePath);
+
             if (imageFile.exists()) {
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
                 if (bitmap != null) {
                     mBinding.alarmBackgroundImage.setImageBitmap(bitmap);
-                    mBinding.alarmBackgroundImage.setColorFilter(alarmBackgroundColor);
 
-                    if (SdkUtils.isAtLeastAndroid12() && SettingsDAO.isAlarmBlurEffectEnabled(mPrefs)) {
-                        float intensity = SettingsDAO.getAlarmBlurIntensity(mPrefs);
-                        RenderEffect blur = RenderEffect.createBlurEffect(intensity, intensity, Shader.TileMode.CLAMP);
+                    float blurIntensity = isPerAlarmBackgroundImageEnable
+                        ? mAlarm.blurIntensity
+                        : SettingsDAO.getAlarmBlurIntensity(mPrefs);
+
+                    if (SdkUtils.isAtLeastAndroid12() && blurIntensity != DEFAULT_BLUR_INTENSITY) {
+                        RenderEffect blur = RenderEffect.createBlurEffect(blurIntensity, blurIntensity, Shader.TileMode.CLAMP);
                         mBinding.alarmBackgroundImage.setRenderEffect(blur);
                     }
                 } else {
@@ -594,8 +677,6 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
                 LogUtils.e("Image file not found: " + imagePath);
                 getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
             }
-        } else {
-            getWindow().setBackgroundDrawable(new ColorDrawable(alarmBackgroundColor));
         }
     }
 
@@ -634,8 +715,28 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mBinding.alarmTitle.setTypeface(mGeneralBoldTypeface);
         mBinding.alarmTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAlarmTitleFontSize);
         mBinding.alarmTitle.setTextColor(mAlarmTitleColor);
-        // Allow text scrolling (all other attributes are indicated in the "alarm_activity.xml" file)
-        mBinding.alarmTitle.setSelected(true);
+
+        if (SettingsDAO.isAlarmTitleDisplayedOnSingleLine(mPrefs)) {
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(mBinding.alarmTitle, TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE);
+            mBinding.alarmTitle.setSingleLine(true);
+            mBinding.alarmTitle.setSelected(true); // Allow text scrolling
+            mBinding.alarmTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+            mBinding.alarmTitle.setMarqueeRepeatLimit(-1);
+            mBinding.alarmTitle.setHorizontallyScrolling(true);
+        } else {
+            mBinding.alarmTitle.setSingleLine(false);
+            mBinding.alarmTitle.setSelected(false);
+            mBinding.alarmTitle.setEllipsize(null);
+            mBinding.alarmTitle.setHorizontallyScrolling(false);
+
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                mBinding.alarmTitle,
+                12,
+                (int) mAlarmTitleFontSize,
+                2,
+                TypedValue.COMPLEX_UNIT_SP
+            );
+        }
 
         // Display a shadow if enabled in the settings
         if (mIsTextShadowDisplayed) {
@@ -793,7 +894,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
      * Initializes the button mode.
      */
     private void initButtonModeUI() {
-        mBinding.slideZoneLayout.setVisibility(GONE);
+        mBinding.slideZoneLayout.setVisibility(INVISIBLE);
 
         if (isSnoozeDisabledForAlarm()) {
             initDismissOnlyButton();
@@ -1308,9 +1409,9 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        mBinding.contentView.setVisibility(View.GONE);
+        mBinding.contentView.setVisibility(GONE);
 
-        mBinding.actionMessageView.setVisibility(View.VISIBLE);
+        mBinding.actionMessageView.setVisibility(VISIBLE);
 
         mBinding.actionTitle.setText(titleResId);
         mBinding.actionTitle.setTypeface(mGeneralBoldTypeface);
@@ -1318,7 +1419,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mBinding.actionTitle.setTextColor(mAlarmTitleColor);
 
         if (descriptionText != null) {
-            mBinding.actionDescription.setVisibility(View.VISIBLE);
+            mBinding.actionDescription.setVisibility(VISIBLE);
             mBinding.actionDescription.setTypeface(mGeneralBoldTypeface);
             mBinding.actionDescription.setText(descriptionText);
             mBinding.actionDescription.setTextSize(TypedValue.COMPLEX_UNIT_SP, mAlarmTitleFontSize);
@@ -1330,7 +1431,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             .alpha(1f)
             .setDuration(ALERT_REVEAL_DURATION_MILLIS)
             .withEndAction(() -> {
-                mBinding.actionMessageView.announceForAccessibility(accessibilityText);
+                ViewCompat.setStateDescription(mBinding.actionMessageView, accessibilityText);
                 mHandler.postDelayed(this::finish, ALERT_DISMISS_DELAY_MILLIS);
             })
             .start();

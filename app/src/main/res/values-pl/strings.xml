@@ -313,7 +313,6 @@
     <string name="FSN_dialog_title">Powiadomienia pełnoekranowe</string>
     <string name="license">Licencja Open-source</string>
     <string name="label_default">Domyślne</string>
-    <string name="duplicate">Duplikuj</string>
     <string name="interface_customization_settings">Interfejs</string>
     <string name="interface_customization_summary">Dostosuj styl, czcionkę, język i kolor aplikacji</string>
     <string name="title_theme">Motyw</string>
@@ -407,9 +406,6 @@
     <string name="title_dark_theme_mode">Tryb ciemnego motywu</string>
     <string name="amoled_dark_theme_mode">AMOLED</string>
     <string name="description_direction_both_for_occasional_alarm">Przesuń palcem w lewo, aby włączyć drzemkę lub w prawo, aby odrzucić i usunąć alarm</string>
-    <string name="display_warning_before_deleting_timer_title">Wyświetl ostrzeżenie przed usunięciem minutnika</string>
-    <string name="warning_dialog_title">Usuń minutnik</string>
-    <string name="warning_dialog_message">Czy na pewno chcesz usunąć minutnik \"%s\"?</string>
     <string name="permission_dialog_revoke_title">Cofnięcie dostępu</string>
     <string name="sort_manually">Ręcznie (przeciągając)</string>
     <string name="first_launch_important_info_message_for_SDK34">• &lt;b&gt;POWIADOMIENIA NA PEŁNYM EKRANIE;&lt;/b&gt; &lt;br&gt; &lt;br&gt;</string>
@@ -552,7 +548,7 @@
     <string name="vibration_pattern_escalating">Eskalacja</string>
     <string name="vibration_pattern_tick_tock">Tik-tak</string>
     <string name="vibration_start_delay_title">Opóźnienie przed rozpoczęciem wibracji</string>
-    <string name="vibration_start_delay_none">Brak</string>
+    <string name="label_none">Brak</string>
     <string name="vibration_start_delay_warning_box_text">Wprowadź wartość od 0 do 10 minut</string>
     <string name="confirm_action_prompt">\n\nCzy chcesz kontynuować?</string>
     <string name="enable_per_alarm_snooze_duration_title">Użyj niestandardowego czasu drzemki dla każdego alarmu</string>
@@ -579,7 +575,6 @@
     <string name="blur_intensity_title">Intensywność rozmycia</string>
     <string name="background_image_title">Wybierz obraz tła</string>
     <string name="background_image_toast_message_selected">Obraz został pomyślnie wybrany</string>
-    <string name="enable_blur_effect_title">Zastosuj efekt rozmycia do obrazu tła</string>
     <string name="customize_background_corner_radius_title">Dostosuj promień zaokrąglenia narożników tła</string>
     <string name="customize_background_corner_radius_summary">Umożliwia zaokrąglenie narożników widżetów, jeśli ekran główny nie obsługuje tej funkcji</string>
     <string name="background_corner_radius_title">Promień narożnika tła</string>
@@ -630,7 +625,6 @@
     <string name="snooze_selector_text_color_title">Kolor tekstu selektora drzemki</string>
     <string name="snooze_minus_symbol_color_title">Kolor symbolu „-”</string>
     <string name="snooze_plus_symbol_color_title">Kolor symbolu „+”</string>
-    <string name="background_image_summary">Ustaw przezroczysty kolor tła, aby zobaczyć obraz</string>
     <string name="alarm_volume_low">Głośność alarmu jest niska</string>
     <string name="fix_alarm_volume">Napraw</string>
     <string name="display_snooze_selector_title">Wyświetl selektor drzemki</string>

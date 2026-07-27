@@ -20,16 +20,7 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATIO
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATION_GATE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATION_ZOOM_OUT;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_TITLE_VISIBILITY_NEVER;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_KEEP_ANDROID_OPEN_DIALOG;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ESSENTIAL_PERMISSIONS_GRANTED;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_IS_FIRST_LAUNCH;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_KEEP_SCREEN_ON;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_TAB_ANIMATION;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_TAB_INDICATOR;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_TAB_TITLE_VISIBILITY;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_TAB_TO_DISPLAY;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_VIBRATIONS;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_VISIBLE_TABS;
+import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 import static com.qwibbler.salarm.utils.AnimatorUtils.getScaleAnimator;
 import static com.qwibbler.salarm.utils.NotificationUtils.EXTRA_UPDATE_ALARM_NOTIFICATIONS;
 import static com.qwibbler.salarm.utils.WidgetUtils.EXTRA_UPDATE_WIDGETS;
@@ -47,6 +38,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.GestureDetector;
+import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,6 +54,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
 import com.qwibbler.salarm.alarms.AlarmFragment;
@@ -80,6 +73,7 @@ import com.qwibbler.salarm.namaz.NamazLocationManager;
 import com.qwibbler.salarm.settings.PermissionsManagementActivity;
 import com.qwibbler.salarm.settings.SettingsActivity;
 import com.qwibbler.salarm.setup.FirstLaunch;
+import com.qwibbler.salarm.stopwatch.StopwatchFragment;
 import com.qwibbler.salarm.stopwatch.StopwatchService;
 import com.qwibbler.salarm.timer.TimerService;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
@@ -94,6 +88,7 @@ import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
 import com.qwibbler.salarm.uidata.TabListener;
 import com.qwibbler.salarm.uidata.UiDataModel;
 import com.qwibbler.salarm.utils.InsetsUtils;
+import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.PermissionUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -121,6 +116,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     private Typeface mRegularTypeface;
     private String mFontPath;
     private boolean mIsToolBarDisplayed;
+    private long mLastFabClickTime = 0;
+    private static final long MIN_CLICK_INTERVAL = 500;
 
     private int mBottomNavPage;
 
@@ -190,8 +187,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     private static final List<String> SUPPORTED_PREF_KEYS = List.of(
         // Interface
-        KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS, KEY_KEEP_SCREEN_ON,
-        KEY_VISIBLE_TABS,
+        KEY_TOOLBAR_TITLE, KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS,
+        KEY_KEEP_SCREEN_ON, KEY_VISIBLE_TABS,
         // Permission
         KEY_ESSENTIAL_PERMISSIONS_GRANTED
     );
@@ -309,6 +306,9 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
             int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
             mBottomNavPage = (tabIndex <= 3) ? 1 : 2;
+
+            mBinding.salarmActivityPager.setPageTransformer(false, null);
+            updatePageTransformer();
         }
 
         if (mShouldRecreate) {
@@ -496,8 +496,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             cachedValues.put(key, newValue);
 
             switch (key) {
-                case KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS, KEY_KEEP_SCREEN_ON,
-                     KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
+                case KEY_TOOLBAR_TITLE, KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS,
+                     KEY_KEEP_SCREEN_ON, KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
 
             }
         };
@@ -523,6 +523,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     private Object getPreferenceValue(String key) {
         return switch (key) {
             // Interface
+            case KEY_TOOLBAR_TITLE -> SettingsDAO.isToolbarTitleDisplayed(mPrefs);
             case KEY_TAB_TITLE_VISIBILITY -> SettingsDAO.getTabTitleVisibility(mPrefs);
             case KEY_TAB_INDICATOR -> SettingsDAO.isTabIndicatorDisplayed(mPrefs);
             case KEY_TAB_TO_DISPLAY -> SettingsDAO.getTabToDisplay(mPrefs);
@@ -603,7 +604,18 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     private void configureFabAndButtons() {
         // Configure the buttons shared by the tabs.
-        mBinding.fab.setOnClickListener(view -> getSelectedSalarmFragment().onFabClick());
+        mBinding.fab.setOnClickListener(view -> {
+            final SalarmFragment currentFragment = getSelectedSalarmFragment();
+            long currentTime = SystemClock.elapsedRealtime();
+            final boolean isStopwatch = currentFragment instanceof StopwatchFragment;
+
+            if (isStopwatch || (currentTime - mLastFabClickTime >= MIN_CLICK_INTERVAL)) {
+                mLastFabClickTime = currentTime;
+                currentFragment.onFabClick();
+            } else {
+                LogUtils.v("Rapid FAB click ignored for Alarm/Timer to prevent double actions.");
+            }
+        });
 
         mBinding.leftButton.setOnLongClickListener(v -> {
             CustomTooltip.showAbove(v, mBinding.leftButton.getContentDescription().toString(), true);
@@ -707,19 +719,29 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         mBinding.salarmActivityPager.addOnPageChangeListener(new PageChangeWatcher());
 
         // Set the animation when switching tabs.
+        updatePageTransformer();
+    }
+
+    /**
+     * Update the animation when switching tabs.
+     */
+    private void updatePageTransformer() {
         mBinding.salarmActivityPager.post(() -> {
             if (isFinishing() || isDestroyed()) {
                 return;
             }
 
             String tabAnimation = SettingsDAO.getTabAnimation(mPrefs);
-            switch (tabAnimation) {
-                case TAB_ANIMATION_CUBE -> mBinding.salarmActivityPager.setPageTransformer(true, new CubePageTransformer());
-                case TAB_ANIMATION_DEPTH -> mBinding.salarmActivityPager.setPageTransformer(true, new DepthPageTransformer());
-                case TAB_ANIMATION_FLIP -> mBinding.salarmActivityPager.setPageTransformer(true, new FlipPageTransformer());
-                case TAB_ANIMATION_GATE -> mBinding.salarmActivityPager.setPageTransformer(true, new GatePageTransformer());
-                case TAB_ANIMATION_ZOOM_OUT -> mBinding.salarmActivityPager.setPageTransformer(true, new ZoomOutPageTransformer());
-            }
+            ViewPager.PageTransformer transformer = switch (tabAnimation) {
+                case TAB_ANIMATION_CUBE -> new CubePageTransformer();
+                case TAB_ANIMATION_DEPTH -> new DepthPageTransformer();
+                case TAB_ANIMATION_FLIP -> new FlipPageTransformer();
+                case TAB_ANIMATION_GATE -> new GatePageTransformer();
+                case TAB_ANIMATION_ZOOM_OUT -> new ZoomOutPageTransformer();
+                default -> null;
+            };
+
+            mBinding.salarmActivityPager.setPageTransformer(true, transformer);
         });
     }
 
@@ -1081,7 +1103,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         if (mIsToolBarDisplayed) {
             mBinding.toolbar.setTitle(selectedTab.getLabelResId());
         } else {
-            mBinding.toolbar.setTitle(null);
+            mBinding.toolbar.setTitle("");
         }
     }
 

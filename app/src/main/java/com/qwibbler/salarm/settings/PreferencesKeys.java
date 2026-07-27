@@ -103,6 +103,7 @@ public class PreferencesKeys {
     public static final String KEY_ALARM_VIBRATION_CATEGORY = "key_alarm_vibration_category";
     public static final String KEY_VOLUME_BUTTONS = "key_volume_button_setting";
     public static final String KEY_POWER_BUTTON = "key_power_button";
+    public static final String KEY_HEADPHONES_BUTTON = "key_headphones_button";
     public static final String KEY_FLIP_ACTION = "key_flip_action";
     public static final String KEY_SHAKE_ACTION = "key_shake_action";
     public static final String KEY_SHAKE_INTENSITY = "key_shake_intensity";
@@ -169,11 +170,12 @@ public class PreferencesKeys {
     public static final String KEY_ALARM_SHADOW_COLOR = "key_alarm_shadow_color";
     public static final String KEY_ALARM_SHADOW_OFFSET = "key_alarm_shadow_offset";
     public static final String KEY_DISPLAY_ALARM_ACTION_MESSAGE = "key_display_alarm_action_message";
+    public static final String KEY_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE = "key_display_alarm_title_on_single_line";
     public static final String KEY_DISPLAY_RINGTONE_TITLE = "key_display_ringtone_title";
     public static final String KEY_RINGTONE_TITLE_COLOR = "key_ringtone_title_color";
     public static final String KEY_ALARM_BACKGROUND_IMAGE = "key_alarm_background_image";
-    public static final String KEY_ENABLE_ALARM_BLUR_EFFECT = "key_enable_alarm_blur_effect";
     public static final String KEY_ALARM_BLUR_INTENSITY = "key_alarm_blur_intensity";
+    public static final String KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE = "key_enable_per_alarm_background_image";
     public static final String KEY_ALARM_PREVIEW = "key_alarm_preview";
 
     // Timer
@@ -181,10 +183,17 @@ public class PreferencesKeys {
     public static final String KEY_TIMER_CREATION_VIEW_STYLE = "key_timer_creation_view_style";
     public static final String KEY_TIMER_RINGTONE = "key_timer_ringtone";
     public static final String KEY_TIMER_AUTO_SILENCE_DURATION = "key_timer_auto_silence_duration";
+    public static final String KEY_ENABLE_PER_TIMER_AUTO_SILENCE = "key_enable_per_timer_auto_silence";
     public static final String KEY_TIMER_VOLUME_CRESCENDO_DURATION = "key_timer_volume_crescendo_duration";
+    public static final String KEY_ENABLE_PER_TIMER_VOLUME_CRESCENDO_DURATION = "key_enable_per_timer_volume_crescendo_duration";
+    public static final String KEY_TIMER_ADVANCED_AUDIO_PLAYBACK_CATEGORY = "key_timer_advanced_audio_playback_category";
+    public static final String KEY_TIMER_VIBRATION_CATEGORY = "key_timer_vibration_category";
     public static final String KEY_TIMER_VIBRATE = "key_timer_vibrate";
+    public static final String KEY_TIMER_VIBRATION_PATTERN = "key_timer_vibration_pattern";
+    public static final String KEY_ENABLE_PER_TIMER_VIBRATION_PATTERN = "key_enable_per_timer_vibration_pattern";
     public static final String KEY_TIMER_VOLUME_BUTTONS_ACTION = "key_timer_volume_buttons_action";
     public static final String KEY_TIMER_POWER_BUTTON_ACTION = "key_timer_power_button_action";
+    public static final String KEY_TIMER_HEADPHONES_BUTTON_ACTION = "key_timer_headphones_button_action";
     public static final String KEY_TIMER_FLIP_ACTION = "key_timer_flip_action";
     public static final String KEY_TIMER_SHAKE_ACTION = "key_timer_shake_action";
     public static final String KEY_TIMER_SHAKE_INTENSITY = "key_timer_shake_intensity";
@@ -192,7 +201,7 @@ public class PreferencesKeys {
     public static final String KEY_SORT_TIMER = "key_sort_timer";
     public static final String KEY_TIMER_ORDER = "timerOrder";
     public static final String KEY_TIMER_ADD_TIME_BUTTON_VALUE = "key_timer_add_time_button_value";
-    public static final String KEY_DISPLAY_WARNING_BEFORE_DELETING_TIMER = "key_display_warning_before_deleting_timer";
+    public static final String KEY_TURN_ON_BACK_FLASH_FOR_EXPIRED_TIMER = "key_turn_on_back_flash_for_expired_timer";
 
     // Timer Display Customization
     public static final String KEY_TIMER_DURATION_FONT = "key_timer_duration_font";
@@ -213,7 +222,6 @@ public class PreferencesKeys {
     public static final String KEY_TIMER_SHADOW_COLOR = "key_timer_shadow_color";
     public static final String KEY_TIMER_SHADOW_OFFSET = "key_timer_shadow_offset";
     public static final String KEY_TIMER_BACKGROUND_IMAGE = "key_timer_background_image";
-    public static final String KEY_ENABLE_TIMER_BLUR_EFFECT = "key_enable_timer_blur_effect";
     public static final String KEY_TIMER_BLUR_INTENSITY = "key_timer_blur_intensity";
     public static final String KEY_TIMER_PREVIEW = "key_timer_preview";
 
@@ -251,7 +259,6 @@ public class PreferencesKeys {
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_ITALIC = "key_screensaver_next_alarm_in_italic";
     public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_on";
     public static final String KEY_SCREENSAVER_BACKGROUND_IMAGE = "key_screensaver_background_image";
-    public static final String KEY_ENABLE_SCREENSAVER_BLUR_EFFECT = "key_enable_screensaver_blur_effect";
     public static final String KEY_SCREENSAVER_BLUR_INTENSITY = "key_screensaver_blur_intensity";
     public static final String KEY_SCREENSAVER_PREVIEW = "key_screensaver_preview";
     public static final String KEY_SCREENSAVER_DAYDREAM_SETTINGS = "key_screensaver_daydream_settings";
@@ -415,6 +422,7 @@ public class PreferencesKeys {
     public static final String FILE_GENERAL_FONT = "general_font";
     public static final String FILE_ALARM_FONT = "alarm_font";
     public static final String FILE_ALARM_BACKGROUND = "alarm_background";
+    public static final String FILE_SPECIFIC_ALARM_BACKGROUND = "specific_alarm_background";
     public static final String FILE_TIMER_FONT = "timer_font";
     public static final String FILE_TIMER_BACKGROUND = "timer_background";
     public static final String FILE_STOPWATCH_FONT = "stopwatch_font";

@@ -24,12 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.OpenableColumns;
 import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.view.MotionEvent;
@@ -54,18 +52,10 @@ import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 
 public class Utils {
 
@@ -287,6 +277,7 @@ public class Utils {
             if (SdkUtils.isAtLeastAndroid8()) {
                 vibrator.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
+                //noinspection deprecation
                 vibrator.vibrate(milliseconds);
             }
         }
@@ -338,123 +329,6 @@ public class Utils {
             cached.put(key, getter.apply(key));
         }
         return cached;
-    }
-
-    /**
-     * Copies the given file to device-protected storage for Direct Boot compatibility.
-     *
-     * @param context   a context used to resolve storage location
-     * @param sourceUri the URI of the source file to copy
-     * @param title     a title used to generate a safe filename
-     * @return a URI pointing to the copied file in device-protected storage, or null if the copy failed
-     */
-    public static Uri copyFileToDeviceProtectedStorage(Context context, Uri sourceUri, String title) {
-        final Context storageContext = getSafeStorageContext(context);
-
-        long sourceSize = getFileSize(storageContext, sourceUri);
-
-        File[] existingFiles = storageContext.getFilesDir().listFiles();
-        String safeTitle = toSafeFileName(title);
-
-        if (existingFiles != null) {
-            for (File file : existingFiles) {
-                if (file.getName().startsWith(safeTitle)) {
-                    if (file.length() == sourceSize) {
-                        // Already copied
-                        return Uri.fromFile(file);
-                    }
-                }
-            }
-        }
-
-        // Copy if not found
-        String filename = safeTitle + "_" + UUID.randomUUID().toString();
-        File destFile = new File(storageContext.getFilesDir(), filename);
-        try (InputStream inputStream = storageContext.getContentResolver().openInputStream(sourceUri);
-             OutputStream outputStream = new FileOutputStream(destFile)) {
-            if (inputStream != null) {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-                return Uri.fromFile(destFile);
-            } else {
-                LogUtils.e("InputStream null for URI: " + sourceUri);
-            }
-        } catch (IOException e) {
-            LogUtils.e("Failed to copy ringtone", e);
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the size of a file for mixed uri formats.
-     *
-     * <p>File pickers usually use {@code content://} but files stored in DeviceProtected storage
-     * use {@code file://}.</p>
-     */
-    public static long getFileSize(Context context, Uri uri) {
-        long size = -1;
-
-        String scheme = uri.getScheme();
-        if ("file".equalsIgnoreCase(scheme)) {
-            File file = new File(Objects.requireNonNull(uri.getPath()));
-            if (file.exists()) {
-                size = file.length();
-            }
-        } else if ("content".equalsIgnoreCase(scheme)) {
-            try (Cursor cursor = context.getContentResolver().query(
-                uri, new String[]{OpenableColumns.SIZE}, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-                    if (!cursor.isNull(sizeIndex)) {
-                        size = cursor.getLong(sizeIndex);
-                    }
-                }
-            }
-        }
-
-        // As a fallback: read the whole stream
-        if (size < 0) {
-            try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-                if (inputStream != null) {
-                    byte[] buffer = new byte[8192];
-                    int read;
-                    size = 0;
-                    while ((read = inputStream.read(buffer)) != -1) {
-                        size += read;
-                    }
-                }
-            } catch (IOException e) {
-                LogUtils.e("Failed to determine file size of ringtone", e);
-            }
-        }
-
-        return size;
-    }
-
-    /**
-     * Converts a given file title into a "safe" filename that can be stored
-     * in the app's private storage without issues.
-     *
-     * <p>This method performs two main steps:
-     * <ol>
-     *   <li>Normalization of accented characters (e.g., é → e, à → a) to ensure ASCII compatibility.</li>
-     *   <li>Replacement of any character not allowed in filenames (anything other than
-     *       letters, digits, dot, or hyphen) with an underscore '_'.</li>
-     * </ol>
-     *
-     * @param title The file title, possibly containing accents or special characters.
-     * @return A sanitized string that can be safely used as a filename in app storage.
-     */
-    public static String toSafeFileName(String title) {
-        // Normalize accented characters to their base form (é → e, ü → u, etc.) and remove diacritical marks
-        String normalized = Normalizer.normalize(title, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-
-        // Replace any remaining non-alphanumeric character (except dot or hyphen) with an underscore
-        return normalized.replaceAll("[^a-zA-Z0-9.\\-]", "_");
     }
 
     /**

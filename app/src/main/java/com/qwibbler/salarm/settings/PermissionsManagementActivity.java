@@ -36,6 +36,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.KeepAliveService;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.settings.custompreference.PermissionsManagementPreference;
 import com.qwibbler.salarm.uicomponents.CollapsingToolbarBaseActivity;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
@@ -67,7 +68,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         }
     }
 
-    public static class PermissionsManagementFragment extends ScreenFragment
+    public static class PermissionsManagementFragment extends BaseSettingsScreenFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
         private static final String KEY_SHOW_FOREGROUND_SERVICE_DIALOG = "show_foreground_service_dialog";
@@ -176,14 +177,14 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         @Override
         public boolean onPreferenceChange(Preference pref, Object newValue) {
             if (pref.getKey().equals(KEY_ENABLE_FOREGROUND_SERVICE)) {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
                 if ((boolean) newValue) {
                     showForegroundServiceDialog();
                     return false;
                 } else {
                     Utils.stopService(requireContext(), KeepAliveService.class);
                 }
-
-                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
             return true;

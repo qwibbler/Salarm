@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package com.qwibbler.salarm.settings;
+package com.qwibbler.salarm.base;
 
 import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
-import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 import static com.qwibbler.salarm.utils.NotificationUtils.EXTRA_UPDATE_ALARM_NOTIFICATIONS;
 import static com.qwibbler.salarm.utils.WidgetUtils.EXTRA_UPDATE_WIDGETS;
 
@@ -55,12 +54,18 @@ import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.CollapsingToolbarBaseLayoutBinding;
+import com.qwibbler.salarm.settings.AboutFragment;
+import com.qwibbler.salarm.settings.PermissionsManagementActivity;
 import com.qwibbler.salarm.settings.custompreference.ColorPickerPreference;
+import com.qwibbler.salarm.settings.custompreference.ColorPreferenceDialogFragment;
 import com.qwibbler.salarm.settings.custompreference.CustomAboutTitlePreference;
+import com.qwibbler.salarm.settings.custompreference.CustomListPreferenceDialogFragment;
+import com.qwibbler.salarm.settings.custompreference.CustomMultiSelectListPreferenceDialogFragment;
 import com.qwibbler.salarm.uicomponents.CollapsingToolbarBaseActivity;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.BackupAndRestoreUtils;
+import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.InsetsUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.NotificationUtils;
@@ -68,9 +73,7 @@ import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
-import java.io.File;
-
-public abstract class ScreenFragment extends PreferenceFragmentCompat {
+public abstract class BaseSettingsScreenFragment extends PreferenceFragmentCompat {
 
     private static final String KEY_PENDING_FILE_PREF_KEY = "pending_file_pref_key";
     private static final String KEY_PENDING_FILE_PATH = "pending_file_path";
@@ -84,21 +87,21 @@ public abstract class ScreenFragment extends PreferenceFragmentCompat {
     protected static final int MENU_BUG_REPORT = 2;
     protected static final int MENU_RESET_SETTINGS = 3;
 
-    CollapsingToolbarBaseLayoutBinding mActivityBinding;
+    private CollapsingToolbarBaseLayoutBinding mActivityBinding;
 
-    SharedPreferences mPrefs;
-    DisplayMetrics mDisplayMetrics;
-    Typeface mRegularTypeface;
-    Typeface mBoldTypeface;
+    public SharedPreferences mPrefs;
+    private DisplayMetrics mDisplayMetrics;
+    private Typeface mRegularTypeface;
+    private Typeface mBoldTypeface;
 
-    RecyclerView mRecyclerView;
-    LinearLayoutManager mLinearLayoutManager;
-    AlertDialog mActiveDialog = null;
+    private RecyclerView mRecyclerView;
+    private LinearLayoutManager mLinearLayoutManager;
+    public AlertDialog mActiveDialog = null;
 
     int mRecyclerViewPosition = -1;
 
     /**
-     * This method should be implemented by subclasses of ScreenFragment to provide the title
+     * This method should be implemented by subclasses of BaseSettingsScreenFragment to provide the title
      * for the fragment's collapsing toolbar.
      * <p>
      * The title returned by this method will be displayed in the collapsing toolbar layout
@@ -469,7 +472,7 @@ public abstract class ScreenFragment extends PreferenceFragmentCompat {
                                     boolean isFontFile, @Nullable OnPreferenceDeleted onPreferenceDeleted) {
 
         if (fontPath == null) {
-            selectFile(launcher, isFontFile);
+            FileUtils.selectFile(launcher, isFontFile);
         } else {
             mPendingFilePrefKey = prefKey;
             mPendingFilePath = fontPath;
@@ -483,13 +486,13 @@ public abstract class ScreenFragment extends PreferenceFragmentCompat {
                     ? R.string.custom_font_dialog_title
                     : R.string.background_image_dialog_title),
                 getString(isFontFile
-                    ? R.string.custom_font_title_variant
-                    : R.string.background_image_title_variant),
+                    ? R.string.custom_font_dialog_message
+                    : R.string.background_image_dialog_message),
                 null,
                 getString(isFontFile ? R.string.label_new_font : R.string.label_new_image),
                 (d, w) -> {
                     mPendingFilePrefKey = null;
-                    selectFile(launcher, isFontFile);
+                    FileUtils.selectFile(launcher, isFontFile);
                 },
                 null,
                 null,
@@ -505,7 +508,7 @@ public abstract class ScreenFragment extends PreferenceFragmentCompat {
                         onPreferenceDeleted.onDeleted();
                     }
 
-                    deleteCustomFile(requireContext().getApplicationContext(), fontPath, isFontFile);
+                    FileUtils.deleteCustomFile(requireContext().getApplicationContext(), fontPath, isFontFile);
                 },
                 (alertDialog -> alertDialog.setOnDismissListener(d -> mPendingFilePrefKey = null)),
                 CustomDialog.SoftInputMode.NONE
@@ -513,118 +516,6 @@ public abstract class ScreenFragment extends PreferenceFragmentCompat {
 
             mActiveDialog.show();
         }
-    }
-
-    /**
-     * Opens a file picker allowing the user to select either a font file or an image file.
-     *
-     * @param launcher   The ActivityResultLauncher used to start the document picker.
-     * @param isFontFile True to filter for font files, false to filter for image files.
-     */
-    protected void selectFile(ActivityResultLauncher<Intent> launcher, boolean isFontFile) {
-        final String type = isFontFile ? "*/*" : "image/*";
-        final String[] mimeTypes = isFontFile
-            ? new String[]{"application/x-font-ttf", "application/x-font-otf", "font/ttf", "font/otf"}
-            : new String[]{"image/jpeg", "image/png"};
-
-        launcher.launch(new Intent(Intent.ACTION_OPEN_DOCUMENT)
-            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType(type)
-            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        );
-    }
-
-    /**
-     * Deletes a file from storage and removes its associated preference entry.
-     *
-     * @param path       The absolute path of the file to delete.
-     * @param isFontFile True if the deleted file is a font, false if it is an image.
-     */
-    protected void deleteCustomFile(Context context, String path, boolean isFontFile) {
-        AppExecutors.getDiskIO().execute(() -> {
-            clearFile(path);
-
-            AppExecutors.getMainThread().post(() -> CustomToast.show(context, isFontFile
-                ? R.string.custom_font_toast_message_deleted
-                : R.string.background_image_toast_message_deleted)
-            );
-        });
-    }
-
-    /**
-     * Scans both standard and device-protected storage to physically delete all custom media files (fonts and background images)
-     * used by the application.
-     *
-     * <p>This prevents file leaks and ensures a completely clean state during a reset or a restore.</p>
-     *
-     * @param context The context used to access the application's storage directories.
-     */
-    protected void wipeAllCustomFiles(Context context) {
-        File[] directoriesToScan = new File[] {
-            context.getFilesDir(),
-            Utils.getSafeStorageContext(context).getFilesDir()
-        };
-
-        for (File dir : directoriesToScan) {
-            if (dir != null) {
-                File[] files = dir.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        if (getCustomFilePrefKey(file.getName()) != null) {
-                            clearFile(file.getAbsolutePath());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Deletes the file at the given path if it exists and is a regular file.
-     *
-     * @param path The absolute path of the file to delete.
-     */
-    protected void clearFile(String path) {
-        if (path != null) {
-            File file = new File(path);
-            if (file.exists() && file.isFile()) {
-                boolean deleted = file.delete();
-                if (!deleted) {
-                    LogUtils.w("Unable to delete file: " + path);
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns the corresponding preference key for a given custom file (font or background image).
-     *
-     * @param fileName The name of the file to check.
-     * @return The associated preference key, or null if the file is not a recognized custom media file.
-     */
-    protected String getCustomFilePrefKey(String fileName) {
-        if (fileName.startsWith(FILE_GENERAL_FONT)) {
-            return KEY_GENERAL_FONT;
-        } else if (fileName.startsWith(FILE_ALARM_FONT)) {
-            return KEY_ALARM_FONT;
-        } else if (fileName.startsWith(FILE_ALARM_BACKGROUND)) {
-            return KEY_ALARM_BACKGROUND_IMAGE;
-        } else if (fileName.startsWith(FILE_TIMER_FONT)) {
-            return KEY_TIMER_DURATION_FONT;
-        } else if (fileName.startsWith(FILE_TIMER_BACKGROUND)) {
-            return KEY_TIMER_BACKGROUND_IMAGE;
-        } else if (fileName.startsWith(FILE_STOPWATCH_FONT)) {
-            return KEY_SW_FONT;
-        } else if (fileName.startsWith(FILE_SCREENSAVER_DIGITAL_CLOCK_FONT)) {
-            return KEY_SCREENSAVER_DIGITAL_CLOCK_FONT;
-        } else if (fileName.startsWith(FILE_SCREENSAVER_BACKGROUND)) {
-            return KEY_SCREENSAVER_BACKGROUND_IMAGE;
-        } else if (fileName.startsWith(FILE_DIGITAL_CLOCK_FONT)) {
-            return KEY_DIGITAL_CLOCK_FONT;
-        }
-
-        return null;
     }
 
     /**

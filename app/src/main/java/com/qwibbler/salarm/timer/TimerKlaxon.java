@@ -17,18 +17,18 @@ import android.os.Vibrator;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.data.Timer;
 import com.qwibbler.salarm.ringtone.AsyncRingtonePlayer;
 import com.qwibbler.salarm.ringtone.RingtonePlayer;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
+import com.qwibbler.salarm.utils.Utils;
 
 /**
  * Manages playing the timer ringtone and vibrating the device.
  */
 public final class TimerKlaxon {
-
-    private static final long[] VIBRATE_PATTERN = {500, 500};
 
     private static TimerKlaxon sInstance;
 
@@ -69,7 +69,7 @@ public final class TimerKlaxon {
         }
     }
 
-    public static void start() {
+    public static void start(Timer timer) {
         // Make sure we are stopped before starting
         stop();
         LogUtils.i("TimerKlaxon.start()");
@@ -77,7 +77,7 @@ public final class TimerKlaxon {
         Context appContext = SalarmApplication.getAppContext();
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
         TimerKlaxon instance = getInstance();
-        Uri uri = DataModel.getDataModel().getTimerRingtoneUri();
+        Uri uri = timer.getRingtoneUri();
 
         // Look up user-selected timer ringtone.
         if (RingtoneUtils.RINGTONE_SILENT.equals(uri)) {
@@ -91,7 +91,7 @@ public final class TimerKlaxon {
             }
 
             // Crescendo duration always in milliseconds
-            final int crescendoDuration = SettingsDAO.getTimerVolumeCrescendoDuration(prefs) * 1000;
+            final int crescendoDuration = timer.getVolumeCrescendoDuration() * 1000;
 
             if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
                 instance.getRingtonePlayer().play(uri, crescendoDuration);
@@ -100,24 +100,29 @@ public final class TimerKlaxon {
             }
         }
 
-        if (SettingsDAO.isTimerVibrate(prefs)) {
+        if (timer.isVibrate()) {
             final Vibrator vibrator = appContext.getSystemService(Vibrator.class);
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
 
+            String patternKey = timer.getVibrationPattern();
+            long[] pattern = Utils.getVibrationPatternForKey(patternKey);
+
             if (SdkUtils.isAtLeastAndroid13()) {
                 VibrationAttributes vibrationAttributes = new VibrationAttributes.Builder()
                     .setUsage(VibrationAttributes.USAGE_ALARM)
                     .build();
-                VibrationEffect vibrationEffect = VibrationEffect.createWaveform(VIBRATE_PATTERN, 0);
+                VibrationEffect vibrationEffect = VibrationEffect.createWaveform(pattern, 0);
                 vibrator.vibrate(vibrationEffect, vibrationAttributes);
             } else if (SdkUtils.isAtLeastAndroid8()) {
-                VibrationEffect vibrationEffect = VibrationEffect.createWaveform(VIBRATE_PATTERN, 0);
+                VibrationEffect vibrationEffect = VibrationEffect.createWaveform(pattern, 0);
+                //noinspection deprecation
                 vibrator.vibrate(vibrationEffect, audioAttributes);
             } else {
-                vibrator.vibrate(VIBRATE_PATTERN, 0, audioAttributes);
+                //noinspection deprecation
+                vibrator.vibrate(pattern, 0, audioAttributes);
             }
         }
 

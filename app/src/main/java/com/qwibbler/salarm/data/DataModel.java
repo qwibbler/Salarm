@@ -373,23 +373,37 @@ public final class DataModel {
     }
 
     /**
-     * @param length         the length of the timer in milliseconds
-     * @param label          describes the purpose of the timer
-     * @param buttonTime     the time indicated in the timer time add button
-     * @param deleteAfterUse {@code true} indicates the timer should be deleted when it is reset
+     * @param length            the length of the timer in milliseconds
+     * @param label             describes the purpose of the timer
+     * @param buttonTime        the time indicated in the timer time add button
+     * @param ringtone          the timer ringtone
+     * @param autoSilence       the auto silence duration
+     * @param crescendoDuration the volume crescendo duration
+     * @param isVibrate         {@code true} to enable vibration upon expiration, {@code false} otherwise
+     * @param vibrationPattern  the vibration pattern
+     * @param isFlashOn         {@code true} tu turn on the flash upon expiration, {@code false} otherwise
+     * @param turnOffMedia      {@code true} to turn off media upon expiration, {@code false} otherwise.
+     * @param deleteAfterUse    {@code true} indicates the timer should be deleted when it is reset
      * @return the newly added timer
      */
-    public Timer addTimer(long length, String label, String buttonTime, boolean deleteAfterUse) {
+    public Timer addTimer(long length, String label, String buttonTime, Uri ringtone, int autoSilence, int crescendoDuration,
+                          boolean isVibrate, String vibrationPattern, boolean isFlashOn, boolean turnOffMedia, boolean deleteAfterUse) {
+
         enforceMainLooper();
-        return mTimerModel.addTimer(length, label, buttonTime, deleteAfterUse);
+
+        return mTimerModel.addTimer(length, label, buttonTime, ringtone, autoSilence, crescendoDuration, isVibrate, vibrationPattern,
+            isFlashOn, turnOffMedia, deleteAfterUse
+        );
     }
 
     /**
+     * Deletes a given timer.
+     *
      * @param timer the timer to be removed
      */
-    public void removeTimer(Timer timer) {
+    public void removeTimer(Timer timer, @StringRes int eventLabelId) {
         enforceMainLooper();
-        mTimerModel.removeTimer(timer);
+        mTimerModel.removeTimer(timer, eventLabelId);
     }
 
     /**
@@ -437,20 +451,33 @@ public final class DataModel {
     }
 
     /**
-     * If the given {@code timer} is expired and marked for deletion after use then this method
-     * removes the timer. The timer is otherwise transitioned to the reset state and continues
-     * to exist.
+     * Resets a given timer.
      *
      * @param timer        the timer to be reset
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
-    public void resetOrDeleteTimer(Timer timer, @StringRes int eventLabelId) {
+    public void resetTimer(Timer timer, @StringRes int eventLabelId) {
         enforceMainLooper();
-        mTimerModel.resetTimer(timer, true, eventLabelId);
+        mTimerModel.resetTimer(timer, eventLabelId);
     }
 
     /**
-     * Resets all expired timers.
+     * Resets or deletes a given timer based on its "delete after use" setting.
+     *
+     * @param timer        the timer to be reset or deleted
+     * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
+     */
+    public void resetOrDeleteTimer(Timer timer, @StringRes int eventLabelId) {
+        enforceMainLooper();
+        if (timer.getDeleteAfterUse()) {
+            removeTimer(timer, eventLabelId);
+        } else {
+            resetTimer(timer, eventLabelId);
+        }
+    }
+
+    /**
+     * Resets or deletes all expired timers.
      *
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
@@ -460,13 +487,13 @@ public final class DataModel {
     }
 
     /**
-     * Resets all missed timers.
+     * Resets or deletes all missed timers.
      *
      * @param eventLabelId the label of the timer event to send; 0 if no event should be sent
      */
-    public void resetMissedTimers(@StringRes int eventLabelId) {
+    public void resetOrDeleteMissedTimers(@StringRes int eventLabelId) {
         enforceMainLooper();
-        mTimerModel.resetMissedTimers(eventLabelId);
+        mTimerModel.resetOrDeleteMissedTimers(eventLabelId);
     }
 
     /**
@@ -478,30 +505,57 @@ public final class DataModel {
     }
 
     /**
-     * @param timer the timer to which the new {@code label} belongs
-     * @param label the new label to store for the {@code timer}
-     */
-    public void setTimerLabel(Timer timer, String label) {
-        enforceMainLooper();
-        mTimerModel.updateTimer(timer.setLabel(label));
-    }
-
-    /**
      * @param timer     the timer to which the new {@code newLength} belongs
      * @param newLength the new duration to store for the {@code timer}
      */
     public void setNewTimerDuration(Timer timer, long newLength) {
         enforceMainLooper();
+
+        if (timer.getLength() == newLength) {
+            return;
+        }
+
         mTimerModel.updateTimer(timer.setNewDuration(newLength));
     }
 
     /**
-     * @param timer      the timer to which the new {@code buttonTime} belongs
-     * @param buttonTime the new add button text to store for the {@code timer}
+     * Updates all customizable settings of a given timer at once.
+     * If no changes are detected, the update is ignored to optimize performance.
+     *
+     * @param timer             the original timer to update
+     * @param label             the new label for the timer
+     * @param buttonTime        the new custom duration for the add button
+     * @param ringtone          the new timer ringtone
+     * @param autoSilence       the new custom auto silence duration
+     * @param crescendoDuration the new custom volume crescendo duration
+     * @param isVibrate         {@code true} to enable vibration upon expiration, {@code false} otherwise
+     * @param vibrationPattern  the vibration pattern
+     * @param isFlashOn         {@code true} tu turn on the flash upon expiration, {@code false} otherwise
+     * @param turnOffMedia      {@code true} to turn off media upon expiration, {@code false} otherwise.
+     * @param deleteAfterUse    {@code true} to automatically delete the timer after use, {@code false} otherwise
      */
-    public void setTimerButtonTime(Timer timer, String buttonTime) {
+    public void updateAllTimerSettings(Timer timer, String label, String buttonTime, Uri ringtone, int autoSilence, int crescendoDuration,
+                                       boolean isVibrate, String vibrationPattern, boolean isFlashOn, boolean turnOffMedia,
+                                       boolean deleteAfterUse) {
+
         enforceMainLooper();
-        mTimerModel.updateTimer(timer.setButtonTime(buttonTime));
+
+        Timer updatedTimer = timer.setLabel(label)
+            .setButtonTime(buttonTime)
+            .setRingtone(ringtone)
+            .setAutoSilence(autoSilence)
+            .setCrescendoDuration(crescendoDuration)
+            .setIsVibrate(isVibrate)
+            .setVibrationPattern(vibrationPattern)
+            .setFlashOn(isFlashOn)
+            .setTurnOffMedia(turnOffMedia)
+            .setDeleteAfterUse(deleteAfterUse);
+
+        if (updatedTimer == timer) {
+            return;
+        }
+
+        mTimerModel.updateTimer(updatedTimer);
     }
 
     /**
@@ -790,7 +844,12 @@ public final class DataModel {
     /**
      * Indicates the preferred behavior of volume button when firing alarms.
      */
-    public enum VolumeButtonBehavior {CHANGE_VOLUME, SNOOZE_ALARM, DISMISS_ALARM, DO_NOTHING}
+    public enum VolumeButtonBehavior {CHANGE_VOLUME, SNOOZE, DISMISS, NOTHING}
+
+    /**
+     * Indicates the preferred behavior of external device buttons when firing alarms.
+     */
+    public enum HeadphonesButtonBehavior {NOTHING, SNOOZE, DISMISS}
 
     /**
      * Indicates the reason alarms may not fire or may fire silently.

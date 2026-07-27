@@ -5,7 +5,6 @@
 package com.qwibbler.salarm.utils;
 
 import static android.media.AudioManager.STREAM_ALARM;
-
 import static com.qwibbler.salarm.data.CustomRingtoneDAO.NEXT_RINGTONE_ID;
 import static com.qwibbler.salarm.data.CustomRingtoneDAO.RINGTONE_IDS;
 import static com.qwibbler.salarm.data.CustomRingtoneDAO.RINGTONE_TITLE;
@@ -13,6 +12,9 @@ import static com.qwibbler.salarm.data.CustomRingtoneDAO.RINGTONE_URI;
 import static com.qwibbler.salarm.data.SettingsDAO.KEY_SELECTED_ALARM_RINGTONE_URI;
 import static com.qwibbler.salarm.data.TimerDAO.STATE;
 import static com.qwibbler.salarm.data.TimerDAO.TIMER_IDS;
+import static com.qwibbler.salarm.data.TimerDAO.TIMER_RINGTONE;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
 import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 
 import android.annotation.SuppressLint;
@@ -24,6 +26,7 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 
 import com.qwibbler.salarm.BuildConfig;
@@ -107,7 +110,7 @@ public class BackupAndRestoreUtils {
                     booleans.put(entry.getKey(), prefs.getBoolean(entry.getKey(), (Boolean) entry.getValue()));
                 } else if (entry.getValue() instanceof String) {
                     // Exclude these keys if the URI does not match a system ringtone
-                    if (KEY_TIMER_RINGTONE.equals(key) || KEY_DEFAULT_ALARM_RINGTONE.equals(key)) {
+                    if (isRingtoneKey(key)) {
                         String value = prefs.getString(key, (String) entry.getValue());
                         Uri uri = Uri.parse(value);
                         if (!RingtoneUtils.isSystemRingtone(uri)) {
@@ -189,6 +192,8 @@ public class BackupAndRestoreUtils {
             alarmObject.put("pauseStartDate", alarm.pauseStartDate);
             alarmObject.put("pauseEndDate", alarm.pauseEndDate);
             alarmObject.put("relationalRuleId", alarm.relationalRuleId);
+            alarmObject.put("backgroundImage", alarm.backgroundImage);
+            alarmObject.put("blurIntensity", alarm.blurIntensity);
 
             if (alarm.daysOfWeek.isRepeating() || !alarm.isSpecifiedDate()) {
                 alarmsArray.put(alarmObject);
@@ -297,7 +302,7 @@ public class BackupAndRestoreUtils {
 
             if (isRingtoneKey(key)) {
                 if (!isRingtoneAvailable(context, value)) {
-                    if (KEY_TIMER_RINGTONE.equals(key)) {
+                    if (KEY_TIMER_RINGTONE.equals(key) || key.startsWith(TIMER_RINGTONE)) {
                         editor.putString(key, RingtoneUtils.getResourceUri(context, R.raw.timer_expire).toString());
                     } else if (KEY_DEFAULT_ALARM_RINGTONE.equals(key)) {
                         editor.putString(key, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM).toString());
@@ -401,6 +406,15 @@ public class BackupAndRestoreUtils {
         long pauseStartDate = alarmObject.optLong("pauseStartDate", 0);
         long pauseEndDate = alarmObject.optLong("pauseEndDate", 0);
         long relationalRuleId = alarmObject.optLong("relationalRuleId", -1);
+        String oldBackgroundImage = alarmObject.optString("backgroundImage", DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE);
+        String newBackgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+        int blurIntensity = alarmObject.optInt("blurIntensity", DEFAULT_BLUR_INTENSITY);
+
+        if (!TextUtils.isEmpty(oldBackgroundImage)) {
+            String fileName = new File(oldBackgroundImage).getName();
+            final Context safeContext = Utils.getSafeStorageContext(context);
+            newBackgroundImage = new File(safeContext.getFilesDir(), fileName).getAbsolutePath();
+        }
 
         // If the pause is in the past during a restore, remove it.
         if (pauseEndDate > 0 && AlarmUtils.isPauseExpired(pauseEndDate)) {
@@ -438,7 +452,8 @@ public class BackupAndRestoreUtils {
 
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes, vibrate, vibrationPattern, flash,
             Weekdays.fromBits(daysOfWeek), label, syncAlarmByLabel, alarmRingtone, deleteAfterUse, autoSilenceDuration, snoozeDuration,
-            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate, relationalRuleId);
+            missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate,
+            relationalRuleId, newBackgroundImage, blurIntensity);
 
         restoredAlarm.addAlarm(contentResolver);
 
@@ -454,7 +469,7 @@ public class BackupAndRestoreUtils {
      * @return {@code true} if a key matches a ringtone key. {@code false} otherwise.
      */
     private static boolean isRingtoneKey(String key) {
-        return KEY_TIMER_RINGTONE.equals(key) || KEY_DEFAULT_ALARM_RINGTONE.equals(key);
+        return KEY_TIMER_RINGTONE.equals(key) || key.startsWith(TIMER_RINGTONE) || KEY_DEFAULT_ALARM_RINGTONE.equals(key);
     }
 
     /**
