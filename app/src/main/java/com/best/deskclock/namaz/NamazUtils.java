@@ -7,12 +7,16 @@ import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.best.deskclock.base.AppExecutors;
 import com.best.deskclock.settings.PreferencesDefaultValues;
 import com.best.deskclock.settings.PreferencesKeys;
 import com.best.deskclock.utils.LogUtils;
+import com.best.deskclock.utils.SdkUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +26,25 @@ import java.util.Locale;
  * Shared utility methods for Namaz features.
  */
 public class NamazUtils {
+
+    /**
+     * Checks if the device has an active internet connection.
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+
+        if (SdkUtils.isAtLeastAndroid10()) {
+            NetworkCapabilities capabilities = cm.getNetworkCapabilities(cm.getActiveNetwork());
+            return capabilities != null && (
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        } else {
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnected();
+        }
+    }
 
     /**
      * Retrieves the current Namaz coordinates from preferences.
