@@ -1,11 +1,11 @@
-# Contributing to Clock
+# Contributing to Salarm
 
 Thank you for your interest in contributing! 🙌  
-There are many ways to help improve Clock: reporting issues, translating, or contributing code.
+There are many ways to help improve Salarm: reporting issues, translating, or contributing code.
 
 ## 📢 Reporting Issues
 
-- Check if the issue already exists ([browse issues](https://github.com/BlackyHawky/Clock/issues)).
+- Check if the issue already exists ([browse issues](https://github.com/qwibbler/Salarm/issues)).
 - Ensure it’s still relevant in the latest version.
 - Keep it focused on a single topic.
 - Write in English only.
@@ -47,7 +47,7 @@ You can also request new languages directly on Weblate if your language is not y
 - Install [Android Studio](https://developer.android.com/studio) or another compatible IDE.
 - Clone the repository:
   ```bash
-  git clone https://github.com/BlackyHawky/Clock.git
+  git clone https://github.com/qwibbler/Salarm.git
   cd Clock
   ./gradlew build
   ```

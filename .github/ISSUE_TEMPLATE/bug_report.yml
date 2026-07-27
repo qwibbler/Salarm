@@ -6,13 +6,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping make Clock better!  
+        Thank you for helping make Clock better!
         Please follow these guidelines for a good bug report:
-        • Search existing issues (open and closed) to avoid duplicates.  
-        • Give your bug report a clear title (avoid "Error" or "Crash").  
-        • Describe the bug concisely.  
-        • If you have a screenshot or screen recording of the bug, link them at the end of this issue.  
-        • Fill out environment information (app version, device, OS). 
+        • Search existing issues (open and closed) to avoid duplicates.
+        • Give your bug report a clear title (avoid "Error" or "Crash").
+        • Describe the bug concisely.
+        • If you have a screenshot or screen recording of the bug, link them at the end of this issue.
+        • Fill out environment information (app version, device, OS).
 
   - type: textarea
     id: description
@@ -89,9 +89,9 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: "I searched for _existing issues_ ([open](https://github.com/BlackyHawky/Clock/issues) and [closed](https://github.com/BlackyHawky/Clock/issues?q=is%3Aissue%20state%3Aclosed)) before filing this report."
+        - label: "I searched for _existing issues_ ([open](https://github.com/qwibbler/Salarm/discussions/Clock/issues) and [closed](https://github.com/qwibbler/Salarm/issues?q=is%3Aissue%20state%3Aclosed)) before filing this report."
           required: true
-        - label: "I have read and understood the [contribution guidelines](https://github.com/BlackyHawky/Clock/blob/main/CONTRIBUTING.md)."
+        - label: "I have read and understood the [contribution guidelines](https://github.com/qwibbler/Salarm/blob/main/CONTRIBUTING.md)."
           required: true
         - label: "I have provided all required details. I understand that the feature request will be dismissed otherwise."
           required: true

@@ -15,10 +15,10 @@ It combines modern design, powerful features, and transparency — giving you fu
 
 # 📥 Download
 
-[<img src="/images/badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/BlackyHawky/Clock/releases)
-[<img src="/images/badge_f-droid.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.best.deskclock/)
-[<img src="/images/badge_izzy_on_droid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.best.deskclock/)
-[<img src="/images/badge_obtainium.png" alt="Get it on Obtainium" height="80">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/BlackyHawky/Clock/releases)
+[<img src="/images/badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/qwibbler/Salarm/releases)
+[<img src="/images/badge_f-droid.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.qwibbler.salarm/)
+[<img src="/images/badge_izzy_on_droid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.qwibbler.deskclock/)
+[<img src="/images/badge_obtainium.png" alt="Get it on Obtainium" height="80">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/qwibbler/Salarm/releases)
 
 > [!NOTE]  
 > **Build variants:**
@@ -121,9 +121,9 @@ See the [LICENSE](LICENSE) file for full details.
 </details>
 
 # 🏅 Credits
-* 🖼️ **App icon** inspired by [LineageOS DeskClock](https://github.com/LineageOS/android_packages_apps_DeskClock), modified by [BlackyHawky](https://github.com/BlackyHawky)
+* 🖼️ **App** forked from [BlackyHawkyClock](https://github.com/BlackyHawky)/[Clock](https://github.com/BlackyHawky/Clock)
 * 💻 Code references and inspiration from:
     * [LineageOS](https://github.com/LineageOS/android_packages_apps_DeskClock)
     * [crDroid Android](https://github.com/crdroidandroid/android_packages_apps_DeskClock)
-* 🌍 Translations provided by the community via [Weblate](https://translate.codeberg.org/projects/clock/)
+* 🌍 Translations provided by the community via [Weblate](https://translate.codeberg.org/projects/Salarm/)
 * 🤝 Thanks to all [contributors](https://github.com/BlackyHawky/Clock/graphs/contributors) who help improve Clock
