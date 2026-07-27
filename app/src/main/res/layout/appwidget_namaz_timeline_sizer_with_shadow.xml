@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:id="@+id/countdown_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/countdown_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:shadowRadius="2.75"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            tools:text="11h:59m" />
+
+        <TextView
+            android:id="@+id/countdown_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:shadowRadius="2.75"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            tools:text="TO SUNRISE" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/timeline_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp">
+
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+        <include layout="@layout/namaz_widget_item_with_shadow" />
+
+    </LinearLayout>
+
+</LinearLayout>
