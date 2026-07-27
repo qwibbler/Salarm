@@ -907,7 +907,7 @@
     <!-- Menu item About -->
     <string name="about_title">About</string>
     <!-- App slogan -->
-    <string name="app_slogan">100% FOSS Clock, based on AOSP</string>
+    <string name="app_slogan">100% FOSS Clock, based on BlackyHawky's Clock</string>
     <!-- Version for about screen -->
     <string name="version">Version</string>
     <!-- Version text [CHAR LIMIT=30] -->
@@ -927,7 +927,7 @@
     <!-- Translate link for about screen -->
     <string name="about_translate_link">Translate on Codeberg</string>
     <!-- Translate dialog message in about screen -->
-    <string name="translate_dialog_message">Visit the Codeberg page:\n\n%s</string>
+    <string name="translate_dialog_message">(Incoming) Visit the Codeberg page:\n\n%s</string>
     <!-- License for about screen -->
     <string name="license">Open-source license</string>
     <!-- License dialog message in about screen -->

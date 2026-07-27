@@ -349,31 +349,31 @@ public class AboutFragment extends ScreenFragment implements Preference.OnPrefer
                 } else if (BuildConfig.IS_NIGHTLY_BUILD) {
                     version = version.replace(BuildConfig.VERSION_NAME, "nightly" + "-" + BuildConfig.COMMIT_NUMBER);
                 }
-                link = "https://github.com/BlackyHawky/Clock/releases/tag/" + version;
+                link = "https://github.com/qwibbler/Salarm/releases/tag/" + version;
                 iconId = R.drawable.ic_about_update;
                 titleId = R.string.whats_new_title;
                 messageId = R.string.whats_new_dialog_message;
             }
             case KEY_ABOUT_FEATURES -> {
-                link = "https://github.com/BlackyHawky/Clock?tab=readme-ov-file#-features";
+                link = "https://github.com/qwibbler/Salarm?tab=readme-ov-file#-features";
                 iconId = R.drawable.ic_about_features;
                 titleId = R.string.features_title;
                 messageId = R.string.features_dialog_message;
             }
             case KEY_ABOUT_VIEW_ON_GITHUB -> {
-                link = "https://github.com/BlackyHawky/Clock";
+                link = "https://github.com/qwibbler/Salarm";
                 iconId = R.drawable.ic_about_github;
                 titleId = R.string.about_github_link;
                 messageId = R.string.github_dialog_message;
             }
             case KEY_ABOUT_TRANSLATE -> {
-                link = "https://translate.codeberg.org/projects/clock";
+                link = "https://translate.codeberg.org/projects/Salarm";
                 iconId = R.drawable.ic_about_translate;
                 titleId = R.string.about_translate_link;
                 messageId = R.string.translate_dialog_message;
             }
             case KEY_ABOUT_READ_LICENCE -> {
-                link = "https://github.com/BlackyHawky/Clock/blob/main/LICENSE";
+                link = "https://github.com/qwibbler/Salarm/blob/main/LICENSE";
                 iconId = R.drawable.ic_about_license;
                 titleId = R.string.license;
                 messageId = R.string.license_dialog_message;
