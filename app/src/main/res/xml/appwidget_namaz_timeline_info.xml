@@ -5,6 +5,8 @@
     android:minHeight="110dp"
     android:minResizeWidth="110dp"
     android:minResizeHeight="40dp"
+    android:previewImage="@drawable/appwidget_namaz_timeline_preview"
+    android:previewLayout="@layout/appwidget_namaz_timeline_preview"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
