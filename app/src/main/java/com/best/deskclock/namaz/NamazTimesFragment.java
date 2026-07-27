@@ -5,6 +5,7 @@ import static com.best.deskclock.uidata.UiDataModel.Tab.NAMAZ;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +31,7 @@ import com.best.deskclock.DeskClockApplication;
 import com.best.deskclock.R;
 import com.best.deskclock.base.DeskClockFragment;
 import com.best.deskclock.settings.PreferencesKeys;
+import com.best.deskclock.utils.ThemeUtils;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
@@ -417,6 +419,7 @@ public class NamazTimesFragment extends DeskClockFragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             PrayerItem item = mItems.get(position);
             holder.name.setText(item.name);
+            holder.itemView.setOnClickListener(v -> { /* Just to trigger ripple */ });
 
             Context context = getContext();
             if (context == null) return;
@@ -446,7 +449,7 @@ public class NamazTimesFragment extends DeskClockFragment {
                         com.google.android.material.R.attr.colorPrimaryContainer, Color.BLUE);
                 @ColorInt int onHighlightColor = MaterialColors.getColor(context,
                         com.google.android.material.R.attr.colorOnPrimaryContainer, Color.WHITE);
-                holder.itemView.setBackgroundColor(highlightColor);
+                holder.itemView.setBackground(ThemeUtils.rippleDrawable(context, new ColorDrawable(highlightColor)));
                 holder.name.setTextColor(onHighlightColor);
                 holder.time.setTextColor(onHighlightColor);
             } else {
