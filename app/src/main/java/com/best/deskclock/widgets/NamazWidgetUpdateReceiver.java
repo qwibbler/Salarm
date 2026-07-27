@@ -33,8 +33,17 @@ public class NamazWidgetUpdateReceiver extends BroadcastReceiver {
             context.sendBroadcast(updateIntent);
         }
 
+        // Update Countdown Widgets
+        int[] countdownIds = wm.getAppWidgetIds(new ComponentName(context, NamazCountdownWidgetProvider.class));
+        if (countdownIds.length > 0) {
+            Intent updateIntent = new Intent(context, NamazCountdownWidgetProvider.class);
+            updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, countdownIds);
+            context.sendBroadcast(updateIntent);
+        }
+
         // Reschedule for the next minute if any Namaz widget is still active
-        if (timelineIds.length > 0) {
+        if (timelineIds.length > 0 || countdownIds.length > 0) {
             scheduleNextUpdate(context);
         }
     }

@@ -343,10 +343,14 @@ public class NamazTimesFragment extends DeskClockFragment {
         boolean isViewingToday = isSameDay(mSelectedDate, todayCal);
         mCountdownText.setAlpha(isViewingToday ? 1.0f : 0.5f);
 
+        String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+        boolean isShafi = "SHAFI".equals(madhabStr);
+        Date asrTime = isShafi ? todayTimes.asrShafi : todayTimes.asrHanafi;
+
         if (now.before(todayTimes.fajr)) nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), todayTimes.fajr);
         else if (now.before(todayTimes.sunrise)) nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todayTimes.sunrise);
         else if (now.before(todayTimes.dhuhr)) nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todayTimes.dhuhr);
-        else if (now.before(todayTimes.asrHanafi)) nextPrayer = new PrayerItem(context.getString(R.string.asr_label), todayTimes.asrHanafi);
+        else if (now.before(asrTime)) nextPrayer = new PrayerItem(context.getString(R.string.asr_label), asrTime);
         else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todayTimes.maghrib);
         else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todayTimes.isha);
         else {
