@@ -121,7 +121,9 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
     private RemoteViews buildRemoteViews(Context context, AppWidgetManager wm, int widgetId, Bundle options, boolean portrait, NamazCalculator.NamazTimes times, List<PrayerItem> allPrayers) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.appwidget_namaz_timeline);
+        RemoteViews rv = new RemoteViews(context.getPackageName(), WidgetDAO.isTextShadowDisplayedOnNamazWidget(prefs)
+                ? R.layout.appwidget_namaz_timeline_with_shadow
+                : R.layout.appwidget_namaz_timeline);
 
         if (times == null) {
             rv.setTextViewText(R.id.countdown_time, "Set Location");
@@ -224,6 +226,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                                       boolean showSymbols, boolean isNarrow) {
         rv.removeAllViews(R.id.timeline_container);
 
+        boolean shadowEnabled = WidgetDAO.isTextShadowDisplayedOnNamazWidget(prefs);
         SimpleDateFormat timeFormat = new SimpleDateFormat(DateFormat.is24HourFormat(context) ? "HH:mm" : "h:mm a", Locale.getDefault());
         boolean uppercase = WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs);
 
@@ -248,7 +251,9 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
         for (int i = 0; i < prayers.size(); i++) {
             PrayerItem prayer = prayers.get(i);
-            RemoteViews itemRv = new RemoteViews(context.getPackageName(), R.layout.namaz_widget_item);
+            RemoteViews itemRv = new RemoteViews(context.getPackageName(), shadowEnabled
+                    ? R.layout.namaz_widget_item_with_shadow
+                    : R.layout.namaz_widget_item);
 
             itemRv.setViewVisibility(R.id.mode_wide, mode == MODE_WIDE ? View.VISIBLE : View.GONE);
             itemRv.setViewVisibility(R.id.mode_narrow, mode == MODE_NARROW ? View.VISIBLE : View.GONE);
@@ -361,9 +366,13 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                                            boolean isCountdownVisible, boolean isHeight1,
                                            boolean showSymbols, boolean isNarrow) {
 
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        boolean shadowEnabled = WidgetDAO.isTextShadowDisplayedOnNamazWidget(prefs);
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
-        View sizer = inflater.inflate(R.layout.appwidget_namaz_timeline_sizer, null);
+        View sizer = inflater.inflate(shadowEnabled
+                ? R.layout.appwidget_namaz_timeline_sizer_with_shadow
+                : R.layout.appwidget_namaz_timeline_sizer, null);
 
         View countdownContainer = sizer.findViewById(R.id.countdown_container);
         if (countdownContainer != null) {
@@ -375,12 +384,13 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             container.setVisibility((!isCountdownVisible || !isHeight1) ? View.VISIBLE : View.GONE);
             container.removeAllViews();
             for (int i = 0; i < prayers.size(); i++) {
-                View item = inflater.inflate(R.layout.namaz_widget_item, container, false);
+                View item = inflater.inflate(shadowEnabled
+                        ? R.layout.namaz_widget_item_with_shadow
+                        : R.layout.namaz_widget_item, container, false);
                 container.addView(item);
             }
         }
 
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
         int padding = (int) dpToPx(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(prefs)
                 ? 20
                 : 0, context.getResources().getDisplayMetrics());

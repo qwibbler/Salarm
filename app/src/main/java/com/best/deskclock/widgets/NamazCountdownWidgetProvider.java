@@ -97,7 +97,9 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
 
     private RemoteViews buildRemoteViews(Context context, Bundle options, boolean portrait, PrayerItem next) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.appwidget_namaz_countdown);
+        RemoteViews rv = new RemoteViews(context.getPackageName(), WidgetDAO.isTextShadowDisplayedOnNamazCountdownWidget(prefs)
+                ? R.layout.appwidget_namaz_countdown_with_shadow
+                : R.layout.appwidget_namaz_countdown);
 
         if (next == null) {
             rv.setTextViewText(R.id.countdown_time, "Set Location");
@@ -203,11 +205,13 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
     }
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx, int maxFontSize) {
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        boolean shadowEnabled = WidgetDAO.isTextShadowDisplayedOnNamazCountdownWidget(prefs);
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
-        View sizer = inflater.inflate(R.layout.appwidget_namaz_countdown_sizer, null);
-
-        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        View sizer = inflater.inflate(shadowEnabled
+                ? R.layout.appwidget_namaz_countdown_sizer_with_shadow
+                : R.layout.appwidget_namaz_countdown_sizer, null);
         int padding = (int) dpToPx(WidgetDAO.isNamazCountdownWidgetHorizontalPaddingApplied(prefs) ? 20 : 0, context.getResources().getDisplayMetrics());
         sizer.setPadding(padding, padding, padding, padding);
 
