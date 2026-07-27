@@ -51,7 +51,7 @@
         android:label="${appName}"
         android:requiredForAllUsers="true"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DeskClock"
+        android:theme="@style/Theme.Salarm"
         android:localeConfig="@xml/locales_config"
         tools:targetApi="33"
         tools:ignore="DataExtractionRules, UnusedTranslation">
@@ -72,7 +72,7 @@
         <activity
             android:name="com.qwibbler.salarm.setup.FirstLaunch"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.DeskClock">
+            android:theme="@style/Theme.Salarm">
         </activity>
 
         <activity
@@ -92,7 +92,7 @@
             android:name="com.qwibbler.salarm.ringtone.RingtonePickerActivity"
             android:excludeFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <activity
             android:name="com.qwibbler.salarm.worldclock.CitySelectionActivity"
@@ -100,7 +100,7 @@
             android:label="@string/cities_activity_title"
             android:parentActivityName=".SalarmActivity"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <activity
             android:name="com.qwibbler.salarm.settings.SettingsActivity"
@@ -108,7 +108,7 @@
             android:label="@string/settings"
             android:parentActivityName=".SalarmActivity"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock"
+            android:theme="@style/Theme.Salarm"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
@@ -120,7 +120,7 @@
             android:excludeFromRecents="true"
             android:label="@string/permission_management_settings"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <activity
             android:name="com.qwibbler.salarm.controller.HandleShortcuts"
@@ -189,7 +189,7 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock.Wallpaper"
+            android:theme="@style/Theme.Salarm.Wallpaper"
             android:windowSoftInputMode="stateAlwaysHidden"
             tools:ignore="DiscouragedApi, NonResizeableActivity" />
 
@@ -197,7 +197,7 @@
             android:name="com.qwibbler.salarm.settings.AlarmDisplayPreviewActivity"
             android:excludeFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock.Wallpaper" />
+            android:theme="@style/Theme.Salarm.Wallpaper" />
 
         <activity
             android:name="com.qwibbler.salarm.alarms.alarmselection.AlarmSelectionActivity"
@@ -262,14 +262,14 @@
             android:showOnLockScreen="true"
             android:showWhenLocked="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock.Wallpaper"
+            android:theme="@style/Theme.Salarm.Wallpaper"
             tools:ignore="DiscouragedApi, NonResizeableActivity" />
 
         <activity
             android:name="com.qwibbler.salarm.settings.TimerDisplayPreviewActivity"
             android:excludeFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock.Wallpaper" />
+            android:theme="@style/Theme.Salarm.Wallpaper" />
 
         <receiver
             android:name="com.qwibbler.salarm.timer.TimerAlertReceiver"
@@ -311,14 +311,14 @@
             android:excludeFromRecents="true"
             android:resizeableActivity="false"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock"
+            android:theme="@style/Theme.Salarm"
             tools:ignore="DiscouragedApi, NonResizeableActivity" />
 
         <activity
             android:name="com.qwibbler.salarm.settings.ScreensaverSettingsActivity"
             android:excludeFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <service
             android:name="com.qwibbler.salarm.screensaver.Screensaver"
@@ -361,7 +361,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$AnalogWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/analog_widget"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <receiver
             android:name="com.qwibbler.salarm.widgets.AnalogAppWidgetProvider"
@@ -380,7 +380,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$DigitalWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/digital_widget"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <receiver
             android:name="com.qwibbler.salarm.widgets.DigitalAppWidgetProvider"
@@ -410,7 +410,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$VerticalWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/vertical_widget"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <receiver
             android:name="com.qwibbler.salarm.widgets.VerticalAppWidgetProvider"
@@ -434,7 +434,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NextAlarmWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/next_alarm_widget"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <receiver
             android:name="com.qwibbler.salarm.widgets.NextAlarmAppWidgetProvider"
@@ -457,7 +457,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/namaz_timeline_widget_label"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
 
 
@@ -465,7 +465,7 @@
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazCountdownWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/namaz_countdown_widget_label"
-            android:theme="@style/Theme.DeskClock" />
+            android:theme="@style/Theme.Salarm" />
 
         <!-- Namaz timeline widget -->
         <receiver

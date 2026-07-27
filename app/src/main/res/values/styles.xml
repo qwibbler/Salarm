@@ -5,7 +5,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.DeskClock" parent="Theme.Material3Expressive.Light.NoActionBar">
+    <style name="Theme.Salarm" parent="Theme.Material3Expressive.Light.NoActionBar">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -208,7 +208,7 @@
     <!--    THEMES    -->
     <!-- ============ -->
 
-    <style name="Theme.DeskClock.Wallpaper">
+    <style name="Theme.Salarm.Wallpaper">
         <item name="android:windowFullscreen">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>

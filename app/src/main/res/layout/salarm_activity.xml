@@ -8,7 +8,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/desk_clock_root_view"
+    android:id="@+id/salarm_activity_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -39,14 +39,14 @@
         android:layout_weight="1">
 
         <androidx.viewpager.widget.ViewPager
-            android:id="@+id/desk_clock_pager"
+            android:id="@+id/salarm_activity_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:importantForAccessibility="no"
             android:saveEnabled="false" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/desk_clock_button_layout"
+            android:id="@+id/salarm_activity_button_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -67,8 +67,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/fab"
                 app:layout_constraintTop_toTopOf="@+id/fab"
                 app:layout_constraintHorizontal_bias="0.6"
-                tools:layout_width="70dp"
-                tools:layout_height="70dp"
+                tools:layout_width="55dp"
+                tools:layout_height="55dp"
                 tools:visibility="visible"
                 tools:src="@drawable/ic_reset" />
 
@@ -82,12 +82,11 @@
                 android:contentDescription="@null"
                 android:importantForAccessibility="no"
                 app:fabCustomSize="@dimen/fab_size"
+                app:maxImageSize="40dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:layout_width="90dp"
-                tools:layout_height="90dp"
                 tools:src="@drawable/ic_fab_play" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -105,8 +104,8 @@
                 app:layout_constraintTop_toTopOf="@id/fab"
                 app:layout_constraintBottom_toBottomOf="@id/fab"
                 app:layout_constraintHorizontal_bias="0.4"
-                tools:layout_width="70dp"
-                tools:layout_height="70dp"
+                tools:layout_width="55dp"
+                tools:layout_height="55dp"
                 tools:visibility="visible"
                 tools:src="@drawable/ic_share" />
 
@@ -115,7 +114,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/desk_clock_bottom_menu"
+        android:id="@+id/salarm_activity_bottom_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:elevation="0dp"

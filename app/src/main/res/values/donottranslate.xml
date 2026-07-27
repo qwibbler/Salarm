@@ -76,7 +76,7 @@
     <string name="action_set_alarm_volume">Set Alarm Volume</string>
 
     <!-- Label names for events describe the entity responsible for the event. -->
-    <string name="label_deskclock">DeskClock</string>
+    <string name="label_salarm">Salarm</string>
     <string name="label_notification">Notification</string>
     <string name="label_intent">Intent</string>
     <string name="label_hardware_button">HardwareButton</string>
