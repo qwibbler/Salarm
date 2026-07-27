@@ -1554,6 +1554,9 @@
 
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>
+    <string name="qibla_location_not_set">Location not set. Please enable GPS or select a city in Namaz Settings to see the Qibla direction.</string>
+    <string name="qibla_sensors_unavailable">Compass sensors are unavailable on this device.</string>
+    <string name="qibla_calibration_tip">Calibrate your compass by moving the device in a figure-8 motion.</string>
 
     <!-- Pass 1 Refactor Extracted Strings -->
     <string name="salarm_today_prefix">Today, </string>
