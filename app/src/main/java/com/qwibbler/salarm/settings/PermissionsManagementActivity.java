@@ -15,6 +15,7 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ENABLE_FOREGROUND
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ESSENTIAL_PERMISSIONS_GRANTED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_FULL_SCREEN_NOTIFICATION_PERMISSION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_IGNORE_BATTERY_OPTIMIZATIONS;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_LOCATION_PERMISSION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NOTIFICATION_PERMISSION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SHOW_LOCKSCREEN_PERMISSION;
@@ -94,6 +95,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         PermissionsManagementPreference mLocationPermissionPref;
         PermissionsManagementPreference mShowLockScreenPref;
         SwitchPreferenceCompat mEnableForegroundServicePref;
+        SwitchPreferenceCompat mInternetAccessPref;
 
         @Override
         protected String getFragmentTitle() {
@@ -112,6 +114,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
             mLocationPermissionPref = findPreference(KEY_LOCATION_PERMISSION);
             mShowLockScreenPref = findPreference(KEY_SHOW_LOCKSCREEN_PERMISSION);
             mEnableForegroundServicePref = findPreference(KEY_ENABLE_FOREGROUND_SERVICE);
+            mInternetAccessPref = findPreference(KEY_INTERNET_ACCESS_ALLOWED);
 
             if (savedInstanceState != null) {
                 mShowForegroundServiceDialog = savedInstanceState.getBoolean(KEY_SHOW_FOREGROUND_SERVICE_DIALOG, false);
@@ -167,7 +170,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
         @Override
         public void onDestroy() {
             nullifyPreferenceListeners(mIgnoreBatteryOptimizationsPref, mNotificationPermissionPref, mFullScreenNotificationPref,
-                mLocationPermissionPref, mShowLockScreenPref, mEnableForegroundServicePref);
+                mLocationPermissionPref, mShowLockScreenPref, mEnableForegroundServicePref, mInternetAccessPref);
 
             nullifyAllPrefs();
 
@@ -454,6 +457,7 @@ public class PermissionsManagementActivity extends CollapsingToolbarBaseActivity
             mLocationPermissionPref = null;
             mShowLockScreenPref = null;
             mEnableForegroundServicePref = null;
+            mInternetAccessPref = null;
         }
 
     }

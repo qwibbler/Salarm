@@ -26,6 +26,16 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_refine_online"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/online_search_refine"
+        android:visibility="gone"
+        app:icon="@drawable/ic_fab_public" />
+
     <ListView
         android:id="@+id/city_results_list"
         android:layout_width="match_parent"

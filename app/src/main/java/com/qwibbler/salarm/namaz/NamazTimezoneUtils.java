@@ -1,5 +1,10 @@
 package com.qwibbler.salarm.namaz;
 
+import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_INTERNET_ACCESS_ALLOWED;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
+
+import android.content.Context;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,9 +18,19 @@ public class NamazTimezoneUtils {
      * Fetches the TimeZone ID from an online API for the given coordinates.
      * Must be called from a background thread.
      */
-    public static String fetchTimeZoneId(double lat, double lon) {
+    public static String fetchTimeZoneId(Context context, double lat, double lon) {
+        if (!getDefaultSharedPreferences(context).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)) {
+            // Internet not allowed: try offline store first
+            NamazUtils.OfflineCity match = NamazUtils.findNearestOfflineCity(context, lat, lon);
+            if (match != null) {
+                return match.timezoneId;
+            }
+            return null;
+        }
+
         try {
-            URL url = new URL(String.format(Locale.US, "https://timeapi.io/api/TimeZone/coordinate?latitude=%f&longitude=%f", lat, lon));
+            // Using Open-Meteo Forecast API as a reliable FLOSS source for TZ from coordinates
+            URL url = new URL(String.format(Locale.US, "https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&timezone=auto&forecast_days=1", lat, lon));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(5000);
@@ -31,12 +46,19 @@ public class NamazTimezoneUtils {
                     }
                     String json = result.toString("UTF-8");
                     JSONObject obj = new JSONObject(json);
-                    return obj.getString("timeZone");
+                    return obj.optString("timezone", null);
                 }
             }
         } catch (Exception e) {
-            com.qwibbler.salarm.utils.LogUtils.e("Error fetching TimeZone ID online", e);
+            com.qwibbler.salarm.utils.LogUtils.e("Error fetching TimeZone ID from Open-Meteo", e);
         }
+
+        // Online failed: try offline store before phone TZ
+        NamazUtils.OfflineCity match = NamazUtils.findNearestOfflineCity(context, lat, lon);
+        if (match != null) {
+            return match.timezoneId;
+        }
+
         return null;
     }
 
@@ -101,5 +123,12 @@ public class NamazTimezoneUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the phone's current default TimeZone ID.
+     */
+    public static String getPhoneTimeZoneId() {
+        return TimeZone.getDefault().getID();
     }
 }

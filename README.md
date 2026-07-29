@@ -1,6 +1,6 @@
 <!--suppress CheckImageSize -->
 # <img width="24" height="24" alt="image" src="/fastlane/metadata/android/en-US/images/icon.png" /> Clock
-**Clock** is a customizable, privacy‑first, open-source clock app inspired by AOSP Clock.  
+**Salarm** is a customizable, privacy‑friendly, open-source clock/namaz app forked from BlackyHawky's Clock.  
 It combines modern design, powerful features, and transparency — giving you full control over your time.
 
 # 📑 Table of Contents
@@ -30,7 +30,22 @@ It combines modern design, powerful features, and transparency — giving you fu
 
 # ✨ Features
 
-### • ⏰ **Advanced alarms**
+### • 🕌 **Relational & Namaz Alarms (Salarm Exclusive)**
+
+* Set alarms relative to Islamic prayer times (e.g., 15 mins before Fajr, 30 mins after Dhuhr, or halfway between Fajr and Dhuhr). 
+* One single rule lasts all year—alarm triggers dynamically shift as seasons change and daytime lengths adjust. 
+* Automatic background recalculation as your location or coordinates change (via GPS or manual city selection). 
+* Set "no earlier than" or "no later than" caps to prevent dynamic alarms from shifting into forbidden or unwanted windows. 
+* Dynamic auto-silence cutoffs tied to prayer events to mark alarms as "missed" before the next prayer window begins. 
+* Dynamic calculations for both Shafi'i and Hanafi Asr prayer times.
+
+### 🧭 **Namaz & Qibla Suite**
+
+* Live countdown to the next prayer event alongside full daily prayer schedules. 
+* View past or future prayer schedules, adjust calculation methods, or toggle manual location overrides. 
+* Dedicated Qibla visualizer and directional guide.
+
+### • ⏰ **Advanced Alarms**
 
 * Set alarms to a specific date
 * Flip or shake to dismiss/postpone
@@ -45,15 +60,15 @@ It combines modern design, powerful features, and transparency — giving you fu
   * Customizable interface, screensaver, and widgets
   * Dynamic colors for Android 12+
 
-### • 🌍 **World clock**
+### • 🌍 **World Clock**
   * Display home time when abroad
   * View time in multiple cities worldwide
 
-### • ⏱️ **Timer & stopwatch**
+### • ⏱️ **Timer & Stopwatch**
   * Built-in timer and stopwatch
   * Share stopwatch results with contacts
 
-### • ⚙️ **Extra features**
+### • ⚙️ **Extra Features**
   * Quick settings tiles (Android 7+)
   * Backup & restore (except custom ringtones)
   * Material Design UI

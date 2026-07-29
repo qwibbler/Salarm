@@ -253,6 +253,7 @@ public class PreferencesDefaultValues {
 
     // Permission management
     public static final boolean DEFAULT_ENABLE_FOREGROUND_SERVICE = false;
+    public static final boolean DEFAULT_INTERNET_ACCESS_ALLOWED = false;
 
     // **************
     // ** WIDGETS **

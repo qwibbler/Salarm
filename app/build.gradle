@@ -25,7 +25,7 @@ android {
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
-                storeFile = file("$rootDir/keystore.jks")
+                storeFile = rootProject.file(keystoreProperties['storeFile'])
                 storePassword = keystoreProperties["storePassword"]
                 keyAlias = keystoreProperties["keyAlias"]
                 keyPassword = keystoreProperties["keyPassword"]
@@ -87,10 +87,10 @@ android {
             def outputFileName
 
             if (variant.buildType == "nightly") {
-                outputFileName = "Clock_${versionName}-nightly-${commitNumber}-${buildCommit}.apk"
+                outputFileName = "Salarm_${versionName}-nightly-${commitNumber}-${buildCommit}.apk"
             } else {
                 def suffix = versionNameSuffix ?: (keystorePropertiesFile.exists() ? "-release" : "-unsigned")
-                outputFileName = "Clock_${versionName}${suffix}.apk"
+                outputFileName = "Salarm_${versionName}${suffix}.apk"
             }
 
             variant.outputs.forEach { output ->

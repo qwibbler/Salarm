@@ -33,17 +33,27 @@ public class NamazLocationManager {
         GPS, MANUAL
     }
 
-    private static final double SIGNIFICANT_CHANGE_THRESHOLD = 0.05;
+    private static final int LOCATION_UPDATE_THRESHOLD_METERS = 10000; // 10km
 
     /**
      * Sets the location mode (GPS or MANUAL) and triggers an update.
      */
     public static void setLocationMode(Context context, LocationMode mode) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
+        LocationMode oldMode = getLocationMode(context);
         prefs.edit().putString(KEY_NAMAZ_LOCATION_MODE, mode.name()).apply();
         LogUtils.i("Location mode set to: " + mode);
 
         if (mode == LocationMode.GPS) {
+            if (oldMode == LocationMode.MANUAL) {
+                // Clear manual state to force fresh GPS resolution
+                prefs.edit()
+                        .remove(KEY_NAMAZ_LATITUDE)
+                        .remove(KEY_NAMAZ_LONGITUDE)
+                        .remove(KEY_NAMAZ_CITY_NAME)
+                        .remove(KEY_NAMAZ_DISPLAY_TIMEZONE)
+                        .apply();
+            }
             prefs.edit().putString(KEY_NAMAZ_CITY_NAME, context.getString(R.string.namaz_detecting_location)).apply();
             requestGpsUpdate(context);
         }
@@ -142,20 +152,37 @@ public class NamazLocationManager {
         double oldLat = oldCoords[0];
         double oldLon = oldCoords[1];
 
-        boolean significantChange = forceSync || Math.abs(lat - oldLat) > SIGNIFICANT_CHANGE_THRESHOLD
-                || Math.abs(lon - oldLon) > SIGNIFICANT_CHANGE_THRESHOLD;
+        double distance = NamazUtils.calculateDistance(lat, lon, oldLat, oldLon);
+        boolean significantChange = forceSync || distance > LOCATION_UPDATE_THRESHOLD_METERS;
+
+        // Also resolve if city name is missing or "Detecting..."
+        String currentCity = prefs.getString(KEY_NAMAZ_CITY_NAME, "");
+        boolean needsResolution = significantChange || currentCity.isEmpty() ||
+                currentCity.equals(context.getString(R.string.namaz_detecting_location));
 
         prefs.edit()
                 .putString(KEY_NAMAZ_LATITUDE, String.valueOf(lat))
                 .putString(KEY_NAMAZ_LONGITUDE, String.valueOf(lon))
                 .apply();
 
-        if (isGps) {
+        if (isGps && needsResolution) {
             NamazUtils.updateCityNameFromCoords(context, lat, lon);
+
+            // For GPS updates, we resolve the TimeZone.
+            // Try online if allowed, otherwise fallback to phone's TZ.
+            AppExecutors.getNetworkIO().execute(() -> {
+                String tzId = NamazTimezoneUtils.fetchTimeZoneId(context, lat, lon);
+                if (tzId == null) {
+                    tzId = NamazTimezoneUtils.getPhoneTimeZoneId();
+                }
+                getDefaultSharedPreferences(context).edit()
+                        .putString(KEY_NAMAZ_DISPLAY_TIMEZONE, tzId)
+                        .apply();
+            });
         }
 
         if (significantChange) {
-            LogUtils.i("Significant location change detected. Triggering alarm resync...");
+            LogUtils.i("Significant location change detected (" + (int) distance + "m). Triggering alarm resync...");
             RelationalAlarmSyncManager.recalculateAllActiveRules(context);
         }
     }

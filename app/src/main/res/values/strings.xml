@@ -1356,6 +1356,16 @@
     <!-- Foreground service -->
     <string name="foreground_service_title">Display a foreground notification</string>
     <string name="foreground_service_dialog_message">To prevent your device from aggressively closing the app and missing alarms, this will display a persistent, silent notification.\n\nThis ensures the app stays in memory, though it may slightly increase battery usage.\n\nNote: Enabling this setting is not necessary for most devices. Only enable it if you experience missed alarms.</string>
+
+    <!-- Internet -->
+    <string name="internet_access_title">Internet access</string>
+    <string name="internet_access_summary">Allow the app to access the internet for online city search and timezone resolution.</string>
+    <string name="internet_access_category_title">Internet</string>
+    <string name="online_search_refine">Refine search online</string>
+    <string name="online_search_internet_disabled_title">Internet access disabled</string>
+    <string name="online_search_internet_disabled_message">Internet access is required to search for cities online. Please enable it in the permission management settings.</string>
+    <string name="online_search_internet_settings_button">Settings</string>
+    <string name="no_results">No results found</string>
     <!-- Button to close a dialog where neither "ok" nor "cancel" are suitable -->
     <string name="dialog_close">Close</string>
 
@@ -1599,7 +1609,7 @@
     <!-- Namaz Times Tab -->
     <string name="menu_namaz">Namaz Times</string>
     <string name="namaz_countdown_format">%1$s To %2$s</string>
-    <string name="namaz_timezone_warning">These are not the local times for this location.</string>
+    <string name="namaz_timezone_warning">Note: These times are shown in %1$s, while your phone is in %2$s.</string>
 
     <!-- Namaz Widgets -->
     <string name="namaz_widget_events_category_title">Events</string>
@@ -1648,4 +1658,5 @@
     <string name="salarm_display_timezone_label">Display Timezone</string>
     <string name="salarm_select_timezone_hint">Select Timezone</string>
     <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
+    <string name="namaz_near_city">Near %s</string>
 </resources>

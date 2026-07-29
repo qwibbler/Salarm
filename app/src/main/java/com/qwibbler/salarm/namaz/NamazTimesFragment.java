@@ -299,25 +299,17 @@ public class NamazTimesFragment extends SalarmFragment {
         mTimezoneInfoText.setText(String.format("%s • %s", tzId, tzName));
 
         // Timezone Warning Logic
-        String localTzId = null;
-        if (isOverride) {
-            // Guessed for manual city
-            localTzId = NamazTimezoneUtils.guessTimezone(cityName);
-        } else if (mode == NamazLocationManager.LocationMode.GPS) {
-            // Local is system default for GPS mode
-            localTzId = TimeZone.getDefault().getID();
-        }
+        // Compare current viewing timezone with the phone's system timezone.
+        // We show a warning if they differ, as times shown won't match the phone's clock.
+        String systemTzId = TimeZone.getDefault().getID();
+        boolean showWarning = !Objects.equals(tzId, systemTzId);
 
-        boolean showWarning = false;
-        if (localTzId != null) {
-            // Compare guessed/system local with current viewing timezone
-            showWarning = !Objects.equals(tzId, localTzId);
-        } else if (isOverride) {
-            // If we couldn't even guess a timezone for a manual city, show warning as it's unreliable
-            showWarning = true;
+        if (showWarning) {
+            mTimezoneWarningText.setText(getString(R.string.namaz_timezone_warning, tzId, systemTzId));
+            mTimezoneWarningText.setVisibility(View.VISIBLE);
+        } else {
+            mTimezoneWarningText.setVisibility(View.GONE);
         }
-
-        mTimezoneWarningText.setVisibility(showWarning ? View.VISIBLE : View.GONE);
     }
 
     private void updateCountdown() {

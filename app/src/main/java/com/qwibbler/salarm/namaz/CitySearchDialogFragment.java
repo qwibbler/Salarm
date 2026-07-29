@@ -1,10 +1,13 @@
 package com.qwibbler.salarm.namaz;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_INTERNET_ACCESS_ALLOWED;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_CITY_NAME;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -25,6 +28,8 @@ import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.City;
 import com.qwibbler.salarm.data.DataModel;
+import com.qwibbler.salarm.settings.PermissionsManagementActivity;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONObject;
@@ -131,6 +136,8 @@ public class CitySearchDialogFragment extends DialogFragment {
     private final List<CitySearchResult> mDisplayResults = new ArrayList<>();
     private CityAdapter mAdapter;
     private ProgressBar mProgressBar;
+    private MaterialButton mBtnRefineOnline;
+    private String mCurrentQuery = "";
 
     private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable mSearchRunnable;
@@ -170,6 +177,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         SearchView searchView = view.findViewById(R.id.city_search_view);
         ListView listView = view.findViewById(R.id.city_results_list);
         mProgressBar = view.findViewById(R.id.city_search_progress);
+        mBtnRefineOnline = view.findViewById(R.id.btn_refine_online);
 
         mAdapter = new CityAdapter(requireContext(), mDisplayResults);
         listView.setAdapter(mAdapter);
@@ -179,12 +187,14 @@ public class CitySearchDialogFragment extends DialogFragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                mCurrentQuery = query;
                 performGeocoderSearch(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                mCurrentQuery = newText;
                 if (mSearchRunnable != null) {
                     mHandler.removeCallbacks(mSearchRunnable);
                 }
@@ -194,10 +204,13 @@ public class CitySearchDialogFragment extends DialogFragment {
                     mHandler.postDelayed(mSearchRunnable, 500);
                 } else if (newText.isEmpty()) {
                     populateInitialList();
+                    mBtnRefineOnline.setVisibility(View.GONE);
                 }
                 return true;
             }
         });
+
+        mBtnRefineOnline.setOnClickListener(v -> performOnlineSearch(mCurrentQuery));
 
         listView.setOnItemClickListener((parent, view1, position, id) -> {
             CitySearchResult selected = mDisplayResults.get(position);
@@ -213,7 +226,32 @@ public class CitySearchDialogFragment extends DialogFragment {
     private void populateInitialList() {
         mDisplayResults.clear();
         mDisplayResults.addAll(mBuiltInResults);
-        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+
+        final Context appContext = requireContext().getApplicationContext();
+        AppExecutors.getNetworkIO().execute(() -> {
+            List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(appContext).cityCoordinateDao().searchByName("");
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mAdapter == null) return;
+
+                List<CitySearchResult> toAdd = new ArrayList<>();
+                for (CityCoordinate cached : cachedResults) {
+                    CitySearchResult res = new CitySearchResult(
+                            null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, cached.latitude, cached.longitude
+                    );
+
+                    boolean duplicate = false;
+                    for (CitySearchResult d : mDisplayResults) {
+                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    if (!duplicate) toAdd.add(res);
+                }
+                mDisplayResults.addAll(0, toAdd);
+                mAdapter.notifyDataSetChanged();
+            });
+        });
     }
 
     private void filterAndSearch(String query) {
@@ -234,73 +272,82 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
-            boolean isOnline = NamazUtils.isNetworkAvailable(appContext);
+            // Offline search: Query database cache
+            List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mAdapter == null || mProgressBar == null) return;
+                mProgressBar.setVisibility(View.GONE);
 
-            if (isOnline && Geocoder.isPresent()) {
-                Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
-                try {
-                    List<Address> addresses = geocoder.getFromLocationName(query, 10);
-                    AppExecutors.getMainThread().post(() -> {
-                        if (!isAdded() || mAdapter == null || mProgressBar == null) return;
-                        mProgressBar.setVisibility(View.GONE);
-                        if (addresses != null) {
-                            for (Address addr : addresses) {
-                                String cityName = addr.getLocality();
-                                if (cityName == null) cityName = addr.getFeatureName();
-                                if (cityName == null) continue;
+                // Add cached results at the TOP
+                List<CitySearchResult> toAdd = new ArrayList<>();
+                for (CityCoordinate cached : cachedResults) {
+                    CitySearchResult res = new CitySearchResult(
+                            null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, cached.latitude, cached.longitude
+                    );
 
-                                if (!cityName.equalsIgnoreCase(addr.getCountryName())) {
-                                    CitySearchResult res = new CitySearchResult(
-                                            cityName,
-                                            addr.getAdminArea(),
-                                            addr.getCountryName(),
-                                            addr.getCountryCode(),
-                                            addr.getLatitude(),
-                                            addr.getLongitude()
-                                    );
-
-                                    boolean duplicate = false;
-                                    for (CitySearchResult d : mDisplayResults) {
-                                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
-                                            duplicate = true;
-                                            break;
-                                        }
-                                    }
-                                    if (!duplicate) mDisplayResults.add(res);
-                                }
-                            }
-                            mAdapter.notifyDataSetChanged();
+                    boolean duplicate = false;
+                    for (CitySearchResult d : mDisplayResults) {
+                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                            duplicate = true;
+                            break;
                         }
-                    });
-                } catch (IOException e) {
-                    AppExecutors.getMainThread().post(() -> {
-                        if (isAdded() && mProgressBar != null) mProgressBar.setVisibility(View.GONE);
-                    });
-                }
-            } else {
-                // Offline search: Query database cache
-                List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
-                AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded() || mAdapter == null || mProgressBar == null) return;
-                    mProgressBar.setVisibility(View.GONE);
-                    for (CityCoordinate cached : cachedResults) {
-                        CitySearchResult res = new CitySearchResult(
-                                null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, cached.latitude, cached.longitude
-                        );
-
-                        boolean duplicate = false;
-                        for (CitySearchResult d : mDisplayResults) {
-                            if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
-                                duplicate = true;
-                                break;
-                            }
-                        }
-                        if (!duplicate) mDisplayResults.add(res);
                     }
-                    mAdapter.notifyDataSetChanged();
-                });
-            }
+                    if (!duplicate) toAdd.add(res);
+                }
+                mDisplayResults.addAll(0, toAdd);
+                mAdapter.notifyDataSetChanged();
+                mBtnRefineOnline.setVisibility(View.VISIBLE);
+            });
         });
+    }
+
+    private void performOnlineSearch(String query) {
+        final Context context = getContext();
+        if (context == null) return;
+        final Context appContext = context.getApplicationContext();
+
+        if (!getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)) {
+            showInternetDisabledDialog();
+            return;
+        }
+
+        if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
+        AppExecutors.getNetworkIO().execute(() -> {
+            List<OpenMeteoClient.SearchResult> openMeteoResults = OpenMeteoClient.search(query);
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mAdapter == null || mProgressBar == null) return;
+                mProgressBar.setVisibility(View.GONE);
+                for (OpenMeteoClient.SearchResult nr : openMeteoResults) {
+                    CitySearchResult res = new CitySearchResult(
+                            null, nr.name, nr.province, nr.country, nr.countryCode, nr.timezone, nr.latitude, nr.longitude
+                    );
+
+                    boolean duplicate = false;
+                    for (CitySearchResult d : mDisplayResults) {
+                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    if (!duplicate) mDisplayResults.add(res);
+                }
+                mAdapter.notifyDataSetChanged();
+                if (openMeteoResults.isEmpty()) {
+                    android.widget.Toast.makeText(appContext, R.string.no_results, android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+    }
+
+    private void showInternetDisabledDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.online_search_internet_disabled_title)
+                .setMessage(R.string.online_search_internet_disabled_message)
+                .setPositiveButton(R.string.online_search_internet_settings_button, (dialog, which) -> {
+                    startActivity(new Intent(requireContext(), PermissionsManagementActivity.class));
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void selectCity(CitySearchResult city) {
@@ -327,11 +374,9 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
-            if (NamazUtils.isNetworkAvailable(appContext)) {
-                city.timeZoneId = NamazTimezoneUtils.fetchTimeZoneId(city.latitude, city.longitude);
-            }
+            city.timeZoneId = NamazTimezoneUtils.fetchTimeZoneId(appContext, city.latitude, city.longitude);
             if (city.timeZoneId == null) {
-                city.timeZoneId = NamazTimezoneUtils.guessTimezone(city.city + ", " + city.country);
+                city.timeZoneId = NamazTimezoneUtils.getPhoneTimeZoneId();
             }
 
             AppExecutors.getMainThread().post(() -> {
@@ -380,8 +425,9 @@ public class CitySearchDialogFragment extends DialogFragment {
                 return;
             }
 
-            // 3. Perform online lookup if available
-            if (NamazUtils.isNetworkAvailable(appContext) && Geocoder.isPresent()) {
+            // 3. Perform online lookup if allowed
+            if (getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)
+                    && Geocoder.isPresent()) {
                 Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
                 try {
                     List<Address> addresses = geocoder.getFromLocationName(city.city, 1);
@@ -400,11 +446,11 @@ public class CitySearchDialogFragment extends DialogFragment {
                             city.countryCode = addr.getCountryCode();
 
                             // 1. Try to fetch actual TimeZone ID online
-                            city.timeZoneId = NamazTimezoneUtils.fetchTimeZoneId(city.latitude, city.longitude);
+                            city.timeZoneId = NamazTimezoneUtils.fetchTimeZoneId(appContext, city.latitude, city.longitude);
 
-                            // 2. Fallback to guessing if online fetch failed
+                            // 2. Fallback to phone's TZ
                             if (city.timeZoneId == null) {
-                                city.timeZoneId = NamazTimezoneUtils.guessTimezone(city.city + ", " + city.country);
+                                city.timeZoneId = NamazTimezoneUtils.getPhoneTimeZoneId();
                             }
 
                             // Save to cache in background
@@ -432,7 +478,11 @@ public class CitySearchDialogFragment extends DialogFragment {
                 AppExecutors.getMainThread().post(() -> {
                     mIsSelecting = false;
                     if (isAdded() && mProgressBar != null) mProgressBar.setVisibility(View.GONE);
-                    android.widget.Toast.makeText(appContext, R.string.salarm_error_resolve_city, android.widget.Toast.LENGTH_SHORT).show();
+                    if (!getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)) {
+                        showInternetDisabledDialog();
+                    } else {
+                        android.widget.Toast.makeText(appContext, R.string.salarm_error_resolve_city, android.widget.Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
         });

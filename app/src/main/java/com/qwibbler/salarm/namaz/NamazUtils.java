@@ -1,11 +1,11 @@
 package com.qwibbler.salarm.namaz;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_INTERNET_ACCESS_ALLOWED;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -19,8 +19,15 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.json.JSONObject;
+import com.qwibbler.salarm.data.City;
+import com.qwibbler.salarm.data.DataModel;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Shared utility methods for Namaz features.
@@ -96,43 +103,153 @@ public class NamazUtils {
      */
     public static void updateCityNameFromCoords(Context context, double lat, double lon) {
         final Context appContext = context.getApplicationContext();
+
         AppExecutors.getNetworkIO().execute(() -> {
-            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
-            try {
-                List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
-                if (addresses != null && !addresses.isEmpty()) {
-                    Address address = addresses.get(0);
-                    String city = address.getLocality();
-                    if (city == null) {
-                        city = address.getSubAdminArea();
-                    }
-                    if (city == null) {
-                        city = address.getFeatureName();
-                    }
+            // 1. Try local cache/JSON first (Priority 1 & 2)
+            OfflineCity match = findNearestOfflineCity(appContext, lat, lon);
+            if (match != null) {
+                String displayName = match.isNear ? appContext.getString(com.qwibbler.salarm.R.string.namaz_near_city, match.name) : match.name;
+                getDefaultSharedPreferences(appContext).edit()
+                        .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, displayName)
+                        .apply();
+                return;
+            }
 
-                    String state = address.getAdminArea();
-                    String country = address.getCountryName();
+            // 2. Try online lookup if allowed (Priority 3)
+            if (getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)) {
+                NominatimClient.SearchResult res = NominatimClient.reverseGeocodeFull(lat, lon);
+                if (res != null) {
+                    String locationName = res.toString();
+                    getDefaultSharedPreferences(appContext).edit()
+                            .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, locationName)
+                            .apply();
 
-                    StringBuilder sb = new StringBuilder();
-                    if (city != null) sb.append(city);
-                    if (state != null && !state.equalsIgnoreCase(city)) {
-                        if (sb.length() > 0) sb.append(", ");
-                        sb.append(state);
-                    }
-                    if (country != null) {
-                        if (sb.length() > 0) sb.append(", ");
-                        sb.append(country);
-                    }
+                    // Save successful online lookup to Room cache (normalized)
+                    double normLat = Math.round(lat * 1000.0) / 1000.0;
+                    double normLon = Math.round(lon * 1000.0) / 1000.0;
+                    String nameKey = String.format(Locale.US, "%s|%s|%s", res.name, res.province, res.country);
 
-                    if (sb.length() > 0) {
-                        getDefaultSharedPreferences(appContext).edit()
-                                .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, sb.toString())
-                                .apply();
+                    CityCoordinate cached = new CityCoordinate(nameKey, res.name, res.province, res.country, normLat, normLon, res.countryCode, NamazTimezoneUtils.guessTimezone(locationName));
+                    NamazDatabase.getDatabase(appContext).cityCoordinateDao().insert(cached);
+                    return;
+                }
+            }
+
+            // 3. Fallback (Priority 4)
+            String fallbackName = String.format(Locale.getDefault(), "Lat: %.4f, Lon: %.4f", lat, lon);
+            getDefaultSharedPreferences(appContext).edit()
+                    .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, fallbackName)
+                    .apply();
+        });
+    }
+
+    public static class OfflineCity {
+        public String name;
+        public String timezoneId;
+        public double latitude;
+        public double longitude;
+        public boolean isNear;
+    }
+
+    private static Map<String, Object[]> sBuiltInCoords;
+
+    private static Map<String, Object[]> getBuiltInCoords(Context context) {
+        if (sBuiltInCoords == null) {
+            sBuiltInCoords = new HashMap<>();
+            try (InputStream is = context.getAssets().open("city_coordinates.json")) {
+                java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int length;
+                while ((length = is.read(buffer)) != -1) {
+                    result.write(buffer, 0, length);
+                }
+                String json = result.toString("UTF-8");
+                JSONObject obj = new JSONObject(json);
+                java.util.Iterator<String> keys = obj.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    try {
+                        JSONObject coord = obj.getJSONObject(key);
+                        sBuiltInCoords.put(key, new Object[]{
+                                coord.getDouble("lat"),
+                                coord.getDouble("lon"),
+                                coord.optString("tz", "")
+                        });
+                    } catch (Exception ignored) {
                     }
                 }
-            } catch (IOException e) {
-                LogUtils.e("Error during reverse geocoding", e);
+            } catch (Exception e) {
+                LogUtils.e("Error loading built-in coordinates", e);
             }
-        });
+        }
+        return sBuiltInCoords;
+    }
+
+    /**
+     * Calculates distance between two points in meters using Haversine formula.
+     */
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371000; // Radius of the earth in meters
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    public static OfflineCity findNearestOfflineCity(Context context, double lat, double lon) {
+        OfflineCity bestMatch = null;
+        double minDistance = 80467; // 50 miles threshold
+
+        // 1. Check local database cache (Priority 1)
+        List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(context).cityCoordinateDao().getAll();
+        for (CityCoordinate cached : cachedResults) {
+            double distance = calculateDistance(lat, lon, cached.latitude, cached.longitude);
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestMatch = new OfflineCity();
+                bestMatch.name = cached.cityName + (cached.country != null && !cached.country.isEmpty() ? ", " + cached.country : "");
+                bestMatch.latitude = cached.latitude;
+                bestMatch.longitude = cached.longitude;
+                bestMatch.timezoneId = cached.timeZoneId;
+                bestMatch.isNear = distance > 32187; // > 20 miles
+            }
+        }
+
+        if (bestMatch != null) return bestMatch;
+
+        // 2. Check built-in cities (Priority 2)
+        minDistance = 80467; // Reset for JSON lookup
+        final List<City> cities = new ArrayList<>();
+        try {
+            DataModel.getDataModel().run(() -> cities.addAll(DataModel.getDataModel().getAllCities()));
+        } catch (Exception e) {
+            LogUtils.e("Error fetching cities from DataModel", e);
+        }
+
+        Map<String, Object[]> builtInCoords = getBuiltInCoords(context);
+        for (City c : cities) {
+            Object[] data = builtInCoords.get(c.getId());
+            if (data != null) {
+                double cLat = (double) data[0];
+                double cLon = (double) data[1];
+                String tz = (data.length > 2 && data[2] instanceof String s && !s.isEmpty()) ? s : c.getTimeZone().getID();
+
+                double distance = calculateDistance(lat, lon, cLat, cLon);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestMatch = new OfflineCity();
+                    bestMatch.name = c.getName();
+                    bestMatch.latitude = cLat;
+                    bestMatch.longitude = cLon;
+                    bestMatch.timezoneId = tz;
+                    bestMatch.isNear = distance > 32187; // > 20 miles
+                }
+            }
+        }
+
+        return bestMatch;
     }
 }

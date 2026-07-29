@@ -49,6 +49,22 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/internet_access_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_internet_access_allowed"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/internet_access_title"
+            android:summary="@string/internet_access_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/miscellaneous_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">

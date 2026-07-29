@@ -47,6 +47,7 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
 
             double lat = result.getDouble("latitude");
             double lon = result.getDouble("longitude");
+            String tzId = result.getString("timezone_id");
 
             Context context = getContext();
             if (context == null) return;
@@ -58,13 +59,16 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
                     .putString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE, String.valueOf(lon))
                     .apply();
 
-            String detectedTz = NamazTimezoneUtils.guessTimezone(name);
-            if (detectedTz != null) {
-                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, detectedTz).apply();
+            if (tzId == null) {
+                tzId = NamazTimezoneUtils.guessTimezone(name);
             }
 
-            if (mTimezonePicker != null && detectedTz != null) {
-                mTimezonePicker.setText(detectedTz, false);
+            if (tzId != null) {
+                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, tzId).apply();
+            }
+
+            if (mTimezonePicker != null && tzId != null) {
+                mTimezonePicker.setText(tzId, false);
             }
             if (mCitySummary != null) {
                 updateCitySummary(mCitySummary, prefs);
