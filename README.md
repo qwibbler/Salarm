@@ -1,5 +1,5 @@
 <!--suppress CheckImageSize -->
-# <img width="24" height="24" alt="image" src="/fastlane/metadata/android/en-US/images/icon.png" /> Clock
+# <img width="48" height="48" alt="image" src="app/src/main/ic_launcher-playstore.png" /> Salarm
 **Salarm** is a customizable, privacy‑friendly, open-source clock/namaz app forked from BlackyHawky's Clock.  
 It combines modern design, powerful features, and transparency — giving you full control over your time.
 
