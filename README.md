@@ -106,13 +106,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting issues, trans
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-Clock is licensed under **GNU General Public License v3.0 (GPLv3)**.
+Salarm is licensed under **GNU General Public License v3.0 (GPLv3)**.
 This strong copyleft license requires that any modifications or larger works using Clock must also be distributed under the same license, with complete source code available.
 
 See the [LICENSE](LICENSE) file for full details.
 
 > [!NOTE]  
-> Since Clock is based on **AOSP Clock**, which is licensed under **Apache License 2.0**, an additional [Apache 2.0](LICENSE-Apache-2.0) license file is provided in this repository.
+> Since Salarm is based on **AOSP Clock**, which is licensed under **Apache License 2.0**, an additional [Apache 2.0](LICENSE-Apache-2.0) license file is provided in this repository.
 
 # 📷 Screenshots
 
