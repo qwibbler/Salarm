@@ -61,7 +61,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
     private int mPrimaryOffsetIdx = 1; // default "after"
     private int mPrimaryRoundIdx = 0; // default "to nearest"
-    private int mSafetyBoundIdx = 1; // default "later than"
+    private int mSafetyBoundIdx = 1; // default "later than" (NO_LATER_THAN)
     private int mSafetyOffsetIdx = 0; // default "before"
     private int mSafetyRoundIdx = 0; // default "to nearest"
     private int mAutostopOffsetIdx = 0; // default "before"
@@ -267,6 +267,10 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.primaryOffsetToggle.setOnClickListener(v -> {
             mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
             updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+
+            // Auto-adjust safety boundary default: After -> No Later Than, Before -> No Earlier Than
+            mSafetyBoundIdx = (mPrimaryOffsetIdx == 1) ? 1 : 0;
+            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
         });
 
         mBinding.primaryRoundToggle.setOnClickListener(v -> {
@@ -341,7 +345,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
         if (rule.clip != null) {
             mBinding.safetyEnabledCheckbox.setChecked(true);
-            mSafetyBoundIdx = rule.clip.boundaryType == RelationalRule.BoundaryType.MAX ? 0 : 1;
+            mSafetyBoundIdx = rule.clip.boundaryType == RelationalRule.BoundaryType.NO_EARLIER_THAN ? 0 : 1;
             updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
 
             String safetyEventName = getEventNameForRule(rule.clip.clipEvent);
@@ -412,8 +416,6 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             getParentFragmentManager().setFragmentResult(REQUEST_KEY, new Bundle());
             dismiss();
 
-        } catch (RelationalRule.InvalidRuleException e) {
-            showConflictConfirmation(e);
         } catch (Exception e) {
             LogUtils.e("Error parsing relational alarm data", e);
             android.widget.Toast.makeText(requireContext(), R.string.namaz_error_saving, android.widget.Toast.LENGTH_LONG).show();
@@ -449,39 +451,6 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         return 0;
     }
 
-    private void showConflictConfirmation(RelationalRule.InvalidRuleException e) {
-        CustomDialog.create(
-            requireContext(),
-            R.style.AppAlertDialogTheme,
-            null,
-            getString(R.string.warning),
-            e.getMessage(),
-            null,
-            getString(android.R.string.ok),
-            (dialog, which) -> {
-                try {
-                    RelationalRule rule = parseRuleFromUi();
-                    Bundle args = getArguments();
-                    if (args != null && args.containsKey(ARG_RULE_ID)) {
-                        rule.id = args.getLong(ARG_RULE_ID);
-                    }
-                    android.net.Uri defaultRingtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
-                    RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, true, defaultRingtone);
-                    dismiss();
-                } catch (Exception ex) {
-                    LogUtils.e("Error force saving rule", ex);
-                    android.widget.Toast.makeText(requireContext(), R.string.namaz_error_saving, android.widget.Toast.LENGTH_LONG).show();
-                }
-            },
-            getString(android.R.string.cancel),
-            null,
-            null,
-            null,
-            null,
-            CustomDialog.SoftInputMode.NONE
-        ).show();
-    }
-
     private RelationalRule parseRuleFromUi() {
         RelationalRule rule = new RelationalRule();
         rule.enabled = true;
@@ -496,7 +465,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
         if (mBinding.safetyEnabledCheckbox.isChecked()) {
             RelationalRule.Clip clip = new RelationalRule.Clip();
-            clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.MAX : RelationalRule.BoundaryType.MIN;
+            clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.NO_EARLIER_THAN : RelationalRule.BoundaryType.NO_LATER_THAN;
             clip.clipEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.safetyEvent))];
 
             int safetyOffset = parseMinutes(getText(mBinding.safetyOffsetValue));

@@ -5,6 +5,8 @@ import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.qwibbler.salarm.utils.LogUtils;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -28,24 +30,10 @@ public class RelationalRule {
     }
 
     public enum BoundaryType {
-        MIN, MAX
+        NO_LATER_THAN, NO_EARLIER_THAN
     }
 
-    /**
-     * Thrown when a rule's parameters result in an impossible time (e.g. clipping conflict).
-     */
-    public static class InvalidRuleException extends Exception {
-        public final long fallbackTime;
-        public final String alarmName;
-
-        public InvalidRuleException(String message, String alarmName, long fallbackTime) {
-            super(message);
-            this.alarmName = alarmName;
-            this.fallbackTime = fallbackTime;
-        }
-    }
-
-    public record EvaluationResult(long time, boolean conflict, long fallbackTime, int autoSilenceSeconds) {
+    public record EvaluationResult(long time, int autoSilenceSeconds) {
     }
 
     public static class Clip {
@@ -115,7 +103,7 @@ public class RelationalRule {
         if (clip != null) {
             String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
             String clipEventName = getEventName(context, clip.clipEvent);
-            int clipResId = clip.boundaryType == BoundaryType.MAX ? com.qwibbler.salarm.R.string.namaz_rule_no_later : com.qwibbler.salarm.R.string.namaz_rule_no_earlier;
+            int clipResId = clip.boundaryType == BoundaryType.NO_LATER_THAN ? com.qwibbler.salarm.R.string.namaz_rule_no_later : com.qwibbler.salarm.R.string.namaz_rule_no_earlier;
             sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
         }
 
@@ -166,34 +154,38 @@ public class RelationalRule {
     public static EvaluationResult evaluateTimeWithConflictCheck(@NonNull RelationalRule rule, @NonNull NamazCalculator.NamazTimes times) {
         Date anchorTime = getEventTime(rule.anchorEvent, times);
         if (anchorTime == null) {
-            // Cannot calculate time for this event
-            return new EvaluationResult(0, true, 0, -1);
+            LogUtils.w("Anchor time is null for event: " + rule.anchorEvent);
+            return new EvaluationResult(0, -1);
         }
         long targetMillis = applyRule(anchorTime, rule.offsetMinutes, rule.roundingDirection, rule.roundingIntervalMinutes);
-        long fallbackTime = anchorTime.getTime(); // Default fallback is the anchor event itself
+        LogUtils.i("Initial target time: " + new Date(targetMillis));
 
-        boolean conflict = false;
         if (rule.clip != null) {
             Date clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
             if (clipAnchorTime != null) {
                 long clipMillis = applyRule(clipAnchorTime, rule.clip.clipOffsetMinutes, rule.clip.clipRoundingDirection,
                         rule.clip.clipRoundingIntervalMinutes);
+                LogUtils.i("Clip time (" + rule.clip.boundaryType + "): " + new Date(clipMillis));
 
                 switch (rule.clip.boundaryType) {
-                    case MIN -> {
-                        if (targetMillis < clipMillis) {
+                    case NO_LATER_THAN -> {
+                        if (targetMillis > clipMillis) {
+                            LogUtils.i("Capping time to NO_LATER_THAN boundary: " + new Date(clipMillis));
                             targetMillis = clipMillis;
-                            conflict = true;
                         }
                     }
-                    case MAX -> {
-                        if (targetMillis > clipMillis) {
+                    case NO_EARLIER_THAN -> {
+                        if (targetMillis < clipMillis) {
+                            LogUtils.i("Capping time to NO_EARLIER_THAN boundary: " + new Date(clipMillis));
                             targetMillis = clipMillis;
-                            conflict = true;
                         }
                     }
                 }
+            } else {
+                LogUtils.w("Clip anchor time is null for event: " + rule.clip.clipEvent);
             }
+        } else {
+            LogUtils.i("No clip defined for this rule.");
         }
 
         int autoSilenceSeconds = -1; // -1 means use default
@@ -205,7 +197,7 @@ public class RelationalRule {
             }
         }
 
-        return new EvaluationResult(targetMillis, conflict, fallbackTime, autoSilenceSeconds);
+        return new EvaluationResult(targetMillis, autoSilenceSeconds);
     }
 
     private static Date getEventTime(AnchorEvent event, NamazCalculator.NamazTimes times) {

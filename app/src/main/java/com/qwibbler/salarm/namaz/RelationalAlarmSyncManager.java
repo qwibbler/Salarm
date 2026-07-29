@@ -2,25 +2,17 @@ package com.qwibbler.salarm.namaz;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
-
-import androidx.core.app.NotificationCompat;
 
 import com.batoulapps.adhan.CalculationMethod;
-import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
-import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 
 import java.util.Calendar;
@@ -31,26 +23,17 @@ import java.util.List;
  */
 public class RelationalAlarmSyncManager {
 
-    private static final String CHANNEL_ID = "relational_alarm_conflicts";
-
     /**
      * Saves or updates a RelationalRule and synchronizes it with a native AOSP Alarm.
-     * Throws InvalidRuleException if the rule is physically impossible for the next valid instance.
      *
      * @param defaultRingtone The default ringtone URI to use if creating a new native alarm.
      *                        Passed as a parameter (Solution A) to avoid background thread crashes.
      */
-    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone)
-            throws RelationalRule.InvalidRuleException {
+    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone) {
         final Context appContext = context.getApplicationContext();
         NamazDatabase db = NamazDatabase.getDatabase(appContext);
 
-        // 1. Pre-validation for immediate UI feedback
-        if (!forceSave) {
-            validateRuleConflict(appContext, rule);
-        }
-
-        // 2. Persist to Room
+        // Persist to Room
         AppExecutors.getDiskIO().execute(() -> {
             try {
                 LogUtils.i("Persisting RelationalRule to Room database...");
@@ -62,7 +45,7 @@ public class RelationalAlarmSyncManager {
                     LogUtils.i("Updated rule with ID: " + rule.id);
                 }
 
-                // 3. Sync to AOSP SQLite
+                // Sync to AOSP SQLite
                 syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
             } catch (Throwable t) {
                 NamazErrorHandler.handleSyncError(appContext, t);
@@ -71,30 +54,6 @@ public class RelationalAlarmSyncManager {
         });
     }
 
-    private static void validateRuleConflict(Context context, RelationalRule rule) throws RelationalRule.InvalidRuleException {
-        double[] coords = NamazUtils.getCoordinates(context);
-        CalculationMethod method = NamazUtils.getCalculationMethod(context);
-
-        Calendar now = Calendar.getInstance();
-        NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(now.getTime(), coords[0], coords[1], method);
-        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
-
-        if (result.conflict()) {
-            String timeStr = result.fallbackTime() > 0 ? AlarmUtils.getFormattedTime(context, result.fallbackTime()) : "unknown time";
-            throw new RelationalRule.InvalidRuleException(
-                "Your alarm has a rule conflict. If you choose to continue, the alarm will default to "
-                + timeStr + ". Please Confirm.",
-                rule.anchorEvent.name(),
-                result.fallbackTime()
-            );
-        }
-    }
-
-    /**
-     * Synchronizes a rule to a native alarm.
-     * If a new alarm must be created, it uses the provided defaultRingtone (Solution A)
-     * or fetches it safely using Solution B.
-     */
     private static void syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
         ContentResolver cr = context.getContentResolver();
 
@@ -247,7 +206,7 @@ public class RelationalAlarmSyncManager {
             candidateDate.set(Calendar.MILLISECOND, 0);
         }
 
-        if (result.time() <= 0) {
+        if (result == null || result.time() <= 0) {
             LogUtils.w("Could not calculate prayer time for rule " + rule.id);
             // Disable native alarm if we can't calculate a future time to prevent stuck instances
             AppExecutors.getDiskIO().execute(() -> {
@@ -265,10 +224,6 @@ public class RelationalAlarmSyncManager {
         }
 
         Calendar nextTrigger = toCalendar(finalResultMin);
-        if (result.conflict()) {
-            sendConflictNotification(context, alarm.label, result.fallbackTime());
-            nextTrigger = toCalendar((result.fallbackTime() / 60000) * 60000);
-        }
 
         // 1. Update parent alarm template time so it shows correctly in list
         alarm.hour = nextTrigger.get(Calendar.HOUR_OF_DAY);
@@ -327,25 +282,6 @@ public class RelationalAlarmSyncManager {
                 LogUtils.e("Error deleting rule " + ruleId, t);
             }
         });
-    }
-
-    private static void sendConflictNotification(Context context, String alarmName, long fallbackTime) {
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Alarm Rule Conflicts", NotificationManager.IMPORTANCE_HIGH);
-            nm.createNotificationChannel(channel);
-        }
-
-        String timeStr = AlarmUtils.getFormattedTime(context, fallbackTime);
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_tab_alarm_static)
-                .setContentTitle("Alarm Rule Conflict")
-                .setContentText(alarmName + " has rule conflict, defaulting to " + timeStr + ". Please update the rule.")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .build();
-
-        nm.notify((int) System.currentTimeMillis(), notification);
     }
 
     private static Calendar toCalendar(long millis) {
