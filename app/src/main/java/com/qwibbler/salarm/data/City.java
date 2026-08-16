@@ -153,6 +153,10 @@ public final class City {
         return mCountry;
     }
 
+    public List<String> getAlternativeNames() {
+        return mAlternativeNames;
+    }
+
     /**
      * @return the city name converted to upper case
      */
@@ -230,12 +234,12 @@ public final class City {
         }
 
         final String countryMatch = getCountryUpperCaseNoSpecialCharacters();
-        if (countryMatch != null && countryMatch.startsWith(upperCaseQueryNoSpecialCharacters)) {
+        if (countryMatch != null && countryMatch.contains(upperCaseQueryNoSpecialCharacters)) {
             return true;
         }
 
         for (String altMatch : getAlternativeNamesUpperCaseNoSpecialCharacters()) {
-            if (altMatch.startsWith(upperCaseQueryNoSpecialCharacters)) {
+            if (altMatch.contains(upperCaseQueryNoSpecialCharacters)) {
                 return true;
             }
         }

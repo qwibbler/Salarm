@@ -104,6 +104,13 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if the country name should be displayed for each city.
+     */
+    public static boolean getShowCountry(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_SHOW_COUNTRY, true);
+    }
+
+    /**
      * @return sorting of cities by time zone in ascending order, by name or manually.
      */
     public static String getCitySorting(SharedPreferences prefs) {

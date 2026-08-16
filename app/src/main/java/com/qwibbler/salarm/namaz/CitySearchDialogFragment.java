@@ -89,21 +89,23 @@ public class CitySearchDialogFragment extends DialogFragment {
         String province;
         String country;
         String countryCode;
-        String timeZoneId; // Added
+        String timeZoneId;
+        List<String> altNames;
         double latitude;
         double longitude;
 
         CitySearchResult(String city, String province, String country, String countryCode, double lat, double lon) {
-            this(null, city, province, country, countryCode, null, lat, lon);
+            this(null, city, province, country, countryCode, null, null, lat, lon);
         }
 
-        CitySearchResult(String cityId, String city, String province, String country, String countryCode, String tzId, double lat, double lon) {
+        CitySearchResult(String cityId, String city, String province, String country, String countryCode, String tzId, List<String> altNames, double lat, double lon) {
             this.cityId = cityId;
             this.city = city;
             this.province = province != null ? province : "";
             this.country = country != null ? country : "";
             this.countryCode = countryCode != null ? countryCode : "";
             this.timeZoneId = tzId;
+            this.altNames = altNames;
             this.latitude = lat;
             this.longitude = lon;
         }
@@ -120,9 +122,20 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         public boolean matches(String query) {
             String lowerQuery = query.toLowerCase(Locale.getDefault());
-            return city.toLowerCase(Locale.getDefault()).contains(lowerQuery)
+            if (city.toLowerCase(Locale.getDefault()).contains(lowerQuery)
                     || province.toLowerCase(Locale.getDefault()).contains(lowerQuery)
-                    || country.toLowerCase(Locale.getDefault()).contains(lowerQuery);
+                    || country.toLowerCase(Locale.getDefault()).contains(lowerQuery)) {
+                return true;
+            }
+
+            if (altNames != null) {
+                for (String alt : altNames) {
+                    if (alt.toLowerCase(Locale.getDefault()).contains(lowerQuery)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         @NonNull
@@ -165,7 +178,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                     tzId = tz;
                 }
             }
-            mBuiltInResults.add(new CitySearchResult(c.getId(), c.getName(), "", "", "", tzId, lat, lon));
+            mBuiltInResults.add(new CitySearchResult(c.getId(), c.getName(), "", c.getCountry(), "", tzId, c.getAlternativeNames(), lat, lon));
         }
     }
 
@@ -234,10 +247,10 @@ public class CitySearchDialogFragment extends DialogFragment {
                 if (!isAdded() || mAdapter == null) return;
 
                 List<CitySearchResult> toAdd = new ArrayList<>();
-                for (CityCoordinate cached : cachedResults) {
-                    CitySearchResult res = new CitySearchResult(
-                            null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, cached.latitude, cached.longitude
-                    );
+                    for (CityCoordinate cached : cachedResults) {
+                        CitySearchResult res = new CitySearchResult(
+                                null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
+                        );
 
                     boolean duplicate = false;
                     for (CitySearchResult d : mDisplayResults) {
@@ -272,18 +285,18 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
-            // Offline search: Query database cache
-            List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
-            AppExecutors.getMainThread().post(() -> {
-                if (!isAdded() || mAdapter == null || mProgressBar == null) return;
-                mProgressBar.setVisibility(View.GONE);
+                // Offline search: Query database cache
+                List<CityCoordinate> cachedResults = NamazDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
+                AppExecutors.getMainThread().post(() -> {
+                    if (!isAdded() || mAdapter == null || mProgressBar == null) return;
+                    mProgressBar.setVisibility(View.GONE);
 
-                // Add cached results at the TOP
-                List<CitySearchResult> toAdd = new ArrayList<>();
-                for (CityCoordinate cached : cachedResults) {
-                    CitySearchResult res = new CitySearchResult(
-                            null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, cached.latitude, cached.longitude
-                    );
+                    // Add cached results at the TOP
+                    List<CitySearchResult> toAdd = new ArrayList<>();
+                    for (CityCoordinate cached : cachedResults) {
+                        CitySearchResult res = new CitySearchResult(
+                                null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
+                        );
 
                     boolean duplicate = false;
                     for (CitySearchResult d : mDisplayResults) {
@@ -319,7 +332,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                 mProgressBar.setVisibility(View.GONE);
                 for (OpenMeteoClient.SearchResult nr : openMeteoResults) {
                     CitySearchResult res = new CitySearchResult(
-                            null, nr.name, nr.province, nr.country, nr.countryCode, nr.timezone, nr.latitude, nr.longitude
+                            null, nr.name, nr.province, nr.country, nr.countryCode, nr.timezone, null, nr.latitude, nr.longitude
                     );
 
                     boolean duplicate = false;

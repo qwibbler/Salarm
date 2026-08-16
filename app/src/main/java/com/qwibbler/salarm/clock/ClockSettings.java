@@ -22,6 +22,7 @@ public class ClockSettings {
 
     // City list
     public boolean showHomeClock;
+    public boolean showCountry;
     public boolean isCityNoteEnabled;
     public String citySorting;
 }

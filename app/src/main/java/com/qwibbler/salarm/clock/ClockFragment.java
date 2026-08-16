@@ -81,7 +81,7 @@ public final class ClockFragment extends SalarmFragment {
             switch (key) {
                 case KEY_CLOCK_STYLE, KEY_CLOCK_DIAL, KEY_CLOCK_DIAL_MATERIAL, KEY_ANALOG_CLOCK_SIZE, KEY_DISPLAY_CLOCK_SECONDS,
                      KEY_CLOCK_SECOND_HAND, KEY_DIGITAL_CLOCK_FONT, KEY_DIGITAL_CLOCK_FONT_SIZE, KEY_DISPLAY_TEXT_UPPERCASE,
-                     KEY_SORT_CITIES, KEY_ENABLE_CITY_NOTE, KEY_AUTO_HOME_CLOCK, KEY_HOME_TIME_ZONE -> {
+                     KEY_SORT_CITIES, KEY_SHOW_COUNTRY, KEY_ENABLE_CITY_NOTE, KEY_AUTO_HOME_CLOCK, KEY_HOME_TIME_ZONE -> {
 
                     mAreSettingsChanged = true;
 
@@ -342,6 +342,7 @@ public final class ClockFragment extends SalarmFragment {
         mSettings.analogClockSizePercent = SettingsDAO.getAnalogClockSize(mPrefs);
 
         mSettings.showHomeClock = SettingsDAO.getShowHomeClock(requireContext(), mPrefs);
+        mSettings.showCountry = SettingsDAO.getShowCountry(mPrefs);
         mSettings.isCityNoteEnabled = SettingsDAO.isCityNoteEnabled(mPrefs);
         mSettings.citySorting = SettingsDAO.getCitySorting(mPrefs);
 

@@ -598,6 +598,8 @@
     <string name="display_settings_title">Display settings</string>
     <!-- Setting title for changing the sorting order to By name. -->
     <string name="sort_name">By name</string>
+    <!-- Setting title to show/hide country in city list. -->
+    <string name="show_country_title">Show country</string>
     <!-- Setting title for manual sorting. -->
     <string name="sort_manually">Manually (by dragging)</string>
     <!-- Title of clock color. -->
