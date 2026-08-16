@@ -242,6 +242,8 @@ public class CityAdapter extends BaseAdapter implements View.OnClickListener, Co
                 holder.binding().cityOnOffCheckbox.setContentDescription(city.getName());
                 holder.binding().cityOnOffCheckbox.setOnCheckedChangeListener(this);
                 holder.binding().cityName.setText(city.getName(), TextView.BufferType.SPANNABLE);
+                holder.binding().cityCountry.setText(city.getCountry());
+                holder.binding().cityCountry.setVisibility(TextUtils.isEmpty(city.getCountry()) ? View.GONE : View.VISIBLE);
                 holder.binding().cityTime.setText(getTimeCharSequence(timeZone));
 
                 final boolean showIndex = getShowIndex(position);

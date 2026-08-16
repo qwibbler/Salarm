@@ -27,6 +27,16 @@
         tools:textStyle="bold" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/city_country"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.7"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="12sp"
+        tools:text=", France" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/hours_ahead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

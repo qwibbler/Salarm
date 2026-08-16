@@ -98,6 +98,8 @@ public class CityViewHolder extends RecyclerView.ViewHolder {
 
         // Bind the city name.
         mBinding.worldClockCityContainer.cityName.setText(city.getName());
+        mBinding.worldClockCityContainer.cityCountry.setText(city.getCountry());
+        mBinding.worldClockCityContainer.cityCountry.setVisibility(city.getCountry() != null ? VISIBLE : GONE);
 
         // Compute if the city week day matches the weekday of the current timezone.
         final Calendar localCal = Calendar.getInstance(TimeZone.getDefault());

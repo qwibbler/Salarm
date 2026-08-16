@@ -9,7 +9,10 @@ package com.qwibbler.salarm.data;
 import androidx.annotation.NonNull;
 
 import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -56,6 +59,16 @@ public final class City {
     private final TimeZone mTimeZone;
 
     /**
+     * The country name of the city.
+     */
+    private final String mCountry;
+
+    /**
+     * Alternative names for the city.
+     */
+    private final List<String> mAlternativeNames;
+
+    /**
      * A cached upper case form of the {@link #mName} used in case-insensitive name comparisons.
      */
     private String mNameUpperCase;
@@ -77,7 +90,19 @@ public final class City {
      */
     private String mEnglishNameUpperCaseNoSpecialCharacters;
 
-    City(String id, int index, String indexString, String name, String englishName, String phoneticName, TimeZone tz) {
+    /**
+     * A cached upper case form of the {@link #mCountry} used in case-insensitive name comparisons
+     * which ignore {@link #removeSpecialCharacters(String)} special characters.
+     */
+    private String mCountryUpperCaseNoSpecialCharacters;
+
+    /**
+     * A cached list of upper case forms of {@link #mAlternativeNames} used in case-insensitive
+     * name comparisons which ignore {@link #removeSpecialCharacters(String)} special characters.
+     */
+    private List<String> mAlternativeNamesUpperCaseNoSpecialCharacters;
+
+    City(String id, int index, String indexString, String name, String englishName, String phoneticName, TimeZone tz, String country, List<String> alternativeNames) {
         mId = id;
         mIndex = index;
         mIndexString = indexString;
@@ -85,6 +110,8 @@ public final class City {
         mEnglishName = englishName;
         mPhoneticName = phoneticName;
         mTimeZone = tz;
+        mCountry = country;
+        mAlternativeNames = alternativeNames != null ? Collections.unmodifiableList(alternativeNames) : Collections.emptyList();
     }
 
     /**
@@ -120,6 +147,10 @@ public final class City {
 
     public String getPhoneticName() {
         return mPhoneticName;
+    }
+
+    public String getCountry() {
+        return mCountry;
     }
 
     /**
@@ -163,6 +194,29 @@ public final class City {
     }
 
     /**
+     * @return the country name converted to upper case with all special characters removed
+     */
+    private String getCountryUpperCaseNoSpecialCharacters() {
+        if (mCountryUpperCaseNoSpecialCharacters == null && mCountry != null) {
+            mCountryUpperCaseNoSpecialCharacters = removeSpecialCharacters(mCountry.toUpperCase());
+        }
+        return mCountryUpperCaseNoSpecialCharacters;
+    }
+
+    /**
+     * @return a list of alternative names converted to upper case with all special characters removed
+     */
+    private List<String> getAlternativeNamesUpperCaseNoSpecialCharacters() {
+        if (mAlternativeNamesUpperCaseNoSpecialCharacters == null) {
+            mAlternativeNamesUpperCaseNoSpecialCharacters = new ArrayList<>(mAlternativeNames.size());
+            for (String alt : mAlternativeNames) {
+                mAlternativeNamesUpperCaseNoSpecialCharacters.add(removeSpecialCharacters(alt.toUpperCase()));
+            }
+        }
+        return mAlternativeNamesUpperCaseNoSpecialCharacters;
+    }
+
+    /**
      * @param upperCaseQueryNoSpecialCharacters search term with all special characters removed
      *                                          to match against the upper case city name
      * @return {@code true} if the name of this city starts with the given query
@@ -170,16 +224,31 @@ public final class City {
     public boolean matches(String upperCaseQueryNoSpecialCharacters) {
         // By removing all special characters, prefix matching becomes more liberal, and it is easier
         // to locate the desired city. e.g. "St. Lucia" is matched by "StL", "St.L", "St L", "St. L"
-        return getNameUpperCaseNoSpecialCharacters().startsWith(upperCaseQueryNoSpecialCharacters)
-            || getEnglishNameUpperCaseNoSpecialCharacters().startsWith(upperCaseQueryNoSpecialCharacters);
+        if (getNameUpperCaseNoSpecialCharacters().startsWith(upperCaseQueryNoSpecialCharacters)
+            || getEnglishNameUpperCaseNoSpecialCharacters().startsWith(upperCaseQueryNoSpecialCharacters)) {
+            return true;
+        }
+
+        final String countryMatch = getCountryUpperCaseNoSpecialCharacters();
+        if (countryMatch != null && countryMatch.startsWith(upperCaseQueryNoSpecialCharacters)) {
+            return true;
+        }
+
+        for (String altMatch : getAlternativeNamesUpperCaseNoSpecialCharacters()) {
+            if (altMatch.startsWith(upperCaseQueryNoSpecialCharacters)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @NonNull
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "City {id=%s, index=%d, indexString=%s, name=%s, englishName=%s, phonetic=%s, tz=%s}",
-            mId, mIndex, mIndexString, mName, mEnglishName, mPhoneticName, mTimeZone.getID());
+            "City {id=%s, index=%d, indexString=%s, name=%s, englishName=%s, phonetic=%s, tz=%s, country=%s, alt=%s}",
+            mId, mIndex, mIndexString, mName, mEnglishName, mPhoneticName, mTimeZone.getID(), mCountry, mAlternativeNames);
     }
 
     @Override
@@ -198,12 +267,14 @@ public final class City {
             && Objects.equals(mName, city.mName)
             && Objects.equals(mEnglishName, city.mEnglishName)
             && Objects.equals(mPhoneticName, city.mPhoneticName)
-            && Objects.equals(mTimeZone, city.mTimeZone);
+            && Objects.equals(mTimeZone, city.mTimeZone)
+            && Objects.equals(mCountry, city.mCountry)
+            && Objects.equals(mAlternativeNames, city.mAlternativeNames);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mIndex, mIndexString, mName, mEnglishName, mPhoneticName, mTimeZone);
+        return Objects.hash(mId, mIndex, mIndexString, mName, mEnglishName, mPhoneticName, mTimeZone, mCountry, mAlternativeNames);
     }
 
 
