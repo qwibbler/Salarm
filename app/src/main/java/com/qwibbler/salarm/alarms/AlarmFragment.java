@@ -719,6 +719,25 @@ public final class AlarmFragment extends SalarmFragment
             }
         );
 
+        parentFragmentManager.setFragmentResultListener(
+            RelationalAlarmDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            (requestKey, bundle) -> {
+                long alarmId = bundle.getLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, Alarm.INVALID_ID);
+                boolean isNewAlarm = bundle.getBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, false);
+                if (alarmId != Alarm.INVALID_ID) {
+                    setSmoothScrollStableId(alarmId);
+                    if (isNewAlarm) {
+                        AppExecutors.getDiskIO().execute(() -> {
+                            Alarm alarm = Alarm.getAlarm(requireContext().getContentResolver(), alarmId);
+                            if (alarm != null) {
+                                AppExecutors.getMainThread().post(() -> displayBottomSheet(alarm));
+                            }
+                        });
+                    }
+                }
+            }
+        );
+
         parentFragmentManager.setFragmentResultListener(MaterialTimePickerDialogFragment.REQUEST_KEY, viewLifecycleOwner,
             (requestKey, result) -> {
                 int hours = result.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_HOURS);

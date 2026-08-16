@@ -257,7 +257,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
                     alarm.updateAlarm(cr);
                 }
             } else {
-                com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.recalculateNextInstance(context, alarm, instance.getAlarmTime());
+                com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.recalculateNextInstanceSync(context, alarm, instance.getAlarmTime());
             }
             return;
         }
@@ -641,18 +641,18 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Remove all other timers and notifications associated to it
         unregisterInstance(context, instance);
 
-        final ContentResolver contentResolver = context.getContentResolver();
-        Alarm alarm = Alarm.getAlarm(contentResolver, instance.mAlarmId);
-        // Display the alarm dismissal warning in a toast
-        if (alarm != null && showToast && !wasPreDismissed) {
-            AppExecutors.getMainThread().post(() -> AlarmUtils.showDismissToast(context, alarm, instance));
-        }
-
         // Pre-dismissed instances reschedule their parent when they enter PREDISMISSED_STATE.
         // When their original firing time arrives, only retire the skipped instance. Rescheduling
         // again can recreate the already skipped next occurrence as a normal active instance.
         if (instance.mAlarmId != null && !wasPreDismissed) {
             updateParentAlarm(context, instance);
+        }
+
+        final ContentResolver contentResolver = context.getContentResolver();
+        Alarm alarm = Alarm.getAlarm(contentResolver, instance.mAlarmId);
+        // Display the alarm dismissal warning in a toast
+        if (alarm != null && showToast && !wasPreDismissed) {
+            AppExecutors.getMainThread().post(() -> AlarmUtils.showDismissToast(context, alarm, instance));
         }
 
         // Delete instance as it is not needed anymore

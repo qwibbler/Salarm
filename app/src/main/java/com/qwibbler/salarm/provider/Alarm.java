@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Parcel;
@@ -324,6 +325,47 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.relationalRuleId = -1;
         this.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
         this.blurIntensity = DEFAULT_BLUR_INTENSITY;
+    }
+
+    /**
+     * Creates a new alarm with default settings based on user preferences.
+     *
+     * @param context  application context
+     * @param hour    alarm hour
+     * @param minute  alarm minute
+     * @param alert   alarm ringtone. If null, the default ringtone from settings will be used.
+     *                NOTE: If alert is null, this method MUST be called from the main thread.
+     * @return a new Alarm object with default settings
+     */
+    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert) {
+        final SharedPreferences prefs = getDefaultSharedPreferences(context);
+        final Alarm alarm = new Alarm(
+            Calendar.getInstance().get(Calendar.YEAR),
+            Calendar.getInstance().get(Calendar.MONTH),
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
+            hour,
+            minute,
+            alert
+        );
+        final AudioManager audioManager = context.getApplicationContext().getSystemService(AudioManager.class);
+
+        alarm.syncByLabel = false;
+        alarm.enabled = true;
+        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs);
+        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs);
+        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs);
+        alarm.deleteAfterUse = SettingsDAO.isOccasionalAlarmDeletedByDefault(prefs);
+        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs);
+        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs);
+        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs);
+        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs);
+        if (audioManager != null) {
+            alarm.alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+        }
+        alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs);
+
+        return alarm;
     }
 
     // Used to back up/restore the alarm

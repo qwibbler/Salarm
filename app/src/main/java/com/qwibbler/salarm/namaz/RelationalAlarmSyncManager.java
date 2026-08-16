@@ -23,6 +23,10 @@ import java.util.List;
  */
 public class RelationalAlarmSyncManager {
 
+    public interface OnRuleSyncListener {
+        void onRuleSynced(Alarm alarm);
+    }
+
     /**
      * Saves or updates a RelationalRule and synchronizes it with a native AOSP Alarm.
      *
@@ -30,6 +34,10 @@ public class RelationalAlarmSyncManager {
      *                        Passed as a parameter (Solution A) to avoid background thread crashes.
      */
     public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone) {
+        saveRule(context, rule, forceSave, defaultRingtone, null);
+    }
+
+    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone, OnRuleSyncListener listener) {
         final Context appContext = context.getApplicationContext();
         NamazDatabase db = NamazDatabase.getDatabase(appContext);
 
@@ -46,7 +54,11 @@ public class RelationalAlarmSyncManager {
                 }
 
                 // Sync to AOSP SQLite
-                syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
+                Alarm syncedAlarm = syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
+
+                if (listener != null) {
+                    AppExecutors.getMainThread().post(() -> listener.onRuleSynced(syncedAlarm));
+                }
             } catch (Throwable t) {
                 NamazErrorHandler.handleSyncError(appContext, t);
                 NamazErrorHandler.reportSaveFailure(appContext);
@@ -54,7 +66,7 @@ public class RelationalAlarmSyncManager {
         });
     }
 
-    private static void syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
+    private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
         ContentResolver cr = context.getContentResolver();
 
         // Find existing alarm mapped to this rule
@@ -70,7 +82,7 @@ public class RelationalAlarmSyncManager {
                     com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings());
             }
 
-            nativeAlarm = new Alarm(0, 0, 0, 0, 0, ringtoneToUse);
+            nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse);
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
@@ -89,6 +101,8 @@ public class RelationalAlarmSyncManager {
         } else {
             AlarmStateManager.deleteAllInstances(context, nativeAlarm.id);
         }
+
+        return nativeAlarm;
     }
 
     /**

@@ -109,10 +109,10 @@ import java.util.TimeZone;
 public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
     public static final String TAG = "alarm_edit_bottom_sheet";
-    private static final String ARG_ALARM = "arg_alarm";
-    private static final String ARG_ALARM_ID = "arg_alarm_id";
-    private static final String ARG_IS_NEW_ALARM = "arg_is_new_alarm";
-    private static final String ARG_TAG = "arg_tag";
+    public static final String ARG_ALARM = "arg_alarm";
+    public static final String ARG_ALARM_ID = "arg_alarm_id";
+    public static final String ARG_IS_NEW_ALARM = "arg_is_new_alarm";
+    public static final String ARG_TAG = "arg_tag";
     public static final String SCROLL_TO_ALARM_ID = "scroll_to_alarm_id";
     public static final String REQUEST_KEY = "alarm_saved";
 
