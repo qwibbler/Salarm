@@ -133,6 +133,7 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_SHOW_BOTH_ASR = "key_namaz_show_both_asr";
     public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_namaz_show_both_asr_in_alarm_events";
     public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES = "key_namaz_show_both_asr_in_namaz_times";
+    public static final String KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS = "key_namaz_show_both_asr_in_widgets";
     public static final String KEY_NAMAZ_TABS_MIGRATED = "key_namaz_tabs_migrated";
     public static final String KEY_NAMAZ_DISPLAY_TIMEZONE = "key_namaz_display_timezone";
     public static final String KEY_NAMAZ_VIEW_LATITUDE = "key_namaz_view_latitude";
@@ -397,9 +398,6 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_WIDGET_SHOW_ALARMS = "key_namaz_widget_show_alarms";
     public static final String KEY_NAMAZ_WIDGET_SHOW_SYMBOLS = "key_namaz_widget_show_symbols";
     public static final String KEY_NAMAZ_WIDGET_VISIBLE_EVENTS = "key_namaz_widget_visible_events";
-
-    // Namaz Widget Events
-    public static final String KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS = "key_namaz_widget_show_both_asrs";
 
     // Namaz Countdown Widget
     public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_countdown_widget_display_text_uppercase";

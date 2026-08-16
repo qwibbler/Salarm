@@ -21,14 +21,6 @@
             app:singleLineTitle="false" />
 
         <SwitchPreferenceCompat
-            android:key="key_namaz_widget_show_both_asrs"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/show_both_asr_title"
-            android:defaultValue="false"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <SwitchPreferenceCompat
             android:key="key_namaz_widget_show_alarms"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/namaz_widget_show_alarms_title"

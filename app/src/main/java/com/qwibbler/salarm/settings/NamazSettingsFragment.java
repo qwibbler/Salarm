@@ -20,6 +20,11 @@ import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.namaz.CitySearchDialogFragment;
 import com.qwibbler.salarm.namaz.NamazLocationManager;
 import com.qwibbler.salarm.namaz.RelationalAlarmSyncManager;
+import com.qwibbler.salarm.utils.WidgetUtils;
+import com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Settings fragment for Namaz-related configurations.
@@ -99,11 +104,13 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
         Preference showBothAsr = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR);
         Preference sub1 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS);
         Preference sub2 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES);
+        Preference sub3 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS);
 
         boolean bothAsrEnabled = showBothAsr instanceof SwitchPreferenceCompat sw && sw.isChecked();
 
         if (sub1 != null) sub1.setVisible(bothAsrEnabled);
         if (sub2 != null) sub2.setVisible(bothAsrEnabled);
+        if (sub3 != null) sub3.setVisible(bothAsrEnabled);
     }
 
     private void updateSummaries() {
@@ -137,6 +144,17 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
             RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());
         } else if (KEY_NAMAZ_SHOW_BOTH_ASR.equals(key)) {
             updateUiStates();
+        } else if (KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS.equals(key)) {
+            if (sharedPreferences.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, false)) {
+                Set<String> visibleEvents = sharedPreferences.getStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS);
+                if (!visibleEvents.contains("asr_shafi") && !visibleEvents.contains("asr_hanafi")) {
+                    Set<String> newVisibleEvents = new HashSet<>(visibleEvents);
+                    newVisibleEvents.add("asr_shafi");
+                    newVisibleEvents.add("asr_hanafi");
+                    sharedPreferences.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, newVisibleEvents).apply();
+                }
+            }
+            WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
         }
     }
 

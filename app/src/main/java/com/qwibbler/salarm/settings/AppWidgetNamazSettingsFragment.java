@@ -77,7 +77,6 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
     CustomSliderPreference mNamazWidgetMaxFontSizePref;
 
-    SwitchPreferenceCompat mShowBothAsrsPref;
     SwitchPreferenceCompat mShowCountdownPref;
     Preference mVisibleEventsPref;
 
@@ -123,7 +122,6 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
         mNamazWidgetMaxFontSizePref = findPreference(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE);
 
-        mShowBothAsrsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS);
         mShowCountdownPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN);
         mVisibleEventsPref = findPreference(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS);
 
@@ -163,7 +161,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
             mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
             mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
             mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
-            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref, mShowBothAsrsPref);
+            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref);
 
         nullifyAllPrefs();
 
@@ -182,9 +180,6 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         String key = pref.getKey();
-        if (KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS.equals(key)) {
-            mPrefs.edit().putBoolean(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS, (boolean) newValue).apply();
-        }
 
         switch (key) {
             case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_SHOW_SYMBOLS,
@@ -343,13 +338,6 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mNamazWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
 
         if (mShowCountdownPref != null) mShowCountdownPref.setOnPreferenceChangeListener(this);
-
-        if (mShowBothAsrsPref != null) {
-            if (!mPrefs.contains(KEY_NAMAZ_WIDGET_SHOW_BOTH_ASRS)) {
-                mShowBothAsrsPref.setChecked(mPrefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, false));
-            }
-            mShowBothAsrsPref.setOnPreferenceChangeListener(this);
-        }
 
         if (mShowAlarmsPref != null) {
             mShowAlarmsPref.setOnPreferenceChangeListener(this);
@@ -533,7 +521,6 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mDefaultItemNextHighlightColorPref = null;
         mCustomItemNextHighlightColorPref = null;
         mNamazWidgetMaxFontSizePref = null;
-        mShowBothAsrsPref = null;
         mShowCountdownPref = null;
         mShowAlarmsPref = null;
     }
