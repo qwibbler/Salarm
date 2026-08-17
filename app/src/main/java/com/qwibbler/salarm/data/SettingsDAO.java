@@ -392,6 +392,13 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if the Namaz alarm display style override is enabled.
+     */
+    public static boolean isNamazAlarmDisplayStyleOverrideEnabled(SharedPreferences prefs) {
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE, DEFAULT_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE);
+    }
+
+    /**
      * @return {@code true} if the Namaz alarm ringtone override is enabled.
      */
     public static boolean isNamazAlarmRingtoneOverrideEnabled(SharedPreferences prefs) {
@@ -402,21 +409,21 @@ public final class SettingsDAO {
      * @return {@code true} if the Namaz alarm colors override is enabled.
      */
     public static boolean isNamazAlarmColorsOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_COLORS_OVERRIDE, DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_COLORS_OVERRIDE, DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm font override is enabled.
      */
     public static boolean isNamazAlarmFontOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_FONT_OVERRIDE, DEFAULT_NAMAZ_ALARM_FONT_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_FONT_OVERRIDE, DEFAULT_NAMAZ_ALARM_FONT_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm background image override is enabled.
      */
     public static boolean isNamazAlarmBackgroundImageOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE, DEFAULT_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE, DEFAULT_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
     }
 
     /**
@@ -1179,7 +1186,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isSwipeActionEnabled(SharedPreferences pref, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(pref)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(pref) && isNamazAlarmDisplayStyleOverrideEnabled(pref)) {
             return pref.getBoolean(KEY_NAMAZ_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
         }
         // Default value must match the one in res/xml/settings_alarm.xml
@@ -1537,7 +1544,7 @@ public final class SettingsDAO {
     }
 
     public static ClockStyle getAlarmClockStyle(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return getClockStyle(prefs, KEY_NAMAZ_ALARM_CLOCK_STYLE);
         }
         return getClockStyle(prefs, KEY_ALARM_CLOCK_STYLE);
@@ -1551,7 +1558,7 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockDial(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
         }
         return prefs.getString(KEY_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
@@ -1565,7 +1572,7 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockSecondHand(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
         }
         return prefs.getString(KEY_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
@@ -1579,7 +1586,7 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockDialMaterial(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
         }
         return prefs.getString(KEY_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
@@ -1593,7 +1600,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmAnalogClockSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
         }
         return prefs.getInt(KEY_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
@@ -1608,7 +1615,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmSecondHandDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1624,7 +1631,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isSnoozeSelectorDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1984,7 +1991,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmActionMessageHidden(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmMiscOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
             return !prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1999,7 +2006,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmTitleDisplayedOnSingleLine(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmMiscOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -2015,7 +2022,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isRingtoneTitleDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmMiscOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -2030,7 +2037,7 @@ public final class SettingsDAO {
     }
 
     public static int getRingtoneTitleColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmMiscOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml

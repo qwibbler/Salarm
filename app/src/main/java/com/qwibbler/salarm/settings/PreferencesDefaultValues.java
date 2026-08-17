@@ -154,6 +154,7 @@ public class PreferencesDefaultValues {
 
     public static final boolean DEFAULT_NAMAZ_ALARM_SHOW_ROUNDING = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_STYLE_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_FONT_OVERRIDE = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE = false;

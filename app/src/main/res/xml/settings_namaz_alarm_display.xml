@@ -14,6 +14,14 @@
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_alarm_display_style_override"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_alarm_display_style_override_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
         <ListPreference
             android:key="key_namaz_alarm_clock_style"
             android:layout="@layout/settings_preference_layout"

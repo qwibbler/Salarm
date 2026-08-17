@@ -27,6 +27,7 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_ALARM_SHOW_ROUNDING = "key_namaz_alarm_show_rounding";
 
     public static final String KEY_NAMAZ_ALARM_STYLE_OVERRIDE = "key_namaz_alarm_style_override";
+    public static final String KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE = "key_namaz_alarm_display_style_override";
     public static final String KEY_NAMAZ_ALARM_COLORS_OVERRIDE = "key_namaz_alarm_colors_override";
     public static final String KEY_NAMAZ_ALARM_FONT_OVERRIDE = "key_namaz_alarm_font_override";
     public static final String KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE = "key_namaz_alarm_background_image_override";

@@ -97,6 +97,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
     Preference mAlarmBackgroundImagePref;
     CustomSliderPreference mAlarmBlurIntensityPref;
     SwitchPreferenceCompat mEnablePerAlarmBackgroundImagePref;
+    SwitchPreferenceCompat mDisplayStyleOverridePref;
     SwitchPreferenceCompat mColorsOverridePref;
     SwitchPreferenceCompat mFontOverridePref;
     SwitchPreferenceCompat mBackgroundImageOverridePref;
@@ -273,6 +274,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mEnablePerAlarmBackgroundImagePref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
         mAlarmPreviewPref = findPreference(KEY_NAMAZ_ALARM_PREVIEW);
 
+        mDisplayStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE);
         mColorsOverridePref = findPreference(KEY_NAMAZ_ALARM_COLORS_OVERRIDE);
         mFontOverridePref = findPreference(KEY_NAMAZ_ALARM_FONT_OVERRIDE);
         mBackgroundImageOverridePref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
@@ -327,7 +329,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             mSnoozePlusSymbolColorPref, mAlarmDigitalClockFontSizePref, mAlarmTitleFontSizePref, mDisplayTextShadowPref, mShadowColorPref, mShadowOffsetPref,
             mDisplayAlarmActionMessagePref, mDisplayAlarmTitleOnSingleLinePref, mDisplayRingtoneTitlePref, mRingtoneTitleColorPref,
             mAlarmBackgroundImagePref, mAlarmBlurIntensityPref, mEnablePerAlarmBackgroundImagePref, mAlarmPreviewPref,
-            mColorsOverridePref, mFontOverridePref, mBackgroundImageOverridePref, mAlarmFontPref
+            mDisplayStyleOverridePref, mColorsOverridePref, mFontOverridePref, mBackgroundImageOverridePref, mAlarmFontPref
         );
 
         nullifyAllPrefs();
@@ -342,7 +344,8 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_ALARM_COLORS_OVERRIDE, KEY_NAMAZ_ALARM_FONT_OVERRIDE, KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE -> {
+            case KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE, KEY_NAMAZ_ALARM_COLORS_OVERRIDE,
+                 KEY_NAMAZ_ALARM_FONT_OVERRIDE, KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 updatePreferencesVisibility(key, newValue);
             }
@@ -609,6 +612,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mColorsOverridePref.setOnPreferenceChangeListener(this);
         mFontOverridePref.setOnPreferenceChangeListener(this);
         mBackgroundImageOverridePref.setOnPreferenceChangeListener(this);
+        mDisplayStyleOverridePref.setOnPreferenceChangeListener(this);
 
         updateBlurPreferenceVisibility();
 
@@ -620,17 +624,26 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
     }
 
     private void updatePreferencesVisibility(@Nullable String changedKey, @Nullable Object newValue) {
-        if (mStyleCategory == null || mColorsOverridePref == null || mFontOverridePref == null || mBackgroundImageOverridePref == null) {
+        if (mStyleCategory == null || mDisplayStyleOverridePref == null || mColorsOverridePref == null || mFontOverridePref == null || mBackgroundImageOverridePref == null) {
             return;
         }
 
-        boolean styleOverride = SettingsDAO.isNamazAlarmStyleOverrideEnabled(mPrefs);
+        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE)) ? (boolean) newValue : mDisplayStyleOverridePref.isChecked();
         boolean colorsOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_COLORS_OVERRIDE)) ? (boolean) newValue : mColorsOverridePref.isChecked();
         boolean fontOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_FONT_OVERRIDE)) ? (boolean) newValue : mFontOverridePref.isChecked();
         boolean backgroundImageOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE)) ? (boolean) newValue : mBackgroundImageOverridePref.isChecked();
-        boolean miscOverride = SettingsDAO.isNamazAlarmMiscOverrideEnabled(mPrefs);
 
-        if (mStyleCategory != null) mStyleCategory.setVisible(styleOverride);
+        if (mStyleCategory != null) {
+            mStyleCategory.setVisible(true);
+            mAlarmClockStylePref.setVisible(styleOverride);
+            mAlarmClockDialPref.setVisible(styleOverride && mAlarmClockStylePref.getValue().equals(mAnalogClock));
+            mAlarmClockDialMaterialPref.setVisible(styleOverride && mAlarmClockStylePref.getValue().equals(mMaterialAnalogClock));
+            mAnalogClockSizePref.setVisible(styleOverride && !mAlarmClockStylePref.getValue().equals(mDigitalClock));
+            mDisplaySecondsPref.setVisible(styleOverride && !mAlarmClockStylePref.getValue().equals(mDigitalClock));
+            mAlarmClockSecondHandPref.setVisible(styleOverride && mDisplaySecondsPref.isChecked() && mAlarmClockStylePref.getValue().equals(mAnalogClock));
+            mSwipeActionPref.setVisible(styleOverride);
+            mDisplaySnoozeSelectorPref.setVisible(styleOverride);
+        }
 
         if (mColorsCategory != null) {
             mColorsCategory.setVisible(true); // Category itself stays visible if user entered this screen
@@ -671,7 +684,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         }
 
         if (mMiscCategory != null) {
-            mMiscCategory.setVisible(miscOverride);
+            mMiscCategory.setVisible(true);
         }
     }
 
@@ -862,6 +875,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mColorsOverridePref = null;
         mFontOverridePref = null;
         mBackgroundImageOverridePref = null;
+        mDisplayStyleOverridePref = null;
         mAlarmFontPref = null;
 
         mStyleCategory = null;
