@@ -9,6 +9,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <PreferenceCategory
+        android:key="key_namaz_alarm_style_category"
         android:title="@string/style_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
@@ -91,9 +92,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="key_namaz_alarm_colors_category"
         android:title="@string/colors_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_alarm_colors_override"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_alarm_colors_override_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
 
         <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
             android:key="key_namaz_alarm_background_color"
@@ -230,9 +240,25 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="key_namaz_alarm_font_category"
         android:title="@string/font_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_alarm_font_override"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_alarm_font_override_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <Preference
+            android:key="key_namaz_alarm_font"
+            android:layout="@layout/settings_preference_layout"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:title="@string/custom_font_title" />
 
         <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
             android:key="key_namaz_alarm_digital_clock_font_size"
@@ -283,9 +309,18 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="key_namaz_alarm_background_image_category"
         android:title="@string/background_image_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_alarm_background_image_override"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_alarm_background_image_override_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
 
         <Preference
             android:key="key_namaz_alarm_background_image"
@@ -315,6 +350,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:key="key_namaz_alarm_miscellaneous_category"
         android:title="@string/miscellaneous_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">

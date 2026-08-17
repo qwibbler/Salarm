@@ -497,7 +497,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
             switch (key) {
                 case KEY_TOOLBAR_TITLE, KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS,
-                     KEY_KEEP_SCREEN_ON, KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
+                     KEY_KEEP_SCREEN_ON, KEY_VISIBLE_TABS, KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
 
             }
         };

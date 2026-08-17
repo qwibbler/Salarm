@@ -38,18 +38,9 @@
         <Preference
             android:key="key_namaz_alarm_display_customization"
             android:layout="@layout/settings_preference_layout"
-            android:title="@string/namaz_alarm_display_customization_title"
-            android:dependency="key_namaz_alarm_style_override"
+            android:title="@string/namaz_alarm_display_settings_title"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
-
-        <Preference
-            android:key="key_namaz_alarm_font"
-            android:layout="@layout/settings_preference_layout"
-            android:dependency="key_namaz_alarm_style_override"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false"
-            tools:title="@string/custom_font_title" />
 
     </PreferenceCategory>
 
@@ -70,7 +61,6 @@
             android:key="key_namaz_default_alarm_ringtone"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/default_alarm_ringtone_title"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -78,7 +68,6 @@
             android:key="key_namaz_auto_silence_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/auto_silence_title"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -87,7 +76,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_auto_silence_title"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -95,7 +83,6 @@
             android:key="key_namaz_alarm_snooze_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/snooze_duration_title"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -104,7 +91,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_snooze_duration_title"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -115,7 +101,6 @@
             android:entries="@array/missed_alarm_repeat_limit_entries"
             android:entryValues="@array/missed_alarm_repeat_limit_values"
             android:defaultValue="-1"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -124,7 +109,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_missed_repeat_limit_title"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -133,7 +117,6 @@
             android:layout="@layout/settings_preference_slider_layout"
             android:title="@string/alarm_volume_title"
             android:summary="0"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -142,7 +125,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_volume_title"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -150,7 +132,6 @@
             android:key="key_namaz_alarm_volume_crescendo_duration"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/crescendo_duration_title"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -159,7 +140,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_crescendo_duration_title"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_ringtone_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -184,7 +164,6 @@
             android:title="@string/advanced_audio_playback_title"
             android:summary="@string/advanced_audio_playback_summary"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_advanced_audio_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -193,7 +172,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/auto_routing_to_external_audio_device_title"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_advanced_audio_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -203,7 +181,6 @@
             android:title="@string/system_media_volume_title"
             android:summary="@string/system_media_volume_summary"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_advanced_audio_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -214,7 +191,6 @@
             android:summary="@string/label_default"
             android:defaultValue="70"
             android:max="100"
-            android:dependency="key_namaz_alarm_advanced_audio_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -239,7 +215,6 @@
             android:title="@string/enable_alarm_vibrations_by_default_setting_title"
             android:summary="@string/alarm_settings_general_summary"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_vibration_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -247,7 +222,6 @@
             android:key="key_namaz_vibration_pattern"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/vibration_pattern_title"
-            android:dependency="key_namaz_alarm_vibration_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -256,7 +230,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/enable_per_alarm_vibration_pattern_title"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_vibration_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -264,7 +237,6 @@
             android:key="key_namaz_vibration_start_delay"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/vibration_start_delay_title"
-            android:dependency="key_namaz_alarm_vibration_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -274,7 +246,6 @@
             android:title="@string/enable_snoozed_or_dismissed_alarm_vibrations_title"
             android:summary="@string/enable_snoozed_or_dismissed_alarm_vibrations_summary"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_vibration_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -300,7 +271,6 @@
             android:entries="@array/volume_button_setting_entries"
             android:entryValues="@array/volume_button_setting_values"
             android:defaultValue="-1"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -311,7 +281,6 @@
             android:entries="@array/action_setting_entries"
             android:entryValues="@array/side_button_setting_values"
             android:defaultValue="0"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -322,7 +291,6 @@
             android:entries="@array/action_setting_entries"
             android:entryValues="@array/side_button_setting_values"
             android:defaultValue="0"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -333,7 +301,6 @@
             android:entries="@array/action_setting_entries"
             android:entryValues="@array/side_button_setting_values"
             android:defaultValue="0"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -344,7 +311,6 @@
             android:entries="@array/action_setting_entries"
             android:entryValues="@array/side_button_setting_values"
             android:defaultValue="0"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -355,7 +321,6 @@
             android:summary="@string/label_default"
             android:defaultValue="16"
             android:max="55"
-            android:dependency="key_namaz_alarm_actions_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -380,7 +345,6 @@
             android:title="@string/display_dismiss_button_title"
             android:summary="@string/display_dismiss_button_summary"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_misc_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -388,7 +352,6 @@
             android:key="key_namaz_alarm_notification_reminder"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/alarm_notification_reminder_title"
-            android:dependency="key_namaz_alarm_misc_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -398,7 +361,6 @@
             android:title="@string/turn_on_back_flash_for_triggered_alarm_title"
             android:summary="@string/alarm_settings_general_summary"
             android:defaultValue="false"
-            android:dependency="key_namaz_alarm_misc_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
@@ -407,7 +369,6 @@
             android:layout="@layout/settings_preference_layout"
             android:title="@string/display_low_alarm_volume_warning_title"
             android:defaultValue="true"
-            android:dependency="key_namaz_alarm_misc_override"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 

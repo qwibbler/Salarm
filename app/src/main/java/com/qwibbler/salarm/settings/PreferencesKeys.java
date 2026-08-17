@@ -37,6 +37,11 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_ALARM_MISC_OVERRIDE = "key_namaz_alarm_misc_override";
 
     public static final String KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION = "key_namaz_alarm_display_customization";
+    public static final String KEY_NAMAZ_ALARM_STYLE_CATEGORY = "key_namaz_alarm_style_category";
+    public static final String KEY_NAMAZ_ALARM_COLORS_CATEGORY = "key_namaz_alarm_colors_category";
+    public static final String KEY_NAMAZ_ALARM_FONT_CATEGORY = "key_namaz_alarm_font_category";
+    public static final String KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_CATEGORY = "key_namaz_alarm_background_image_category";
+    public static final String KEY_NAMAZ_ALARM_MISCELLANEOUS_CATEGORY = "key_namaz_alarm_miscellaneous_category";
     public static final String KEY_NAMAZ_ALARM_FONT = "key_namaz_alarm_font";
 
     public static final String KEY_NAMAZ_DEFAULT_ALARM_RINGTONE = "key_namaz_default_alarm_ringtone";

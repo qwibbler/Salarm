@@ -1565,12 +1565,15 @@
     <string name="show_rounding_option_title">Show option to round the namaz alarms</string>
     <string name="override_normal_alarm_settings_title">Override normal alarm settings</string>
     <string name="namaz_alarm_style_override_title">Override normal alarm style</string>
+    <string name="namaz_alarm_colors_override_title">Override normal alarm colors</string>
+    <string name="namaz_alarm_font_override_title">Override normal alarm font</string>
+    <string name="namaz_alarm_background_image_override_title">Override normal alarm background image</string>
     <string name="namaz_alarm_ringtone_override_title">Override normal alarm ringtone settings</string>
     <string name="namaz_alarm_advanced_audio_override_title">Override normal alarm advanced audio playback</string>
     <string name="namaz_alarm_vibration_override_title">Override normal alarm vibration settings</string>
     <string name="namaz_alarm_actions_override_title">Override normal alarm action settings</string>
     <string name="namaz_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
-    <string name="namaz_alarm_display_customization_title">Namaz alarm display customization</string>
+    <string name="namaz_alarm_display_settings_title">Namaz alarm display settings</string>
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Namaz Alarm</string>

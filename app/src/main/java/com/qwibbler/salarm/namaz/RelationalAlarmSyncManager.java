@@ -79,7 +79,7 @@ public class RelationalAlarmSyncManager {
             if (ringtoneToUse == null) {
                 // Solution B: Fallback to thread-hopping fetcher if not provided
                 ringtoneToUse = AppExecutors.getOnMainThread(() ->
-                    com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings());
+                    com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
             }
 
             nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse);

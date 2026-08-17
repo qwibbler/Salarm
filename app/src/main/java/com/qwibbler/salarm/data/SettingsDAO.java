@@ -1639,7 +1639,7 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmFont(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getString(KEY_NAMAZ_ALARM_FONT, null);
         }
         return prefs.getString(KEY_ALARM_FONT, null);
@@ -1908,7 +1908,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmDigitalClockFontSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1923,7 +1923,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmTitleFontSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1939,7 +1939,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmTextShadowDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1954,7 +1954,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmShadowColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -1969,7 +1969,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmShadowOffset(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -2045,7 +2045,7 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmBackgroundImage(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
             return prefs.getString(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
         }
         return prefs.getString(KEY_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
@@ -2059,7 +2059,7 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmBlurIntensity(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
             return prefs.getInt(KEY_NAMAZ_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
@@ -2075,7 +2075,7 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmBackgroundImageEnable(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
+        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
             return prefs.getBoolean(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml

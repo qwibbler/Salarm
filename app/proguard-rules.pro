@@ -12,6 +12,20 @@
 #   public *;
 #}
 
+# Room implementation classes
+-keep class * extends androidx.room.RoomDatabase {
+    <init>(...);
+}
+
+# Fragments instantiated via reflection in FragmentTabPagerAdapter
+-keep public class * extends androidx.fragment.app.Fragment {
+    public <init>();
+}
+
+# Keep Room entities and DAOs
+-keep class com.qwibbler.salarm.namaz.** { *; }
+-keep class com.qwibbler.salarm.provider.** { *; }
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
