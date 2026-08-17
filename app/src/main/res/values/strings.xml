@@ -1559,6 +1559,19 @@
     <string name="asr_hanafi_label">Asr Hanafi</string>
     <string name="asr_shafii_label">Asr Shafi\'i</string>
 
+    <!-- Namaz Alarms Settings -->
+    <string name="namaz_alarms_settings_title">Namaz Alarms</string>
+    <string name="namaz_alarms_settings_summary">Settings for Namaz alarms</string>
+    <string name="show_rounding_option_title">Show option to round the namaz alarms</string>
+    <string name="override_normal_alarm_settings_title">Override normal alarm settings</string>
+    <string name="namaz_alarm_style_override_title">Override normal alarm style</string>
+    <string name="namaz_alarm_ringtone_override_title">Override normal alarm ringtone settings</string>
+    <string name="namaz_alarm_advanced_audio_override_title">Override normal alarm advanced audio playback</string>
+    <string name="namaz_alarm_vibration_override_title">Override normal alarm vibration settings</string>
+    <string name="namaz_alarm_actions_override_title">Override normal alarm action settings</string>
+    <string name="namaz_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
+    <string name="namaz_alarm_display_customization_title">Namaz alarm display customization</string>
+
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Namaz Alarm</string>
     <string name="relational_alarm_primary_alarm">Primary Alarm</string>

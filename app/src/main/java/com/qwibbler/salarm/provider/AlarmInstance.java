@@ -69,7 +69,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         MISSED_ALARM_REPEAT_COUNT,
         MISSED_ALARM_REPEAT_LIMIT,
         CRESCENDO_DURATION,
-        ALARM_VOLUME
+        ALARM_VOLUME,
+        RELATIONAL_RULE_ID
     };
 
     /**
@@ -96,8 +97,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int MISSED_ALARM_MAX_COUNT_INDEX = 17;
     private static final int CRESCENDO_DURATION_INDEX = 18;
     private static final int ALARM_VOLUME_INDEX = 19;
+    private static final int RELATIONAL_RULE_ID_INDEX = 20;
 
-    private static final int COLUMN_COUNT = ALARM_VOLUME_INDEX + 1;
+    private static final int COLUMN_COUNT = RELATIONAL_RULE_ID_INDEX + 1;
     // Public fields
     public long mId;
     public int mYear;
@@ -120,6 +122,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public int mCrescendoDuration;
     // Alarm volume level in steps; not a percentage
     public int mAlarmVolume;
+    public long mRelationalRuleId;
+    public boolean mIsNamaz;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -142,6 +146,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mMissedAlarmRepeatLimit = Integer.parseInt(DEFAULT_MISSED_ALARM_REPEAT_LIMIT);
         mCrescendoDuration = DEFAULT_VOLUME_CRESCENDO_DURATION;
         mAlarmVolume = DEFAULT_ALARM_VOLUME;
+        mRelationalRuleId = -1;
+        mIsNamaz = false;
     }
 
     public AlarmInstance(AlarmInstance instance) {
@@ -165,6 +171,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mMissedAlarmRepeatLimit = instance.mMissedAlarmRepeatLimit;
         this.mCrescendoDuration = instance.mCrescendoDuration;
         this.mAlarmVolume = instance.mAlarmVolume;
+        this.mRelationalRuleId = instance.mRelationalRuleId;
+        this.mIsNamaz = instance.mIsNamaz;
     }
 
     public AlarmInstance(Cursor c, boolean joinedTable) {
@@ -199,6 +207,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             }
             mAlarmState = c.getInt(Alarm.INSTANCE_STATE_INDEX);
 
+            mRelationalRuleId = c.getLong(Alarm.INSTANCE_RELATIONAL_RULE_ID_INDEX);
+            mIsNamaz = mRelationalRuleId != -1;
+
         } else {
             mId = c.getLong(ID_INDEX);
             mYear = c.getInt(YEAR_INDEX);
@@ -229,6 +240,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
                 mAlarmId = c.getLong(ALARM_ID_INDEX);
             }
             mAlarmState = c.getInt(ALARM_STATE_INDEX);
+            mRelationalRuleId = c.getLong(RELATIONAL_RULE_ID_INDEX);
+            mIsNamaz = mRelationalRuleId != -1;
         }
     }
 
@@ -263,6 +276,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(MISSED_ALARM_REPEAT_LIMIT, mMissedAlarmRepeatLimit);
         values.put(CRESCENDO_DURATION, mCrescendoDuration);
         values.put(ALARM_VOLUME, mAlarmVolume);
+        values.put(RELATIONAL_RULE_ID, mRelationalRuleId);
 
         return values;
     }
@@ -492,7 +506,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
      */
     public Calendar getNotificationTime(Context context) {
         Calendar calendar = getAlarmTime();
-        int getAlarmNotificationReminderTime = SettingsDAO.getAlarmNotificationReminderTime(getDefaultSharedPreferences(context));
+        int getAlarmNotificationReminderTime = SettingsDAO.getAlarmNotificationReminderTime(getDefaultSharedPreferences(context), mIsNamaz);
         calendar.add(Calendar.MINUTE, -getAlarmNotificationReminderTime);
         return calendar;
     }

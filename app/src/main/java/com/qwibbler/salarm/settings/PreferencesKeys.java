@@ -23,6 +23,96 @@ public class PreferencesKeys {
     public static final String KEY_TIMER_SETTINGS = "key_timer_settings";
     public static final String KEY_STOPWATCH_SETTINGS = "key_stopwatch_settings";
     public static final String KEY_NAMAZ_SETTINGS = "key_namaz_settings";
+    public static final String KEY_NAMAZ_ALARM_SETTINGS = "key_namaz_alarm_settings";
+    public static final String KEY_NAMAZ_ALARM_SHOW_ROUNDING = "key_namaz_alarm_show_rounding";
+
+    public static final String KEY_NAMAZ_ALARM_STYLE_OVERRIDE = "key_namaz_alarm_style_override";
+    public static final String KEY_NAMAZ_ALARM_COLORS_OVERRIDE = "key_namaz_alarm_colors_override";
+    public static final String KEY_NAMAZ_ALARM_FONT_OVERRIDE = "key_namaz_alarm_font_override";
+    public static final String KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE = "key_namaz_alarm_background_image_override";
+    public static final String KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE = "key_namaz_alarm_ringtone_override";
+    public static final String KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE = "key_namaz_alarm_advanced_audio_override";
+    public static final String KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE = "key_namaz_alarm_vibration_override";
+    public static final String KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE = "key_namaz_alarm_actions_override";
+    public static final String KEY_NAMAZ_ALARM_MISC_OVERRIDE = "key_namaz_alarm_misc_override";
+
+    public static final String KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION = "key_namaz_alarm_display_customization";
+    public static final String KEY_NAMAZ_ALARM_FONT = "key_namaz_alarm_font";
+
+    public static final String KEY_NAMAZ_DEFAULT_ALARM_RINGTONE = "key_namaz_default_alarm_ringtone";
+    public static final String KEY_NAMAZ_AUTO_SILENCE_DURATION = "key_namaz_auto_silence_duration";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE = "key_namaz_enable_per_alarm_auto_silence";
+    public static final String KEY_NAMAZ_ALARM_SNOOZE_DURATION = "key_namaz_alarm_snooze_duration";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION = "key_namaz_enable_per_alarm_snooze_duration";
+    public static final String KEY_NAMAZ_REPEAT_MISSED_ALARM = "key_namaz_repeat_missed_alarm";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = "key_namaz_enable_per_alarm_missed_repeat_limit";
+    public static final String KEY_NAMAZ_ALARM_VOLUME_SETTING = "key_namaz_volume_setting";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME = "key_namaz_enable_per_alarm_volume";
+    public static final String KEY_NAMAZ_ALARM_VOLUME_CRESCENDO_DURATION = "key_namaz_alarm_volume_crescendo_duration";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION = "key_namaz_enable_per_alarm_volume_crescendo_duration";
+
+    public static final String KEY_NAMAZ_ADVANCED_AUDIO_PLAYBACK = "key_namaz_advanced_audio_playback";
+    public static final String KEY_NAMAZ_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE = "key_namaz_auto_routing_to_external_audio_device";
+    public static final String KEY_NAMAZ_SYSTEM_MEDIA_VOLUME = "key_namaz_system_media_volume";
+    public static final String KEY_NAMAZ_EXTERNAL_AUDIO_DEVICE_VOLUME = "key_namaz_external_audio_device_volume";
+
+    public static final String KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT = "key_namaz_enable_alarm_vibrations_by_default";
+    public static final String KEY_NAMAZ_VIBRATION_PATTERN = "key_namaz_vibration_pattern";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN = "key_namaz_enable_per_alarm_vibration_pattern";
+    public static final String KEY_NAMAZ_VIBRATION_START_DELAY = "key_namaz_vibration_start_delay";
+    public static final String KEY_NAMAZ_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS = "key_namaz_enable_snoozed_or_dismissed_alarm_vibrations";
+
+    public static final String KEY_NAMAZ_VOLUME_BUTTONS = "key_namaz_volume_button_setting";
+    public static final String KEY_NAMAZ_POWER_BUTTON = "key_namaz_power_button";
+    public static final String KEY_NAMAZ_HEADPHONES_BUTTON = "key_namaz_headphones_button";
+    public static final String KEY_NAMAZ_FLIP_ACTION = "key_namaz_flip_action";
+    public static final String KEY_NAMAZ_SHAKE_ACTION = "key_namaz_shake_action";
+    public static final String KEY_NAMAZ_SHAKE_INTENSITY = "key_namaz_shake_intensity";
+
+    public static final String KEY_NAMAZ_DISPLAY_DISMISS_BUTTON = "key_namaz_display_dismiss_button";
+    public static final String KEY_NAMAZ_ALARM_NOTIFICATION_REMINDER = "key_namaz_alarm_notification_reminder";
+    public static final String KEY_NAMAZ_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM = "key_namaz_turn_on_back_flash_for_triggered_alarm";
+    public static final String KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING = "key_namaz_display_low_alarm_volume_warning";
+    public static final String KEY_NAMAZ_ALARM_PREVIEW = "key_namaz_alarm_preview";
+
+    public static final String KEY_NAMAZ_ALARM_CLOCK_STYLE = "key_namaz_alarm_clock_style";
+    public static final String KEY_NAMAZ_ALARM_CLOCK_DIAL = "key_namaz_alarm_clock_dial";
+    public static final String KEY_NAMAZ_ALARM_CLOCK_DIAL_MATERIAL = "key_namaz_alarm_clock_dial_material";
+    public static final String KEY_NAMAZ_ALARM_ANALOG_CLOCK_SIZE = "key_namaz_alarm_analog_clock_size";
+    public static final String KEY_NAMAZ_DISPLAY_ALARM_SECOND_HAND = "key_namaz_display_alarm_second_hand";
+    public static final String KEY_NAMAZ_ALARM_CLOCK_SECOND_HAND = "key_namaz_alarm_clock_second_hand";
+    public static final String KEY_NAMAZ_SWIPE_ACTION = "key_namaz_swipe_action";
+    public static final String KEY_NAMAZ_DISPLAY_SNOOZE_SELECTOR = "key_namaz_display_snooze_selector";
+    public static final String KEY_NAMAZ_ALARM_BACKGROUND_COLOR = "key_namaz_alarm_background_color";
+    public static final String KEY_NAMAZ_ALARM_BACKGROUND_AMOLED_COLOR = "key_namaz_alarm_background_amoled_color";
+    public static final String KEY_NAMAZ_ALARM_CLOCK_COLOR = "key_namaz_alarm_clock_color";
+    public static final String KEY_NAMAZ_ALARM_SECOND_HAND_COLOR = "key_namaz_alarm_second_hand_color";
+    public static final String KEY_NAMAZ_ALARM_TITLE_COLOR = "key_namaz_alarm_title_color";
+    public static final String KEY_NAMAZ_SLIDE_ZONE_COLOR = "key_namaz_slide_zone_color";
+    public static final String KEY_NAMAZ_ALARM_BUTTON_COLOR = "key_namaz_alarm_button_color";
+    public static final String KEY_NAMAZ_SNOOZE_TITLE_COLOR = "key_namaz_snooze_title_color";
+    public static final String KEY_NAMAZ_SNOOZE_BUTTON_COLOR = "key_namaz_snooze_button_color";
+    public static final String KEY_NAMAZ_DISMISS_TITLE_COLOR = "key_namaz_dismiss_title_color";
+    public static final String KEY_NAMAZ_DISMISS_BUTTON_COLOR = "key_namaz_dismiss_button_color";
+    public static final String KEY_NAMAZ_SNOOZE_ZONE_COLOR = "key_namaz_snooze_zone_color";
+    public static final String KEY_NAMAZ_SNOOZE_MINUS_BUTTON_COLOR = "key_namaz_snooze_minus_button_color";
+    public static final String KEY_NAMAZ_SNOOZE_PLUS_BUTTON_COLOR = "key_namaz_snooze_plus_button_color";
+    public static final String KEY_NAMAZ_SNOOZE_SELECTOR_TEXT_COLOR = "key_namaz_snooze_selector_text_color";
+    public static final String KEY_NAMAZ_SNOOZE_MINUS_SYMBOL_COLOR = "key_namaz_snooze_minus_symbol_color";
+    public static final String KEY_NAMAZ_SNOOZE_PLUS_SYMBOL_COLOR = "key_namaz_snooze_plus_symbol_color";
+    public static final String KEY_NAMAZ_ALARM_DIGITAL_CLOCK_FONT_SIZE = "key_namaz_alarm_digital_clock_font_size";
+    public static final String KEY_NAMAZ_ALARM_TITLE_FONT_SIZE_PREF = "key_namaz_alarm_title_font_size_pref";
+    public static final String KEY_NAMAZ_ALARM_DISPLAY_TEXT_SHADOW = "key_namaz_alarm_display_text_shadow";
+    public static final String KEY_NAMAZ_ALARM_SHADOW_COLOR = "key_namaz_alarm_shadow_color";
+    public static final String KEY_NAMAZ_ALARM_SHADOW_OFFSET = "key_namaz_alarm_shadow_offset";
+    public static final String KEY_NAMAZ_DISPLAY_ALARM_ACTION_MESSAGE = "key_namaz_display_alarm_action_message";
+    public static final String KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE = "key_namaz_display_alarm_title_on_single_line";
+    public static final String KEY_NAMAZ_DISPLAY_RINGTONE_TITLE = "key_namaz_display_ringtone_title";
+    public static final String KEY_NAMAZ_RINGTONE_TITLE_COLOR = "key_namaz_ringtone_title_color";
+    public static final String KEY_NAMAZ_ALARM_BACKGROUND_IMAGE = "key_namaz_alarm_background_image";
+    public static final String KEY_NAMAZ_ALARM_BLUR_INTENSITY = "key_namaz_alarm_blur_intensity";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE = "key_namaz_enable_per_alarm_background_image";
+
     public static final String KEY_SCREENSAVER_SETTINGS = "key_screensaver_settings";
     public static final String KEY_WIDGETS_SETTINGS = "key_widgets_settings";
     public static final String KEY_PERMISSIONS_MANAGEMENT = "key_permissions_management";
@@ -180,6 +270,135 @@ public class PreferencesKeys {
     public static final String KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE = "key_enable_per_alarm_background_image";
     public static final String KEY_ALARM_PREVIEW = "key_alarm_preview";
 
+    // Widgets
+    public static final String KEY_ANALOG_WIDGET_CUSTOMIZATION = "key_analog_widget_customization";
+    public static final String KEY_ANALOG_WIDGET_CLOCK_DIAL = "key_analog_widget_clock_dial";
+    public static final String KEY_ANALOG_WIDGET_WITH_SECOND_HAND = "key_analog_widget_with_second_hand";
+    public static final String KEY_ANALOG_WIDGET_CLOCK_SECOND_HAND = "key_analog_widget_clock_second_hand";
+    public static final String KEY_ANALOG_WIDGET_DEFAULT_DIAL_COLOR = "key_analog_widget_default_dial_color";
+    public static final String KEY_ANALOG_WIDGET_CUSTOM_DIAL_COLOR = "key_analog_widget_custom_dial_color";
+    public static final String KEY_ANALOG_WIDGET_DEFAULT_HOUR_HAND_COLOR = "key_analog_widget_default_hour_hand_color";
+    public static final String KEY_ANALOG_WIDGET_CUSTOM_HOUR_HAND_COLOR = "key_analog_widget_custom_hour_hand_color";
+    public static final String KEY_ANALOG_WIDGET_DEFAULT_MINUTE_HAND_COLOR = "key_analog_widget_default_minute_hand_color";
+    public static final String KEY_ANALOG_WIDGET_CUSTOM_MINUTE_HAND_COLOR = "key_analog_widget_custom_minute_hand_color";
+    public static final String KEY_ANALOG_WIDGET_DEFAULT_SECOND_HAND_COLOR = "key_analog_widget_default_second_hand_color";
+    public static final String KEY_ANALOG_WIDGET_CUSTOM_SECOND_HAND_COLOR = "key_analog_widget_custom_second_hand_color";
+
+    public static final String KEY_DIGITAL_WIDGET_CUSTOMIZATION = "key_digital_widget_customization";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_digital_widget_display_text_uppercase";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TEXT_SHADOW = "key_digital_widget_display_text_shadow";
+    public static final String KEY_DIGITAL_WIDGET_SECONDS_DISPLAYED = "key_digital_widget_seconds_displayed";
+    public static final String KEY_DIGITAL_WIDGET_HIDE_AM_PM = "key_digital_widget_hide_am_pm";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_BACKGROUND = "key_digital_widget_display_background";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_digital_widget_customize_background_corner_radius";
+    public static final String KEY_DIGITAL_WIDGET_BACKGROUND_CORNER_RADIUS = "key_digital_widget_background_corner_radius";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_DATE = "key_digital_widget_display_date";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TOP_DATE = "key_digital_widget_display_top_date";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM = "key_digital_widget_display_next_alarm";
+    public static final String KEY_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM_TITLE = "key_digital_widget_display_next_alarm_title";
+    public static final String KEY_DIGITAL_WIDGET_WORLD_CITIES_DISPLAYED = "key_digital_widget_world_cities_displayed";
+    public static final String KEY_DIGITAL_WIDGET_APPLY_HORIZONTAL_PADDING = "key_digital_widget_apply_horizontal_padding";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_digital_widget_default_background_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_digital_widget_custom_background_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CLOCK_COLOR = "key_digital_widget_default_clock_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CLOCK_COLOR = "key_digital_widget_custom_clock_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_DATE_COLOR = "key_digital_widget_default_date_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_DATE_COLOR = "key_digital_widget_custom_date_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR = "key_digital_widget_default_next_alarm_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR = "key_digital_widget_custom_next_alarm_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_TITLE_COLOR = "key_digital_widget_default_next_alarm_title_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_TITLE_COLOR = "key_digital_widget_custom_next_alarm_title_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_CLOCK_COLOR = "key_digital_widget_default_city_clock_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_CLOCK_COLOR = "key_digital_widget_custom_city_clock_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_NAME_COLOR = "key_digital_widget_default_city_name_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_NAME_COLOR = "key_digital_widget_custom_city_name_color";
+    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_NOTE_COLOR = "key_digital_widget_default_city_note_color";
+    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_NOTE_COLOR = "key_digital_widget_custom_city_note_color";
+    public static final String KEY_DIGITAL_WIDGET_MAXIMUM_CLOCK_FONT_SIZE = "key_digital_widget_maximum_clock_font_size";
+
+    public static final String KEY_VERTICAL_WIDGET_CUSTOMIZATION = "key_vertical_widget_customization";
+    public static final String KEY_VERTICAL_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_vertical_widget_display_text_uppercase";
+    public static final String KEY_VERTICAL_WIDGET_DISPLAY_TEXT_SHADOW = "key_vertical_widget_display_text_shadow";
+    public static final String KEY_VERTICAL_WIDGET_DISPLAY_BACKGROUND = "key_vertical_widget_display_background";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_vertical_widget_customize_background_corner_radius";
+    public static final String KEY_VERTICAL_WIDGET_BACKGROUND_CORNER_RADIUS = "key_vertical_widget_background_corner_radius";
+    public static final String KEY_VERTICAL_WIDGET_DISPLAY_DATE = "key_vertical_widget_display_date";
+    public static final String KEY_VERTICAL_WIDGET_DISPLAY_NEXT_ALARM = "key_vertical_widget_display_next_alarm";
+    public static final String KEY_VERTICAL_WIDGET_APPLY_HORIZONTAL_PADDING = "key_vertical_widget_apply_horizontal_padding";
+    public static final String KEY_VERTICAL_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_vertical_widget_default_background_color";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_vertical_widget_custom_background_color";
+    public static final String KEY_VERTICAL_WIDGET_DEFAULT_HOURS_COLOR = "key_vertical_widget_default_hours_color";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOM_HOURS_COLOR = "key_vertical_widget_custom_hours_color";
+    public static final String KEY_VERTICAL_WIDGET_DEFAULT_MINUTES_COLOR = "key_vertical_widget_default_minutes_color";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOM_MINUTES_COLOR = "key_vertical_widget_custom_minutes_color";
+    public static final String KEY_VERTICAL_WIDGET_DEFAULT_DATE_COLOR = "key_vertical_widget_default_date_color";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOM_DATE_COLOR = "key_vertical_widget_custom_date_color";
+    public static final String KEY_VERTICAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR = "key_vertical_widget_default_next_alarm_color";
+    public static final String KEY_VERTICAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR = "key_vertical_widget_custom_next_alarm_color";
+    public static final String KEY_VERTICAL_WIDGET_MAXIMUM_CLOCK_FONT_SIZE = "key_vertical_widget_maximum_clock_font_size";
+
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION = "key_next_alarm_widget_customization";
+    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_next_alarm_widget_display_text_uppercase";
+    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_TEXT_SHADOW = "key_next_alarm_widget_display_text_shadow";
+    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_BACKGROUND = "key_next_alarm_widget_display_background";
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_next_alarm_widget_customize_background_corner_radius";
+    public static final String KEY_NEXT_ALARM_WIDGET_BACKGROUND_CORNER_RADIUS = "key_next_alarm_widget_background_corner_radius";
+    public static final String KEY_NEXT_ALARM_WIDGET_APPLY_HORIZONTAL_PADDING = "key_next_alarm_widget_apply_horizontal_padding";
+    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_next_alarm_widget_default_background_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_next_alarm_widget_custom_background_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_TITLE_COLOR = "key_next_alarm_widget_default_title_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_TITLE_COLOR = "key_next_alarm_widget_custom_title_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_ALARM_TITLE_COLOR = "key_next_alarm_widget_default_alarm_title_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_ALARM_TITLE_COLOR = "key_next_alarm_widget_custom_alarm_title_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_ALARM_COLOR = "key_next_alarm_widget_default_alarm_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_ALARM_COLOR = "key_next_alarm_widget_custom_alarm_color";
+    public static final String KEY_NEXT_ALARM_WIDGET_MAXIMUM_FONT_SIZE = "key_next_alarm_widget_maximum_font_size";
+
+    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZATION = "key_namaz_widget_customization";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_widget_display_text_uppercase";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_widget_display_text_shadow";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND = "key_namaz_widget_display_background";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_customize_background_corner_radius";
+    public static final String KEY_NAMAZ_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_background_corner_radius";
+    public static final String KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_widget_apply_horizontal_padding";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_widget_default_background_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_widget_custom_background_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR = "key_namaz_widget_default_countdown_time_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR = "key_namaz_widget_custom_countdown_time_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_default_countdown_label_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_custom_countdown_label_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_default_timeline_active_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_custom_timeline_active_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR = "key_namaz_widget_default_timeline_next_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_widget_custom_timeline_next_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_widget_default_timeline_standard_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_widget_custom_timeline_standard_color";
+    public static final String KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT = "key_namaz_widget_display_item_highlight";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_active_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_active_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_next_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_next_highlight_color";
+    public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN = "key_namaz_widget_show_countdown";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_SYMBOLS = "key_namaz_widget_show_symbols";
+    public static final String KEY_NAMAZ_WIDGET_VISIBLE_EVENTS = "key_namaz_widget_visible_events";
+    public static final String KEY_NAMAZ_WIDGET_SHOW_ALARMS = "key_namaz_widget_show_alarms";
+
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_countdown_widget_display_text_uppercase";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_countdown_widget_display_text_shadow";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = "key_namaz_countdown_widget_display_background";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_countdown_widget_customize_background_corner_radius";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_countdown_widget_background_corner_radius";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_countdown_widget_apply_horizontal_padding";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_countdown_widget_default_background_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_countdown_widget_custom_background_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR = "key_namaz_countdown_widget_default_time_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR = "key_namaz_countdown_widget_custom_time_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR = "key_namaz_countdown_widget_default_label_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR = "key_namaz_countdown_widget_custom_label_color";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_countdown_widget_maximum_font_size";
+    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS = "key_namaz_countdown_widget_show_symbols";
+
     // Timer
     public static final String KEY_TIMER_DISPLAY_CUSTOMIZATION = "key_timer_display_customization";
     public static final String KEY_TIMER_CREATION_VIEW_STYLE = "key_timer_creation_view_style";
@@ -259,7 +478,7 @@ public class PreferencesKeys {
     public static final String KEY_SCREENSAVER_DATE_IN_ITALIC = "key_screensaver_date_in_italic";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_BOLD = "key_screensaver_next_alarm_in_bold";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_ITALIC = "key_screensaver_next_alarm_in_italic";
-    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_on";
+    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_ON";
     public static final String KEY_SCREENSAVER_BACKGROUND_IMAGE = "key_screensaver_background_image";
     public static final String KEY_SCREENSAVER_BLUR_INTENSITY = "key_screensaver_blur_intensity";
     public static final String KEY_SCREENSAVER_PREVIEW = "key_screensaver_preview";
@@ -273,147 +492,6 @@ public class PreferencesKeys {
     public static final String KEY_INTERNET_ACCESS_ALLOWED = "key_internet_access_allowed";
     public static final String KEY_SHOW_LOCKSCREEN_PERMISSION = "key_show_lockscreen_permission";
     public static final String KEY_ENABLE_FOREGROUND_SERVICE = "key_enable_foreground_service";
-
-    // **************
-    // ** WIDGETS **
-    // **************
-
-    // Widget settings
-    public static final String KEY_ANALOG_WIDGET_CUSTOMIZATION = "key_analog_widget_customization";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOMIZATION = "key_digital_widget_customization";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOMIZATION = "key_vertical_widget_customization";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION = "key_next_alarm_widget_customization";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZATION = "key_namaz_widget_customization";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZATION = "key_namaz_countdown_widget_customization";
-
-    // Analog Widget
-    public static final String KEY_ANALOG_WIDGET_CLOCK_DIAL = "key_analog_widget_clock_dial";
-    public static final String KEY_ANALOG_WIDGET_WITH_SECOND_HAND = "key_analog_widget_with_second_hand";
-    public static final String KEY_ANALOG_WIDGET_CLOCK_SECOND_HAND = "key_analog_widget_clock_second_hand";
-    public static final String KEY_ANALOG_WIDGET_DEFAULT_DIAL_COLOR = "key_analog_widget_default_dial_color";
-    public static final String KEY_ANALOG_WIDGET_CUSTOM_DIAL_COLOR = "key_analog_widget_custom_dial_color";
-    public static final String KEY_ANALOG_WIDGET_DEFAULT_HOUR_HAND_COLOR = "key_analog_widget_default_hour_hand_color";
-    public static final String KEY_ANALOG_WIDGET_CUSTOM_HOUR_HAND_COLOR = "key_analog_widget_custom_hour_hand_color";
-    public static final String KEY_ANALOG_WIDGET_DEFAULT_MINUTE_HAND_COLOR = "key_analog_widget_default_minute_hand_color";
-    public static final String KEY_ANALOG_WIDGET_CUSTOM_MINUTE_HAND_COLOR = "key_analog_widget_custom_minute_hand_color";
-    public static final String KEY_ANALOG_WIDGET_DEFAULT_SECOND_HAND_COLOR = "key_analog_widget_default_second_hand_color";
-    public static final String KEY_ANALOG_WIDGET_CUSTOM_SECOND_HAND_COLOR = "key_analog_widget_custom_second_hand_color";
-
-    // Digital Widget
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_digital_widget_display_text_uppercase";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TEXT_SHADOW = "key_digital_widget_display_text_shadow";
-    public static final String KEY_DIGITAL_WIDGET_SECONDS_DISPLAYED = "key_digital_widget_seconds_displayed";
-    public static final String KEY_DIGITAL_WIDGET_HIDE_AM_PM = "key_digital_widget_hide_am_pm";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_BACKGROUND = "key_digital_widget_display_background";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_digital_widget_customize_background_corner_radius";
-    public static final String KEY_DIGITAL_WIDGET_BACKGROUND_CORNER_RADIUS = "key_digital_widget_background_corner_radius";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_DATE = "key_digital_widget_display_date";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_TOP_DATE = "key_digital_widget_display_top_date";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM = "key_digital_widget_display_next_alarm";
-    public static final String KEY_DIGITAL_WIDGET_DISPLAY_NEXT_ALARM_TITLE = "key_digital_widget_display_next_alarm_title";
-    public static final String KEY_DIGITAL_WIDGET_WORLD_CITIES_DISPLAYED = "key_digital_widget_world_cities_displayed";
-    public static final String KEY_DIGITAL_WIDGET_APPLY_HORIZONTAL_PADDING = "key_digital_widget_apply_horizontal_padding";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_digital_widget_default_background_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_digital_widget_custom_background_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CLOCK_COLOR = "key_digital_widget_default_clock_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CLOCK_COLOR = "key_digital_widget_custom_clock_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_DATE_COLOR = "key_digital_widget_default_date_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_DATE_COLOR = "key_digital_widget_custom_date_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR = "key_digital_widget_default_next_alarm_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR = "key_digital_widget_custom_next_alarm_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_TITLE_COLOR = "key_digital_widget_default_next_alarm_title_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_TITLE_COLOR = "key_digital_widget_custom_next_alarm_title_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_CLOCK_COLOR = "key_digital_widget_default_city_clock_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_CLOCK_COLOR = "key_digital_widget_custom_city_clock_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_NAME_COLOR = "key_digital_widget_default_city_name_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_NAME_COLOR = "key_digital_widget_custom_city_name_color";
-    public static final String KEY_DIGITAL_WIDGET_DEFAULT_CITY_NOTE_COLOR = "key_digital_widget_default_city_note_color";
-    public static final String KEY_DIGITAL_WIDGET_CUSTOM_CITY_NOTE_COLOR = "key_digital_widget_custom_city_note_color";
-    public static final String KEY_DIGITAL_WIDGET_MAXIMUM_CLOCK_FONT_SIZE = "key_digital_widget_maximum_clock_font_size";
-
-    // Vertical Digital Widget
-    public static final String KEY_VERTICAL_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_vertical_widget_display_text_uppercase";
-    public static final String KEY_VERTICAL_WIDGET_DISPLAY_TEXT_SHADOW = "key_vertical_widget_display_text_shadow";
-    public static final String KEY_VERTICAL_WIDGET_DISPLAY_BACKGROUND = "key_vertical_widget_display_background";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_vertical_widget_customize_background_corner_radius";
-    public static final String KEY_VERTICAL_WIDGET_BACKGROUND_CORNER_RADIUS = "key_vertical_widget_background_corner_radius";
-    public static final String KEY_VERTICAL_WIDGET_DISPLAY_DATE = "key_vertical_widget_display_date";
-    public static final String KEY_VERTICAL_WIDGET_DISPLAY_NEXT_ALARM = "key_vertical_widget_display_next_alarm";
-    public static final String KEY_VERTICAL_WIDGET_APPLY_HORIZONTAL_PADDING = "key_vertical_widget_apply_horizontal_padding";
-    public static final String KEY_VERTICAL_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_vertical_widget_default_background_color";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_vertical_widget_custom_background_color";
-    public static final String KEY_VERTICAL_WIDGET_DEFAULT_HOURS_COLOR = "key_vertical_widget_default_hours_color";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOM_HOURS_COLOR = "key_vertical_widget_custom_hours_color";
-    public static final String KEY_VERTICAL_WIDGET_DEFAULT_MINUTES_COLOR = "key_vertical_widget_default_minutes_color";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOM_MINUTES_COLOR = "key_vertical_widget_custom_minutes_color";
-    public static final String KEY_VERTICAL_WIDGET_DEFAULT_DATE_COLOR = "key_vertical_widget_default_date_color";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOM_DATE_COLOR = "key_vertical_widget_custom_date_color";
-    public static final String KEY_VERTICAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR = "key_vertical_widget_default_next_alarm_color";
-    public static final String KEY_VERTICAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR = "key_vertical_widget_custom_next_alarm_color";
-    public static final String KEY_VERTICAL_WIDGET_MAXIMUM_CLOCK_FONT_SIZE = "key_vertical_widget_maximum_clock_font_size";
-
-    // Next Alarm Widget
-    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_next_alarm_widget_display_text_uppercase";
-    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_TEXT_SHADOW = "key_next_alarm_widget_display_text_shadow";
-    public static final String KEY_NEXT_ALARM_WIDGET_DISPLAY_BACKGROUND = "key_next_alarm_widget_display_background";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_next_alarm_widget_customize_background_corner_radius";
-    public static final String KEY_NEXT_ALARM_WIDGET_BACKGROUND_CORNER_RADIUS = "key_next_alarm_widget_background_corner_radius";
-    public static final String KEY_NEXT_ALARM_WIDGET_APPLY_HORIZONTAL_PADDING = "key_next_alarm_widget_apply_horizontal_padding";
-    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_next_alarm_widget_default_background_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_next_alarm_widget_custom_background_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_TITLE_COLOR = "key_next_alarm_widget_default_title_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_TITLE_COLOR = "key_next_alarm_widget_custom_title_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_ALARM_TITLE_COLOR = "key_next_alarm_widget_default_alarm_title_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_ALARM_TITLE_COLOR = "key_next_alarm_widget_custom_alarm_title_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_DEFAULT_ALARM_COLOR = "key_next_alarm_widget_default_alarm_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_CUSTOM_ALARM_COLOR = "key_next_alarm_widget_custom_alarm_color";
-    public static final String KEY_NEXT_ALARM_WIDGET_MAXIMUM_FONT_SIZE = "key_next_alarm_widget_maximum_font_size";
-
-    // Namaz Widget
-    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_widget_display_text_uppercase";
-    public static final String KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_widget_display_text_shadow";
-    public static final String KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND = "key_namaz_widget_display_background";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_customize_background_corner_radius";
-    public static final String KEY_NAMAZ_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_widget_background_corner_radius";
-    public static final String KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_widget_apply_horizontal_padding";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_widget_default_background_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_widget_custom_background_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR = "key_namaz_widget_default_countdown_time_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR = "key_namaz_widget_custom_countdown_time_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_default_countdown_label_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR = "key_namaz_widget_custom_countdown_label_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_default_timeline_active_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR = "key_namaz_widget_custom_timeline_active_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR = "key_namaz_widget_default_timeline_next_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR = "key_namaz_widget_custom_timeline_next_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR = "key_namaz_widget_default_timeline_standard_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR = "key_namaz_widget_custom_timeline_standard_color";
-    public static final String KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT = "key_namaz_widget_display_item_highlight";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_active_highlight_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_active_highlight_color";
-    public static final String KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_default_item_next_highlight_color";
-    public static final String KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR = "key_namaz_widget_custom_item_next_highlight_color";
-    public static final String KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_widget_maximum_font_size";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN = "key_namaz_widget_show_countdown";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_ALARMS = "key_namaz_widget_show_alarms";
-    public static final String KEY_NAMAZ_WIDGET_SHOW_SYMBOLS = "key_namaz_widget_show_symbols";
-    public static final String KEY_NAMAZ_WIDGET_VISIBLE_EVENTS = "key_namaz_widget_visible_events";
-
-    // Namaz Countdown Widget
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE = "key_namaz_countdown_widget_display_text_uppercase";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW = "key_namaz_countdown_widget_display_text_shadow";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = "key_namaz_countdown_widget_display_background";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS = "key_namaz_countdown_widget_customize_background_corner_radius";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS = "key_namaz_countdown_widget_background_corner_radius";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = "key_namaz_countdown_widget_apply_horizontal_padding";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR = "key_namaz_countdown_widget_default_background_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR = "key_namaz_countdown_widget_custom_background_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR = "key_namaz_countdown_widget_default_time_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR = "key_namaz_countdown_widget_custom_time_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR = "key_namaz_countdown_widget_default_label_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR = "key_namaz_countdown_widget_custom_label_color";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS = "key_namaz_countdown_widget_show_symbols";
-    public static final String KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE = "key_namaz_countdown_widget_maximum_font_size";
 
     // ****************
     // ** FILE NAMES **

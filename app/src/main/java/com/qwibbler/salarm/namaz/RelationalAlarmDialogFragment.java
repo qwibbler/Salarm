@@ -98,6 +98,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         setupAdapters();
         setupListeners();
 
+        updateRoundingVisibility();
+
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
         } else {
@@ -260,6 +262,17 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.autostopEvent.setText(mBinding.primaryEvent.getAdapter().getItem(nextPosition).toString(), false);
     }
 
+    private void updateRoundingVisibility() {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
+        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
+
+        int visibility = showRounding ? View.VISIBLE : View.GONE;
+        mBinding.primaryRoundTitle.setVisibility(visibility);
+        mBinding.primaryRoundContainer.setVisibility(visibility);
+        mBinding.safetyRoundTitle.setVisibility(visibility);
+        mBinding.safetyRoundContainer.setVisibility(visibility);
+    }
+
     private void setupListeners() {
         mBinding.safetyEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.safetyContent));
         mBinding.autostopEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.autostopContent));
@@ -404,7 +417,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 rule.id = args.getLong(ARG_RULE_ID);
             }
 
-            android.net.Uri defaultRingtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+            android.net.Uri defaultRingtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
 
             // Disable button to prevent double-save and indicate activity
             if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {

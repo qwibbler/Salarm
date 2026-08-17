@@ -134,6 +134,7 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_WEEK_START = String.valueOf(Calendar.getInstance().getFirstDayOfWeek());
     public static final boolean DEFAULT_DISPLAY_DISMISS_BUTTON = true;
     public static final int DEFAULT_ALARM_NOTIFICATION_REMINDER = 30;
+    public static final boolean DEFAULT_DISPLAY_TIMER_RINGTONE_TITLE = false;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN = false;
     public static final int DEFAULT_VIBRATION_START_DELAY = 0;
     public static final boolean DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT = false;
@@ -150,6 +151,17 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_NAMAZ_LOCATION_MODE = "GPS";
     public static final String DEFAULT_NAMAZ_CITY_NAME = "Unknown";
     public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR = false;
+
+    public static final boolean DEFAULT_NAMAZ_ALARM_SHOW_ROUNDING = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_STYLE_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_FONT_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_RINGTONE_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_VIBRATION_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_ACTIONS_OVERRIDE = false;
+    public static final boolean DEFAULT_NAMAZ_ALARM_MISC_OVERRIDE = false;
 
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;
@@ -287,7 +299,7 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_SHADOW_DISPLAYED = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
+    public static final boolean DEFAULT_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
     public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;

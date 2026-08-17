@@ -27,7 +27,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
 
-    private static final int DATABASE_VERSION = 28;
+    private static final int DATABASE_VERSION = 31;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
@@ -87,6 +87,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.CRESCENDO_DURATION + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.ALARM_VOLUME + " INTEGER NOT NULL, " +
+            ClockContract.InstancesColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
             ClockContract.InstancesColumns.ALARM_ID + " INTEGER REFERENCES " +
             ALARMS_TABLE_NAME + "(" + ClockContract.AlarmsColumns._ID + ") " +
             "ON UPDATE CASCADE ON DELETE CASCADE);");
@@ -308,6 +309,24 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
             LogUtils.i("Ensured all version 27/28 columns (Namaz + Upstream) exist.");
+        }
+
+        if (oldVersion < 30) {
+            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
+                        + " INTEGER NOT NULL DEFAULT -1;");
+            }
+
+            LogUtils.i("relational_rule_id column added to instances table for version 30 upgrade.");
+        }
+
+        if (oldVersion < 31) {
+            // Ensure relational_rule_id exists in instances table
+            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
+                        + " INTEGER NOT NULL DEFAULT -1;");
+            }
+            LogUtils.i("Ensured relational_rule_id column exists for version 31 upgrade.");
         }
     }
 

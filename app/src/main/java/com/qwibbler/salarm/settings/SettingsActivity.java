@@ -137,6 +137,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         Preference mTimerSettingsPref;
         Preference mStopwatchSettingsPref;
         Preference mNamazSettingsPref;
+        Preference mNamazAlarmSettingsPref;
         Preference mScreensaverSettings;
         Preference mWidgetsSettings;
         Preference mPermissionsManagement;
@@ -253,6 +254,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mTimerSettingsPref = findPreference(KEY_TIMER_SETTINGS);
             mStopwatchSettingsPref = findPreference(KEY_STOPWATCH_SETTINGS);
             mNamazSettingsPref = findPreference(KEY_NAMAZ_SETTINGS);
+            mNamazAlarmSettingsPref = findPreference(KEY_NAMAZ_ALARM_SETTINGS);
             mScreensaverSettings = findPreference(KEY_SCREENSAVER_SETTINGS);
             mWidgetsSettings = findPreference(KEY_WIDGETS_SETTINGS);
             mPermissionsManagement = findPreference(KEY_PERMISSIONS_MANAGEMENT);
@@ -339,6 +341,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
                 case KEY_NAMAZ_SETTINGS -> animateAndShowFragment(new NamazSettingsFragment());
 
+                case KEY_NAMAZ_ALARM_SETTINGS -> animateAndShowFragment(new NamazAlarmSettingsFragment());
+
                 case KEY_SCREENSAVER_SETTINGS -> animateAndShowFragment(new ScreensaverSettingsActivity.ScreensaverSettingsFragment());
 
                 case KEY_WIDGETS_SETTINGS -> animateAndShowFragment(new WidgetSettingsFragment());
@@ -366,6 +370,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mStopwatchSettingsPref.setOnPreferenceClickListener(this);
 
             mNamazSettingsPref.setOnPreferenceClickListener(this);
+
+            mNamazAlarmSettingsPref.setOnPreferenceClickListener(this);
 
             mScreensaverSettings.setOnPreferenceClickListener(this);
 
@@ -583,6 +589,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mAlarmSettingsPref = null;
             mTimerSettingsPref = null;
             mStopwatchSettingsPref = null;
+            mNamazSettingsPref = null;
+            mNamazAlarmSettingsPref = null;
             mScreensaverSettings = null;
             mWidgetsSettings = null;
             mPermissionsManagement = null;

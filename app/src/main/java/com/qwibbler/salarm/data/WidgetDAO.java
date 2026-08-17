@@ -717,7 +717,7 @@ public final class WidgetDAO {
     }
 
     public static boolean isItemHighlightDisplayedOnNamazWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED);
+        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
     }
 
     public static boolean isNamazWidgetItemActiveHighlightDefaultColor(SharedPreferences prefs) {

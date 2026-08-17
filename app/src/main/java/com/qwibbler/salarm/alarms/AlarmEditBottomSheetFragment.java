@@ -128,6 +128,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     private String mTag;
     private boolean mIsNewAlarm;
     private boolean mIsDeleted;
+    private boolean mIsNamaz;
     private int mScreenHeight;
     private int mVisualPadding;
 
@@ -224,7 +225,6 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mPrefs = getDefaultSharedPreferences(requireContext());
         mGeneralTypeface = ThemeUtils.loadFont(SettingsDAO.getGeneralFont(mPrefs));
-        mAlarmBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getAlarmFont(mPrefs));
 
         mDisplayMetrics = getResources().getDisplayMetrics();
         mScreenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
@@ -295,6 +295,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mOriginalAlarm = new Alarm(alarmFromArguments);
         mAlarm = new Alarm(alarmFromArguments);
+        mIsNamaz = mAlarm.relationalRuleId != -1;
+
+        mAlarmBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getAlarmFont(mPrefs, mIsNamaz));
 
         mBinding = AlarmEditBottomSheetBinding.inflate(getLayoutInflater());
 
@@ -374,7 +377,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         // This catches any system volume changes the user might have made
         // (e.g., using hardware buttons) while the UI was frozen, ensuring the banner state
         // remains perfectly synchronized.
-        if (SettingsDAO.isPerAlarmVolumeEnabled(mPrefs)) {
+        if (SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsNamaz)) {
             Fragment parentFragment = getParentFragmentManager().findFragmentByTag(mTag);
             if (parentFragment instanceof AlarmFragment alarmFragment) {
                 alarmFragment.updateWarningBannerVisibility();
@@ -693,7 +696,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindVibrationPattern() {
-        if (!mAlarm.vibrate || !SettingsDAO.isPerAlarmVibrationPatternEnabled(mPrefs)) {
+        if (!mAlarm.vibrate || !SettingsDAO.isPerAlarmVibrationPatternEnabled(mPrefs, mIsNamaz)) {
             mBinding.vibrationPatternLayout.setVisibility(GONE);
             return;
         }
@@ -754,7 +757,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAutoSilenceValue() {
-        if (SettingsDAO.isPerAlarmAutoSilenceDisabled(mPrefs)) {
+        if (!SettingsDAO.isPerAlarmAutoSilenceEnabled(mPrefs, mIsNamaz)) {
             mBinding.autoSilenceDurationLayout.setVisibility(GONE);
             return;
         }
@@ -805,7 +808,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindSnoozeDurationValue() {
-        if (SettingsDAO.isPerAlarmSnoozeDurationDisabled(mPrefs)) {
+        if (!SettingsDAO.isPerAlarmSnoozeDurationEnabled(mPrefs, mIsNamaz)) {
             mBinding.snoozeDurationLayout.setVisibility(GONE);
             return;
         }
@@ -845,7 +848,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindMissedAlarmRepeatLimit() {
-        if (SettingsDAO.isPerAlarmMissedRepeatLimitDisabled(mPrefs)
+        if (!SettingsDAO.isPerAlarmMissedRepeatLimitEnabled(mPrefs, mIsNamaz)
             || mAlarm.autoSilenceDuration == TIMEOUT_NEVER
             || mAlarm.snoozeDuration == ALARM_SNOOZE_DURATION_DISABLED) {
             mBinding.missedAlarmRepeatLimitLayout.setVisibility(GONE);
@@ -881,7 +884,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindCrescendoDuration() {
-        if (SettingsDAO.isPerAlarmCrescendoDurationDisabled(mPrefs)) {
+        if (!SettingsDAO.isPerAlarmCrescendoDurationEnabled(mPrefs, mIsNamaz)) {
             mBinding.crescendoDurationLayout.setVisibility(GONE);
             return;
         }
@@ -924,7 +927,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAlarmVolume() {
-        if (!SettingsDAO.isPerAlarmVolumeEnabled(mPrefs)) {
+        if (!SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsNamaz)) {
             mBinding.alarmVolumeLayout.setVisibility(GONE);
             return;
         }
@@ -974,7 +977,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAlarmBackgroundImage() {
-        if (!SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs)) {
+        if (!SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsNamaz)) {
             mBinding.alarmBackgroundImageLayout.setVisibility(GONE);
             return;
         }
@@ -1005,11 +1008,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindBlurIntensity() {
-        final boolean hasGlobalImage = !TextUtils.isEmpty(SettingsDAO.getAlarmBackgroundImage(mPrefs));
+        final boolean hasGlobalImage = !TextUtils.isEmpty(SettingsDAO.getAlarmBackgroundImage(mPrefs, mIsNamaz));
         final boolean hasSpecificImage = !TextUtils.isEmpty(mAlarm.backgroundImage);
 
         if (SdkUtils.isBeforeAndroid12()
-            || !SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs)
+            || !SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsNamaz)
             || (!hasGlobalImage && !hasSpecificImage)) {
             mBinding.alarmBlurIntensityLayout.setVisibility(GONE);
             return;

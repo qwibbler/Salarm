@@ -152,6 +152,8 @@ public class ClockProvider extends ContentProvider {
             INSTANCES_TABLE_NAME + "." + InstancesColumns.CRESCENDO_DURATION);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_VOLUME,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_VOLUME);
+        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.RELATIONAL_RULE_ID,
+            INSTANCES_TABLE_NAME + "." + InstancesColumns.RELATIONAL_RULE_ID);
     }
 
     static {

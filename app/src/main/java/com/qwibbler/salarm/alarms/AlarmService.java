@@ -238,6 +238,7 @@ public class AlarmService extends Service {
     };
 
     private int mShakeAction;
+    private float mShakeIntensity;
     private final ResettableSensorEventListener mShakeListener = new ResettableSensorEventListener() {
         private static final int BUFFER = 5;
         private final float[] gravity = new float[3];
@@ -283,13 +284,11 @@ public class AlarmService extends Service {
             float y = event.values[1] - gravity[1];
             float z = event.values[2] - gravity[2];
 
-            float sensitivity = SettingsDAO.getShakeIntensity(mPrefs);
-
             if (fill <= BUFFER) {
                 average += Math.abs(x) + Math.abs(y) + Math.abs(z);
                 fill++;
             } else {
-                if (average / BUFFER >= sensitivity) {
+                if (average / BUFFER >= mShakeIntensity) {
                     mStopped = true;
                     handleAction(mShakeAction);
                 }
@@ -331,6 +330,7 @@ public class AlarmService extends Service {
         mSensorManager = getApplicationContext().getSystemService(SensorManager.class);
         mFlipAction = SettingsDAO.getFlipAction(mPrefs);
         mShakeAction = SettingsDAO.getShakeAction(mPrefs);
+        mShakeIntensity = SettingsDAO.getShakeIntensity(mPrefs);
 
         mVibrator = getApplicationContext().getSystemService(Vibrator.class);
         mCameraManager = getApplicationContext().getSystemService(CameraManager.class);
@@ -465,6 +465,11 @@ public class AlarmService extends Service {
 
         AlarmNotifications.showAlarmNotification(this, mCurrentAlarm);
         AlarmKlaxon.start(mCurrentAlarm);
+
+        // Update actions based on the current alarm context (normal vs Namaz)
+        mFlipAction = SettingsDAO.getFlipAction(mPrefs, mCurrentAlarm.mIsNamaz);
+        mShakeAction = SettingsDAO.getShakeAction(mPrefs, mCurrentAlarm.mIsNamaz);
+        mShakeIntensity = SettingsDAO.getShakeIntensity(mPrefs, mCurrentAlarm.mIsNamaz);
 
         if (mCurrentAlarm.mFlash) {
             if (mIsUserFlashlightOn) {

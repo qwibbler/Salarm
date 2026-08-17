@@ -96,19 +96,20 @@ public final class AlarmKlaxon {
         Context appContext = SalarmApplication.getAppContext();
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
         AlarmKlaxon instance = getInstance();
+        boolean isNamaz = alarmInstance.mIsNamaz;
         boolean isRingtoneSilent = RingtoneUtils.RINGTONE_SILENT.equals(alarmInstance.mRingtone);
 
         if (!isRingtoneSilent) {
             // Crescendo duration always in milliseconds
             final int crescendoDuration = alarmInstance.mCrescendoDuration * 1000;
-            if (DeviceUtils.isUserUnlocked(appContext) && SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
+            if (DeviceUtils.isUserUnlocked(appContext) && SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs, isNamaz)) {
                 LogUtils.v("AlarmKlaxon.start() with ExoPlayer");
 
                 instance.getRingtonePlayer().play(alarmInstance.mRingtone, crescendoDuration);
             } else {
                 LogUtils.v("AlarmKlaxon.start() with MediaPlayer");
 
-                if (SettingsDAO.isPerAlarmVolumeEnabled(prefs)) {
+                if (SettingsDAO.isPerAlarmVolumeEnabled(prefs, isNamaz)) {
                     AudioManager audioManager = appContext.getSystemService(AudioManager.class);
 
                     if (instance.mPreviousAlarmVolume == -1) {
@@ -132,7 +133,7 @@ public final class AlarmKlaxon {
                 delayInMillis = 0;
                 LogUtils.v("AlarmKlaxon: Ringtone is silent, bypassing vibration delay");
             } else {
-                delayInMillis = SettingsDAO.getVibrationStartDelay(prefs) * 1000L;
+                delayInMillis = SettingsDAO.getVibrationStartDelay(prefs, isNamaz) * 1000L;
                 // Add a small safety margin in case the vibration pattern starts with 0 ms,
                 // to prevent any vibration if the alarm stops right at the delay limit.
                 final long SAFETY_MARGIN_MS = 300;
@@ -146,9 +147,9 @@ public final class AlarmKlaxon {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build();
 
-                String patternKey = SettingsDAO.isPerAlarmVibrationPatternEnabled(prefs)
+                String patternKey = SettingsDAO.isPerAlarmVibrationPatternEnabled(prefs, isNamaz)
                     ? alarmInstance.mVibrationPattern
-                    : SettingsDAO.getVibrationPattern(prefs);
+                    : SettingsDAO.getVibrationPattern(prefs, isNamaz);
                 long[] pattern = Utils.getVibrationPatternForKey(patternKey);
 
                 if (SdkUtils.isAtLeastAndroid13()) {

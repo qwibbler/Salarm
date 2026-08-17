@@ -340,5 +340,11 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String MISSED_ALARM_REPEAT_COUNT = "missed_alarm_repeat_count";
+
+        /**
+         * Foreign key to relational rule table (Room).
+         * <p>Type: INTEGER (long)</p>
+         */
+        String RELATIONAL_RULE_ID = "relational_rule_id";
     }
 }

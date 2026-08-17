@@ -200,7 +200,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_COUNT,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
-        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
@@ -229,7 +230,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     private static final int MANUAL_SORT_ORDER_INDEX = 20;
     private static final int PAUSE_START_DATE_INDEX = 21;
     private static final int PAUSE_END_DATE_INDEX = 22;
-    private static final int RELATIONAL_RULE_ID_INDEX = 23;
+    public static final int RELATIONAL_RULE_ID_INDEX = 23;
     private static final int BACKGROUND_IMAGE_INDEX = 24;
     private static final int BLUR_INTENSITY_INDEX = 25;
 
@@ -253,9 +254,10 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 43;
     public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 44;
     public static final int INSTANCE_ALARM_VOLUME_INDEX = 45;
+    public static final int INSTANCE_RELATIONAL_RULE_ID_INDEX = 46;
 
     private static final int COLUMN_COUNT = BLUR_INTENSITY_INDEX + 1;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_RELATIONAL_RULE_ID_INDEX + 1;
     // Public fields
     public long id;
     public boolean enabled;
@@ -952,6 +954,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         result.mMissedAlarmRepeatLimit = missedAlarmRepeatLimit;
         result.mCrescendoDuration = crescendoDuration;
         result.mAlarmVolume = alarmVolume;
+        result.mRelationalRuleId = relationalRuleId;
+        result.mIsNamaz = relationalRuleId != -1;
         return result;
     }
 

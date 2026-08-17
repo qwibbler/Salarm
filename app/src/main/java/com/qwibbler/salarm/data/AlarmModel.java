@@ -56,6 +56,14 @@ final class AlarmModel {
      * @return the uri of the ringtone to play for all alarms
      */
     Uri getAlarmRingtoneUriFromSettings() {
+        return getAlarmRingtoneUriFromSettings(false);
+    }
+
+    Uri getAlarmRingtoneUriFromSettings(boolean isNamaz) {
+        if (isNamaz) {
+            return SettingsDAO.getAlarmRingtoneUriFromSettings(mPrefs, getDefaultAlarmRingtoneUriFromSettings(), true);
+        }
+
         if (mAlarmRingtoneUriFromSettings == null) {
             mAlarmRingtoneUriFromSettings = SettingsDAO.getAlarmRingtoneUriFromSettings(mPrefs, getDefaultAlarmRingtoneUriFromSettings());
         }
@@ -67,10 +75,14 @@ final class AlarmModel {
      * @return the title of the ringtone that is played for all alarms
      */
     String getAlarmRingtoneTitle() {
-        final Uri uri = getAlarmRingtoneUriFromSettings();
-        mAlarmRingtoneTitle = mRingtoneModel.getRingtoneTitle(uri);
+        return getAlarmRingtoneTitle(false);
+    }
 
-        return mAlarmRingtoneTitle;
+    String getAlarmRingtoneTitle(boolean isNamaz) {
+        final Uri uri = isNamaz
+            ? SettingsDAO.getAlarmRingtoneUriFromSettings(mPrefs, getDefaultAlarmRingtoneUriFromSettings(), true)
+            : getAlarmRingtoneUriFromSettings();
+        return mRingtoneModel.getRingtoneTitle(uri);
     }
 
     /**
