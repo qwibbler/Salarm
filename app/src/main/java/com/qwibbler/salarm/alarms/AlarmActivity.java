@@ -14,6 +14,7 @@ import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -1392,25 +1393,33 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         double[] coords = com.qwibbler.salarm.namaz.NamazUtils.getCoordinates(this);
         com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.namaz.NamazUtils.getCalculationMethod(this);
+        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.namaz.NamazUtils.getMadhab(this);
+        boolean showBothAsr = mPrefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
         long now = System.currentTimeMillis();
 
         Calendar cal = Calendar.getInstance();
         com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times =
             com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
 
+        java.util.List<com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.FAJR);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.SUNRISE);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.DHUHR);
+
+        if (showBothAsr) {
+            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
+            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI);
+        } else {
+            events.add(madhab == com.batoulapps.adhan.Madhab.HANAFI
+                ? com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI
+                : com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
+        }
+
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.MAGHRIB);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ISHA);
+
         com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent nextEvent = null;
         java.util.Date nextEventTime = null;
-
-        // Possible events in order
-        com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent[] events = {
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.FAJR,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.SUNRISE,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.DHUHR,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.MAGHRIB,
-            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ISHA
-        };
 
         // Find next event today
         for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
@@ -1445,7 +1454,14 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        String eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
+        String eventName;
+        if (!showBothAsr && (nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI ||
+            nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI)) {
+            eventName = getString(R.string.asr_label);
+        } else {
+            eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
+        }
+
         long remainingMillis = nextEventTime.getTime() - now;
 
         if (mBinding.nextEventInfo == null) return;

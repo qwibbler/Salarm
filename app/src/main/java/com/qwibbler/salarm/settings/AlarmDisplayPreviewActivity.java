@@ -76,6 +76,8 @@ import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 public class AlarmDisplayPreviewActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
@@ -109,6 +111,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
     private int mSnoozePlusButtonColor;
     private int mSnoozeMinusSymbolColor;
     private int mSnoozePlusSymbolColor;
+    private String mShowNextEventInfo;
     private Animator mTranslationAnimator;
     private int mInitialPointerIndex = MotionEvent.INVALID_POINTER_ID;
     private float mInitialTouchX = 0;
@@ -221,6 +224,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
         mSnoozePlusButtonColor = SettingsDAO.getSnoozePlusButtonColor(mPrefs, mIsNamaz);
         mSnoozeMinusSymbolColor = SettingsDAO.getSnoozeMinusSymbolColor(mPrefs, mIsNamaz);
         mSnoozePlusSymbolColor = SettingsDAO.getSnoozePlusSymbolColor(mPrefs, mIsNamaz);
+        mShowNextEventInfo = SettingsDAO.getNamazShowNextEventInfo(mPrefs);
         mIsTextShadowDisplayed = SettingsDAO.isAlarmTextShadowDisplayed(mPrefs, mIsNamaz);
         mShadowColor = SettingsDAO.getAlarmShadowColor(mPrefs, mIsNamaz);
         mShadowOffset = SettingsDAO.getAlarmShadowOffset(mPrefs, mIsNamaz);
@@ -246,6 +250,8 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
         }
 
         initRingtoneTitle();
+
+        initNextEventInfo();
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -1022,6 +1028,144 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
         mBinding.ringtoneTitle.setTextColor(ringtoneTitleColor);
         // Allow text scrolling (all other attributes are indicated in the "alarm_activity.xml" file)
         mBinding.ringtoneTitle.setSelected(true);
+    }
+
+    private void initNextEventInfo() {
+        if (!mIsNamaz || "nothing".equals(mShowNextEventInfo)) {
+            if (mBinding.nextEventInfo != null) {
+                mBinding.nextEventInfo.setVisibility(GONE);
+            }
+            return;
+        }
+
+        if (mBinding.nextEventInfo == null) return;
+
+        mBinding.nextEventInfo.setTypeface(mGeneralBoldTypeface);
+        if (mIsTextShadowDisplayed) {
+            mBinding.nextEventInfo.setShadowLayer(mShadowRadius, mShadowOffset, mShadowOffset, mShadowColor);
+        }
+
+        mBinding.nextEventInfo.setVisibility(VISIBLE);
+        updateNextEventInfo();
+    }
+
+    private void updateNextEventInfo() {
+        if (isFinishing() || mBinding.nextEventInfo == null || mBinding.nextEventInfo.getVisibility() == GONE) {
+            return;
+        }
+
+        double[] coords = com.qwibbler.salarm.namaz.NamazUtils.getCoordinates(this);
+        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.namaz.NamazUtils.getCalculationMethod(this);
+        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.namaz.NamazUtils.getMadhab(this);
+        boolean showBothAsr = mPrefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        long now = System.currentTimeMillis();
+
+        Calendar cal = Calendar.getInstance();
+        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times =
+            com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
+
+        java.util.List<com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.FAJR);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.SUNRISE);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.DHUHR);
+
+        if (showBothAsr) {
+            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
+            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI);
+        } else {
+            events.add(madhab == com.batoulapps.adhan.Madhab.HANAFI
+                ? com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI
+                : com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
+        }
+
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.MAGHRIB);
+        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ISHA);
+
+        com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent nextEvent = null;
+        java.util.Date nextEventTime = null;
+
+        // Find next event today
+        for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+            java.util.Date time = getEventTime(event, times);
+            if (time != null && time.getTime() > now) {
+                if (nextEventTime == null || time.before(nextEventTime)) {
+                    nextEventTime = time;
+                    nextEvent = event;
+                }
+            }
+        }
+
+        // If no more events today, find first event tomorrow
+        if (nextEventTime == null) {
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+            times = com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
+            for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+                java.util.Date time = getEventTime(event, times);
+                if (time != null) {
+                    if (nextEventTime == null || time.before(nextEventTime)) {
+                        nextEventTime = time;
+                        nextEvent = event;
+                    }
+                }
+            }
+        }
+
+        if (nextEventTime == null) {
+            if (mBinding.nextEventInfo != null) {
+                mBinding.nextEventInfo.setVisibility(GONE);
+            }
+            return;
+        }
+
+        String eventName;
+        if (!showBothAsr && (nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI ||
+            nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI)) {
+            eventName = getString(R.string.asr_label);
+        } else {
+            eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
+        }
+
+        long remainingMillis = nextEventTime.getTime() - now;
+
+        if (mBinding.nextEventInfo == null) return;
+
+        if ("time".equals(mShowNextEventInfo)) {
+            String formattedTime = android.text.format.DateFormat.getTimeFormat(this).format(nextEventTime);
+            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
+                getString(R.string.namaz_next_event_info_time_format), eventName, formattedTime));
+        } else {
+            // countdown
+            long remainingSeconds = (remainingMillis + 999) / 1000;
+            int hours = (int) (remainingSeconds / 3600);
+            int minutes = (int) ((remainingSeconds % 3600) / 60);
+            int seconds = (int) (remainingSeconds % 60);
+
+            String countdown;
+            if (hours > 0) {
+                countdown = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                countdown = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+            }
+
+            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
+                getString(R.string.namaz_next_event_info_countdown_format), countdown, eventName));
+
+            // Update again in a second
+            mHandler.postDelayed(this::updateNextEventInfo, 1000);
+        }
+    }
+
+    private java.util.Date getEventTime(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event,
+                                        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times) {
+        return switch (event) {
+            case FAJR -> times.fajr;
+            case SUNRISE -> times.sunrise;
+            case DHUHR -> times.dhuhr;
+            case ASR_SHAFI -> times.asrShafi;
+            case ASR_HANAFI -> times.asrHanafi;
+            case MAGHRIB -> times.maghrib;
+            case ISHA -> times.isha;
+        };
     }
 
     /**
