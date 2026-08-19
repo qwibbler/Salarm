@@ -168,7 +168,14 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"إيقاف كل الموقِّتات"</string>
     <string name="timer_canceled" msgid="7327923392567128060">أُلغِيَ الموقِّت</string>
     <string name="timer_times_up" msgid="9190440395938519009">"انتهى الوقت"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"انتهت صلاحية <xliff:g id="NUM_TIMERS">%d</xliff:g> من الموقِّتات"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="zero">"انتهت صلاحية <xliff:g id="NUM_TIMERS">%d</xliff:g> من الموقِّتات"</item>
+        <item quantity="one">"انتهت صلاحية موقِّت واحد"</item>
+        <item quantity="two">"انتهت صلاحية موقِّتين"</item>
+        <item quantity="few">"انتهت صلاحية <xliff:g id="NUM_TIMERS">%d</xliff:g> موقِّتات"</item>
+        <item quantity="many">"انتهت صلاحية <xliff:g id="NUM_TIMERS">%d</xliff:g> موقِّتًا"</item>
+        <item quantity="other">"انتهت صلاحية <xliff:g id="NUM_TIMERS">%d</xliff:g> موقِّت"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"مؤقت"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">الموقِّت الفائت: <xliff:g example="Pick up kids" id="name">%s</xliff:g></string>
     <string name="timer_pause" msgid="3748323712728398743">أوقف مؤقتًا</string>
@@ -215,7 +222,14 @@
     <string name="timer_settings" msgid="7955522143086154795">"الموقتات"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"اهتزاز الموقت"</string>
     <string name="timer_paused" msgid="5941160896040771462">"تم إيقاف الموقِّت مؤقتًا"</string>
-    <string name="timers_in_use" msgid="5570729467344408506"><xliff:g id="number">%d</xliff:g> من الموقتات</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="zero">"لا توجد موقِّتات قيد الاستخدام"</item>
+        <item quantity="one">"موقِّت واحد قيد الاستخدام"</item>
+        <item quantity="two">"موقِّتان قيد الاستخدام"</item>
+        <item quantity="few">"<xliff:g id="NUMBER">%d</xliff:g> موقِّتات قيد الاستخدام"</item>
+        <item quantity="many">"<xliff:g id="NUMBER">%d</xliff:g> موقِّتًا قيد الاستخدام"</item>
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> موقِّت قيد الاستخدام"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"تراجع"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">حُذف المنبّه</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="label">%s</xliff:g></string>

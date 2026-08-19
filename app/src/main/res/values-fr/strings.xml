@@ -187,7 +187,11 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"Arrêter tous les minuteurs"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"Le minuteur a été annulé."</string>
     <string name="timer_times_up" msgid="9190440395938519009">"Le temps est écoulé."</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"<xliff:g id="NUM_TIMERS">%d</xliff:g> minuteurs ont expiré."</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="one">"<xliff:g id="NUM_TIMERS">%d</xliff:g> minuteurs ont expiré."</item>
+        <item quantity="many">"<xliff:g id="NUM_TIMERS">%d</xliff:g> minuteurs ont expiré."</item>
+        <item quantity="other">"<xliff:g id="NUM_TIMERS">%d</xliff:g> minuteurs ont expiré."</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"Minuteur"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"Rappel manqué : <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"Interrompre"</string>
@@ -250,7 +254,11 @@
     <string name="default_time_to_add_to_timer_title">Durée par défaut à ajouter aux minuteurs</string>
     <string name="transparent_background_for_expired_timer_title">Arrière-plan transparent à l\'expiration des minuteurs</string>
     <string name="timer_paused" msgid="5941160896040771462">"Minuteur interrompu"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"<xliff:g id="NUMBER">%d</xliff:g> minuteurs"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="one">"<xliff:g id="NUMBER">%d</xliff:g> minuteurs"</item>
+        <item quantity="many">"<xliff:g id="NUMBER">%d</xliff:g> minuteurs"</item>
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> minuteurs"</item>
+    </plurals>
     <string name="screensaver_settings_title">Économiseur d\'écran</string>
     <string name="screensaver_settings_summary">Personnaliser le style, la police et la couleur de l\'économiseur d\'écran</string>
     <string name="screensaver_daydream_settings">Sélectionner/activer l\'économiseur d\'écran</string>

@@ -162,7 +162,7 @@ public final class City {
      */
     public String getNameUpperCase() {
         if (mNameUpperCase == null) {
-            mNameUpperCase = mName.toUpperCase();
+            mNameUpperCase = mName.toUpperCase(Locale.ROOT);
         }
         return mNameUpperCase;
     }
@@ -182,7 +182,7 @@ public final class City {
      */
     public String getEnglishNameUpperCase() {
         if (mEnglishNameUpperCase == null) {
-            mEnglishNameUpperCase = mEnglishName.toUpperCase();
+            mEnglishNameUpperCase = mEnglishName.toUpperCase(Locale.ROOT);
         }
         return mEnglishNameUpperCase;
     }
@@ -202,7 +202,7 @@ public final class City {
      */
     private String getCountryUpperCaseNoSpecialCharacters() {
         if (mCountryUpperCaseNoSpecialCharacters == null && mCountry != null) {
-            mCountryUpperCaseNoSpecialCharacters = removeSpecialCharacters(mCountry.toUpperCase());
+            mCountryUpperCaseNoSpecialCharacters = removeSpecialCharacters(mCountry.toUpperCase(Locale.ROOT));
         }
         return mCountryUpperCaseNoSpecialCharacters;
     }
@@ -214,7 +214,7 @@ public final class City {
         if (mAlternativeNamesUpperCaseNoSpecialCharacters == null) {
             mAlternativeNamesUpperCaseNoSpecialCharacters = new ArrayList<>(mAlternativeNames.size());
             for (String alt : mAlternativeNames) {
-                mAlternativeNamesUpperCaseNoSpecialCharacters.add(removeSpecialCharacters(alt.toUpperCase()));
+                mAlternativeNamesUpperCaseNoSpecialCharacters.add(removeSpecialCharacters(alt.toUpperCase(Locale.ROOT)));
             }
         }
         return mAlternativeNamesUpperCaseNoSpecialCharacters;

@@ -132,7 +132,9 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"ຢຸດ​ທຸກ​ເວ​ລາ"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"​ຍົກ​ເລີກ​ການ​ຈັບ​ເວ​ລາ​ແລ້ວ"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"ໝົດເວລາ"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"<xliff:g id="NUM_TIMERS">%d</xliff:g> ​ໂມງ​ຈັບ​ເວ​ລາ​ໝົດ​ອາ​ຍຸ​ແລ້ວ"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="other">"<xliff:g id="NUM_TIMERS">%d</xliff:g> ​ໂມງ​ຈັບ​ເວ​ລາ​ໝົດ​ອາ​ຍຸ​ແລ້ວ"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"ໂມງນັບຖອຍຫລັງ"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"ການຕັ້ງເວລາທີ່ພາດໄປ: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"ຢຸດຊົ່ວຄາວ"</string>
@@ -179,7 +181,9 @@
     <string name="timer_settings" msgid="7955522143086154795">"ໂມງ​ຈັບ​ເວ​ລາ"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"ໂມງນັບຖອຍຫຼັງສັ່ນ"</string>
     <string name="timer_paused" msgid="5941160896040771462">"ເຄື່ອງ​ຈັບ​ເວ​ລາ​ຢຸດ​ແລ້ວ"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"<xliff:g id="NUMBER">%d</xliff:g> ໂມງນັບຖອຍຫຼັງ"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> ໂມງນັບຖອຍຫຼັງ"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"ຍົກເລີກ"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"ໂມງປຸກຖືກລຶບແລ້ວ."</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="LABEL">%s</xliff:g></string>

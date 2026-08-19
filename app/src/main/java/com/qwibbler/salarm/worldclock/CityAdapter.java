@@ -429,7 +429,7 @@ public class CityAdapter extends BaseAdapter implements View.OnClickListener, Co
     public void filter(String queryText) {
         mCurrentQueryText = queryText;
 
-        final String query = City.removeSpecialCharacters(queryText.toUpperCase());
+        final String query = City.removeSpecialCharacters(queryText.toUpperCase(Locale.getDefault()));
 
         // Compute the filtered list of cities.
         final List<City> filteredCities;

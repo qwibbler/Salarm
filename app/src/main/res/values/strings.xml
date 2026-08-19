@@ -409,7 +409,10 @@
     <string name="timer_times_up">Time\'s up</string>
     <!-- Notification content shown when multiple timers have completed and have no more time remaining.
      Arg is the number of timers. [CHAR LIMIT=25] -->
-    <string name="timer_multi_times_up"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> timers expired</string>
+    <plurals name="timer_multi_times_up">
+        <item quantity="one"><xliff:g example="1" id="NUM_TIMERS">%d</xliff:g> timer expired</item>
+        <item quantity="other"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> timers expired</item>
+    </plurals>
     <!-- Label associated with a notification for a Timer -->
     <string name="timer_notification_label">Timer</string>
     <!-- Label associated with a notification for a missed named Timer. [CHAR LIMIT=NONE] -->
@@ -417,7 +420,10 @@
     <!-- Notification title when timer is paused. [CHAR LIMIT=25] -->
     <string name="timer_paused">Timer paused</string>
     <!-- Notification title when at least one timer, of those in use, is counting down. -->
-    <string name="timers_in_use"><xliff:g example="7" id="number">%d</xliff:g> timers</string>
+    <plurals name="timers_in_use">
+        <item quantity="one"><xliff:g example="1" id="number">%d</xliff:g> timer</item>
+        <item quantity="other"><xliff:g example="7" id="number">%d</xliff:g> timers</item>
+    </plurals>
     <!-- Describes the purpose of the notification button to pause the timer. [CHAR LIMIT=15] -->
     <string name="timer_pause">Pause</string>
     <!-- Describes the service that processes actions originating from timer notifications. -->
@@ -1563,7 +1569,6 @@
     <string name="namaz_alarms_settings_title">Namaz Alarms</string>
     <string name="namaz_alarms_settings_summary">Settings for Namaz alarms</string>
     <string name="show_rounding_option_title">Show option to round the namaz alarms</string>
-    <string name="override_normal_alarm_settings_title">Override normal alarm settings</string>
     <string name="namaz_alarm_style_override_title">Override normal alarm style</string>
     <string name="namaz_alarm_display_style_override_title">Override normal alarm display style</string>
     <string name="namaz_alarm_colors_override_title">Override normal alarm colors</string>

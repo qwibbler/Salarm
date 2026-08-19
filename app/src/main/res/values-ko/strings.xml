@@ -133,7 +133,9 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"모든 타이머 정지"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"타이머 취소됨"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"시간이 다 되었습니다."</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"<xliff:g id="NUM_TIMERS">%d</xliff:g>개 타이머 만료"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="other">"<xliff:g id="NUM_TIMERS">%d</xliff:g>개 타이머 만료"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"타이머"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"부재중 타이머: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"일시중지"</string>
@@ -180,7 +182,9 @@
     <string name="timer_settings" msgid="7955522143086154795">"타이머"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"타이머 진동"</string>
     <string name="timer_paused" msgid="5941160896040771462">"타이머가 일시중지됨"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"타이머 <xliff:g id="NUMBER">%d</xliff:g>개"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="other">"타이머 <xliff:g id="NUMBER">%d</xliff:g>개"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">실행 취소</string>
     <string name="alarm_deleted" msgid="6131529309389084785">알람을 삭제했습니다.</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="label">%s</xliff:g></string>

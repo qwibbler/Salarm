@@ -146,8 +146,8 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
         String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
         String label = context.getString(R.string.namaz_countdown_format, "", next.fullName).replace(" To ", "").trim();
         if (WidgetDAO.isTextUppercaseDisplayedOnNamazCountdownWidget(prefs)) {
-            timeLeft = timeLeft.toUpperCase();
-            label = label.toUpperCase();
+            timeLeft = timeLeft.toUpperCase(Locale.getDefault());
+            label = label.toUpperCase(Locale.getDefault());
         }
 
         rv.setTextViewText(R.id.countdown_time, timeLeft);

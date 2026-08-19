@@ -9,6 +9,7 @@ import com.qwibbler.salarm.utils.LogUtils;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Represents a rule for calculating an alarm time relative to a prayer event.
@@ -116,7 +117,7 @@ public class RelationalRule {
 
         String description = sb.toString();
         if (description.isEmpty()) return "";
-        return description.substring(0, 1).toUpperCase() + description.substring(1);
+        return description.substring(0, 1).toUpperCase(Locale.getDefault()) + description.substring(1);
     }
 
     private String getOffsetPart(android.content.Context context, int offset) {

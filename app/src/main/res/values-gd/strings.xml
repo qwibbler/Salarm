@@ -112,7 +112,12 @@
     <string name="timer_stop_all">Cuir stad air gach tìmear</string>
     <string name="timer_canceled">Chaidh sgur dhen tìmear</string>
     <string name="timer_times_up">Tha an ùine seachad</string>
-    <string name="timer_multi_times_up">Dh’fhalbh an ùine air tìmearan (<xliff:g example="2" id="NUM_TIMERS">%d</xliff:g>)</string>
+    <plurals name="timer_multi_times_up">
+        <item quantity="one">Dh’fhalbh an ùine air tìmearan (<xliff:g example="2" id="NUM_TIMERS">%d</xliff:g>)</item>
+        <item quantity="two">Dh’fhalbh an ùine air tìmearan (<xliff:g example="2" id="NUM_TIMERS">%d</xliff:g>)</item>
+        <item quantity="few">Dh’fhalbh an ùine air tìmearan (<xliff:g example="2" id="NUM_TIMERS">%d</xliff:g>)</item>
+        <item quantity="other">Dh’fhalbh an ùine air tìmearan (<xliff:g example="2" id="NUM_TIMERS">%d</xliff:g>)</item>
+    </plurals>
     <string name="timer_notification_label">Tìmear</string>
     <string name="timer_pause">Cuir ’na stad</string>
     <string name="jocular_content_message_1">Nach tusa a tha luath!</string>
@@ -145,7 +150,12 @@
     <string name="description_direction_both">Grad-shlaighd gun taobh chlì ’ga chur ’na dhùsal no gun taobh deas ’ga leigeil seachad</string>
     <string name="timer_settings">Tìmearan</string>
     <string name="timer_paused">Tha an tìmear ’na stad</string>
-    <string name="timers_in_use"><xliff:g example="7" id="number">%d</xliff:g> tìmear(an)</string>
+    <plurals name="timers_in_use">
+        <item quantity="one"><xliff:g example="7" id="number">%d</xliff:g> tìmear(an)</item>
+        <item quantity="two"><xliff:g example="7" id="number">%d</xliff:g> tìmear(an)</item>
+        <item quantity="few"><xliff:g example="7" id="number">%d</xliff:g> tìmear(an)</item>
+        <item quantity="other"><xliff:g example="7" id="number">%d</xliff:g> tìmear(an)</item>
+    </plurals>
     <string name="alarm_undo">neo-dhèan</string>
     <string name="alarm_deleted">Chaidh a’ chaismeachd a sguabadh às</string>
     <string name="world_day_of_week_label">/ <xliff:g id="label">%s</xliff:g></string>

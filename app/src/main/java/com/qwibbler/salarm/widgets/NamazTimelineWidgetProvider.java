@@ -28,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import com.batoulapps.adhan.CalculationMethod;
 import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
@@ -197,8 +199,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
         String label = context.getString(R.string.namaz_countdown_format, "", next.fullName).replace(" To ", "").trim();
         if (WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs)) {
-            timeLeft = timeLeft.toUpperCase();
-            label = label.toUpperCase();
+            timeLeft = timeLeft.toUpperCase(Locale.getDefault());
+            label = label.toUpperCase(Locale.getDefault());
         }
 
         rv.setTextViewText(R.id.countdown_time, timeLeft);
@@ -263,8 +265,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             String name = prayer.name;
             String time = timeFormat.format(prayer.time);
             if (uppercase) {
-                name = name.toUpperCase();
-                time = time.toUpperCase();
+                name = name.toUpperCase(Locale.getDefault());
+                time = time.toUpperCase(Locale.getDefault());
             }
 
             int color = standardColor;

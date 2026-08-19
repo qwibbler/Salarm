@@ -49,6 +49,7 @@
                 android:layout_marginStart="8dp"
                 android:src="@drawable/ic_calendar_clock"
                 android:alpha="0.7"
+                android:contentDescription="@null"
                 app:tint="?attr/colorOnSurface" />
         </LinearLayout>
 
@@ -122,6 +123,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/ic_tab_namaz_static"
+            android:contentDescription="@null"
             app:tint="?attr/colorPrimary" />
 
         <LinearLayout

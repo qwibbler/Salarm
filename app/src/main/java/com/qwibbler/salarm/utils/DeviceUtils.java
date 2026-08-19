@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class DeviceUtils {
@@ -59,7 +60,7 @@ public class DeviceUtils {
      */
     public static boolean isMiui(boolean excludeHyperOS) {
         // Check if the device is from Xiaomi, Redmi or POCO.
-        String brand = Build.BRAND.toLowerCase();
+        String brand = Build.BRAND.toLowerCase(Locale.ROOT);
         Set<String> xiaomiBrands = new HashSet<>(Arrays.asList("xiaomi", "redmi", "poco"));
         if (!xiaomiBrands.contains(brand)) {
             return false;

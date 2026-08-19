@@ -102,7 +102,7 @@ public class TimerTileService extends TileService {
         }
 
         if (SdkUtils.isAtLeastAndroid10()) {
-            tile.setSubtitle(getString(R.string.timers_in_use, count));
+            tile.setSubtitle(getResources().getQuantityString(R.plurals.timers_in_use, count, count));
         }
 
         tile.updateTile();

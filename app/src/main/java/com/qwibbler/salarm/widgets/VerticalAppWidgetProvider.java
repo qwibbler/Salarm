@@ -20,6 +20,8 @@ import android.widget.RemoteViews;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import androidx.annotation.Keep;
 
 import com.qwibbler.salarm.R;
@@ -297,7 +299,7 @@ public class VerticalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
         }
 
         String dateFormat = WidgetUtils.getDateFormat(context);
-        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase() : dateFormat;
+        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase(Locale.getDefault()) : dateFormat;
 
         if (WidgetDAO.isVerticalWidgetDefaultDateColor(prefs)) {
             rv.setViewVisibility(getDateViewId(), VISIBLE);
@@ -321,7 +323,7 @@ public class VerticalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase() : nextAlarmTime;
+        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase(Locale.getDefault()) : nextAlarmTime;
 
         if (WidgetDAO.isVerticalWidgetDefaultNextAlarmColor(prefs)) {
             rv.setViewVisibility(getNextAlarmViewId(), VISIBLE);
@@ -416,7 +418,7 @@ public class VerticalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
         }
 
         String dateFormat = WidgetUtils.getDateFormat(context);
-        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase() : dateFormat;
+        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase(Locale.getDefault()) : dateFormat;
 
         if (WidgetDAO.isVerticalWidgetDefaultDateColor(prefs)) {
             date.setVisibility(VISIBLE);
@@ -444,7 +446,7 @@ public class VerticalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase() : nextAlarmTime;
+        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase(Locale.getDefault()) : nextAlarmTime;
 
         if (WidgetDAO.isVerticalWidgetDefaultNextAlarmColor(prefs)) {
             nextAlarm.setText(nextAlarmText);
