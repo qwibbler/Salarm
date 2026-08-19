@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">م<xliff:g id="separator">=</xliff:g>منامہ، بحرین<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">ب<xliff:g id="separator">=</xliff:g>بریج ٹاؤن، بارباڈوس<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">ب<xliff:g id="separator">=</xliff:g>بلموپان، بیلیز<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">ر<xliff:g id="separator">=</xliff:g>ریکیاوک، آئس لینڈ<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">ن<xliff:g id="separator">=</xliff:g>نئی دہلی، بھارت<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">آ<xliff:g id="separator">=</xliff:g>آستانہ، قازقستان<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">ک<xliff:g id="separator">=</xliff:g>کویت سٹی، کویت<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">ر<xliff:g id="separator">=</xliff:g>رباط، مراکش<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">و<xliff:g id="separator">=</xliff:g>ویلنگٹن، نیوزی لینڈ<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">ا<xliff:g id="separator">=</xliff:g>ابوجا، نائیجیریا<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">پ<xliff:g id="separator">=</xliff:g>پریٹوریا، جنوبی افریقہ<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">ب<xliff:g id="separator">=</xliff:g>برن، سوئٹزرلینڈ<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">ک<xliff:g id="separator">=</xliff:g>کیف، یوکرین<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">ا<xliff:g id="separator">=</xliff:g>ابو ظہبی، متحدہ عرب امارات<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">و<xliff:g id="separator">=</xliff:g>واشنگٹن، ڈی سی، امریکہ<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">ج<xliff:g id="separator">=</xliff:g>جدہ، سعودی عرب<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">م<xliff:g id="separator">=</xliff:g>مکہ، سعودی عرب<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">م<xliff:g id="separator">=</xliff:g>مدینہ، سعودی عرب<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

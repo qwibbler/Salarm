@@ -355,4 +355,22 @@
     <string name="C359">ㅇ<xliff:g id="separator">=</xliff:g>유클라<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">ㄹ<xliff:g id="separator">=</xliff:g>로드하우 섬<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">ㅊ<xliff:g id="separator">=</xliff:g>채텀 제도<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">마<xliff:g id="separator">=</xliff:g>마나마, 바레인<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">브<xliff:g id="separator">=</xliff:g>브리지타운, 바베이도스<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">벨<xliff:g id="separator">=</xliff:g>벨모판, 벨리즈<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">레<xliff:g id="separator">=</xliff:g>레이캬비크, 아이슬란드<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">뉴<xliff:g id="separator">=</xliff:g>뉴델리, 인도<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">아<xliff:g id="separator">=</xliff:g>아스타나, 카자흐스탄<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">쿠<xliff:g id="separator">=</xliff:g>쿠웨이트시티, 쿠웨이트<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">라<xliff:g id="separator">=</xliff:g>라바特, 모로코<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">웰<xliff:g id="separator">=</xliff:g>웰링턴, 뉴질랜드<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">아<xliff:g id="separator">=</xliff:g>아부자, 나이지리아<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">프<xliff:g id="separator">=</xliff:g>프리토리아, 남아프리카 공화국<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">베<xliff:g id="separator">=</xliff:g>베른, 스위스<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">키<xliff:g id="separator">=</xliff:g>키이우, 우크라이나<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">아<xliff:g id="separator">=</xliff:g>아부다비, 아랍에미리트<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">워<xliff:g id="separator">=</xliff:g>워싱턴 D.C., 미국<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">제<xliff:g id="separator">=</xliff:g>제다, 사우디아라비ีอา<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">메<xliff:g id="separator">=</xliff:g>메카, 사우디아라비ีอา<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">메<xliff:g id="separator">=</xliff:g>메디나, 사우디아라비ีอา<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

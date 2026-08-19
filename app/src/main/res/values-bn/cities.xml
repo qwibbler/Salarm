@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">ম<xliff:g id="separator">=</xliff:g>মানামা, বাহরাইন<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">ব<xliff:g id="separator">=</xliff:g>ব্রিজটাউন, বার্বাডোস<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">ব<xliff:g id="separator">=</xliff:g>বেলমোপান, বেলিজ<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">র<xliff:g id="separator">=</xliff:g>রেকিয়াভিক, আইসল্যান্ড<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">ন<xliff:g id="separator">=</xliff:g>নয়াদিল্লি, ভারত<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">আ<xliff:g id="separator">=</xliff:g>আস্তানা, কাজাখস্তান<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">ক<xliff:g id="separator">=</xliff:g>কুয়েত সিটি, কুয়েত<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">র<xliff:g id="separator">=</xliff:g>রাবাত, মরক্কো<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">ও<xliff:g id="separator">=</xliff:g>ওয়েলিংটন, নিউজিল্যান্ড<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">আ<xliff:g id="separator">=</xliff:g>আবুজা, নাইজেরিয়া<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">প<xliff:g id="separator">=</xliff:g>প্রিটোরিয়া, দক্ষিণ আফ্রিকা<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">ব<xliff:g id="separator">=</xliff:g>বার্ন, সুইজারল্যান্ড<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">ক<xliff:g id="separator">=</xliff:g>কিয়েভ, ইউক্রেন<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">আ<xliff:g id="separator">=</xliff:g>আবুধাবি, সংযুক্ত আরব আমিরাত<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">ও<xliff:g id="separator">=</xliff:g>ওয়াশিংটন, ডি.সি., মার্কিন যুক্তরাষ্ট্র<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">জ<xliff:g id="separator">=</xliff:g>জেদ্দা, সৌদি আরব<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">ম<xliff:g id="separator">=</xliff:g>মক্কা, সৌদি আরব<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">ম<xliff:g id="separator">=</xliff:g>মদিনা, সৌদি আরব<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

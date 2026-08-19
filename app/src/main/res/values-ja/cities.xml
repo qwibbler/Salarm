@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">マ<xliff:g id="separator">=</xliff:g>マナマ、バーレーン<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">ブ<xliff:g id="separator">=</xliff:g>ブリッジタウン、バルバドス<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">ブ<xliff:g id="separator">=</xliff:g>ベルモパン、ベリーズ<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">レ<xliff:g id="separator">=</xliff:g>レイキャビク、アイスランド<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">ニ<xliff:g id="separator">=</xliff:g>ニューデリー、インド<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">ア<xliff:g id="separator">=</xliff:g>アスタナ、カザフスタン<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">ク<xliff:g id="separator">=</xliff:g>クウェートシティ、クウェート<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">ラ<xliff:g id="separator">=</xliff:g>ラバト、モロッコ<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">ウ<xliff:g id="separator">=</xliff:g>ウェリントン、ニュージーランド<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">ア<xliff:g id="separator">=</xliff:g>アブジャ、ナイジェリア<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">プ<xliff:g id="separator">=</xliff:g>プレトリア、南アフリカ<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">ベ<xliff:g id="separator">=</xliff:g>ベルン、スイス<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">キ<xliff:g id="separator">=</xliff:g>キーウ、ウクライナ<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">ア<xliff:g id="separator">=</xliff:g>アブダビ、UAE<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">ワ<xliff:g id="separator">=</xliff:g>ワシントンD.C.、アメリカ<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">ジ<xliff:g id="separator">=</xliff:g>ジェッダ、サウジアラビア<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">メ<xliff:g id="separator">=</xliff:g>メッカ、サウジアラビア<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">メ<xliff:g id="separator">=</xliff:g>メディナ、サウジアラビア<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

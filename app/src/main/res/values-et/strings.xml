@@ -247,7 +247,7 @@
     <string name="alarm_notification_reminder_title">Teavituse meeldetuletus</string>
     <string name="enable_alarm_vibrations_by_default_setting_title">Äratuse käivitamisel lülita vibreerimine sisse</string>
     <string name="timer_add_custom_time">+ %s</string>
-    <string name="app_slogan">AOSP-l põhinev, 100% avatud lähtekoodiga kell</string>
+    <string name="app_slogan">AOSP-l põhinev, 100%% avatud lähtekoodiga kell</string>
     <string name="display_background_border_summary">See eelistus võimaldab mõnede rakenduse elementide (äratused, linnad, taimeri nupud, jne) puhul kuvada taustu äärejoontega</string>
     <string name="display_background_border_title">Kuva taustade äärejooni</string>
     <string name="settings_vibration_title">Kasuta vibreerimist/värinat</string>

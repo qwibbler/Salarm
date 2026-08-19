@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">ا<xliff:g id="separator">=</xliff:g>المنامة، البحرين<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">ب<xliff:g id="separator">=</xliff:g>بريدجتاون، باربادوس<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">ب<xliff:g id="separator">=</xliff:g>بلموبان، بليز<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">ر<xliff:g id="separator">=</xliff:g>ريكيافيك، آيسلندا<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">ن<xliff:g id="separator">=</xliff:g>نيودلهي، الهند<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">أ<xliff:g id="separator">=</xliff:g>أستانا، كازاخستان<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">م<xliff:g id="separator">=</xliff:g>مدينة الكويت، الكويت<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">ا<xliff:g id="separator">=</xliff:g>الرباط، المغرب<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">و<xliff:g id="separator">=</xliff:g>ويلينغتون، نيوزيلندا<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">أ<xliff:g id="separator">=</xliff:g>أبوجا، نيجيريا<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">ب<xliff:g id="separator">=</xliff:g>بريتوريا، جنوب أفريقيا<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">ب<xliff:g id="separator">=</xliff:g>برن، سويسرا<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">ك<xliff:g id="separator">=</xliff:g>كييف، أوكرانيا<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">أ<xliff:g id="separator">=</xliff:g>أبو ظبي، الإمارات<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">و<xliff:g id="separator">=</xliff:g>واشنطن العاصمة، الولايات المتحدة<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">ج<xliff:g id="separator">=</xliff:g>جدة، السعودية<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">م<xliff:g id="separator">=</xliff:g>مكة المكرمة، السعودية<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">ا<xliff:g id="separator">=</xliff:g>المدينة المنورة، السعودية<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>
