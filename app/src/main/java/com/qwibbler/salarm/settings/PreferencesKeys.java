@@ -53,6 +53,8 @@ public class PreferencesKeys {
     public static final String KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE = "key_namaz_enable_per_alarm_auto_silence";
     public static final String KEY_NAMAZ_ALARM_SNOOZE_DURATION = "key_namaz_alarm_snooze_duration";
     public static final String KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION = "key_namaz_enable_per_alarm_snooze_duration";
+    public static final String KEY_NAMAZ_ALARM_DISMISS_AFTER = "key_namaz_alarm_dismiss_after";
+    public static final String KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER = "key_namaz_enable_per_alarm_dismiss_after";
     public static final String KEY_NAMAZ_REPEAT_MISSED_ALARM = "key_namaz_repeat_missed_alarm";
     public static final String KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = "key_namaz_enable_per_alarm_missed_repeat_limit";
     public static final String KEY_NAMAZ_ALARM_VOLUME_SETTING = "key_namaz_volume_setting";
@@ -190,6 +192,8 @@ public class PreferencesKeys {
     public static final String KEY_AUTO_SILENCE_DURATION = "key_auto_silence_duration";
     public static final String KEY_ENABLE_PER_ALARM_SNOOZE_DURATION = "key_enable_per_alarm_snooze_duration";
     public static final String KEY_ALARM_SNOOZE_DURATION = "key_alarm_snooze_duration";
+    public static final String KEY_ENABLE_PER_ALARM_DISMISS_AFTER = "key_enable_per_alarm_dismiss_after";
+    public static final String KEY_ALARM_DISMISS_AFTER = "key_dismiss_after";
     public static final String KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = "key_enable_per_alarm_missed_repeat_limit";
     public static final String KEY_REPEAT_MISSED_ALARM = "key_repeat_missed_alarm";
     public static final String KEY_ALARM_VOLUME_SETTING = "key_volume_setting";

@@ -111,6 +111,21 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+        <com.qwibbler.salarm.settings.custompreference.DismissAfterPreference
+            android:key="key_namaz_alarm_dismiss_after"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/dismiss_after_title"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_enable_per_alarm_dismiss_after"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/enable_per_alarm_dismiss_after_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
         <ListPreference
             android:key="key_namaz_repeat_missed_alarm"
             android:layout="@layout/settings_preference_layout"

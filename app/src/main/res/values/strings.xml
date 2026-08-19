@@ -858,6 +858,10 @@
     <string name="enable_per_alarm_snooze_duration_title">Use a custom snooze duration for each alarm</string>
     <!-- Dialog message when the "Use a custom snooze duration for each alarm" setting is disabled. -->
     <string name="enable_per_alarm_snooze_duration_dialog_message">Custom alarm snooze durations will be reset.%s</string>
+    <!-- Setting title to enable the use of a custom dismiss duration for each alarm. -->
+    <string name="enable_per_alarm_dismiss_after_title">Use a custom dismiss duration for each alarm</string>
+    <!-- Dialog message when the "Use a custom dismiss duration for each alarm" setting is disabled. -->
+    <string name="enable_per_alarm_dismiss_after_dialog_message">Custom alarm dismiss durations will be reset.%s</string>
     <!-- Setting title for changing the snooze duration. -->
     <string name="snooze_duration_title">Snooze length</string>
     <!-- Dismiss after preference title -->

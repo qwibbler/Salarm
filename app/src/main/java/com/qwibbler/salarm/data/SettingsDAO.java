@@ -1346,6 +1346,19 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if a custom dismiss duration cannot be set for each alarm.
+     * {@code false} otherwise.
+     */
+    public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs) {
+        return !isPerAlarmDismissAfterEnabled(prefs, false);
+    }
+
+    public static boolean isPerAlarmDismissAfterEnabled(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
+        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
+    }
+
+    /**
      * @return the number of minutes an alarm will remain snoozed before it rings again
      */
     public static int getSnoozeLength(SharedPreferences prefs) {
@@ -1355,6 +1368,18 @@ public final class SettingsDAO {
     public static int getSnoozeLength(SharedPreferences prefs, boolean isNamaz) {
         final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_SNOOZE_DURATION : KEY_ALARM_SNOOZE_DURATION;
         return prefs.getInt(key, DEFAULT_ALARM_SNOOZE_DURATION);
+    }
+
+    /**
+     * @return the number of minutes an alarm may ring before it is automatically dismissed
+     */
+    public static int getAlarmDismissAfter(SharedPreferences prefs) {
+        return getAlarmDismissAfter(prefs, false);
+    }
+
+    public static int getAlarmDismissAfter(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_DISMISS_AFTER : KEY_ALARM_DISMISS_AFTER;
+        return prefs.getInt(key, DEFAULT_ALARM_DISMISS_AFTER);
     }
 
     /**

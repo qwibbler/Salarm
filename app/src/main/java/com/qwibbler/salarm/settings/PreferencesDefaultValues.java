@@ -100,6 +100,8 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_AUTO_SILENCE_DURATION = 600;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION = true;
     public static final int DEFAULT_ALARM_SNOOZE_DURATION = 10;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER = true;
+    public static final int DEFAULT_ALARM_DISMISS_AFTER = 0;
     public static final int ALARM_SNOOZE_DURATION_DISABLED = -1;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = true;
     public static final String DEFAULT_MISSED_ALARM_REPEAT_LIMIT = "-1";

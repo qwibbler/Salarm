@@ -35,16 +35,24 @@ public class DismissAfterDialogFragment extends DialogFragment {
     private static final String TAG = "dismiss_after_dialog";
 
     private static final String ARG_DISMISS_AFTER = "arg_dismiss_after";
+    private static final String ARG_PREF_KEY = "arg_pref_key";
     public static final String REQUEST_KEY = "dismiss_after_request_key";
     public static final String DISMISS_AFTER_VALUE = "dismiss_after_value";
+    public static final String RESULT_PREF_KEY = "result_pref_key";
 
     private AlarmDismissAfterDialogBinding mBinding;
+    private String mPrefKey;
     private Button mOkButton;
     private InputMethodManager mInput;
     private boolean isUpdatingInputs = false;
 
     public static DismissAfterDialogFragment newInstance(int dismissAfter) {
+        return newInstance(null, dismissAfter);
+    }
+
+    public static DismissAfterDialogFragment newInstance(String key, int dismissAfter) {
         Bundle args = new Bundle();
+        args.putString(ARG_PREF_KEY, key);
         args.putInt(ARG_DISMISS_AFTER, dismissAfter);
         DismissAfterDialogFragment frag = new DismissAfterDialogFragment();
         frag.setArguments(args);
@@ -62,6 +70,7 @@ public class DismissAfterDialogFragment extends DialogFragment {
         final Typeface typeFace = ThemeUtils.loadFont(SettingsDAO.getGeneralFont(prefs));
 
         final Bundle args = requireArguments();
+        mPrefKey = args.getString(ARG_PREF_KEY, null);
         int dismissAfter = args.getInt(ARG_DISMISS_AFTER, 0);
 
         if (savedInstanceState != null) {
@@ -258,6 +267,11 @@ public class DismissAfterDialogFragment extends DialogFragment {
 
         Bundle result = new Bundle();
         result.putInt(DISMISS_AFTER_VALUE, value);
+
+        if (mPrefKey != null) {
+            result.putString(RESULT_PREF_KEY, mPrefKey);
+        }
+
         getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
     }
 

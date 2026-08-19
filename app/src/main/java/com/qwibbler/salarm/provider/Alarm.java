@@ -348,6 +348,10 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      * @return a new Alarm object with default settings
      */
     public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert) {
+        return createDefaultAlarm(context, hour, minute, alert, false);
+    }
+
+    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert, boolean isNamaz) {
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final Alarm alarm = new Alarm(
             Calendar.getInstance().get(Calendar.YEAR),
@@ -361,20 +365,22 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
 
         alarm.syncByLabel = false;
         alarm.enabled = true;
-        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs);
-        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs);
-        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs);
+        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs, isNamaz);
+        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs, isNamaz);
+        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs, isNamaz);
         alarm.deleteAfterUse = SettingsDAO.isOccasionalAlarmDeletedByDefault(prefs);
-        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs);
-        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs);
-        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs);
-        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs);
+        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs, isNamaz);
+        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs, isNamaz);
+        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs, isNamaz);
+        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs, isNamaz);
         if (audioManager != null) {
-            alarm.alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+            alarm.alarmVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isNamaz)
+                ? SettingsDAO.getAlarmVolume(prefs, isNamaz)
+                : audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
         }
         alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
-        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs);
-        alarm.dismissAfter = 0;
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs, isNamaz);
+        alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, isNamaz);
 
         return alarm;
     }

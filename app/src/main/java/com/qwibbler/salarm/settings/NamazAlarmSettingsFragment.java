@@ -46,6 +46,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.dialogfragment.AlarmNotificationReminderDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmSnoozeDurationDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AutoSilenceDurationDialogFragment;
+import com.qwibbler.salarm.dialogfragment.DismissAfterDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationStartDelayDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
@@ -56,6 +57,7 @@ import com.qwibbler.salarm.settings.custompreference.AlarmSnoozeDurationPreferen
 import com.qwibbler.salarm.settings.custompreference.AlarmVolumePreference;
 import com.qwibbler.salarm.settings.custompreference.AutoSilenceDurationPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
+import com.qwibbler.salarm.settings.custompreference.DismissAfterPreference;
 import com.qwibbler.salarm.settings.custompreference.VibrationPatternPreference;
 import com.qwibbler.salarm.settings.custompreference.VibrationStartDelayPreference;
 import com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference;
@@ -100,6 +102,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     SwitchPreferenceCompat mEnablePerAlarmAutoSilencePref;
     AlarmSnoozeDurationPreference mAlarmSnoozeDurationPref;
     SwitchPreferenceCompat mEnablePerAlarmSnoozeDurationPref;
+    DismissAfterPreference mDismissAfterPref;
+    SwitchPreferenceCompat mEnablePerAlarmDismissAfterPref;
     ListPreference mRepeatMissedAlarmPref;
     SwitchPreferenceCompat mEnablePerAlarmMissedRepeatLimitPref;
     AlarmVolumePreference mAlarmVolumePref;
@@ -172,6 +176,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         mEnablePerAlarmAutoSilencePref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE);
         mAlarmSnoozeDurationPref = findPreference(KEY_NAMAZ_ALARM_SNOOZE_DURATION);
         mEnablePerAlarmSnoozeDurationPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION);
+        mDismissAfterPref = findPreference(KEY_NAMAZ_ALARM_DISMISS_AFTER);
+        mEnablePerAlarmDismissAfterPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER);
         mRepeatMissedAlarmPref = findPreference(KEY_NAMAZ_REPEAT_MISSED_ALARM);
         mEnablePerAlarmMissedRepeatLimitPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
         mAlarmVolumePref = findPreference(KEY_NAMAZ_ALARM_VOLUME_SETTING);
@@ -261,7 +267,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
             mStyleOverridePref, mRingtoneOverridePref, mAdvancedAudioOverridePref,
             mVibrationOverridePref, mActionsOverridePref, mMiscOverridePref, mAlarmDisplayCustomizationPref,
             mAlarmRingtonePref, mAlarmAutoSilencePref, mEnablePerAlarmAutoSilencePref, mAlarmSnoozeDurationPref,
-            mEnablePerAlarmSnoozeDurationPref, mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref, mAlarmVolumePref,
+            mEnablePerAlarmSnoozeDurationPref, mDismissAfterPref, mEnablePerAlarmDismissAfterPref,
+            mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref, mAlarmVolumePref,
             mEnablePerAlarmVolumePref, mAlarmVolumeCrescendoDurationPref, mEnablePerAlarmVolumeCrescendoDurationPref,
             mAdvancedAudioPlaybackPref, mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolumePref, mExternalAudioDeviceVolumePref,
             mEnableAlarmVibrationsByDefaultPref, mVibrationPatternPref, mEnablePerAlarmVibrationPatternPref,
@@ -340,6 +347,25 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                     });
                 } else {
                     triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION);
+                    return false;
+                }
+            }
+
+            case KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                if ((boolean) newValue) {
+                    AppExecutors.getDiskIO().execute(() -> {
+                        List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
+                        for (Alarm alarm : currentAlarms) {
+                            if (alarm.relationalRuleId != -1) {
+                                alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(mPrefs, true);
+                                mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+                            }
+                        }
+                    });
+                } else {
+                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER);
                     return false;
                 }
             }
@@ -561,6 +587,10 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
             int currentValue = alarmSnoozeDurationPreference.getSnoozeDuration();
             AlarmSnoozeDurationDialogFragment dialogFragment = AlarmSnoozeDurationDialogFragment.newInstance(key, currentValue);
             AlarmSnoozeDurationDialogFragment.show(getParentFragmentManager(), dialogFragment);
+        } else if (pref instanceof DismissAfterPreference dismissAfterPreference) {
+            int currentValue = dismissAfterPreference.getDismissAfter();
+            DismissAfterDialogFragment dialogFragment = DismissAfterDialogFragment.newInstance(key, currentValue);
+            DismissAfterDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else if (pref instanceof VolumeCrescendoDurationPreference volumeCrescendoDurationPreference) {
             int currentValue = volumeCrescendoDurationPreference.getVolumeCrescendoDuration();
             VolumeCrescendoDurationDialogFragment dialogFragment =
@@ -609,6 +639,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
         mEnablePerAlarmAutoSilencePref.setOnPreferenceChangeListener(this);
         mEnablePerAlarmSnoozeDurationPref.setOnPreferenceChangeListener(this);
+
+        mEnablePerAlarmDismissAfterPref.setOnPreferenceChangeListener(this);
 
         updateMissedAlarmPrefsVisibility(SettingsDAO.getAlarmTimeout(mPrefs, true), SettingsDAO.getSnoozeLength(mPrefs, true), null);
 
@@ -684,6 +716,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         if (mEnablePerAlarmAutoSilencePref != null) mEnablePerAlarmAutoSilencePref.setVisible(ringtoneOverride);
         if (mAlarmSnoozeDurationPref != null) mAlarmSnoozeDurationPref.setVisible(ringtoneOverride);
         if (mEnablePerAlarmSnoozeDurationPref != null) mEnablePerAlarmSnoozeDurationPref.setVisible(ringtoneOverride);
+        if (mDismissAfterPref != null) mDismissAfterPref.setVisible(ringtoneOverride);
+        if (mEnablePerAlarmDismissAfterPref != null) mEnablePerAlarmDismissAfterPref.setVisible(ringtoneOverride);
         if (mRepeatMissedAlarmPref != null) mRepeatMissedAlarmPref.setVisible(ringtoneOverride);
         if (mEnablePerAlarmMissedRepeatLimitPref != null) mEnablePerAlarmMissedRepeatLimitPref.setVisible(ringtoneOverride);
         if (mAlarmVolumePref != null) mAlarmVolumePref.setVisible(ringtoneOverride);
@@ -760,6 +794,28 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         for (Alarm alarm : currentAlarms) {
                             if (alarm.relationalRuleId != -1) {
                                 alarm.snoozeDuration = newValue;
+                                mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+                            }
+                        }
+                    });
+                }
+            });
+
+        // Alarm dismiss after preference
+        parentFragmentManager.setFragmentResultListener(DismissAfterDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            (requestKey, bundle) -> {
+                String key = bundle.getString(DismissAfterDialogFragment.RESULT_PREF_KEY);
+                if (key == null || !key.startsWith("key_namaz_")) return;
+                int newValue = bundle.getInt(DismissAfterDialogFragment.DISMISS_AFTER_VALUE);
+
+                mDismissAfterPref.setDismissAfter(newValue);
+
+                if (!SettingsDAO.isPerAlarmDismissAfterEnabled(mPrefs, true)) {
+                    AppExecutors.getDiskIO().execute(() -> {
+                        List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
+                        for (Alarm alarm : currentAlarms) {
+                            if (alarm.relationalRuleId != -1) {
+                                alarm.dismissAfter = newValue;
                                 mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
                             }
                         }
@@ -867,6 +923,10 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_snooze_duration_dialog_message,
                                 KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION, mEnablePerAlarmSnoozeDurationPref, mAlarmSnoozeDurationPref,
                                 alarm -> alarm.snoozeDuration = SettingsDAO.getSnoozeLength(mPrefs, true));
+                        case KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER ->
+                            showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_dismiss_after_dialog_message,
+                                KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER, mEnablePerAlarmDismissAfterPref, mDismissAfterPref,
+                                alarm -> alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(mPrefs, true));
                         case KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_missed_repeat_limit_dialog_message,
                                 KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT, mEnablePerAlarmMissedRepeatLimitPref, mRepeatMissedAlarmPref,
@@ -973,7 +1033,10 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         mVibrationOverridePref = null; mActionsOverridePref = null; mMiscOverridePref = null;
         mAlarmDisplayCustomizationPref = null; mAlarmRingtonePref = null;
         mAlarmAutoSilencePref = null; mEnablePerAlarmAutoSilencePref = null; mAlarmSnoozeDurationPref = null;
-        mEnablePerAlarmSnoozeDurationPref = null; mRepeatMissedAlarmPref = null; mEnablePerAlarmMissedRepeatLimitPref = null;
+        mEnablePerAlarmSnoozeDurationPref = null;
+        mDismissAfterPref = null;
+        mEnablePerAlarmDismissAfterPref = null;
+        mRepeatMissedAlarmPref = null; mEnablePerAlarmMissedRepeatLimitPref = null;
         mAlarmVolumePref = null; mEnablePerAlarmVolumePref = null; mAlarmVolumeCrescendoDurationPref = null;
         mEnablePerAlarmVolumeCrescendoDurationPref = null; mAdvancedAudioPlaybackPref = null;
         mAutoRoutingToExternalAudioDevicePref = null; mSystemMediaVolumePref = null; mExternalAudioDeviceVolumePref = null;
