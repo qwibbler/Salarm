@@ -1700,4 +1700,17 @@
     <string name="salarm_select_timezone_hint">Select Timezone</string>
     <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
     <string name="namaz_near_city">Near %s</string>
+
+    <!-- Widget Previews -->
+    <string name="salarm_preview_countdown_time">1h:24m</string>
+    <string name="salarm_preview_next_prayer">TO DHUHR</string>
+    <string name="salarm_preview_prayer_fajr">FAJR</string>
+    <string name="salarm_preview_prayer_dhuhr">DHUHR</string>
+    <string name="salarm_preview_prayer_asr">ASR</string>
+    <string name="salarm_preview_prayer_maghrib">MAGHRIB</string>
+    <string name="salarm_preview_fajr_time">05:12 AM</string>
+    <string name="salarm_preview_dhuhr_time">12:30 PM</string>
+    <string name="salarm_preview_asr_time">04:15 PM</string>
+    <string name="salarm_preview_maghrib_time">07:20 PM</string>
+    <string name="salarm_preview_time_long">11:59 PM</string>
 </resources>

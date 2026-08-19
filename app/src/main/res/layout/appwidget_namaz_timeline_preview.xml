@@ -28,7 +28,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1h:24m"
+                android:text="@string/salarm_preview_countdown_time"
                 android:textColor="@color/digital_widget_time_color"
                 android:textSize="32sp"
                 android:includeFontPadding="false" />
@@ -36,7 +36,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TO DHUHR"
+                android:text="@string/salarm_preview_next_prayer"
                 android:textColor="@color/next_alarm_widget_title_color"
                 android:textSize="12sp"
                 android:textAllCaps="true"
@@ -54,8 +54,8 @@
                 android:orientation="horizontal"
                 android:paddingVertical="2dp"
                 android:paddingHorizontal="4dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="FAJR" android:textColor="@color/widget_text_color" android:textSize="12sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="05:12 AM" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/salarm_preview_prayer_fajr" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/salarm_preview_fajr_time" android:textColor="@color/widget_text_color" android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -66,8 +66,8 @@
                 android:paddingHorizontal="4dp"
                 android:background="@drawable/namaz_item_highlight"
                 android:backgroundTint="#26DCE2F9">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="DHUHR" android:textColor="@color/next_alarm_widget_title_color" android:textSize="12sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12:30 PM" android:textColor="@color/next_alarm_widget_title_color" android:textSize="12sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/salarm_preview_prayer_dhuhr" android:textColor="@color/next_alarm_widget_title_color" android:textSize="12sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/salarm_preview_dhuhr_time" android:textColor="@color/next_alarm_widget_title_color" android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -76,8 +76,8 @@
                 android:orientation="horizontal"
                 android:paddingVertical="2dp"
                 android:paddingHorizontal="4dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="ASR" android:textColor="@color/widget_text_color" android:textSize="12sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="04:15 PM" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/salarm_preview_prayer_asr" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/salarm_preview_asr_time" android:textColor="@color/widget_text_color" android:textSize="12sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -86,8 +86,8 @@
                 android:orientation="horizontal"
                 android:paddingVertical="2dp"
                 android:paddingHorizontal="4dp">
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="MAGHRIB" android:textColor="@color/widget_text_color" android:textSize="12sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="07:20 PM" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/salarm_preview_prayer_maghrib" android:textColor="@color/widget_text_color" android:textSize="12sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/salarm_preview_maghrib_time" android:textColor="@color/widget_text_color" android:textSize="12sp" />
             </LinearLayout>
 
         </LinearLayout>

@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1h:24m"
+            android:text="@string/salarm_preview_countdown_time"
             android:textColor="@color/digital_widget_time_color"
             android:textSize="24sp"
             android:includeFontPadding="false" />
@@ -29,9 +29,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TO DHUHR"
+            android:text="@string/salarm_preview_next_prayer"
             android:textColor="@color/next_alarm_widget_title_color"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textAllCaps="true"
             android:includeFontPadding="false" />
     </LinearLayout>
