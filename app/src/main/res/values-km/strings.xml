@@ -134,7 +134,6 @@
     <string name="timer_canceled" msgid="7327923392567128060">"បានលុបចោល​​​កម្មវិធី​កំណត់ម៉ោង"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"ដល់​ម៉ោង"</string>
     <plurals name="timer_multi_times_up" msgid="1239104626836080409">
-        <item quantity="one">"កម្មវិធីកំណត់ពេល <xliff:g id="NUM_TIMERS">%d</xliff:g> បានផុតកំណត់"</item>
         <item quantity="other">"កម្មវិធីកំណត់ពេល <xliff:g id="NUM_TIMERS">%d</xliff:g> បានផុតកំណត់"</item>
     </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"កម្មវិធី​កំណត់​ម៉ោង"</string>
@@ -184,7 +183,6 @@
     <string name="timer_vibrate_title" msgid="7788920024785587518">"ការញ័រនៃកម្មវិធីកំណត់ម៉ោង"</string>
     <string name="timer_paused" msgid="5941160896040771462">"បានផ្អាកកម្មវិធីកំណត់ម៉ោង"</string>
     <plurals name="timers_in_use" msgid="5570729467344408506">
-        <item quantity="one">"<xliff:g id="NUMBER">%d</xliff:g> កម្មវិធី​កំណត់​ពេល"</item>
         <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> កម្មវិធី​កំណត់​ពេល"</item>
     </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"​មិន​​ធ្វើ​វិញ"</string>
