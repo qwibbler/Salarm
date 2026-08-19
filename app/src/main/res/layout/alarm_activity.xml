@@ -92,18 +92,36 @@
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/alarm_title"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="20dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             app:layout_constraintStart_toEndOf="@+id/alarm_vertical_start_guide"
             app:layout_constraintEnd_toEndOf="@+id/alarm_vertical_end_guide"
             app:layout_constraintTop_toBottomOf="@+id/clock_layout"
-            app:layout_constraintBottom_toTopOf="@+id/slide_zone_layout"
+            app:layout_constraintBottom_toTopOf="@+id/next_event_info"
+            app:layout_constraintVertical_chainStyle="packed"
             tools:text="@string/menu_alarm"
             tools:textStyle="bold"
             tools:textSize="50sp"
             tools:textColor="@android:color/white" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/next_event_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/alarm_title"
+            app:layout_constraintBottom_toTopOf="@+id/slide_zone_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="5 minute to Sunrise"
+            tools:visibility="visible" />
 
         <!-- Snooze button -->
         <com.google.android.material.button.MaterialButton

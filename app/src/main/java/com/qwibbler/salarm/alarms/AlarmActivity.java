@@ -92,6 +92,8 @@ import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
 
 public class AlarmActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
@@ -152,6 +154,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     private int mSnoozePlusSymbolColor;
     private int mDefaultSnoozeMinutes;
     private boolean mIsNamaz;
+    private String mShowNextEventInfo;
 
     private Animator mTranslationAnimator;
     private int mInitialPointerIndex = MotionEvent.INVALID_POINTER_ID;
@@ -267,6 +270,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mVolumeBehavior = SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs, mIsNamaz);
         mPowerBehavior = SettingsDAO.getAlarmPowerButtonBehavior(mPrefs, mIsNamaz);
         mHeadphonesButtonBehavior = SettingsDAO.getHeadphonesButtonBehavior(mPrefs, mIsNamaz);
+        mShowNextEventInfo = SettingsDAO.getNamazShowNextEventInfo(mPrefs);
 
         initAlarmBackground();
 
@@ -305,6 +309,8 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         updateSnoozeTexts();
 
         initRingtoneTitle();
+
+        initNextEventInfo();
 
         applyWindowInsets();
 
@@ -1358,6 +1364,129 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             unbindService(mConnection);
             mServiceBound = false;
         }
+    }
+
+    private void initNextEventInfo() {
+        if (!mAlarmInstance.mIsNamaz || "nothing".equals(mShowNextEventInfo)) {
+            if (mBinding.nextEventInfo != null) {
+                mBinding.nextEventInfo.setVisibility(GONE);
+            }
+            return;
+        }
+
+        if (mBinding.nextEventInfo == null) return;
+
+        mBinding.nextEventInfo.setTypeface(mGeneralBoldTypeface);
+        if (mIsTextShadowDisplayed) {
+            mBinding.nextEventInfo.setShadowLayer(mShadowRadius, mShadowOffset, mShadowOffset, mShadowColor);
+        }
+
+        mBinding.nextEventInfo.setVisibility(VISIBLE);
+        updateNextEventInfo();
+    }
+
+    private void updateNextEventInfo() {
+        if (isFinishing() || mAlarmHandled || mBinding.nextEventInfo == null || mBinding.nextEventInfo.getVisibility() == GONE) {
+            return;
+        }
+
+        double[] coords = com.qwibbler.salarm.namaz.NamazUtils.getCoordinates(this);
+        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.namaz.NamazUtils.getCalculationMethod(this);
+        long now = System.currentTimeMillis();
+
+        Calendar cal = Calendar.getInstance();
+        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times =
+            com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
+
+        com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent nextEvent = null;
+        java.util.Date nextEventTime = null;
+
+        // Possible events in order
+        com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent[] events = {
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.FAJR,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.SUNRISE,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.DHUHR,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.MAGHRIB,
+            com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ISHA
+        };
+
+        // Find next event today
+        for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+            java.util.Date time = getEventTime(event, times);
+            if (time != null && time.getTime() > now) {
+                if (nextEventTime == null || time.before(nextEventTime)) {
+                    nextEventTime = time;
+                    nextEvent = event;
+                }
+            }
+        }
+
+        // If no more events today, find first event tomorrow
+        if (nextEventTime == null) {
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+            times = com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
+            for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+                java.util.Date time = getEventTime(event, times);
+                if (time != null) {
+                    if (nextEventTime == null || time.before(nextEventTime)) {
+                        nextEventTime = time;
+                        nextEvent = event;
+                    }
+                }
+            }
+        }
+
+        if (nextEventTime == null) {
+            if (mBinding.nextEventInfo != null) {
+                mBinding.nextEventInfo.setVisibility(GONE);
+            }
+            return;
+        }
+
+        String eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
+        long remainingMillis = nextEventTime.getTime() - now;
+
+        if (mBinding.nextEventInfo == null) return;
+
+        if ("time".equals(mShowNextEventInfo)) {
+            String formattedTime = android.text.format.DateFormat.getTimeFormat(this).format(nextEventTime);
+            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
+                getString(R.string.namaz_next_event_info_time_format), eventName, formattedTime));
+        } else {
+            // countdown
+            long remainingSeconds = (remainingMillis + 999) / 1000;
+            int hours = (int) (remainingSeconds / 3600);
+            int minutes = (int) ((remainingSeconds % 3600) / 60);
+            int seconds = (int) (remainingSeconds % 60);
+
+            String countdown;
+            if (hours > 0) {
+                countdown = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+            } else {
+                countdown = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+            }
+
+            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
+                getString(R.string.namaz_next_event_info_countdown_format), countdown, eventName));
+
+            // Update again in a second
+            mHandler.postDelayed(this::updateNextEventInfo, 1000);
+        }
+    }
+
+    private java.util.Date getEventTime(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event,
+                                        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times) {
+        return switch (event) {
+            case FAJR -> times.fajr;
+            case SUNRISE -> times.sunrise;
+            case DHUHR -> times.dhuhr;
+            case ASR_SHAFI -> times.asrShafi;
+            case ASR_HANAFI -> times.asrHanafi;
+            case MAGHRIB -> times.maghrib;
+            case ISHA -> times.isha;
+        };
     }
 
     /**

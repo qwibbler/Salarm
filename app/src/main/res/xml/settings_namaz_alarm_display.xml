@@ -395,6 +395,17 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+        <ListPreference
+            android:key="key_namaz_display_next_event_info"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/namaz_display_next_event_info_title"
+            android:summary="@string/namaz_display_next_event_info_summary"
+            android:entries="@array/namaz_display_next_event_info_entries"
+            android:entryValues="@array/namaz_display_next_event_info_values"
+            android:defaultValue="countdown"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
         <Preference
             android:key="key_namaz_alarm_preview"
             android:layout="@layout/settings_preference_layout"

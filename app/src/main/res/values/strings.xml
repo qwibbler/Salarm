@@ -1576,6 +1576,19 @@
     <string name="namaz_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
     <string name="namaz_alarm_display_settings_title">Namaz alarm display settings</string>
 
+    <!-- Namaz Alarms Additional Settings -->
+    <string name="autodismiss_default_title">Auto-dismiss by default</string>
+    <string name="autodismiss_default_summary">Automatically enable auto-dismiss for new Namaz alarms</string>
+    <string name="adjust_alarm_after_rounding_title">Adjust alarm after rounding</string>
+    <string name="adjust_alarm_after_rounding_summary">Adjust the alarm trigger time based on rounding rules</string>
+    <string name="namaz_display_next_event_info_title">Display next event time</string>
+    <string name="namaz_display_next_event_info_summary">Select what information to show about the next prayer event when the alarm is ringing</string>
+    <string name="namaz_display_next_event_info_countdown">Display countdown to next event</string>
+    <string name="namaz_display_next_event_info_time">Display time of next event</string>
+    <string name="namaz_display_next_event_info_nothing">Do not show next event</string>
+    <string name="namaz_next_event_info_countdown_format">%1$s to %2$s</string>
+    <string name="namaz_next_event_info_time_format">%1$s at %2$s</string>
+
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Namaz Alarm</string>
     <string name="relational_alarm_primary_alarm">Primary Alarm</string>

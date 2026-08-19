@@ -20,6 +20,24 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_adjust_alarm_after_rounding"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/adjust_alarm_after_rounding_title"
+            android:summary="@string/adjust_alarm_after_rounding_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_namaz_autodismiss_by_default"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/autodismiss_default_title"
+            android:summary="@string/autodismiss_default_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

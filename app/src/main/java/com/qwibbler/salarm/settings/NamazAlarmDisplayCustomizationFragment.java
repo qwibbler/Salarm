@@ -94,6 +94,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
     SwitchPreferenceCompat mDisplayAlarmTitleOnSingleLinePref;
     SwitchPreferenceCompat mDisplayRingtoneTitlePref;
     ColorPickerPreference mRingtoneTitleColorPref;
+    ListPreference mShowNextEventInfoPref;
     Preference mAlarmBackgroundImagePref;
     CustomSliderPreference mAlarmBlurIntensityPref;
     SwitchPreferenceCompat mEnablePerAlarmBackgroundImagePref;
@@ -268,6 +269,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mDisplayAlarmTitleOnSingleLinePref = findPreference(KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
         mDisplayRingtoneTitlePref = findPreference(KEY_NAMAZ_DISPLAY_RINGTONE_TITLE);
         mRingtoneTitleColorPref = findPreference(KEY_NAMAZ_RINGTONE_TITLE_COLOR);
+        mShowNextEventInfoPref = findPreference(KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO);
         mAlarmFontPref = findPreference(KEY_NAMAZ_ALARM_FONT);
         mAlarmBackgroundImagePref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE);
         mAlarmBlurIntensityPref = findPreference(KEY_NAMAZ_ALARM_BLUR_INTENSITY);
@@ -328,6 +330,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             mSnoozeMinusButtonColorPref, mSnoozePlusButtonColorPref, mSnoozeSelectorTextColorPref, mSnoozeMinusSymbolColorPref,
             mSnoozePlusSymbolColorPref, mAlarmDigitalClockFontSizePref, mAlarmTitleFontSizePref, mDisplayTextShadowPref, mShadowColorPref, mShadowOffsetPref,
             mDisplayAlarmActionMessagePref, mDisplayAlarmTitleOnSingleLinePref, mDisplayRingtoneTitlePref, mRingtoneTitleColorPref,
+            mShowNextEventInfoPref,
             mAlarmBackgroundImagePref, mAlarmBlurIntensityPref, mEnablePerAlarmBackgroundImagePref, mAlarmPreviewPref,
             mDisplayStyleOverridePref, mColorsOverridePref, mFontOverridePref, mBackgroundImageOverridePref, mAlarmFontPref
         );
@@ -423,6 +426,11 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 mRingtoneTitleColorPref.setVisible((boolean) newValue);
+            }
+
+            case KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO -> {
+                final int index = mShowNextEventInfoPref.findIndexOfValue((String) newValue);
+                mShowNextEventInfoPref.setSummary(mShowNextEventInfoPref.getEntries()[index]);
             }
 
             case KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE -> {
@@ -593,6 +601,9 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mDisplayRingtoneTitlePref.setOnPreferenceChangeListener(this);
 
         mRingtoneTitleColorPref.setVisible(SettingsDAO.isRingtoneTitleDisplayed(mPrefs, true));
+
+        mShowNextEventInfoPref.setSummary(mShowNextEventInfoPref.getEntry());
+        mShowNextEventInfoPref.setOnPreferenceChangeListener(this);
 
         if (SettingsDAO.getAlarmBackgroundImage(mPrefs, true) == null) {
             mAlarmBackgroundImagePref.setTitle(getString(R.string.background_image_title));
@@ -867,6 +878,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         mDisplayAlarmTitleOnSingleLinePref = null;
         mDisplayRingtoneTitlePref = null;
         mRingtoneTitleColorPref = null;
+        mShowNextEventInfoPref = null;
         mAlarmBackgroundImagePref = null;
         mAlarmBlurIntensityPref = null;
         mEnablePerAlarmBackgroundImagePref = null;

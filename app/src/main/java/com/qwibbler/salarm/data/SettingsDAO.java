@@ -385,6 +385,27 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if Namaz auto-dismiss is enabled by default.
+     */
+    public static boolean isNamazAutoDismissByDefaultEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_AUTODISMISS_BY_DEFAULT, DEFAULT_NAMAZ_AUTODISMISS_BY_DEFAULT);
+    }
+
+    /**
+     * @return {@code true} if the Namaz alarm should be adjusted after rounding.
+     */
+    public static boolean isNamazAdjustAlarmAfterRoundingEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, DEFAULT_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING);
+    }
+
+    /**
+     * @return a value indicating what next event info to display when the alarm is ringing.
+     */
+    public static String getNamazShowNextEventInfo(SharedPreferences prefs) {
+        return prefs.getString(KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO, DEFAULT_NAMAZ_DISPLAY_NEXT_EVENT_INFO);
+    }
+
+    /**
      * @return {@code true} if the Namaz alarm style override is enabled.
      */
     public static boolean isNamazAlarmStyleOverrideEnabled(SharedPreferences prefs) {

@@ -42,4 +42,15 @@
         <item>DUBAI</item>
         <item>MOON_SIGHTING_COMMITTEE</item>
     </string-array>
+
+    <string-array name="namaz_display_next_event_info_entries">
+        <item>@string/namaz_display_next_event_info_countdown</item>
+        <item>@string/namaz_display_next_event_info_time</item>
+        <item>@string/namaz_display_next_event_info_nothing</item>
+    </string-array>
+    <string-array name="namaz_display_next_event_info_values" translatable="false">
+        <item>countdown</item>
+        <item>time</item>
+        <item>nothing</item>
+    </string-array>
 </resources>

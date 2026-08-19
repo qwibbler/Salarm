@@ -86,6 +86,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     private boolean mHasExternalAudioDeviceConnected;
 
     SwitchPreferenceCompat mAlarmShowRoundingPref;
+    SwitchPreferenceCompat mAdjustAlarmAfterRoundingPref;
+    SwitchPreferenceCompat mAutoDismissByDefaultPref;
 
     SwitchPreferenceCompat mStyleOverridePref;
     SwitchPreferenceCompat mRingtoneOverridePref;
@@ -156,6 +158,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         addPreferencesFromResource(R.xml.settings_namaz_alarms);
 
         mAlarmShowRoundingPref = findPreference(KEY_NAMAZ_ALARM_SHOW_ROUNDING);
+        mAdjustAlarmAfterRoundingPref = findPreference(KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING);
+        mAutoDismissByDefaultPref = findPreference(KEY_NAMAZ_AUTODISMISS_BY_DEFAULT);
 
         mStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_STYLE_OVERRIDE);
         mRingtoneOverridePref = findPreference(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE);
@@ -255,7 +259,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     @Override
     public void onDestroy() {
-        nullifyPreferenceListeners(mAlarmShowRoundingPref, mStyleOverridePref, mRingtoneOverridePref, mAdvancedAudioOverridePref,
+        nullifyPreferenceListeners(mAlarmShowRoundingPref, mAdjustAlarmAfterRoundingPref, mAutoDismissByDefaultPref,
+            mStyleOverridePref, mRingtoneOverridePref, mAdvancedAudioOverridePref,
             mVibrationOverridePref, mActionsOverridePref, mMiscOverridePref, mAlarmDisplayCustomizationPref,
             mAlarmRingtonePref, mAlarmAutoSilencePref, mEnablePerAlarmAutoSilencePref, mAlarmSnoozeDurationPref,
             mEnablePerAlarmSnoozeDurationPref, mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref, mAlarmVolumePref,
@@ -280,7 +285,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_ALARM_SHOW_ROUNDING, KEY_NAMAZ_ALARM_STYLE_OVERRIDE,
+            case KEY_NAMAZ_ALARM_SHOW_ROUNDING -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                mAdjustAlarmAfterRoundingPref.setVisible((boolean) newValue);
+            }
+
+            case KEY_NAMAZ_ALARM_STYLE_OVERRIDE,
                  KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE, KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE,
                  KEY_NAMAZ_ALARM_MISC_OVERRIDE, KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING,
                  KEY_NAMAZ_DISPLAY_DISMISS_BUTTON, KEY_NAMAZ_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS -> {
@@ -573,6 +583,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     private void setupPreferences() {
         mAlarmShowRoundingPref.setOnPreferenceChangeListener(this);
+        mAdjustAlarmAfterRoundingPref.setVisible(mAlarmShowRoundingPref.isChecked());
 
         mStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_STYLE_OVERRIDE);
         mRingtoneOverridePref = findPreference(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE);
@@ -952,6 +963,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     private void nullifyAllPrefs() {
         mAlarmShowRoundingPref = null;
+        mAdjustAlarmAfterRoundingPref = null;
+        mAutoDismissByDefaultPref = null;
         mStyleOverridePref = null; mRingtoneOverridePref = null; mAdvancedAudioOverridePref = null;
         mVibrationOverridePref = null; mActionsOverridePref = null; mMiscOverridePref = null;
         mAlarmDisplayCustomizationPref = null; mAlarmRingtonePref = null;

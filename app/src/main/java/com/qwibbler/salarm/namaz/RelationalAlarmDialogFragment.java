@@ -18,6 +18,7 @@ import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.DialogAddRelationalAlarmBinding;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
@@ -201,6 +202,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private void setInitialDefaults() {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         mBinding.primaryOffsetValue.setText("5");
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
         updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
@@ -213,7 +215,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
         mBinding.safetyRoundValue.setText("0");
 
-        mBinding.autostopEnabledCheckbox.setChecked(true);
+        boolean autoDismissByDefault = SettingsDAO.isNamazAutoDismissByDefaultEnabled(prefs);
+        mBinding.autostopEnabledCheckbox.setChecked(autoDismissByDefault);
         mBinding.autostopOffsetValue.setText("0");
         updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
 
