@@ -27,7 +27,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
 
-    private static final int DATABASE_VERSION = 31;
+    private static final int DATABASE_VERSION = 33;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
@@ -61,7 +61,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.AlarmsColumns.PAUSE_END_DATE + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.AlarmsColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
             ClockContract.AlarmsColumns.BACKGROUND_IMAGE + " TEXT NOT NULL DEFAULT '', " +
-            ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0);");
+            ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.AlarmsColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0);");
 
         LogUtils.i("Alarms Table created");
     }
@@ -88,6 +89,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.InstancesColumns.CRESCENDO_DURATION + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.ALARM_VOLUME + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
+            ClockContract.InstancesColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.InstancesColumns.INITIAL_ALARM_TIME + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.InstancesColumns.ALARM_ID + " INTEGER REFERENCES " +
             ALARMS_TABLE_NAME + "(" + ClockContract.AlarmsColumns._ID + ") " +
             "ON UPDATE CASCADE ON DELETE CASCADE);");
@@ -327,6 +330,20 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                         + " INTEGER NOT NULL DEFAULT -1;");
             }
             LogUtils.i("Ensured relational_rule_id column exists for version 31 upgrade.");
+        }
+
+        if (oldVersion < 32) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.DISMISS_AFTER
+                + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.DISMISS_AFTER
+                + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("dismissAfter column added for version 32 upgrade.");
+        }
+
+        if (oldVersion < 33) {
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
+                + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("initialAlarmTime column added for version 33 upgrade.");
         }
     }
 

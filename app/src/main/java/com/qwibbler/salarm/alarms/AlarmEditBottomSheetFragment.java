@@ -63,6 +63,7 @@ import com.qwibbler.salarm.dialogfragment.AlarmVolumeDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AutoSilenceDurationDialogFragment;
 import com.qwibbler.salarm.dialogfragment.BlurIntensityDialogFragment;
 import com.qwibbler.salarm.dialogfragment.DatePickerDialogFragment;
+import com.qwibbler.salarm.dialogfragment.DismissAfterDialogFragment;
 import com.qwibbler.salarm.dialogfragment.LabelDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerDatePickerDialogFragment;
@@ -247,6 +248,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     public void onDestroyView() {
         nullifyClickListeners(mBinding.digitalClock, mBinding.scheduleAlarmLayout, mBinding.pauseAlarmLayout, mBinding.editLabel,
             mBinding.chooseRingtone, mBinding.vibrationPatternLayout, mBinding.autoSilenceDurationLayout, mBinding.snoozeDurationLayout,
+            mBinding.dismissAfterLayout,
             mBinding.missedAlarmRepeatLimitLayout, mBinding.crescendoDurationLayout, mBinding.alarmVolumeLayout,
             mBinding.alarmBackgroundImageLayout, mBinding.alarmBackgroundImageButton, mBinding.alarmBlurIntensityLayout,
             mBinding.deleteButton, mBinding.duplicateButton, mBinding.previewButton, mBinding.saveButton);
@@ -328,6 +330,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindDeleteOccasionalAlarmAfterUse();
         bindAutoSilenceValue();
         bindSnoozeDurationValue();
+        bindDismissAfterValue();
         bindMissedAlarmRepeatLimit();
         bindCrescendoDuration();
         bindAlarmVolume();
@@ -616,12 +619,14 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
                     bindClock();
                     bindAutoSilenceValue();
+                    bindDismissAfterValue();
                     updateAllGroupBackgrounds();
                 });
             } else {
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
                     mBinding.namazRuleDescription.setVisibility(View.GONE);
+                    bindDismissAfterValue();
                     updateAllGroupBackgrounds();
                 });
             }
@@ -789,22 +794,14 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding.autoSilenceDurationLayout.setVisibility(VISIBLE);
 
-        boolean isAutostopEnabled = mNamazRule != null && mNamazRule.autostopEnabled;
-        mBinding.autoSilenceDurationLayout.setEnabled(!isAutostopEnabled);
-        mBinding.autoSilenceDurationLayout.setAlpha(isAutostopEnabled ? 0.4f : 1.0f);
+        View.OnClickListener openAutoSilenceDurationFragment = v -> {
+            Events.sendAlarmEvent(R.string.action_set_auto_silence_duration, R.string.label_salarm);
 
-        if (isAutostopEnabled) {
-            mBinding.autoSilenceDurationLayout.setOnClickListener(null);
-        } else {
-            View.OnClickListener openAutoSilenceDurationFragment = v -> {
-                Events.sendAlarmEvent(R.string.action_set_auto_silence_duration, R.string.label_salarm);
+            final AutoSilenceDurationDialogFragment fragment = AutoSilenceDurationDialogFragment.newInstance(mAlarm.autoSilenceDuration);
+            AutoSilenceDurationDialogFragment.show(getChildFragmentManager(), fragment);
+        };
 
-                final AutoSilenceDurationDialogFragment fragment = AutoSilenceDurationDialogFragment.newInstance(mAlarm.autoSilenceDuration);
-                AutoSilenceDurationDialogFragment.show(getChildFragmentManager(), fragment);
-            };
-
-            mBinding.autoSilenceDurationLayout.setOnClickListener(openAutoSilenceDurationFragment);
-        }
+        mBinding.autoSilenceDurationLayout.setOnClickListener(openAutoSilenceDurationFragment);
     }
 
     private void bindSnoozeDurationValue() {
@@ -845,6 +842,41 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         };
 
         mBinding.snoozeDurationLayout.setOnClickListener(openAlarmSnoozeDurationFragment);
+    }
+
+    private void bindDismissAfterValue() {
+        mBinding.dismissAfterTitle.setTypeface(mGeneralTypeface);
+        mBinding.dismissAfterValue.setTypeface(mGeneralTypeface);
+
+        int dismissAfter = mAlarm.dismissAfter;
+
+        if (dismissAfter == 0) {
+            mBinding.dismissAfterValue.setText(getString(R.string.dismiss_after_never));
+        } else if (dismissAfter > 0) {
+            mBinding.dismissAfterValue.setText(getResources().getQuantityString(R.plurals.dismiss_after_minutes, dismissAfter, dismissAfter));
+        } else {
+            int snoozeCount = Math.abs(dismissAfter);
+            mBinding.dismissAfterValue.setText(getResources().getQuantityString(R.plurals.dismiss_after_snoozing, snoozeCount, snoozeCount));
+        }
+
+        mBinding.dismissAfterLayout.setVisibility(VISIBLE);
+
+        boolean isAutostopEnabled = mNamazRule != null && mNamazRule.autostopEnabled;
+        mBinding.dismissAfterLayout.setEnabled(!isAutostopEnabled);
+        mBinding.dismissAfterLayout.setAlpha(isAutostopEnabled ? 0.4f : 1.0f);
+
+        if (isAutostopEnabled) {
+            mBinding.dismissAfterLayout.setOnClickListener(null);
+        } else {
+            View.OnClickListener openDismissAfterFragment = v -> {
+                Events.sendAlarmEvent(R.string.dismiss_after_title, R.string.label_salarm);
+
+                final DismissAfterDialogFragment fragment = DismissAfterDialogFragment.newInstance(mAlarm.dismissAfter);
+                DismissAfterDialogFragment.show(getChildFragmentManager(), fragment);
+            };
+
+            mBinding.dismissAfterLayout.setOnClickListener(openDismissAfterFragment);
+        }
     }
 
     private void bindMissedAlarmRepeatLimit() {
@@ -1237,6 +1269,12 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 mAlarm.blurIntensity = bundle.getInt(BlurIntensityDialogFragment.RESULT_BLUR_INTENSITY_VALUE);
                 bindBlurIntensity();
             });
+
+        childFragmentManager.setFragmentResultListener(DismissAfterDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> {
+                mAlarm.dismissAfter = bundle.getInt(DismissAfterDialogFragment.DISMISS_AFTER_VALUE);
+                bindDismissAfterValue();
+            });
     }
 
     /**
@@ -1462,6 +1500,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mPrefs,
             mBinding.autoSilenceDurationLayout,
             mBinding.snoozeDurationLayout,
+            mBinding.dismissAfterLayout,
             mBinding.missedAlarmRepeatLimitLayout,
             mBinding.crescendoDurationLayout,
             mBinding.alarmVolumeLayout

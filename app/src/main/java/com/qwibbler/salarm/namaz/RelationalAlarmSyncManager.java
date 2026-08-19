@@ -251,7 +251,7 @@ public class RelationalAlarmSyncManager {
         }
 
         if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
-            alarm.autoSilenceDuration = result.autoSilenceSeconds();
+            alarm.dismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
         }
 
         alarm.updateAlarm(cr);
@@ -259,9 +259,10 @@ public class RelationalAlarmSyncManager {
         // 2. Update AOSP instances
         AlarmStateManager.deleteAllInstances(context, alarm.id);
         AlarmInstance instance = alarm.createInstance(nextTrigger);
+        instance.mInitialAlarmTimeMillis = nextTrigger.getTimeInMillis();
 
-        if (result.autoSilenceSeconds() > 0) {
-            instance.mAutoSilenceDuration = result.autoSilenceSeconds();
+        if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
+            instance.mDismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
         }
 
         instance.addInstance(cr);

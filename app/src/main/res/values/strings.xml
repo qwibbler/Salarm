@@ -858,6 +858,22 @@
     <string name="enable_per_alarm_snooze_duration_dialog_message">Custom alarm snooze durations will be reset.%s</string>
     <!-- Setting title for changing the snooze duration. -->
     <string name="snooze_duration_title">Snooze length</string>
+    <!-- Dismiss after preference title -->
+    <string name="dismiss_after_title">Dismiss after</string>
+    <!-- Dismiss after never -->
+    <string name="dismiss_after_never">Never</string>
+    <!-- Dismiss after minutes -->
+    <plurals name="dismiss_after_minutes">
+        <item quantity="one"><xliff:g example="1" id="minutes">%d</xliff:g> minute</item>
+        <item quantity="other"><xliff:g example="10" id="minutes">%d</xliff:g> minutes</item>
+    </plurals>
+    <!-- Dismiss after snoozing -->
+    <plurals name="dismiss_after_snoozing">
+        <item quantity="one">Snoozing <xliff:g example="1" id="times">%d</xliff:g> time</item>
+        <item quantity="other">Snoozing <xliff:g example="10" id="times">%d</xliff:g> times</item>
+    </plurals>
+    <!-- Dismiss after snoozing hint -->
+    <string name="dismiss_after_snoozing_hint">Times snoozed</string>
     <!-- Setting title for changing the snooze duration to None. -->
     <string name="snooze_duration_none">None</string>
     <!-- Setting title to enable the use of a custom volume for each alarm. -->

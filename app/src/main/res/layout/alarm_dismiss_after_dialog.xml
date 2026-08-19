@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="?attr/dialogPreferredPadding"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/minutes_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:button="@null"
+                android:drawableStart="@drawable/ic_selector_checkbox"
+                tools:checked="false" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/text_input_layout_minutes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:helperText="@string/timer_button_time_minutes_warning_box_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_minutes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/label_minutes"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    tools:ignore="TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/snoozes_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:button="@null"
+                android:drawableStart="@drawable/ic_selector_checkbox"
+                tools:checked="false" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/text_input_layout_snoozes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_snoozes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/dismiss_after_snoozing_hint"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    tools:ignore="TextContrastCheck" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="6dp"
+            app:dividerColor="?attr/colorOutline" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/dismiss_never_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableStart="@drawable/ic_selector_checkbox"
+            android:drawablePadding="20dp"
+            android:text="@string/label_never"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:ignore="RtlSymmetry"
+            tools:checked="true" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

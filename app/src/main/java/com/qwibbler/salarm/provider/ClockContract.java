@@ -148,6 +148,18 @@ public final class ClockContract {
          * Type: INTEGER
          */
         String BLUR_INTENSITY = "blurIntensity";
+
+        /**
+         * Alarm dismiss after duration or snooze count.
+         * <p>Type: INTEGER</p>
+         */
+        String DISMISS_AFTER = "dismissAfter";
+
+        /**
+         * The initial trigger time of the alarm instance.
+         * <p>Type: LONG</p>
+         */
+        String INITIAL_ALARM_TIME = "initialAlarmTime";
     }
 
     /**

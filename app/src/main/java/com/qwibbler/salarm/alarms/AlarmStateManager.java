@@ -421,8 +421,18 @@ public final class AlarmStateManager extends BroadcastReceiver {
         Events.sendAlarmEvent(R.string.action_fire, 0);
 
         Calendar timeout = instance.getTimeout(context);
-        if (timeout != null) {
+        Calendar dismissTimeout = instance.getDismissTimeout();
+
+        if (timeout != null && dismissTimeout != null) {
+            if (!dismissTimeout.after(timeout)) {
+                scheduleInstanceStateChange(context, dismissTimeout, instance, AlarmInstance.DISMISSED_STATE);
+            } else {
+                scheduleInstanceStateChange(context, timeout, instance, AlarmInstance.MISSED_STATE);
+            }
+        } else if (timeout != null) {
             scheduleInstanceStateChange(context, timeout, instance, AlarmInstance.MISSED_STATE);
+        } else if (dismissTimeout != null) {
+            scheduleInstanceStateChange(context, dismissTimeout, instance, AlarmInstance.DISMISSED_STATE);
         }
 
         // Instance not valid anymore, so find next alarm that will fire and notify system
@@ -441,8 +451,35 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final int snoozeMinutes = instance.mSnoozeDuration;
         Calendar newAlarmTime = Calendar.getInstance();
+
+        // Increment snooze counter
+        instance.mMissedAlarmCurrentCount++;
+
         // If the "Snooze duration" setting has been set to "None" simply dismiss the alarm.
         if (snoozeMinutes == ALARM_SNOOZE_DURATION_DISABLED) {
+            deleteInstanceAndUpdateParent(context, instance, true);
+            return;
+        }
+
+        // Check if snooze count limit reached
+        if (instance.mDismissAfter < 0) {
+            int maxSnoozes = Math.abs(instance.mDismissAfter);
+            if (instance.mMissedAlarmCurrentCount > maxSnoozes) {
+                LogUtils.i("Manual snooze limit reached (%d). Dismissing", maxSnoozes);
+                deleteInstanceAndUpdateParent(context, instance, true);
+                return;
+            }
+        }
+
+        // Calculate the new snooze alarm time
+        newAlarmTime.add(Calendar.MINUTE, snoozeMinutes);
+
+        // Check if time-based limit reached
+        Calendar dismissTimeout = instance.getDismissTimeout();
+        if (dismissTimeout != null && !newAlarmTime.before(dismissTimeout)) {
+            LogUtils.i("Snooze time (%s) is after dismiss deadline (%s). Dismissing",
+                AlarmUtils.getFormattedTime(context, newAlarmTime),
+                AlarmUtils.getFormattedTime(context, dismissTimeout));
             deleteInstanceAndUpdateParent(context, instance, true);
             return;
         }
@@ -467,7 +504,12 @@ public final class AlarmStateManager extends BroadcastReceiver {
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.showSnoozeNotification(context, instance);
-        scheduleInstanceStateChange(context, instance.getAlarmTime(), instance, AlarmInstance.FIRED_STATE);
+
+        if (dismissTimeout != null && !dismissTimeout.after(newAlarmTime)) {
+            scheduleInstanceStateChange(context, dismissTimeout, instance, AlarmInstance.DISMISSED_STATE);
+        } else {
+            scheduleInstanceStateChange(context, instance.getAlarmTime(), instance, AlarmInstance.FIRED_STATE);
+        }
 
         // Display the snooze minutes in a toast.
         if (showToast) {
@@ -502,6 +544,23 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final int maxMissedAlarmRepeatCount = instance.mMissedAlarmRepeatLimit;
 
         if (instance.mSnoozeDuration != ALARM_SNOOZE_DURATION_DISABLED) {
+
+            if (instance.mDismissAfter < 0) {
+                int maxSnoozes = Math.abs(instance.mDismissAfter);
+                if (instance.mMissedAlarmCurrentCount >= maxSnoozes) {
+                    LogUtils.i("Dismiss after snoozing count reached (%d). Dismissing", maxSnoozes);
+                    deleteInstanceAndUpdateParent(context, instance, true);
+                    return;
+                }
+            }
+
+            Calendar dismissTimeout = instance.getDismissTimeout();
+            if (dismissTimeout != null && !getCurrentTime().before(dismissTimeout)) {
+                LogUtils.i("Dismiss after duration reached. Dismissing");
+                deleteInstanceAndUpdateParent(context, instance, true);
+                return;
+            }
+
             // If the "Silence after" or the "Repeat missed alarms" feature has been set to "Never"
             // in Settings or in the alarm editing panel, the alarm is snoozed instead of marked as missed.
             if (instance.mAutoSilenceDuration == TIMEOUT_NEVER
@@ -722,8 +781,22 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final Calendar currentTime = getCurrentTime();
         final Calendar alarmTime = instance.getAlarmTime();
         final Calendar timeoutTime = instance.getTimeout(context);
+        final Calendar dismissTimeoutTime = instance.getDismissTimeout();
         final Calendar notificationTime = instance.getNotificationTime(context);
         final Calendar missedTTL = instance.getMissedTimeToLive();
+
+        Calendar dismissTimeout = instance.getDismissTimeout();
+        if (dismissTimeout != null && currentTime.after(dismissTimeout)) {
+            LogUtils.i("Dismiss deadline reached for instance %d. Dismissing", instance.mId);
+            deleteInstanceAndUpdateParent(context, instance, false);
+            return;
+        }
+
+        if (instance.mDismissAfter < 0 && instance.mMissedAlarmCurrentCount >= Math.abs(instance.mDismissAfter)) {
+            LogUtils.i("Snooze limit reached for instance %d. Dismissing", instance.mId);
+            deleteInstanceAndUpdateParent(context, instance, false);
+            return;
+        }
 
         // Handle special use cases here
         if (instance.mAlarmState == AlarmInstance.DISMISSED_STATE) {
@@ -732,8 +805,15 @@ public final class AlarmStateManager extends BroadcastReceiver {
             deleteInstanceAndUpdateParent(context, instance, false);
             return;
         } else if (instance.mAlarmState == AlarmInstance.FIRED_STATE) {
-            // Keep alarm firing, unless it should be timed out
+            // Keep alarm firing, unless it should be timed out or dismissed
             boolean hasTimeout = timeoutTime != null && currentTime.after(timeoutTime);
+            boolean hasDismissTimeout = dismissTimeoutTime != null && currentTime.after(dismissTimeoutTime);
+
+            if (hasDismissTimeout) {
+                deleteInstanceAndUpdateParent(context, instance, false);
+                return;
+            }
+
             if (!hasTimeout) {
                 setFiredState(context, instance);
                 return;
@@ -791,7 +871,13 @@ public final class AlarmStateManager extends BroadcastReceiver {
             // We only want to display snooze notification and not update the time,
             // so handle showing the notification directly
             AlarmNotifications.showSnoozeNotification(context, instance);
-            scheduleInstanceStateChange(context, instance.getAlarmTime(), instance, AlarmInstance.FIRED_STATE);
+
+            Calendar nextFire = instance.getAlarmTime();
+            if (dismissTimeoutTime != null && !dismissTimeoutTime.after(nextFire)) {
+                scheduleInstanceStateChange(context, dismissTimeoutTime, instance, AlarmInstance.DISMISSED_STATE);
+            } else {
+                scheduleInstanceStateChange(context, nextFire, instance, AlarmInstance.FIRED_STATE);
+            }
         } else if (currentTime.after(notificationTime)) {
             setNotificationState(context, instance);
         } else {
