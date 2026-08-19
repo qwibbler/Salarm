@@ -252,6 +252,8 @@ public class RelationalAlarmSyncManager {
 
         if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
             alarm.dismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
+        } else {
+            alarm.dismissAfter = 0;
         }
 
         alarm.updateAlarm(cr);
@@ -263,6 +265,8 @@ public class RelationalAlarmSyncManager {
 
         if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
             instance.mDismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
+        } else {
+            instance.mDismissAfter = 0;
         }
 
         instance.addInstance(cr);
