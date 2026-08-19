@@ -10,6 +10,7 @@ import android.net.Uri;
 import com.batoulapps.adhan.CalculationMethod;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
@@ -82,7 +83,7 @@ public class RelationalAlarmSyncManager {
                     com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
             }
 
-            nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse);
+            nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse, true);
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
@@ -253,7 +254,7 @@ public class RelationalAlarmSyncManager {
         if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
             alarm.dismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
         } else {
-            alarm.dismissAfter = 0;
+            alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, true);
         }
 
         alarm.updateAlarm(cr);
@@ -262,12 +263,6 @@ public class RelationalAlarmSyncManager {
         AlarmStateManager.deleteAllInstances(context, alarm.id);
         AlarmInstance instance = alarm.createInstance(nextTrigger);
         instance.mInitialAlarmTimeMillis = nextTrigger.getTimeInMillis();
-
-        if (rule.autostopEnabled && result.autoSilenceSeconds() > 0) {
-            instance.mDismissAfter = Math.max(1, result.autoSilenceSeconds() / 60);
-        } else {
-            instance.mDismissAfter = 0;
-        }
 
         instance.addInstance(cr);
         AlarmStateManager.registerInstance(context, instance, true);
