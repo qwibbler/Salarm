@@ -504,7 +504,6 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, now.get(Calendar.HOUR_OF_DAY));
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, now.get(Calendar.MINUTE));
                 previewIntent.putExtra("is_namaz", true);
-                previewIntent.putExtra("force_override", true);
 
                 ThemeUtils.startActivityWithTransition(context, previewIntent);
             }

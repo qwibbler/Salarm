@@ -13,8 +13,7 @@ import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
-
-import static com.qwibbler.salarm.settings.PreferencesKeys.*;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -123,69 +122,6 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
     private float mShadowRadius;
     private boolean mIsNamaz;
 
-    private static class ForcedOverridesSharedPreferences implements SharedPreferences {
-        private final SharedPreferences mBase;
-        private final boolean mForceOverride;
-        private final java.util.Set<String> mOverrideKeys;
-
-        ForcedOverridesSharedPreferences(SharedPreferences base, boolean forceOverride) {
-            mBase = base;
-            mForceOverride = forceOverride;
-            mOverrideKeys = new java.util.HashSet<>();
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_STYLE_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_COLORS_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_FONT_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE);
-            mOverrideKeys.add(KEY_NAMAZ_ALARM_MISC_OVERRIDE);
-        }
-
-        @Override
-        public java.util.Map<String, ?> getAll() { return mBase.getAll(); }
-
-        @Override
-        public String getString(String key, String defValue) { return mBase.getString(key, defValue); }
-
-        @Override
-        public java.util.Set<String> getStringSet(String key, java.util.Set<String> defValues) { return mBase.getStringSet(key, defValues); }
-
-        @Override
-        public int getInt(String key, int defValue) { return mBase.getInt(key, defValue); }
-
-        @Override
-        public long getLong(String key, long defValue) { return mBase.getLong(key, defValue); }
-
-        @Override
-        public float getFloat(String key, float defValue) { return mBase.getFloat(key, defValue); }
-
-        @Override
-        public boolean getBoolean(String key, boolean defValue) {
-            if (mForceOverride && mOverrideKeys.contains(key)) {
-                return true;
-            }
-            return mBase.getBoolean(key, defValue);
-        }
-
-        @Override
-        public boolean contains(String key) { return mBase.contains(key); }
-
-        @Override
-        public Editor edit() { return mBase.edit(); }
-
-        @Override
-        public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-            mBase.registerOnSharedPreferenceChangeListener(listener);
-        }
-
-        @Override
-        public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
-            mBase.unregisterOnSharedPreferenceChangeListener(listener);
-        }
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,8 +129,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
 
         mBinding = AlarmActivityBinding.inflate(getLayoutInflater());
 
-        boolean forceOverride = getIntent().getBooleanExtra("force_override", false);
-        mPrefs = new ForcedOverridesSharedPreferences(getDefaultSharedPreferences(this), forceOverride);
+        mPrefs = getDefaultSharedPreferences(this);
         mGeneralBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getGeneralFont(mPrefs));
         mVibrator = getSystemService(Vibrator.class);
         mAreSnoozedOrDismissedAlarmVibrationsEnabled = SettingsDAO.areSnoozedOrDismissedAlarmVibrationsEnabled(mPrefs);
@@ -491,7 +426,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
                 mBinding.digitalClock.setStaticTime(previewHour, previewMinute);
             }
         } else {
-            ClockUtils.adjustAnalogClockSize(mBinding.analogClock, SettingsDAO.getAlarmAnalogClockSize(mPrefs));
+            ClockUtils.adjustAnalogClockSize(mBinding.analogClock, SettingsDAO.getAlarmAnalogClockSize(mPrefs, mIsNamaz));
             ClockUtils.setAnalogClockSecondsEnabled(alarmClockStyle, mBinding.analogClock, isAlarmSecondHandDisplayed);
 
             if (previewHour != -1 && previewMinute != -1) {
