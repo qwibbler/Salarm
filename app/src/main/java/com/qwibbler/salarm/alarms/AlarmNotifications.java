@@ -38,6 +38,7 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.Utils;
 
+import java.util.Calendar;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -443,14 +444,33 @@ public final class AlarmNotifications {
         // Setup Snooze Action only if snooze duration has NOT been set to "None" in the settings
         // or if "Enable alarm snooze actions" is enabled in the alarm editing panel.
         if (instance.mSnoozeDuration != ALARM_SNOOZE_DURATION_DISABLED) {
-            Intent snoozeIntent = AlarmStateManager.createStateChangeIntent(
-                context, AlarmStateManager.ALARM_SNOOZE_TAG, instance, AlarmInstance.SNOOZE_STATE);
-            snoozeIntent.putExtra(AlarmStateManager.FROM_NOTIFICATION_EXTRA, true);
+            boolean snoozeDisabled = false;
+            if (instance.mDismissAfter < 0) {
+                int maxSnoozes = Math.abs(instance.mDismissAfter);
+                if (instance.mMissedAlarmCurrentCount >= maxSnoozes) {
+                    snoozeDisabled = true;
+                }
+            }
 
-            PendingIntent snoozePendingIntent = PendingIntent.getService(context,
-                ALARM_FIRING_NOTIFICATION_ID, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Calendar deadline = instance.getDismissTimeout();
+            if (deadline != null) {
+                Calendar nextSnooze = Calendar.getInstance();
+                nextSnooze.add(Calendar.MINUTE, instance.mSnoozeDuration);
+                if (!nextSnooze.before(deadline)) {
+                    snoozeDisabled = true;
+                }
+            }
 
-            notification.addAction(R.drawable.ic_snooze, localizedContext.getString(R.string.alarm_alert_snooze_text), snoozePendingIntent);
+            if (!snoozeDisabled) {
+                Intent snoozeIntent = AlarmStateManager.createStateChangeIntent(
+                    context, AlarmStateManager.ALARM_SNOOZE_TAG, instance, AlarmInstance.SNOOZE_STATE);
+                snoozeIntent.putExtra(AlarmStateManager.FROM_NOTIFICATION_EXTRA, true);
+
+                PendingIntent snoozePendingIntent = PendingIntent.getService(context,
+                    ALARM_FIRING_NOTIFICATION_ID, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+                notification.addAction(R.drawable.ic_snooze, localizedContext.getString(R.string.alarm_alert_snooze_text), snoozePendingIntent);
+            }
         }
 
         notification.addAction(R.drawable.ic_alarm_off, dismissActionTitle, dismissPendingIntent);

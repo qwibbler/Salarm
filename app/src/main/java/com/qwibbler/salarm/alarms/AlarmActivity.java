@@ -1331,7 +1331,28 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
      * <p>Useful to know what the alarm should do when it sounds.</p>
      */
     private boolean isSnoozeDisabledForAlarmInstance() {
-        return mAlarmInstance.mSnoozeDuration == ALARM_SNOOZE_DURATION_DISABLED;
+        if (mAlarmInstance.mSnoozeDuration == ALARM_SNOOZE_DURATION_DISABLED) {
+            return true;
+        }
+
+        if (mAlarmInstance.mDismissAfter < 0) {
+            int maxSnoozes = Math.abs(mAlarmInstance.mDismissAfter);
+            if (mAlarmInstance.mMissedAlarmCurrentCount >= maxSnoozes) {
+                return true;
+            }
+        }
+
+        Calendar deadline = mAlarmInstance.getDismissTimeout();
+        if (deadline != null) {
+            Calendar nextSnooze = Calendar.getInstance();
+            nextSnooze.add(Calendar.MINUTE, mAlarmInstance.mSnoozeDuration);
+            // If next snooze trigger would be at or after the deadline, don't allow it.
+            if (!nextSnooze.before(deadline)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

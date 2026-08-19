@@ -544,23 +544,6 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final int maxMissedAlarmRepeatCount = instance.mMissedAlarmRepeatLimit;
 
         if (instance.mSnoozeDuration != ALARM_SNOOZE_DURATION_DISABLED) {
-
-            if (instance.mDismissAfter < 0) {
-                int maxSnoozes = Math.abs(instance.mDismissAfter);
-                if (instance.mMissedAlarmCurrentCount >= maxSnoozes) {
-                    LogUtils.i("Dismiss after snoozing count reached (%d). Dismissing", maxSnoozes);
-                    deleteInstanceAndUpdateParent(context, instance, true);
-                    return;
-                }
-            }
-
-            Calendar dismissTimeout = instance.getDismissTimeout();
-            if (dismissTimeout != null && !getCurrentTime().before(dismissTimeout)) {
-                LogUtils.i("Dismiss after duration reached. Dismissing");
-                deleteInstanceAndUpdateParent(context, instance, true);
-                return;
-            }
-
             // If the "Silence after" or the "Repeat missed alarms" feature has been set to "Never"
             // in Settings or in the alarm editing panel, the alarm is snoozed instead of marked as missed.
             if (instance.mAutoSilenceDuration == TIMEOUT_NEVER
@@ -571,10 +554,8 @@ public final class AlarmStateManager extends BroadcastReceiver {
                 return;
             }
 
-            instance.mMissedAlarmCurrentCount += 1;
-
             // Snooze the alarm until the missed alarm repeat limit is reached.
-            if (instance.mMissedAlarmCurrentCount < maxMissedAlarmRepeatCount + 1) {
+            if (instance.mMissedAlarmCurrentCount < maxMissedAlarmRepeatCount) {
                 LogUtils.i("Alarm auto-silenced. Snoozing (missedAlarmCurrentCount = " + instance.mMissedAlarmCurrentCount + ")");
                 setSnoozeState(context, instance, true);
                 return;
@@ -973,7 +954,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
             case AlarmInstance.SNOOZE_STATE -> setSnoozeState(context, instance, true);
             case AlarmInstance.MISSED_STATE -> setMissedState(context, instance);
             case AlarmInstance.PREDISMISSED_STATE -> setPreDismissState(context, instance, true);
-            case AlarmInstance.DISMISSED_STATE -> deleteInstanceAndUpdateParent(context, instance, true);
+            case AlarmInstance.DISMISSED_STATE -> deleteInstanceAndUpdateParent(context, instance, false);
             default -> LogUtils.e("Trying to change to unknown alarm state: " + state);
         }
     }

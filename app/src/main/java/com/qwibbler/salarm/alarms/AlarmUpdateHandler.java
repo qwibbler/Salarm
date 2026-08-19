@@ -162,6 +162,7 @@ public final class AlarmUpdateHandler {
                     newInstance.mMissedAlarmRepeatLimit = alarm.missedAlarmRepeatLimit;
                     newInstance.mCrescendoDuration = alarm.crescendoDuration;
                     newInstance.mAlarmVolume = alarm.alarmVolume;
+                    newInstance.mDismissAfter = alarm.dismissAfter;
 
                     // If the alarm is in Missed state, mark it as Dismissed and clear its notification.
                     if (newInstance.mAlarmState == AlarmInstance.MISSED_STATE) {
