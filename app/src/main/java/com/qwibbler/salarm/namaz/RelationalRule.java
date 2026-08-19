@@ -64,6 +64,8 @@ public class RelationalRule {
     @Embedded(prefix = "clip_")
     public Clip clip;
 
+    public int adjustmentMinutes;
+
     public boolean autostopEnabled;
     public int autostopOffsetMinutes;
     public AnchorEvent autostopAnchorEvent;
@@ -100,6 +102,12 @@ public class RelationalRule {
             sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_rounded, roundingIntervalMinutes));
         }
 
+        // Adjustment: adjusted by 2m earlier
+        if (adjustmentMinutes != 0) {
+            String adjPart = getAdjustmentPart(context, adjustmentMinutes);
+            sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjusted, adjPart));
+        }
+
         // Clip: no later than 15m before sunrise
         if (clip != null) {
             String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
@@ -127,6 +135,14 @@ public class RelationalRule {
             return context.getString(com.qwibbler.salarm.R.string.namaz_rule_offset_after, offset);
         } else {
             return context.getString(com.qwibbler.salarm.R.string.namaz_rule_offset_before, Math.abs(offset));
+        }
+    }
+
+    private String getAdjustmentPart(android.content.Context context, int offset) {
+        if (offset >= 0) {
+            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjustment_later, offset);
+        } else {
+            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjustment_earlier, Math.abs(offset));
         }
     }
 
@@ -159,6 +175,9 @@ public class RelationalRule {
             return new EvaluationResult(0, -1);
         }
         long targetMillis = applyRule(anchorTime, rule.offsetMinutes, rule.roundingDirection, rule.roundingIntervalMinutes);
+        if (rule.adjustmentMinutes != 0) {
+            targetMillis += rule.adjustmentMinutes * 60 * 1000L;
+        }
         LogUtils.i("Initial target time: " + new Date(targetMillis));
 
         if (rule.clip != null) {

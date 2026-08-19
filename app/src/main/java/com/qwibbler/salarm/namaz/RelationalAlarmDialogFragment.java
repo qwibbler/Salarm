@@ -54,11 +54,15 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private static final String KEY_AUTOSTOP_OFFSET_IDX = "autostop_offset_idx";
     private static final String KEY_AUTOSTOP_EVENT = "autostop_event";
 
+    private static final String KEY_ADJUSTMENT_VALUE = "adjustment_value";
+    private static final String KEY_ADJUSTMENT_IDX = "adjustment_idx";
+
     private DialogAddRelationalAlarmBinding mBinding;
 
     private String[] mOffsetTypes;
     private String[] mRoundTypes;
     private String[] mBoundaryTypes;
+    private String[] mAdjustmentTypes;
 
     private int mPrimaryOffsetIdx = 1; // default "after"
     private int mPrimaryRoundIdx = 0; // default "to nearest"
@@ -66,6 +70,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private int mSafetyOffsetIdx = 0; // default "before"
     private int mSafetyRoundIdx = 0; // default "to nearest"
     private int mAutostopOffsetIdx = 0; // default "before"
+    private int mAdjustmentIdx = 0; // default "earlier"
 
     public static RelationalAlarmDialogFragment newInstance() {
         return new RelationalAlarmDialogFragment();
@@ -95,6 +100,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mOffsetTypes = getResources().getStringArray(R.array.relational_alarm_offset_type);
         mRoundTypes = getResources().getStringArray(R.array.relational_alarm_round_type);
         mBoundaryTypes = getResources().getStringArray(R.array.relational_alarm_boundary_type);
+        mAdjustmentTypes = getResources().getStringArray(R.array.relational_alarm_adjustment_type);
 
         setupAdapters();
         setupListeners();
@@ -163,6 +169,9 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             outState.putString(KEY_AUTOSTOP_VALUE, getText(mBinding.autostopOffsetValue));
             outState.putInt(KEY_AUTOSTOP_OFFSET_IDX, mAutostopOffsetIdx);
             outState.putString(KEY_AUTOSTOP_EVENT, getText(mBinding.autostopEvent));
+
+            outState.putString(KEY_ADJUSTMENT_VALUE, getText(mBinding.adjustmentValue));
+            outState.putInt(KEY_ADJUSTMENT_IDX, mAdjustmentIdx);
         }
     }
 
@@ -220,8 +229,13 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.autostopOffsetValue.setText("0");
         updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
 
+        mBinding.adjustmentEnabledCheckbox.setChecked(false);
+        mBinding.adjustmentValue.setText("0");
+        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
+
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
+        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
 
         if (mBinding.primaryEvent.getAdapter().getCount() > 0) {
             mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
@@ -254,10 +268,17 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.autostopOffsetValue.setText(savedInstanceState.getString(KEY_AUTOSTOP_VALUE));
         mAutostopOffsetIdx = savedInstanceState.getInt(KEY_AUTOSTOP_OFFSET_IDX);
         updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
-        mBinding.autostopEvent.setText(savedInstanceState.getString(KEY_AUTOSTOP_EVENT), false);
+        mBinding.adjustmentEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_ADJUSTMENT_VALUE, false)); // We don't have boolean anymore, just check value
+        mBinding.adjustmentValue.setText(savedInstanceState.getString(KEY_ADJUSTMENT_VALUE));
+        mAdjustmentIdx = savedInstanceState.getInt(KEY_ADJUSTMENT_IDX);
+        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
+
+        String adjVal = getText(mBinding.adjustmentValue);
+        mBinding.adjustmentEnabledCheckbox.setChecked(!adjVal.equals("0") && !adjVal.isEmpty());
 
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
+        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
     }
 
     private void updateAutostopEvent(int primaryPosition) {
@@ -268,12 +289,17 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private void updateRoundingVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
+        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, false);
 
-        int visibility = showRounding ? View.VISIBLE : View.GONE;
-        mBinding.primaryRoundTitle.setVisibility(visibility);
-        mBinding.primaryRoundContainer.setVisibility(visibility);
-        mBinding.safetyRoundTitle.setVisibility(visibility);
-        mBinding.safetyRoundContainer.setVisibility(visibility);
+        int roundingVisibility = showRounding ? View.VISIBLE : View.GONE;
+        mBinding.primaryRoundTitle.setVisibility(roundingVisibility);
+        mBinding.primaryRoundContainer.setVisibility(roundingVisibility);
+        mBinding.safetyRoundTitle.setVisibility(roundingVisibility);
+        mBinding.safetyRoundContainer.setVisibility(roundingVisibility);
+
+        int adjustmentVisibility = (showRounding && showAdjustment) ? View.VISIBLE : View.GONE;
+        mBinding.adjustmentEnabledCheckbox.setVisibility(adjustmentVisibility);
+        mBinding.adjustmentContainer.setVisibility(adjustmentVisibility);
     }
 
     private void setupListeners() {
@@ -312,6 +338,12 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.autostopOffsetToggle.setOnClickListener(v -> {
             mAutostopOffsetIdx = (mAutostopOffsetIdx + 1) % mOffsetTypes.length;
             updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        });
+
+        mBinding.adjustmentEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.adjustmentContainer));
+        mBinding.adjustmentToggle.setOnClickListener(v -> {
+            mAdjustmentIdx = (mAdjustmentIdx + 1) % mAdjustmentTypes.length;
+            updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
         });
     }
 
@@ -396,8 +428,19 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             mBinding.autostopEnabledCheckbox.setChecked(false);
         }
 
+        if (rule.adjustmentMinutes != 0) {
+            mBinding.adjustmentEnabledCheckbox.setChecked(true);
+            mBinding.adjustmentValue.setText(String.valueOf(Math.abs(rule.adjustmentMinutes)));
+            mAdjustmentIdx = rule.adjustmentMinutes >= 0 ? 1 : 0;
+            updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
+        } else {
+            mBinding.adjustmentEnabledCheckbox.setChecked(false);
+            mBinding.adjustmentValue.setText("0");
+        }
+
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
+        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
     }
 
     private String getEventNameForRule(RelationalRule.AnchorEvent event) {
@@ -500,6 +543,14 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             int autostopOffset = parseMinutes(getText(mBinding.autostopOffsetValue));
             if (mAutostopOffsetIdx == 0) autostopOffset *= -1;
             rule.autostopOffsetMinutes = autostopOffset;
+        }
+
+        if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
+            int adjustment = parseMinutes(getText(mBinding.adjustmentValue));
+            if (mAdjustmentIdx == 0) adjustment *= -1;
+            rule.adjustmentMinutes = adjustment;
+        } else {
+            rule.adjustmentMinutes = 0;
         }
         return rule;
     }

@@ -287,7 +287,11 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         switch (key) {
             case KEY_NAMAZ_ALARM_SHOW_ROUNDING -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
-                mAdjustAlarmAfterRoundingPref.setVisible((boolean) newValue);
+                boolean showRounding = (boolean) newValue;
+                mAdjustAlarmAfterRoundingPref.setVisible(showRounding);
+                if (!showRounding) {
+                    mAdjustAlarmAfterRoundingPref.setChecked(false);
+                }
             }
 
             case KEY_NAMAZ_ALARM_STYLE_OVERRIDE,

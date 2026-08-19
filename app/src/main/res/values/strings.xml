@@ -1604,6 +1604,8 @@
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>
     <string name="relational_alarm_stop_ringing">Dismiss Alarm</string>
+    <string name="relational_alarm_adjust_alarm">Adjust Alarm</string>
+    <string name="relational_alarm_adjusted_by">Adjusted by</string>
     <string name="relational_alarm_save">SAVE</string>
     <string name="relational_alarm_than">Than</string>
 
@@ -1616,6 +1618,9 @@
     <string name="namaz_rule_no_later">, no later than %1$s %2$s</string>
     <string name="namaz_rule_no_earlier">, no earlier than %1$s %2$s</string>
     <string name="namaz_rule_autostop">, auto dismissed %1$s %2$s</string>
+    <string name="namaz_rule_adjusted">, adjusted by %1$s</string>
+    <string name="namaz_rule_adjustment_earlier">%1$dm earlier</string>
+    <string name="namaz_rule_adjustment_later">%1$dm later</string>
 
     <string-array name="relational_alarm_offset_type">
         <item>Before</item>
@@ -1639,6 +1644,11 @@
     </string-array>
 
     <string-array name="relational_alarm_boundary_type">
+        <item>Earlier</item>
+        <item>Later</item>
+    </string-array>
+
+    <string-array name="relational_alarm_adjustment_type">
         <item>Earlier</item>
         <item>Later</item>
     </string-array>
