@@ -92,6 +92,7 @@ public class RelationalAlarmSyncManager {
         } else {
             nativeAlarm = alarms.get(0);
             nativeAlarm.enabled = rule.enabled;
+            nativeAlarm.label = "🔔 " + RelationalRule.getEventName(context, rule.anchorEvent);
             nativeAlarm.updateAlarm(cr);
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }

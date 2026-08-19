@@ -1052,13 +1052,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
             return;
         }
 
-        String eventName;
-        if (!showBothAsr && (nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI ||
-            nextEvent == com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI)) {
-            eventName = getString(R.string.asr_label);
-        } else {
-            eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
-        }
+        String eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
 
         long remainingMillis = nextEventTime.getTime() - now;
 

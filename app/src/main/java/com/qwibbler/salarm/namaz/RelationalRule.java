@@ -6,6 +6,8 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.settings.PreferencesKeys;
+import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -147,6 +149,15 @@ public class RelationalRule {
     }
 
     public static String getEventName(android.content.Context context, AnchorEvent event) {
+        boolean showBothAsr = getDefaultSharedPreferences(context)
+                .getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+
+        if (!showBothAsr) {
+            if (event == AnchorEvent.ASR_HANAFI || event == AnchorEvent.ASR_SHAFI) {
+                return context.getString(com.qwibbler.salarm.R.string.asr_label);
+            }
+        }
+
         int resId = switch (event) {
             case FAJR -> com.qwibbler.salarm.R.string.fajr_label;
             case SUNRISE -> com.qwibbler.salarm.R.string.sunrise_label;

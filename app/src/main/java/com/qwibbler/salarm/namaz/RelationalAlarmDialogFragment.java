@@ -378,7 +378,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         if (mBinding == null) return;
 
         ArrayAdapter<String> adapter = (ArrayAdapter<String>) mBinding.primaryEvent.getAdapter();
-        String primaryEventName = getEventNameForRule(rule.anchorEvent);
+        String primaryEventName = RelationalRule.getEventName(requireContext(), rule.anchorEvent);
         int primaryPos = adapter.getPosition(primaryEventName);
         if (primaryPos >= 0) {
             mBinding.primaryEvent.setText(adapter.getItem(primaryPos), false);
@@ -396,7 +396,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             mSafetyBoundIdx = rule.clip.boundaryType == RelationalRule.BoundaryType.NO_EARLIER_THAN ? 0 : 1;
             updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
 
-            String safetyEventName = getEventNameForRule(rule.clip.clipEvent);
+            String safetyEventName = RelationalRule.getEventName(requireContext(), rule.clip.clipEvent);
             int safetyPos = adapter.getPosition(safetyEventName);
             if (safetyPos >= 0) {
                 mBinding.safetyEvent.setText(adapter.getItem(safetyPos), false);
@@ -415,7 +415,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         if (rule.autostopEnabled) {
             mBinding.autostopEnabledCheckbox.setChecked(true);
             if (rule.autostopAnchorEvent != null) {
-                String autostopEventName = getEventNameForRule(rule.autostopAnchorEvent);
+                String autostopEventName = RelationalRule.getEventName(requireContext(), rule.autostopAnchorEvent);
                 int autostopPos = adapter.getPosition(autostopEventName);
                 if (autostopPos >= 0) {
                     mBinding.autostopEvent.setText(adapter.getItem(autostopPos), false);
@@ -441,16 +441,6 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
-    }
-
-    private String getEventNameForRule(RelationalRule.AnchorEvent event) {
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
-        if (!showBothAsr && (event == RelationalRule.AnchorEvent.ASR_HANAFI || event == RelationalRule.AnchorEvent.ASR_SHAFI)) {
-            return getString(R.string.asr_label);
-        }
-        String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
-        return originalEvents[event.ordinal()];
     }
 
     private void saveRelationalAlarm() {
