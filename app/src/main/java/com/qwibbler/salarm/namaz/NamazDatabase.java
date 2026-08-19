@@ -25,14 +25,6 @@ public abstract class NamazDatabase extends RoomDatabase {
         }
     };
 
-    static final Migration MIGRATION_7_8 = new Migration(7, 8) {
-        @Override
-        public void migrate(@NonNull SupportSQLiteDatabase database) {
-            // adjustmentEnabled was added in v7 but removed in v8.
-            // adjustmentMinutes was added in v7 and kept in v8.
-            // Room will ignore the extra adjustmentEnabled column if it exists.
-        }
-    };
 
     public static NamazDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
@@ -40,7 +32,7 @@ public abstract class NamazDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     NamazDatabase.class, "namaz_database")
-                            .addMigrations(MIGRATION_6_8, MIGRATION_7_8)
+                            .addMigrations(MIGRATION_6_8)
                             .fallbackToDestructiveMigration()
                             .build();
                 }

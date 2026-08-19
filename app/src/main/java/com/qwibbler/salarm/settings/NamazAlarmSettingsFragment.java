@@ -60,10 +60,8 @@ import com.qwibbler.salarm.settings.custompreference.VibrationPatternPreference;
 import com.qwibbler.salarm.settings.custompreference.VibrationStartDelayPreference;
 import com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
-import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.DeviceUtils;
-import com.qwibbler.salarm.utils.FileUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -529,22 +527,24 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
         String key = pref.getKey();
 
-        if (key.equals(KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION)) {
-            animateAndShowFragment(new NamazAlarmDisplayCustomizationFragment());
-        } else if (key.equals(KEY_NAMAZ_DEFAULT_ALARM_RINGTONE)) {
-            Intent intent = RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(context);
-            intent.putExtra(RingtonePickerActivity.EXTRA_RETURN_RESULT_ONLY, true);
-            ringtonePickerLauncher.launch(intent);
-        } else if (key.equals(KEY_NAMAZ_ALARM_PREVIEW)) {
-            Intent previewIntent = new Intent(context, AlarmDisplayPreviewActivity.class);
-            Calendar now = Calendar.getInstance();
+        switch (key) {
+            case KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION -> animateAndShowFragment(new NamazAlarmDisplayCustomizationFragment());
+            case KEY_NAMAZ_DEFAULT_ALARM_RINGTONE -> {
+                Intent intent = RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(context);
+                intent.putExtra(RingtonePickerActivity.EXTRA_RETURN_RESULT_ONLY, true);
+                ringtonePickerLauncher.launch(intent);
+            }
+            case KEY_NAMAZ_ALARM_PREVIEW -> {
+                Intent previewIntent = new Intent(context, AlarmDisplayPreviewActivity.class);
+                Calendar now = Calendar.getInstance();
 
-            previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, now.get(Calendar.HOUR_OF_DAY));
-            previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, now.get(Calendar.MINUTE));
-            previewIntent.putExtra("is_namaz", true);
-            previewIntent.putExtra("force_override", true);
+                previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, now.get(Calendar.HOUR_OF_DAY));
+                previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, now.get(Calendar.MINUTE));
+                previewIntent.putExtra("is_namaz", true);
+                previewIntent.putExtra("force_override", true);
 
-            ThemeUtils.startActivityWithTransition(context, previewIntent);
+                ThemeUtils.startActivityWithTransition(context, previewIntent);
+            }
         }
 
         return true;
@@ -670,12 +670,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
             return;
         }
 
-        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_STYLE_OVERRIDE)) ? (boolean) newValue : mStyleOverridePref.isChecked();
-        boolean ringtoneOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE)) ? (boolean) newValue : mRingtoneOverridePref.isChecked();
-        boolean advancedAudioOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE)) ? (boolean) newValue : mAdvancedAudioOverridePref.isChecked();
-        boolean vibrationOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE)) ? (boolean) newValue : mVibrationOverridePref.isChecked();
-        boolean actionsOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE)) ? (boolean) newValue : mActionsOverridePref.isChecked();
-        boolean miscOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_MISC_OVERRIDE)) ? (boolean) newValue : mMiscOverridePref.isChecked();
+        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_STYLE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mStyleOverridePref.isChecked();
+        boolean ringtoneOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mRingtoneOverridePref.isChecked();
+        boolean advancedAudioOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mAdvancedAudioOverridePref.isChecked();
+        boolean vibrationOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mVibrationOverridePref.isChecked();
+        boolean actionsOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mActionsOverridePref.isChecked();
+        boolean miscOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_MISC_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mMiscOverridePref.isChecked();
 
         if (mAlarmDisplayCustomizationPref != null) mAlarmDisplayCustomizationPref.setVisible(styleOverride);
 

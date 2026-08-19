@@ -9,8 +9,8 @@ android {
         applicationId = "com.qwibbler.salarm"
         minSdk = 23
         targetSdk = 36
-        versionCode = 2035
-        versionName = 'v0.1.0-alpha2'
+        versionCode = 2036
+        versionName = 'v0.2.0-beta1-debug'
         ndk {
             abiFilters = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         }

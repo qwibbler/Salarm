@@ -32,7 +32,6 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
-import com.qwibbler.salarm.utils.SdkUtils;
 
 import java.util.Calendar;
 import java.util.LinkedList;

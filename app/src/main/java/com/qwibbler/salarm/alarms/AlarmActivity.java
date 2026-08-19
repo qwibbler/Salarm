@@ -81,7 +81,6 @@ import com.qwibbler.salarm.events.Events;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.PillView;
-import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
 import com.qwibbler.salarm.utils.FormattedTextUtils;
@@ -1347,9 +1346,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             Calendar nextSnooze = Calendar.getInstance();
             nextSnooze.add(Calendar.MINUTE, mAlarmInstance.mSnoozeDuration);
             // If next snooze trigger would be at or after the deadline, don't allow it.
-            if (!nextSnooze.before(deadline)) {
-                return true;
-            }
+            return !nextSnooze.before(deadline);
         }
 
         return false;

@@ -42,6 +42,8 @@
     <string name="label_hours">Hours</string>
     <!-- Label "Minutes" -->
     <string name="label_minutes">Minutes</string>
+    <!-- Label "Snoozes" -->
+    <string name="label_snoozes">Snoozes</string>
     <!-- Label "Seconds" -->
     <string name="label_seconds">Seconds</string>
     <string name="hours_minutes_seconds"><xliff:g example="2" id="hours">%1$d</xliff:g>:<xliff:g example="3" id="minutes">%2$02d</xliff:g>:<xliff:g example="44" id="seconds">%3$02d</xliff:g></string>
@@ -873,7 +875,6 @@
         <item quantity="other">Snoozing <xliff:g example="10" id="times">%d</xliff:g> times</item>
     </plurals>
     <!-- Dismiss after snoozing hint -->
-    <string name="dismiss_after_snoozing_hint">Times snoozed</string>
     <!-- Setting title for changing the snooze duration to None. -->
     <string name="snooze_duration_none">None</string>
     <!-- Setting title to enable the use of a custom volume for each alarm. -->
@@ -1738,5 +1739,4 @@
     <string name="salarm_preview_dhuhr_time">12:30 PM</string>
     <string name="salarm_preview_asr_time">04:15 PM</string>
     <string name="salarm_preview_maghrib_time">07:20 PM</string>
-    <string name="salarm_preview_time_long">11:59 PM</string>
 </resources>

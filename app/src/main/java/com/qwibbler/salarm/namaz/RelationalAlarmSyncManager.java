@@ -33,11 +33,11 @@ public class RelationalAlarmSyncManager {
      * @param defaultRingtone The default ringtone URI to use if creating a new native alarm.
      *                        Passed as a parameter (Solution A) to avoid background thread crashes.
      */
-    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone) {
-        saveRule(context, rule, forceSave, defaultRingtone, null);
+    public static void saveRule(Context context, RelationalRule rule, Uri defaultRingtone) {
+        saveRule(context, rule, defaultRingtone, null);
     }
 
-    public static void saveRule(Context context, RelationalRule rule, boolean forceSave, Uri defaultRingtone, OnRuleSyncListener listener) {
+    public static void saveRule(Context context, RelationalRule rule, Uri defaultRingtone, OnRuleSyncListener listener) {
         final Context appContext = context.getApplicationContext();
         NamazDatabase db = NamazDatabase.getDatabase(appContext);
 

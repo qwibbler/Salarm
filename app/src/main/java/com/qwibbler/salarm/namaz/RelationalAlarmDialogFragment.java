@@ -461,7 +461,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
                 if (saveButton != null) saveButton.setEnabled(false);
             }
 
-            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, false, defaultRingtone);
+            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, defaultRingtone);
             getParentFragmentManager().setFragmentResult(REQUEST_KEY, new Bundle());
             dismiss();
 

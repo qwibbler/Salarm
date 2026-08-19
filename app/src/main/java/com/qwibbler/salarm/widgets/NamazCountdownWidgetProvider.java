@@ -201,7 +201,7 @@ public class NamazCountdownWidgetProvider extends AppWidgetProvider {
 
     private void configurePadding(RemoteViews rv, Context context, SharedPreferences prefs) {
         int padding = (int) dpToPx(WidgetDAO.isNamazCountdownWidgetHorizontalPaddingApplied(prefs) ? 20 : 0, context.getResources().getDisplayMetrics());
-        rv.setViewPadding(R.id.namaz_widget_container, padding, padding, padding, padding);
+        rv.setViewPadding(R.id.countdown_container, padding, padding, padding, padding);
     }
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx, int maxFontSize) {
