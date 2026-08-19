@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">Μ<xliff:g id="separator">=</xliff:g>Μανάμα, Μπαχρέιν<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">Μ<xliff:g id="separator">=</xliff:g>Μπρίτζταουν, Μπαρμπάντος<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">Μ<xliff:g id="separator">=</xliff:g>Μπελμοπάν, Μπελίζ<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">Ρ<xliff:g id="separator">=</xliff:g>Ρέικιαβικ, Ισλανδία<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">Ν<xliff:g id="separator">=</xliff:g>Νέο Δελχί, Ινδία<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">Α<xliff:g id="separator">=</xliff:g>Αστάνα, Καζακστάν<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">Π<xliff:g id="separator">=</xliff:g>Πόλη του Κουβέιτ, Κουβέιτ<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">Ρ<xliff:g id="separator">=</xliff:g>Ραμπάτ, Μαρόκο<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">Ο<xliff:g id="separator">=</xliff:g>Ουέλλινγκτον, Νέα Ζηλανδία<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">Α<xliff:g id="separator">=</xliff:g>Αμπούτζα, Νιγηρία<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">Π<xliff:g id="separator">=</xliff:g>Πρετόρια, Νότια Αφρική<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">Β<xliff:g id="separator">=</xliff:g>Βέρνη, Ελβετία<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">Κ<xliff:g id="separator">=</xliff:g>Κίεβο, Ουκρανία<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">Ά<xliff:g id="separator">=</xliff:g>Άμπου Ντάμπι, Ηνωμένα Αραβικά Εμιράτα<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">Ο<xliff:g id="separator">=</xliff:g>Ουάσιγκτον, Π.Κ., ΗΠΑ<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">Τ<xliff:g id="separator">=</xliff:g>Τζέντα, Σαουδική Αραβία;Τζάντα<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">Μ<xliff:g id="separator">=</xliff:g>Μέκκα, Σαουδική Αραβία;Meccah<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">Μ<xliff:g id="separator">=</xliff:g>Μεδίνα, Σαουδική Αραβία;Μεδίνα<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>
