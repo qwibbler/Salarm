@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -155,7 +156,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
                         items.add(new HeaderItem(currentDay));
                         lastDay = currentDay;
                     }
-                    items.add(new LogEntry(cursor, context));
+                    items.add(new LogEntry(cursor, context, this));
                 } while (cursor.moveToNext());
             }
         }
@@ -166,12 +167,15 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
         if (DateUtils.isToday(timeMillis)) {
             return getString(R.string.today);
         }
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
         if (DateUtils.isToday(timeMillis + DateUtils.DAY_IN_MILLIS)) {
             return getString(R.string.yesterday);
         }
         return new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date(timeMillis));
+    }
+
+    private String getFormattedDateTime(Context context, long timeMillis) {
+        String time = AlarmUtils.getFormattedTime(context, timeMillis);
+        return time;
     }
 
     private static class HeaderItem {
@@ -182,26 +186,26 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
     private static class LogEntry {
         final String time;
         final String text;
+        final int iconRes;
 
-        LogEntry(Cursor cursor, Context context) {
+        LogEntry(Cursor cursor, Context context, AlarmLogFragment fragment) {
             long eventTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.EVENT_TIME));
             this.time = AlarmUtils.getFormattedTime(context, eventTime);
 
             String label = cursor.getString(cursor.getColumnIndexOrThrow(AlarmLogColumns.LABEL));
             long firedTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.FIRED_TIME));
-            if (label == null || label.isEmpty()) {
-                String originalTime = AlarmUtils.getFormattedTime(context, firedTime);
-                label = context.getString(R.string.default_label) + " (" + originalTime + ")";
-            }
-            final String finalLabel = label;
 
             int eventType = cursor.getInt(cursor.getColumnIndexOrThrow(AlarmLogColumns.EVENT_TYPE));
             int snoozes = cursor.getInt(cursor.getColumnIndexOrThrow(AlarmLogColumns.SNOOZE_COUNT));
             long extraInfo = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.EXTRA_INFO));
 
             String eventStr;
+            int icon;
             switch (eventType) {
-                case AlarmLogColumns.EVENT_FIRED -> eventStr = context.getString(R.string.alarm_log_fired);
+                case AlarmLogColumns.EVENT_FIRED -> {
+                    eventStr = context.getString(R.string.alarm_log_fired);
+                    icon = R.drawable.ic_tab_alarm_static;
+                }
                 case AlarmLogColumns.EVENT_SNOOZED -> {
                     if (extraInfo > 0) {
                         String untilTime = AlarmUtils.getFormattedTime(context, extraInfo);
@@ -209,18 +213,45 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
                     } else {
                         eventStr = context.getString(R.string.alarm_log_snoozed);
                     }
+                    icon = R.drawable.ic_snooze;
                 }
-                case AlarmLogColumns.EVENT_MISSED -> eventStr = context.getString(R.string.alarm_log_missed);
-                case AlarmLogColumns.EVENT_TIMED_OUT -> eventStr = context.getString(R.string.alarm_log_timed_out);
-                case AlarmLogColumns.EVENT_DISMISSED -> eventStr = context.getString(R.string.alarm_log_dismissed);
-                default -> eventStr = "Unknown event";
+                case AlarmLogColumns.EVENT_MISSED -> {
+                    eventStr = context.getString(R.string.alarm_log_missed);
+                    icon = R.drawable.ic_error;
+                }
+                case AlarmLogColumns.EVENT_TIMED_OUT -> {
+                    eventStr = context.getString(R.string.alarm_log_timed_out);
+                    icon = R.drawable.ic_hourglass_bottom;
+                }
+                case AlarmLogColumns.EVENT_DISMISSED -> {
+                    eventStr = context.getString(R.string.alarm_log_dismissed);
+                    icon = R.drawable.ic_alarm_off;
+                }
+                default -> {
+                    eventStr = "Unknown event";
+                    icon = R.drawable.ic_tab_alarm_static;
+                }
             }
 
             if ((eventType == AlarmLogColumns.EVENT_DISMISSED || eventType == AlarmLogColumns.EVENT_MISSED || eventType == AlarmLogColumns.EVENT_TIMED_OUT) && snoozes > 0) {
                 eventStr = context.getString(R.string.alarm_log_snoozed_count, snoozes) + ", " + eventStr;
             }
 
-            this.text = finalLabel + " - " + eventStr;
+            String alarmName;
+            if (label == null || label.isEmpty()) {
+                String originalTime = fragment.getFormattedDateTime(context, firedTime);
+                alarmName = context.getString(R.string.default_label) + " (" + originalTime + ")";
+            } else {
+                alarmName = context.getString(R.string.default_label) + " (" + label + ")";
+            }
+
+            // Integrate alarm name into the event string if it starts with "Alarm"
+            if (eventStr.startsWith(context.getString(R.string.default_label))) {
+                this.text = eventStr.replaceFirst(context.getString(R.string.default_label), alarmName);
+            } else {
+                this.text = alarmName + " - " + eventStr;
+            }
+            this.iconRes = icon;
         }
     }
 
@@ -265,6 +296,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
                 LogEntry entry = (LogEntry) item;
                 logHolder.time.setText(entry.time);
                 logHolder.text.setText(entry.text);
+                logHolder.icon.setImageResource(entry.iconRes);
             }
         }
 
@@ -285,11 +317,13 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
     private static class LogViewHolder extends RecyclerView.ViewHolder {
         final TextView time;
         final TextView text;
+        final ImageView icon;
 
         LogViewHolder(View itemView) {
             super(itemView);
             time = itemView.findViewById(R.id.log_item_time);
             text = itemView.findViewById(R.id.log_item_text);
+            icon = itemView.findViewById(R.id.log_item_icon);
         }
     }
 }

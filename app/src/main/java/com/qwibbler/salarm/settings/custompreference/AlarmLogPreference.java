@@ -8,6 +8,7 @@ package com.qwibbler.salarm.settings.custompreference;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,10 @@ import androidx.preference.Preference;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
 import com.qwibbler.salarm.utils.AlarmUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class AlarmLogPreference extends Preference {
 
@@ -37,17 +42,34 @@ public class AlarmLogPreference extends Preference {
                 AlarmLogColumns.CONTENT_URI, null, selection, selectionArgs, sortOrder)) {
             if (cursor != null && cursor.moveToFirst()) {
                 String label = cursor.getString(cursor.getColumnIndexOrThrow(AlarmLogColumns.LABEL));
-                if (label == null || label.isEmpty()) {
-                    label = getContext().getString(R.string.default_label);
-                }
+                long firedTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.FIRED_TIME));
                 long eventTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.EVENT_TIME));
                 String timeStr = AlarmUtils.getFormattedTime(getContext(), eventTime);
 
-                return label + " (" + timeStr + ")";
+                String alarmName;
+                if (label == null || label.isEmpty()) {
+                    String originalTimeStr = getFormattedDateTime(firedTime);
+                    alarmName = getContext().getString(R.string.default_label) + " (" + originalTimeStr + ")";
+                } else {
+                    alarmName = getContext().getString(R.string.default_label) + " (" + label + ")";
+                }
+
+                return alarmName + " (" + timeStr + ")";
             }
         } catch (Exception e) {
             // Log or ignore
         }
         return getContext().getString(R.string.alarm_log_no_events);
+    }
+
+    private String getFormattedDateTime(long timeMillis) {
+        String time = AlarmUtils.getFormattedTime(getContext(), timeMillis);
+//        if (DateUtils.isToday(timeMillis)) {
+//            return getContext().getString(R.string.today) + " " + time;
+//        }
+//        if (DateUtils.isToday(timeMillis + DateUtils.DAY_IN_MILLIS)) {
+//            return getContext().getString(R.string.yesterday) + " " + time;
+//        }
+        return time;
     }
 }
