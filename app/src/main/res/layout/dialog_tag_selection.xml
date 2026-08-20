@@ -39,17 +39,17 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:gravity="center"
         android:layout_height="wrap_content"
         android:maxHeight="250dp"
+        android:fillViewport="true"
         android:layout_marginTop="12dp">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/tags_group"
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/tags_flexbox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="-4dp"
-            app:singleLine="false" />
+            app:flexWrap="wrap"
+            app:justifyContent="center"
+            app:alignItems="center" />
     </ScrollView>
 </LinearLayout>
