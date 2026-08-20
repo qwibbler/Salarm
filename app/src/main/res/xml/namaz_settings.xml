@@ -98,29 +98,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/namaz_tagging_category_title"
-        app:allowDividerAbove="true"
-        app:iconSpaceReserved="false">
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:key="key_namaz_auto_tag"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/namaz_auto_tag_title"
-            android:defaultValue="true"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-        <androidx.preference.EditTextPreference
-            android:key="key_namaz_auto_tag_name"
-            android:layout="@layout/settings_preference_layout"
-            android:title="@string/namaz_auto_tag_name_title"
-            android:summary="%s"
-            android:defaultValue="Namaz"
-            android:dependency="key_namaz_auto_tag"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
-
-    </PreferenceCategory>
-
 </PreferenceScreen>
