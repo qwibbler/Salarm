@@ -79,6 +79,27 @@
      a 'label' but they didn't specify any labels. [CHAR LIMIT=NONE] -->
     <string name="no_label_specified">No label specified</string>
 
+    <!-- Alarm log strings -->
+    <string name="alarm_log_title">Alarm history</string>
+    <string name="alarm_log_window_24h">Last 24 hours</string>
+    <string name="alarm_log_window_3d">Last 3 days</string>
+    <string name="alarm_log_window_7d">Last 7 days</string>
+    <string name="alarm_log_no_events">No recent alarm events</string>
+    <string name="alarm_log_entry_format">%1$s - %2$s</string>
+    <string name="alarm_log_snoozed_count">snoozed %1$d times</string>
+    <string name="alarm_log_dismissed">Alarm was dismissed</string>
+    <string name="alarm_log_missed">Alarm was missed</string>
+    <string name="alarm_log_timed_out">Alarm timed out</string>
+    <string name="alarm_log_fired">Alarm went off</string>
+    <string name="alarm_log_snoozed">Alarm snoozed</string>
+    <string name="alarm_log_snoozed_until">Alarm snoozed till %1$s</string>
+    <string name="alarm_log_clear">Clear history</string>
+    <string name="alarm_log_clear_confirm">Are you sure you want to clear the alarm history?</string>
+    <string name="alarm_log_view_timeline">Timeline</string>
+    <string name="alarm_log_view_grouped">Grouped</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+
     <!-- ******************* -->
     <!-- **     ALARM     ** -->
     <!-- ******************* -->

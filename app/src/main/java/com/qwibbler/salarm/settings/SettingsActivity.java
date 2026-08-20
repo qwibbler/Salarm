@@ -143,6 +143,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         Preference mPermissionsManagement;
         Preference mPermissionMessage;
         Preference mBackupRestorePref;
+        Preference mAlarmLogPref;
 
         private AlertDialog mRestartDialog;
 
@@ -260,6 +261,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mPermissionsManagement = findPreference(KEY_PERMISSIONS_MANAGEMENT);
             mPermissionMessage = findPreference(KEY_PERMISSION_MESSAGE);
             mBackupRestorePref = findPreference(KEY_BACKUP_RESTORE_PREFERENCES);
+            mAlarmLogPref = findPreference(KEY_ALARM_LOG);
 
             if (savedInstanceState != null) {
                 mShowBackupRestoreDialog = savedInstanceState.getBoolean(KEY_SHOW_BACKUP_RESTORE_DIALOG, false);
@@ -351,6 +353,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
                     animateAndShowFragment(new PermissionsManagementActivity.PermissionsManagementFragment());
 
                 case KEY_BACKUP_RESTORE_PREFERENCES -> showBackupRestoreDialog();
+
+                case KEY_ALARM_LOG -> animateAndShowFragment(new AlarmLogFragment());
             }
 
             return true;
@@ -380,6 +384,10 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mPermissionsManagement.setOnPreferenceClickListener(this);
 
             mBackupRestorePref.setOnPreferenceClickListener(this);
+
+            if (mAlarmLogPref != null) {
+                mAlarmLogPref.setOnPreferenceClickListener(this);
+            }
         }
 
         private void updateSettingsVisibility() {

@@ -80,6 +80,7 @@ import com.qwibbler.salarm.databinding.AlarmActivityBinding;
 import com.qwibbler.salarm.events.Events;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
 import com.qwibbler.salarm.uicomponents.PillView;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
@@ -221,6 +222,14 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mPrefs = getDefaultSharedPreferences(storageContext);
         mGeneralBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getGeneralFont(mPrefs));
 
+        setVolumeControlStream(AudioManager.STREAM_ALARM);
+
+        if (!initAlarmAndInstance()) {
+            return;
+        }
+
+        mPowerBehavior = SettingsDAO.getAlarmPowerButtonBehavior(mPrefs, mIsNamaz);
+
         // Register Power button (screen off) intent receiver
         if (mPowerBehavior != PowerButtonBehavior.NOTHING) {
             IntentFilter powerFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
@@ -231,12 +240,6 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             }
 
             mPowerBtnReceiverRegistered = true;
-        }
-
-        setVolumeControlStream(AudioManager.STREAM_ALARM);
-
-        if (!initAlarmAndInstance()) {
-            return;
         }
 
         initDefaultSnoozeValue();
@@ -268,7 +271,6 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         mIsNamaz = mAlarm != null && mAlarm.relationalRuleId != -1;
 
         mVolumeBehavior = SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs, mIsNamaz);
-        mPowerBehavior = SettingsDAO.getAlarmPowerButtonBehavior(mPrefs, mIsNamaz);
         mHeadphonesButtonBehavior = SettingsDAO.getHeadphonesButtonBehavior(mPrefs, mIsNamaz);
         mShowNextEventInfo = SettingsDAO.getNamazShowNextEventInfo(mPrefs);
 
@@ -1267,7 +1269,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
             displayAlarmActionMessage(titleResId, null, getString(titleResId));
 
-            AlarmStateManager.deleteInstanceAndUpdateParent(this, mAlarmInstance, false);
+            AlarmStateManager.deleteInstanceAndUpdateParent(this, mAlarmInstance, false, AlarmLogColumns.EVENT_DISMISSED);
 
             Events.sendAlarmEvent(action, R.string.label_salarm);
         } else {
@@ -1307,7 +1309,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         displayAlarmActionMessage(titleResId, null, getString(titleResId));
 
-        AlarmStateManager.deleteInstanceAndUpdateParent(this, mAlarmInstance, false);
+        AlarmStateManager.deleteInstanceAndUpdateParent(this, mAlarmInstance, false, AlarmLogColumns.EVENT_DISMISSED);
 
         Events.sendAlarmEvent(action, R.string.label_salarm);
 

@@ -26,8 +26,9 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String DATABASE_NAME = "alarms.db";
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
+    static final String ALARM_LOG_TABLE_NAME = "alarm_log";
 
-    private static final int DATABASE_VERSION = 33;
+    private static final int DATABASE_VERSION = 37;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
@@ -98,10 +99,27 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         LogUtils.i("Instance table created");
     }
 
+    private static void createAlarmLogTable(SQLiteDatabase db, String alarmLogTableName) {
+        db.execSQL("CREATE TABLE " + alarmLogTableName + " (" +
+            ClockContract.AlarmLogColumns._ID + " INTEGER PRIMARY KEY," +
+            ClockContract.AlarmLogColumns.ALARM_ID + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.INSTANCE_ID + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.LABEL + " TEXT NOT NULL, " +
+            ClockContract.AlarmLogColumns.FIRED_TIME + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EVENT_TIME + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.STATE + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EVENT_TYPE + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.SNOOZE_COUNT + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EXTRA_INFO + " INTEGER NOT NULL DEFAULT 0);");
+
+        LogUtils.i("Alarm log table created");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         createAlarmsTable(db, ALARMS_TABLE_NAME);
         createInstanceTable(db, INSTANCES_TABLE_NAME);
+        createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
     }
 
     @Override
@@ -344,6 +362,43 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
                 + " INTEGER NOT NULL DEFAULT 0;");
             LogUtils.i("initialAlarmTime column added for version 33 upgrade.");
+        }
+
+        if (oldVersion < 34) {
+            createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
+            LogUtils.i("Alarm log table added for version 34 upgrade.");
+        }
+
+        if (oldVersion < 35) {
+            // Re-create the alarm log table with new columns if it was already created in v34
+            db.execSQL("DROP TABLE IF EXISTS " + ALARM_LOG_TABLE_NAME + ";");
+            createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
+            LogUtils.i("Alarm log table re-created for version 35 upgrade.");
+        }
+
+        if (oldVersion < 36) {
+            // Safety check for missing columns in alarm_templates and alarm_instances
+            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.DISMISS_AFTER)) {
+                db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.DISMISS_AFTER
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.DISMISS_AFTER)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.DISMISS_AFTER
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.INITIAL_ALARM_TIME)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            LogUtils.i("Ensured dismissAfter and initialAlarmTime columns exist for version 36 upgrade.");
+        }
+
+        if (oldVersion < 37) {
+            if (!columnExists(db, ALARM_LOG_TABLE_NAME, ClockContract.AlarmLogColumns.EXTRA_INFO)) {
+                db.execSQL("ALTER TABLE " + ALARM_LOG_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmLogColumns.EXTRA_INFO
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            LogUtils.i("Added extra_info column to alarm log for version 37 upgrade.");
         }
     }
 

@@ -104,4 +104,8 @@
         android:icon="@drawable/ic_backup_restore"
         app:singleLineTitle="false" />
 
+    <com.qwibbler.salarm.settings.custompreference.AlarmLogPreference
+        android:key="key_alarm_log"
+        android:title="@string/alarm_log_title" />
+
 </PreferenceScreen>

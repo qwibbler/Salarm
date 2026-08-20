@@ -19,6 +19,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,6 +37,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.events.Events;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
 import com.qwibbler.salarm.tiles.AlarmTileService;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 import com.qwibbler.salarm.utils.AlarmUtils;
@@ -411,6 +413,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         }
 
         instance.updateInstance(contentResolver);
+        logAlarmEvent(context, instance, AlarmLogColumns.EVENT_FIRED, 0);
 
         if (instance.mAlarmId != null) {
             // if the time changed *backward* and pushed an instance from missed back to fired,
@@ -501,6 +504,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         instance.setAlarmTime(newAlarmTime);
         instance.mAlarmState = AlarmInstance.SNOOZE_STATE;
         instance.updateInstance(context.getContentResolver());
+        logAlarmEvent(context, instance, AlarmLogColumns.EVENT_SNOOZED, instance.getAlarmTime().getTimeInMillis());
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.showSnoozeNotification(context, instance);
@@ -575,6 +579,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Update alarm state
         instance.mAlarmState = AlarmInstance.MISSED_STATE;
         instance.updateInstance(contentResolver);
+        logAlarmEvent(context, instance, AlarmLogColumns.EVENT_MISSED, 0);
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.showMissedNotification(context, instance);
@@ -665,6 +670,10 @@ public final class AlarmStateManager extends BroadcastReceiver {
      * @param instance to set state to
      */
     public static void deleteInstanceAndUpdateParent(Context context, AlarmInstance instance, boolean showToast) {
+        deleteInstanceAndUpdateParent(context, instance, showToast, -1);
+    }
+
+    public static void deleteInstanceAndUpdateParent(Context context, AlarmInstance instance, boolean showToast, int eventType) {
         final boolean wasPreDismissed = instance.mAlarmState == AlarmInstance.PREDISMISSED_STATE;
         LogUtils.i("Deleting instance " + instance.mId
             + (wasPreDismissed ? " without updating parent alarm." : " and updating parent alarm."));
@@ -685,6 +694,13 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // When their original firing time arrives, only retire the skipped instance. Rescheduling
         // again can recreate the already skipped next occurrence as a normal active instance.
         if (instance.mAlarmId != null && !wasPreDismissed) {
+            int finalEventType = eventType;
+            if (finalEventType == -1) {
+                finalEventType = (instance.mAlarmState == AlarmInstance.MISSED_STATE)
+                        ? AlarmLogColumns.EVENT_MISSED
+                        : AlarmLogColumns.EVENT_DISMISSED;
+            }
+            logAlarmEvent(context, instance, finalEventType, 0);
             updateParentAlarm(context, instance);
         }
 
@@ -701,6 +717,32 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Instance is not valid anymore, so find next alarm that will fire and notify system
         updateNextAlarm(context);
     }
+
+    private static void logAlarmEvent(Context context, AlarmInstance instance, int eventType, long extraInfo) {
+        ContentValues values = new ContentValues();
+        values.put(AlarmLogColumns.ALARM_ID, instance.mAlarmId != null ? instance.mAlarmId : -1);
+        values.put(AlarmLogColumns.INSTANCE_ID, instance.mId);
+        values.put(AlarmLogColumns.LABEL, instance.mLabel);
+        values.put(AlarmLogColumns.FIRED_TIME, instance.mInitialAlarmTimeMillis > 0
+                ? instance.mInitialAlarmTimeMillis : instance.getAlarmTime().getTimeInMillis());
+        values.put(AlarmLogColumns.EVENT_TIME, System.currentTimeMillis());
+        values.put(AlarmLogColumns.STATE, instance.mAlarmState);
+        values.put(AlarmLogColumns.EVENT_TYPE, eventType);
+        values.put(AlarmLogColumns.SNOOZE_COUNT, instance.mMissedAlarmCurrentCount);
+        values.put(AlarmLogColumns.EXTRA_INFO, extraInfo);
+
+        try {
+            context.getContentResolver().insert(AlarmLogColumns.CONTENT_URI, values);
+
+            // Clean up logs older than 7 days
+            long cutoff = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L;
+            context.getContentResolver().delete(AlarmLogColumns.CONTENT_URI,
+                    AlarmLogColumns.EVENT_TIME + " < ?", new String[]{String.valueOf(cutoff)});
+        } catch (Exception e) {
+            LogUtils.e("Failed to log alarm event", e);
+        }
+    }
+
 
     /**
      * This will set the instance state to DISMISSED_STATE and remove its notifications and
@@ -954,7 +996,12 @@ public final class AlarmStateManager extends BroadcastReceiver {
             case AlarmInstance.SNOOZE_STATE -> setSnoozeState(context, instance, true);
             case AlarmInstance.MISSED_STATE -> setMissedState(context, instance);
             case AlarmInstance.PREDISMISSED_STATE -> setPreDismissState(context, instance, true);
-            case AlarmInstance.DISMISSED_STATE -> deleteInstanceAndUpdateParent(context, instance, false);
+            case AlarmInstance.DISMISSED_STATE -> {
+                int eventType = (instance.mAlarmState == AlarmInstance.FIRED_STATE)
+                        ? AlarmLogColumns.EVENT_TIMED_OUT
+                        : -1;
+                deleteInstanceAndUpdateParent(context, instance, false, eventType);
+            }
             default -> LogUtils.e("Trying to change to unknown alarm state: " + state);
         }
     }
