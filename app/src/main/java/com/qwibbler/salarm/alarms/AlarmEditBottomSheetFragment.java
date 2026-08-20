@@ -762,7 +762,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAutoSilenceValue() {
-        if (!SettingsDAO.isPerAlarmAutoSilenceEnabled(mPrefs, mIsNamaz)) {
+        if (SettingsDAO.isPerAlarmAutoSilenceDisabled(mPrefs, mIsNamaz)) {
             mBinding.autoSilenceDurationLayout.setVisibility(GONE);
             return;
         }
@@ -805,7 +805,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindSnoozeDurationValue() {
-        if (!SettingsDAO.isPerAlarmSnoozeDurationEnabled(mPrefs, mIsNamaz)) {
+        if (SettingsDAO.isPerAlarmSnoozeDurationDisabled(mPrefs, mIsNamaz)) {
             mBinding.snoozeDurationLayout.setVisibility(GONE);
             return;
         }
@@ -880,7 +880,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindMissedAlarmRepeatLimit() {
-        if (!SettingsDAO.isPerAlarmMissedRepeatLimitEnabled(mPrefs, mIsNamaz)
+        if (SettingsDAO.isPerAlarmMissedRepeatLimitDisabled(mPrefs, mIsNamaz)
             || mAlarm.autoSilenceDuration == TIMEOUT_NEVER
             || mAlarm.snoozeDuration == ALARM_SNOOZE_DURATION_DISABLED) {
             mBinding.missedAlarmRepeatLimitLayout.setVisibility(GONE);

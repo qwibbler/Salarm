@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -245,6 +246,26 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
             }
             this.iconRes = icon;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LogEntry logEntry = (LogEntry) o;
+
+            if (iconRes != logEntry.iconRes) return false;
+            if (!time.equals(logEntry.time)) return false;
+            return text.equals(logEntry.text);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = time.hashCode();
+            result = 31 * result + text.hashCode();
+            result = 31 * result + iconRes;
+            return result;
+        }
     }
 
     private static class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -252,10 +273,31 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
         private static final int TYPE_ENTRY = 1;
         private final List<Object> mItems = new ArrayList<>();
 
-        void setItems(List<Object> items) {
+        void setItems(final List<Object> items) {
+            final List<Object> oldItems = new ArrayList<>(mItems);
             mItems.clear();
             mItems.addAll(items);
-            notifyDataSetChanged();
+            DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldItems.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return mItems.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return oldItems.get(oldItemPosition).equals(mItems.get(newItemPosition));
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    return oldItems.get(oldItemPosition).equals(mItems.get(newItemPosition));
+                }
+            }).dispatchUpdatesTo(this);
         }
 
         @Override

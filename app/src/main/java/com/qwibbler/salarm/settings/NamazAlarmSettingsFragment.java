@@ -393,7 +393,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 final int index = mRepeatMissedAlarmPref.findIndexOfValue((String) newValue);
                 mRepeatMissedAlarmPref.setSummary(mRepeatMissedAlarmPref.getEntries()[index]);
 
-                if (!SettingsDAO.isPerAlarmMissedRepeatLimitEnabled(mPrefs, true)) {
+                if (SettingsDAO.isPerAlarmMissedRepeatLimitDisabled(mPrefs, true)) {
                     AppExecutors.getDiskIO().execute(() -> {
                         List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
                         for (Alarm alarm : currentAlarms) {
@@ -766,7 +766,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 mAlarmAutoSilencePref.setAutoSilenceDuration(newValue);
                 updateMissedAlarmPrefsVisibility(newValue, SettingsDAO.getSnoozeLength(mPrefs, true), null);
 
-                if (!SettingsDAO.isPerAlarmAutoSilenceEnabled(mPrefs, true)) {
+                if (SettingsDAO.isPerAlarmAutoSilenceDisabled(mPrefs, true)) {
                     AppExecutors.getDiskIO().execute(() -> {
                         List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
                         for (Alarm alarm : currentAlarms) {
@@ -788,7 +788,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 mAlarmSnoozeDurationPref.setSnoozeDuration(newValue);
                 updateMissedAlarmPrefsVisibility(SettingsDAO.getAlarmTimeout(mPrefs, true), newValue, null);
 
-                if (!SettingsDAO.isPerAlarmSnoozeDurationEnabled(mPrefs, true)) {
+                if (SettingsDAO.isPerAlarmSnoozeDurationDisabled(mPrefs, true)) {
                     AppExecutors.getDiskIO().execute(() -> {
                         List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
                         for (Alarm alarm : currentAlarms) {
@@ -810,7 +810,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
                 mDismissAfterPref.setDismissAfter(newValue);
 
-                if (!SettingsDAO.isPerAlarmDismissAfterEnabled(mPrefs, true)) {
+                if (SettingsDAO.isPerAlarmDismissAfterDisabled(mPrefs, true)) {
                     AppExecutors.getDiskIO().execute(() -> {
                         List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
                         for (Alarm alarm : currentAlarms) {

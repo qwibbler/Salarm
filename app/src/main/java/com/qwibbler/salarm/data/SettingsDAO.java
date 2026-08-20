@@ -1308,16 +1308,20 @@ public final class SettingsDAO {
         };
     }
 
+    public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE : KEY_ENABLE_PER_ALARM_AUTO_SILENCE;
+        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE);
+    }
+
     /**
      * @return {@code true} if a custom auto silence duration cannot be set for each alarm. {@code false} otherwise.
      */
     public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs) {
-        return !isPerAlarmAutoSilenceEnabled(prefs, false);
+        return isPerAlarmAutoSilenceDisabled(prefs, false);
     }
 
     public static boolean isPerAlarmAutoSilenceEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE : KEY_ENABLE_PER_ALARM_AUTO_SILENCE;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE);
+        return !isPerAlarmAutoSilenceDisabled(prefs, isNamaz);
     }
 
     /**
@@ -1332,17 +1336,26 @@ public final class SettingsDAO {
         return prefs.getInt(key, DEFAULT_AUTO_SILENCE_DURATION);
     }
 
+    public static boolean isPerAlarmSnoozeDurationDisabled(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION : KEY_ENABLE_PER_ALARM_SNOOZE_DURATION;
+        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION);
+    }
+
     /**
      * @return {@code true} if a custom snooze duration cannot be set for each alarm.
      * {@code false} otherwise.
      */
     public static boolean isPerAlarmSnoozeDurationDisabled(SharedPreferences prefs) {
-        return !isPerAlarmSnoozeDurationEnabled(prefs, false);
+        return isPerAlarmSnoozeDurationDisabled(prefs, false);
     }
 
     public static boolean isPerAlarmSnoozeDurationEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION : KEY_ENABLE_PER_ALARM_SNOOZE_DURATION;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION);
+        return !isPerAlarmSnoozeDurationDisabled(prefs, isNamaz);
+    }
+
+    public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
+        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
     }
 
     /**
@@ -1350,12 +1363,11 @@ public final class SettingsDAO {
      * {@code false} otherwise.
      */
     public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs) {
-        return !isPerAlarmDismissAfterEnabled(prefs, false);
+        return isPerAlarmDismissAfterDisabled(prefs, false);
     }
 
     public static boolean isPerAlarmDismissAfterEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
+        return !isPerAlarmDismissAfterDisabled(prefs, isNamaz);
     }
 
     /**
@@ -1382,17 +1394,21 @@ public final class SettingsDAO {
         return prefs.getInt(key, DEFAULT_ALARM_DISMISS_AFTER);
     }
 
+    public static boolean isPerAlarmMissedRepeatLimitDisabled(SharedPreferences prefs, boolean isNamaz) {
+        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT : KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT;
+        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
+    }
+
     /**
      * @return {@code true} if a custom repeat limit cannot be set for each missed alarm.
      * {@code false} otherwise.
      */
     public static boolean isPerAlarmMissedRepeatLimitDisabled(SharedPreferences prefs) {
-        return !isPerAlarmMissedRepeatLimitEnabled(prefs, false);
+        return isPerAlarmMissedRepeatLimitDisabled(prefs, false);
     }
 
     public static boolean isPerAlarmMissedRepeatLimitEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT : KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
+        return !isPerAlarmMissedRepeatLimitDisabled(prefs, isNamaz);
     }
 
     /**

@@ -45,6 +45,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -834,13 +836,13 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         }
 
         mBinding.salarmActivityBottomMenu.post(() -> {
-            if (isFinishing() || isDestroyed() || mBinding == null || mBinding.salarmActivityBottomMenu == null) {
+            if (isFinishing() || isDestroyed() || mBinding == null) {
                 return;
             }
 
             final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
-                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
                     if (Math.abs(velocityX) > Math.abs(velocityY)) {
                         if (velocityX > 0) {
                             setBottomNavPage(1);
@@ -861,6 +863,11 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 public boolean onDown(MotionEvent e) {
                     return true;
                 }
+
+                @Override
+                public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                    return true;
+                }
             });
 
             View menuView = mBinding.salarmActivityBottomMenu.getChildAt(0);
@@ -869,7 +876,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                     View itemView = menuViewGroup.getChildAt(i);
                     if (itemView != null) {
                         itemView.setOnTouchListener((v, event) -> {
-                            gestureDetector.onTouchEvent(event);
+                            if (gestureDetector.onTouchEvent(event)) {
+                                if (event.getAction() == MotionEvent.ACTION_UP) {
+                                    v.performClick();
+                                }
+                                return true;
+                            }
                             return false;
                         });
                     }
@@ -878,7 +890,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
             if (menuView != null) {
                 menuView.setOnTouchListener((v, event) -> {
-                    gestureDetector.onTouchEvent(event);
+                    if (gestureDetector.onTouchEvent(event)) {
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            v.performClick();
+                        }
+                        return true;
+                    }
                     return false;
                 });
             }
@@ -946,7 +963,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     @SuppressLint("RestrictedApi")
     private void applyBottomNavTooltips() {
-        if (mBinding == null || mBinding.salarmActivityBottomMenu == null) {
+        if (mBinding == null) {
             return;
         }
 

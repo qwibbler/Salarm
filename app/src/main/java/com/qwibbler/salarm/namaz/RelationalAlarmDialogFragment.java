@@ -194,9 +194,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             for (int i = 0; i < originalEvents.length; i++) {
                 if (i == 3) { // ASR_SHAFI
                     eventsList.add(getString(R.string.asr_label));
-                } else if (i == 4) { // ASR_HANAFI
-                    continue; // Skip the second Asr
-                } else {
+                } else if (i != 4) { // Not ASR_HANAFI
                     eventsList.add(originalEvents[i]);
                 }
             }
@@ -378,6 +376,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private void populateUiFromRule(RelationalRule rule) {
         if (mBinding == null) return;
 
+        @SuppressWarnings("unchecked")
         ArrayAdapter<String> adapter = (ArrayAdapter<String>) mBinding.primaryEvent.getAdapter();
         String primaryEventName = RelationalRule.getEventName(requireContext(), rule.anchorEvent);
         int primaryPos = adapter.getPosition(primaryEventName);

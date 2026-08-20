@@ -404,12 +404,10 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
     private static boolean columnExists(SQLiteDatabase db, String table, String column) {
         try (Cursor cursor = db.rawQuery("PRAGMA table_info(" + table + ")", null)) {
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                    if (column.equalsIgnoreCase(name)) {
-                        return true;
-                    }
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                if (column.equalsIgnoreCase(name)) {
+                    return true;
                 }
             }
         }

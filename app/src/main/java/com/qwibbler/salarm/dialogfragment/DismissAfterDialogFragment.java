@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -243,26 +244,18 @@ public class DismissAfterDialogFragment extends DialogFragment {
         boolean never = mBinding.dismissNeverCheckbox.isChecked();
         boolean minutesChecked = mBinding.minutesCheckbox.isChecked();
         boolean snoozesChecked = mBinding.snoozesCheckbox.isChecked();
-        boolean minutesFilled = mBinding.editMinutes.getText() != null && !mBinding.editMinutes.getText().toString().isEmpty();
-        boolean snoozesFilled = mBinding.editSnoozes.getText() != null && !mBinding.editSnoozes.getText().toString().isEmpty();
+        boolean minutesFilled = !TextUtils.isEmpty(mBinding.editMinutes.getText());
+        boolean snoozesFilled = !TextUtils.isEmpty(mBinding.editSnoozes.getText());
 
         mOkButton.setEnabled(never || (minutesChecked && minutesFilled) || (snoozesChecked && snoozesFilled));
     }
 
     private void setDismissAfterValue() {
         int value = 0;
-        if (mBinding.dismissNeverCheckbox.isChecked()) {
-            value = 0;
-        } else if (mBinding.minutesCheckbox.isChecked()) {
-            String mins = mBinding.editMinutes.getText().toString();
-            if (!mins.isEmpty()) {
-                value = Integer.parseInt(mins);
-            }
+        if (mBinding.minutesCheckbox.isChecked()) {
+            value = parseInput(mBinding.editMinutes.getText());
         } else if (mBinding.snoozesCheckbox.isChecked()) {
-            String snoozes = mBinding.editSnoozes.getText().toString();
-            if (!snoozes.isEmpty()) {
-                value = -Integer.parseInt(snoozes);
-            }
+            value = -parseInput(mBinding.editSnoozes.getText());
         }
 
         Bundle result = new Bundle();
@@ -273,6 +266,15 @@ public class DismissAfterDialogFragment extends DialogFragment {
         }
 
         getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
+    }
+
+    private int parseInput(CharSequence text) {
+        if (TextUtils.isEmpty(text)) return 0;
+        try {
+            return Integer.parseInt(text.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private class ImeDoneListener implements TextView.OnEditorActionListener {
