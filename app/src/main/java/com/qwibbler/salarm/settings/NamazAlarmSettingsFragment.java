@@ -7,10 +7,12 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_ALARM_VOLUME;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_START_DELAY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_NAMAZ_AUTO_TAG_NAME;
 import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -73,7 +75,7 @@ import java.util.Calendar;
 import java.util.List;
 
 public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
-    implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
+    implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String KEY_PENDING_DIALOG_PREF_KEY = "pending_dialog_pref_key";
 
@@ -129,6 +131,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     AlarmNotificationReminderPreference mAlarmNotificationReminderPref;
     SwitchPreferenceCompat mTurnOnBackFlashForTriggeredAlarmPref;
     SwitchPreferenceCompat mDisplayLowAlarmVolumeWarningPref;
+    SwitchPreferenceCompat mAutoTagPref;
+    Preference mAutoTagNamePref;
     Preference mAlarmPreviewPref;
 
     private final ActivityResultLauncher<Intent> ringtonePickerLauncher =
@@ -203,6 +207,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         mAlarmNotificationReminderPref = findPreference(KEY_NAMAZ_ALARM_NOTIFICATION_REMINDER);
         mTurnOnBackFlashForTriggeredAlarmPref = findPreference(KEY_NAMAZ_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
         mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING);
+        mAutoTagPref = findPreference(KEY_NAMAZ_AUTO_TAG);
+        mAutoTagNamePref = findPreference(KEY_NAMAZ_AUTO_TAG_NAME);
         mAlarmPreviewPref = findPreference(KEY_NAMAZ_ALARM_PREVIEW);
 
         if (savedInstanceState != null) {
@@ -230,10 +236,15 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     public void onResume() {
         super.onResume();
 
+        if (mPrefs != null) {
+            mPrefs.registerOnSharedPreferenceChangeListener(this);
+        }
+
         if (mPendingDialogPrefKey != null && (mActiveDialog == null || !mActiveDialog.isShowing())) {
             triggerDisableSettingDialog(mPendingDialogPrefKey);
         }
 
+        updateSummaries();
         updateRingtonePreferences();
 
         if (mHasExternalAudioDeviceConnected) {
@@ -250,8 +261,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
+
+        if (mPrefs != null) {
+            mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        }
 
         stopRingtonePreview();
 
@@ -274,7 +289,8 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
             mEnableAlarmVibrationsByDefaultPref, mVibrationPatternPref, mEnablePerAlarmVibrationPatternPref,
             mVibrationStartDelayPref, mEnableSnoozedOrDismissedAlarmVibrationsPref, mVolumeButtonsPref, mPowerButtonPref,
             mHeadphonesButtonPref, mFlipActionPref, mShakeActionPref, mShakeIntensityPref, mDisplayDismissButtonPref,
-            mAlarmNotificationReminderPref, mTurnOnBackFlashForTriggeredAlarmPref, mDisplayLowAlarmVolumeWarningPref
+            mAlarmNotificationReminderPref, mTurnOnBackFlashForTriggeredAlarmPref, mDisplayLowAlarmVolumeWarningPref,
+            mAutoTagPref, mAutoTagNamePref
         );
 
         mAudioManager = null;
@@ -1023,6 +1039,19 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
     private void updateRingtonePreferences() {
         mAlarmRingtonePref.setSummary(DataModel.getDataModel().getAlarmRingtoneTitle(true));
         mAlarmRingtonePref.setIntent(RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(requireContext()));
+    }
+
+    private void updateSummaries() {
+        if (mAutoTagNamePref != null) {
+            mAutoTagNamePref.setSummary(mPrefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME));
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (KEY_NAMAZ_AUTO_TAG_NAME.equals(key)) {
+            updateSummaries();
+        }
     }
 
     private void nullifyAllPrefs() {

@@ -116,6 +116,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     public static final String ARG_ALARM_ID = "arg_alarm_id";
     public static final String ARG_IS_NEW_ALARM = "arg_is_new_alarm";
     public static final String ARG_TAG = "arg_tag";
+    public static final String ARG_OPEN_TAGS = "arg_open_tags";
     public static final String SCROLL_TO_ALARM_ID = "scroll_to_alarm_id";
     public static final String REQUEST_KEY = "alarm_saved";
 
@@ -135,7 +136,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     private int mScreenHeight;
     private int mVisualPadding;
 
-    public static AlarmEditBottomSheetFragment newInstance(Alarm alarm, long alarmId, String tag, boolean isNewAlarm) {
+    public static AlarmEditBottomSheetFragment newInstance(Alarm alarm, long alarmId, String tag, boolean isNewAlarm, boolean openTags) {
 
         final Bundle args = new Bundle();
 
@@ -143,6 +144,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         args.putLong(ARG_ALARM_ID, alarmId);
         args.putString(ARG_TAG, tag);
         args.putBoolean(ARG_IS_NEW_ALARM, isNewAlarm);
+        args.putBoolean(ARG_OPEN_TAGS, openTags);
 
         final AlarmEditBottomSheetFragment fragment = new AlarmEditBottomSheetFragment();
         fragment.setArguments(args);
@@ -346,6 +348,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindSaveButton();
 
         updateAllGroupBackgrounds();
+
+        boolean openTags = bundleToUse.getBoolean(ARG_OPEN_TAGS, false);
+        if (openTags) {
+            mBinding.editTags.post(() -> mBinding.editTags.performClick());
+        }
 
         dialog.setOnShowListener(dialogInterface -> {
             BottomSheetDialog d = (BottomSheetDialog) dialogInterface;

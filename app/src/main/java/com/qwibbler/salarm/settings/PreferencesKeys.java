@@ -228,6 +228,7 @@ public class PreferencesKeys {
     public static final String KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM = "key_turn_on_back_flash_for_triggered_alarm";
     public static final String KEY_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT = "key_enable_delete_occasional_alarm_by_default";
     public static final String KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING = "key_display_low_alarm_volume_warning";
+    public static final String KEY_DISPLAY_ALARM_TAGS = "key_display_alarm_tags";
 
     // Namaz
     public static final String KEY_NAMAZ_LATITUDE = "key_namaz_latitude";

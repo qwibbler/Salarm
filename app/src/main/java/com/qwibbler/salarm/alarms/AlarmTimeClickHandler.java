@@ -62,11 +62,15 @@ public final class AlarmTimeClickHandler {
     }
 
     public void displayBottomSheetDialog(Alarm alarm, boolean isNewAlarm) {
+        displayBottomSheetDialog(alarm, isNewAlarm, false);
+    }
+
+    public void displayBottomSheetDialog(Alarm alarm, boolean isNewAlarm, boolean openTags) {
         AlarmEditBottomSheetFragment fragment =
-            AlarmEditBottomSheetFragment.newInstance(alarm, alarm.id, mAlarmFragment.getTag(), isNewAlarm);
+            AlarmEditBottomSheetFragment.newInstance(alarm, alarm.id, mAlarmFragment.getTag(), isNewAlarm, openTags);
 
         AlarmEditBottomSheetFragment.show(mAlarmFragment.getParentFragmentManager(), fragment);
-        LOGGER.v("Opening BottomSheet to edit alarm: " + alarm.id);
+        LOGGER.v("Opening BottomSheet to edit alarm: " + alarm.id + (openTags ? " with tags open" : ""));
     }
 
     public void setAlarmEnabled(Alarm alarm, boolean newState) {

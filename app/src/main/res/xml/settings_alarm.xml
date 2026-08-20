@@ -365,6 +365,14 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="key_display_alarm_tags"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/display_alarm_tags_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
         <com.qwibbler.salarm.settings.custompreference.AlarmNotificationReminderPreference
             android:key="key_alarm_notification_reminder"
             android:layout="@layout/settings_preference_layout"
