@@ -1596,6 +1596,8 @@
     <string name="new_tag_hint">New tag</string>
     <!-- Add tag button text -->
     <string name="add_tag_button">Add</string>
+    <!-- Text displayed when no tags have been created yet -->
+    <string name="no_tags_yet">No tags yet</string>
     <!-- Select tags dialog title -->
     <string name="select_tags_dialog_title">Select Tags</string>
     <!-- Tooltip for the all alarms toggle -->
