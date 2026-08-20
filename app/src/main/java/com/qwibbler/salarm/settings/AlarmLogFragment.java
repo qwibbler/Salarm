@@ -174,7 +174,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
     }
 
     private String getFormattedDateTime(Context context, long timeMillis) {
-        String time = AlarmUtils.getFormattedTime(context, timeMillis);
+        String time = AlarmUtils.getSimpleFormattedTime(context, timeMillis);
         return time;
     }
 
@@ -190,7 +190,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
 
         LogEntry(Cursor cursor, Context context, AlarmLogFragment fragment) {
             long eventTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.EVENT_TIME));
-            this.time = AlarmUtils.getFormattedTime(context, eventTime);
+            this.time = AlarmUtils.getSimpleFormattedTime(context, eventTime);
 
             String label = cursor.getString(cursor.getColumnIndexOrThrow(AlarmLogColumns.LABEL));
             long firedTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.FIRED_TIME));
@@ -208,7 +208,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
                 }
                 case AlarmLogColumns.EVENT_SNOOZED -> {
                     if (extraInfo > 0) {
-                        String untilTime = AlarmUtils.getFormattedTime(context, extraInfo);
+                        String untilTime = AlarmUtils.getSimpleFormattedTime(context, extraInfo);
                         eventStr = context.getString(R.string.alarm_log_snoozed_until, untilTime);
                     } else {
                         eventStr = context.getString(R.string.alarm_log_snoozed);

@@ -400,6 +400,27 @@ public class AlarmUtils {
     }
 
     /**
+     * Returns a human‑readable string representing the time only.
+     *
+     * @param context   the context used to access locale and time format settings
+     * @param alarmTime the time to format
+     * @return a formatted string describing the time
+     */
+    public static String getSimpleFormattedTime(Context context, Calendar alarmTime) {
+        final boolean is24HourFormat = DateFormat.is24HourFormat(context);
+        String skeleton = is24HourFormat ? "Hm" : "hma";
+        final Locale locale = Locale.getDefault();
+        String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
+        return DateFormat.format(pattern, alarmTime).toString();
+    }
+
+    public static String getSimpleFormattedTime(Context context, long timeInMillis) {
+        final Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(timeInMillis);
+        return getSimpleFormattedTime(context, c);
+    }
+
+    /**
      * format "Alarm set for 2 days, 7 hours, and 53 minutes from now."
      */
     @VisibleForTesting

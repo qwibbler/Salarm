@@ -870,10 +870,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                     if (itemView != null) {
                         itemView.setOnTouchListener((v, event) -> {
                             gestureDetector.onTouchEvent(event);
-                            if (event.getAction() == MotionEvent.ACTION_UP) {
-                                v.performClick();
-                                return true;
-                            }
                             return false;
                         });
                     }
@@ -883,10 +879,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             if (menuView != null) {
                 menuView.setOnTouchListener((v, event) -> {
                     gestureDetector.onTouchEvent(event);
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        v.performClick();
-                        return true;
-                    }
                     return false;
                 });
             }
