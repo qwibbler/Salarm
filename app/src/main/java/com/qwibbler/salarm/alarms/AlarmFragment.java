@@ -725,14 +725,15 @@ public final class AlarmFragment extends SalarmFragment
                 long alarmId = bundle.getLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, Alarm.INVALID_ID);
                 boolean isNewAlarm = bundle.getBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, false);
                 if (alarmId != Alarm.INVALID_ID) {
-                    setSmoothScrollStableId(alarmId);
                     if (isNewAlarm) {
                         AppExecutors.getDiskIO().execute(() -> {
                             Alarm alarm = Alarm.getAlarm(requireContext().getContentResolver(), alarmId);
                             if (alarm != null) {
-                                AppExecutors.getMainThread().post(() -> displayBottomSheet(alarm));
+                                AppExecutors.getMainThread().post(() -> setPendingAlarmToEdit(alarm));
                             }
                         });
+                    } else {
+                        setSmoothScrollStableId(alarmId);
                     }
                 }
             }

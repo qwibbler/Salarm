@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentManager;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.alarms.AlarmEditBottomSheetFragment;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.DialogAddRelationalAlarmBinding;
@@ -455,14 +456,23 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
             android.net.Uri defaultRingtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
 
+            boolean isNewRule = rule.id == 0;
+
+            final FragmentManager fm = getParentFragmentManager();
+
             // Disable button to prevent double-save and indicate activity
             if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
                 View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
                 if (saveButton != null) saveButton.setEnabled(false);
             }
 
-            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, defaultRingtone);
-            getParentFragmentManager().setFragmentResult(REQUEST_KEY, new Bundle());
+            RelationalAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, defaultRingtone, syncedAlarm -> {
+                Bundle result = new Bundle();
+                result.putLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, syncedAlarm.id);
+                result.putBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, isNewRule);
+                fm.setFragmentResult(REQUEST_KEY, result);
+            });
+
             dismiss();
 
         } catch (Exception e) {

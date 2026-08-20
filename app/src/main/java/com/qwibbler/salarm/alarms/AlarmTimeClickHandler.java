@@ -247,13 +247,7 @@ public final class AlarmTimeClickHandler {
 
             AlarmVisualCache.invalidate(newAlarm.id);
 
-            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, addedAlarm ->
-                AppExecutors.getMainThread().post(() -> {
-                    if (mAlarmFragment.isAdded()) {
-                        mAlarmFragment.setPendingAlarmToEdit(addedAlarm);
-                    }
-                })
-            );
+            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, true);
         } else {
             updateExistingAlarm(hour, minute, false);
         }
@@ -273,13 +267,7 @@ public final class AlarmTimeClickHandler {
 
             AlarmVisualCache.invalidate(newAlarm.id);
 
-            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, addedAlarm ->
-                AppExecutors.getMainThread().post(() -> {
-                    if (mAlarmFragment.isAdded()) {
-                        mAlarmFragment.setPendingAlarmToEdit(addedAlarm);
-                    }
-                })
-            );
+            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, true);
         } else {
             updateExistingAlarm(h, m, true);
         }

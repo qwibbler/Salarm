@@ -61,17 +61,17 @@ public final class AlarmUpdateHandler {
      * @param alarm The alarm to be added.
      */
     public void asyncAddAlarm(final Alarm alarm) {
-        asyncAddAlarm(alarm, true, null);
+        asyncAddAlarm(alarm, true, true);
     }
 
     /**
      * Adds a new alarm on the background.
      *
-     * @param alarm The alarm to be added.
-     * @param listener A callback invoked on the main thread once the alarm has been successfully saved, providing the newly created alarm
-     *                 with its generated database ID. Can be null.
+     * @param alarm          The alarm to be added.
+     * @param showSnackbar   Whether to show a snackbar after saving.
+     * @param openEditScreen Whether to open the edit screen for the new alarm.
      */
-    public void asyncAddAlarm(final Alarm alarm, final boolean showSnackbar, final OnAlarmSavedListener listener) {
+    public void asyncAddAlarm(final Alarm alarm, final boolean showSnackbar, final boolean openEditScreen) {
         AppExecutors.getDiskIO().execute(() -> {
             AlarmInstance instance = null;
             Alarm newAlarm = null;
@@ -82,11 +82,6 @@ public final class AlarmUpdateHandler {
 
                 // Add alarm to db
                 newAlarm = alarm.addAlarm(cr);
-
-                // Be ready to scroll to this alarm on UI later.
-                if (mScrollHandler != null) {
-                    mScrollHandler.setSmoothScrollStableId(newAlarm.id);
-                }
 
                 // Create and add instance to db
                 if (newAlarm.enabled) {
@@ -103,8 +98,12 @@ public final class AlarmUpdateHandler {
                     AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, finalInstance.getAlarmTime().getTimeInMillis());
                 }
 
-                if (listener != null && finalNewAlarm != null) {
-                    listener.onAlarmSaved(finalNewAlarm);
+                if (mScrollHandler != null && finalNewAlarm != null) {
+                    if (openEditScreen) {
+                        mScrollHandler.setPendingAlarmToEdit(finalNewAlarm);
+                    } else {
+                        mScrollHandler.setSmoothScrollStableId(finalNewAlarm.id);
+                    }
                 }
             });
         });
@@ -308,7 +307,7 @@ public final class AlarmUpdateHandler {
                 if (ruleToRestore != null) {
                     asyncRestoreRelationalAlarm(alarmToRestore, ruleToRestore);
                 } else {
-                    asyncAddAlarm(alarmToRestore);
+                    asyncAddAlarm(alarmToRestore, true, false);
                 }
             }
         });
@@ -375,19 +374,6 @@ public final class AlarmUpdateHandler {
         // Register instance to state manager
         AlarmStateManager.registerInstance(mAppContext, newInstance, true);
         return newInstance;
-    }
-
-    /**
-     * Callback interface used to listen for the completion of an alarm save operation.
-     */
-    public interface OnAlarmSavedListener {
-
-        /**
-         * Invoked when the alarm has been successfully saved to the database.
-         *
-         * @param savedAlarm The newly saved alarm, including its generated database ID.
-         */
-        void onAlarmSaved(Alarm savedAlarm);
     }
 
 }
