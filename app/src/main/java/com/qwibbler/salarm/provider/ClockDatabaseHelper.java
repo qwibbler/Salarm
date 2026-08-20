@@ -317,15 +317,15 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         if (oldVersion < 28) {
             // Safety check for users already on version 27 of either branch
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.RELATIONAL_RULE_ID)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.RELATIONAL_RULE_ID)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.RELATIONAL_RULE_ID
                         + " INTEGER NOT NULL DEFAULT -1;");
             }
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BACKGROUND_IMAGE)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BACKGROUND_IMAGE)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.BACKGROUND_IMAGE
                         + " TEXT NOT NULL DEFAULT '';");
             }
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BLUR_INTENSITY)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BLUR_INTENSITY)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.BLUR_INTENSITY
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
@@ -333,7 +333,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < 30) {
-            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
                 db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
                         + " INTEGER NOT NULL DEFAULT -1;");
             }
@@ -343,7 +343,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         if (oldVersion < 31) {
             // Ensure relational_rule_id exists in instances table
-            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
                 db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
                         + " INTEGER NOT NULL DEFAULT -1;");
             }
@@ -378,15 +378,15 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         if (oldVersion < 36) {
             // Safety check for missing columns in alarm_templates and alarm_instances
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.DISMISS_AFTER)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.DISMISS_AFTER)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.DISMISS_AFTER
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
-            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.DISMISS_AFTER)) {
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.DISMISS_AFTER)) {
                 db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.DISMISS_AFTER
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
-            if (!columnExists(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.INITIAL_ALARM_TIME)) {
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.INITIAL_ALARM_TIME)) {
                 db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
@@ -394,7 +394,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < 37) {
-            if (!columnExists(db, ALARM_LOG_TABLE_NAME, ClockContract.AlarmLogColumns.EXTRA_INFO)) {
+            if (columnMissing(db, ALARM_LOG_TABLE_NAME, ClockContract.AlarmLogColumns.EXTRA_INFO)) {
                 db.execSQL("ALTER TABLE " + ALARM_LOG_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmLogColumns.EXTRA_INFO
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
@@ -402,16 +402,16 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    private static boolean columnExists(SQLiteDatabase db, String table, String column) {
+    private static boolean columnMissing(SQLiteDatabase db, String table, String column) {
         try (Cursor cursor = db.rawQuery("PRAGMA table_info(" + table + ")", null)) {
             while (cursor.moveToNext()) {
                 String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
                 if (column.equalsIgnoreCase(name)) {
-                    return true;
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     long fixAlarmInsert(ContentValues values) {

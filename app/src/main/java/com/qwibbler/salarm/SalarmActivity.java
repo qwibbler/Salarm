@@ -202,7 +202,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     private SharedPreferences.OnSharedPreferenceChangeListener mPrefListener;
 
     @Override
-    public void onNewIntent(Intent newIntent) {
+    public void onNewIntent(@NonNull Intent newIntent) {
         super.onNewIntent(newIntent);
 
         // Fragments may query the latest intent for information, so update the intent.
@@ -362,7 +362,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
     @SuppressLint("AlwaysShowAction")
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         menu.add(0, Menu.NONE, 1, R.string.settings).setIcon(R.drawable.ic_settings).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         if (PermissionUtils.areEssentialPermissionsNotGranted(this)) {
@@ -379,7 +379,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == 0) {
             final Intent settingIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingIntent);
@@ -398,12 +398,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      * respond to key presses even if they are not currently focused.
      */
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         return getSelectedSalarmFragment().onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         return getSelectedSalarmFragment().onKeyUp(keyCode, event) || super.onKeyUp(keyCode, event);
     }
 
@@ -855,12 +855,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 }
 
                 @Override
-                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
                     return Math.abs(distanceX) > Math.abs(distanceY);
                 }
 
                 @Override
-                public boolean onDown(MotionEvent e) {
+                public boolean onDown(@NonNull MotionEvent e) {
                     return true;
                 }
 
@@ -1301,7 +1301,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     private final class AutoStartShowListener extends AnimatorListenerAdapter {
         @Override
-        public void onAnimationEnd(Animator animation) {
+        public void onAnimationEnd(@NonNull Animator animation) {
             // Prepare the hide animation for its next use; by default do not auto-show after hide.
             mHideAnimation.removeListener(mAutoStartShowListener);
 

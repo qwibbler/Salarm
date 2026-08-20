@@ -156,7 +156,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
                         items.add(new HeaderItem(currentDay));
                         lastDay = currentDay;
                     }
-                    items.add(new LogEntry(cursor, context, this));
+                    items.add(new LogEntry(cursor, context));
                 } while (cursor.moveToNext());
             }
         }
@@ -181,7 +181,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
         final String text;
         final int iconRes;
 
-        LogEntry(Cursor cursor, Context context, AlarmLogFragment fragment) {
+        LogEntry(Cursor cursor, Context context) {
             long eventTime = cursor.getLong(cursor.getColumnIndexOrThrow(AlarmLogColumns.EVENT_TIME));
             this.time = AlarmUtils.getSimpleFormattedTime(context, eventTime);
 

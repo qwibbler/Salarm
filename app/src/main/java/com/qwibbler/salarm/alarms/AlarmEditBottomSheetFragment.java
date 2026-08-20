@@ -303,7 +303,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding = AlarmEditBottomSheetBinding.inflate(getLayoutInflater());
 
-        dialog.setContentView(mBinding.getRoot());
+        ((Dialog) dialog).setContentView(mBinding.getRoot());
 
         BottomSheetBehavior<?> behavior = dialog.getBehavior();
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
