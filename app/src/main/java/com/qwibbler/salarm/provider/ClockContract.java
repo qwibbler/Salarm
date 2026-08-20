@@ -160,6 +160,12 @@ public final class ClockContract {
          * <p>Type: LONG</p>
          */
         String INITIAL_ALARM_TIME = "initialAlarmTime";
+
+        /**
+         * Alarm tags stored as a comma-separated string.
+         * <p>Type: STRING</p>
+         */
+        String TAGS = "tags";
     }
 
     /**

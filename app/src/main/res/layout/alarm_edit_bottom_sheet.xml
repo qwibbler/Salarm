@@ -162,7 +162,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="2dp"
                 android:minHeight="48dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="10dp"
@@ -175,6 +175,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/namaz_rule_description"
                 app:layout_goneMarginTop="10dp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/edit_tags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="2dp"
+                android:minHeight="48dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="10dp"
+                android:drawableStart="@drawable/ic_tag"
+                android:drawablePadding="10dp"
+                android:drawableTint="?attr/colorOnSurfaceVariant"
+                android:gravity="center_vertical"
+                android:focusable="true"
+                android:text="Add tags"
+                app:layout_constraintTop_toBottomOf="@id/edit_label" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/choose_ringtone"
@@ -192,7 +209,7 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
-                app:layout_constraintTop_toBottomOf="@id/edit_label"
+                app:layout_constraintTop_toBottomOf="@id/edit_tags"
                 tools:text="Standard (Hassium)" />
 
             <com.google.android.material.checkbox.MaterialCheckBox

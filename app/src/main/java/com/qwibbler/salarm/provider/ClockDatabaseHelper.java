@@ -28,11 +28,16 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
     static final String ALARM_LOG_TABLE_NAME = "alarm_log";
 
-    private static final int DATABASE_VERSION = 37;
+    private static final int DATABASE_VERSION = 39;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        db.setForeignKeyConstraintsEnabled(true);
     }
 
     private static void createAlarmsTable(SQLiteDatabase db, String alarmsTableName) {
@@ -63,6 +68,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.AlarmsColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
             ClockContract.AlarmsColumns.BACKGROUND_IMAGE + " TEXT NOT NULL DEFAULT '', " +
             ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.AlarmsColumns.TAGS + " TEXT NOT NULL DEFAULT '', " +
             ClockContract.AlarmsColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0);");
 
         LogUtils.i("Alarms Table created");
@@ -399,6 +405,20 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
             LogUtils.i("Added extra_info column to alarm log for version 37 upgrade.");
+        }
+
+        if (oldVersion < 38) {
+            // Drop tables if they exist from a failed v38 attempt
+            db.execSQL("DROP TABLE IF EXISTS tags;");
+            db.execSQL("DROP TABLE IF EXISTS alarm_tags;");
+        }
+
+        if (oldVersion < 39) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.TAGS)) {
+                db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.TAGS
+                        + " TEXT NOT NULL DEFAULT '';");
+            }
+            LogUtils.i("Added tags column to alarms table for version 39 upgrade.");
         }
     }
 

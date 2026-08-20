@@ -76,6 +76,7 @@ import com.qwibbler.salarm.namaz.RelationalAlarmDialogFragment;
 import com.qwibbler.salarm.namaz.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
 import com.qwibbler.salarm.ringtone.RingtonePickerActivity;
 import com.qwibbler.salarm.settings.AlarmDisplayPreviewActivity;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
@@ -101,6 +102,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -323,6 +325,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindPauseAlarm();
         bindNamazRule();
         bindLabel();
+        bindTags();
         bindRingtone();
         bindVibrator();
         bindVibrationPattern();
@@ -586,13 +589,18 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindNamazRule() {
-        if (mAlarm.relationalRuleId <= 0) {
-            if (mBinding != null) {
+        if (mAlarm.relationalRuleId == -1) {
+            mIsNamaz = false;
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mBinding == null) return;
                 mBinding.namazRuleDescription.setVisibility(View.GONE);
-            }
+                bindDismissAfterValue();
+                updateAllGroupBackgrounds();
+            });
             return;
         }
 
+        mIsNamaz = true;
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
             mNamazRule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
@@ -606,6 +614,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     mAlarm.month = reloadedAlarm.month;
                     mAlarm.day = reloadedAlarm.day;
                     mAlarm.autoSilenceDuration = reloadedAlarm.autoSilenceDuration;
+                    mAlarm.tags = reloadedAlarm.tags;
                 }
 
                 AppExecutors.getMainThread().post(() -> {
@@ -618,6 +627,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     );
 
                     bindClock();
+                    bindTags();
                     bindAutoSilenceValue();
                     bindDismissAfterValue();
                     updateAllGroupBackgrounds();
@@ -647,6 +657,32 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
             final LabelDialogFragment fragment = LabelDialogFragment.newInstance(mAlarm.label, mAlarm.syncByLabel);
             LabelDialogFragment.show(getChildFragmentManager(), fragment);
+        });
+    }
+
+    private void bindTags() {
+        boolean noTags = mAlarm.tags == null || mAlarm.tags.isEmpty();
+        if (!noTags) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mAlarm.tags.size(); i++) {
+                sb.append(mAlarm.tags.get(i));
+                if (i < mAlarm.tags.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            mBinding.editTags.setText(sb.toString());
+            mBinding.editTags.setAlpha(1f);
+        } else {
+            mBinding.editTags.setText("Add tags");
+            mBinding.editTags.setAlpha(0.6f);
+        }
+        mBinding.editTags.setTypeface(mGeneralTypeface);
+
+        mBinding.editTags.setOnClickListener(v -> {
+            Utils.performHapticFeedback(v, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+            final TagSelectionDialogFragment fragment = TagSelectionDialogFragment.newInstance(new ArrayList<>(mAlarm.tags));
+            Utils.showDialogFragment(getChildFragmentManager(), fragment, "tag_selection_dialog");
         });
     }
 
@@ -1218,6 +1254,15 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 bindLabel();
             });
 
+        childFragmentManager.setFragmentResultListener(TagSelectionDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> {
+                ArrayList<String> tags = bundle.getStringArrayList(TagSelectionDialogFragment.RESULT_TAGS);
+                if (tags != null) {
+                    mAlarm.tags = tags;
+                    bindTags();
+                }
+            });
+
         childFragmentManager.setFragmentResultListener(VibrationPatternDialogFragment.REQUEST_KEY, this,
             (requestKey, bundle) -> {
                 String selectedPattern = bundle.getString(VibrationPatternDialogFragment.RESULT_PATTERN_KEY);
@@ -1529,13 +1574,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         ThemeUtils.applyExpressiveBackgroundsToGroup(
             requireContext(),
             mPrefs,
-            mBinding.namazRuleDescription
-        );
-
-        ThemeUtils.applyExpressiveBackgroundsToGroup(
-            requireContext(),
-            mPrefs,
+            mBinding.namazRuleDescription,
             mBinding.editLabel,
+            mBinding.editTags,
             mBinding.chooseRingtone
         );
 

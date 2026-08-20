@@ -406,6 +406,20 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if Namaz alarms should be automatically tagged.
+     */
+    public static boolean isNamazAutoTagEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_NAMAZ_AUTO_TAG, DEFAULT_NAMAZ_AUTO_TAG);
+    }
+
+    /**
+     * @return the name of the tag to automatically add to Namaz alarms.
+     */
+    public static String getNamazAutoTagName(SharedPreferences prefs) {
+        return prefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME);
+    }
+
+    /**
      * @return {@code true} if the Namaz alarm style override is enabled.
      */
     public static boolean isNamazAlarmStyleOverrideEnabled(SharedPreferences prefs) {

@@ -118,6 +118,11 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
         if (cityPref != null) {
             cityPref.setSummary(mPrefs.getString(KEY_NAMAZ_CITY_NAME, DEFAULT_NAMAZ_CITY_NAME));
         }
+
+        Preference autoTagPref = findPreference(KEY_NAMAZ_AUTO_TAG_NAME);
+        if (autoTagPref != null) {
+            autoTagPref.setSummary(mPrefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME));
+        }
     }
 
     @Override
@@ -138,7 +143,7 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (KEY_NAMAZ_CITY_NAME.equals(key)) {
+        if (KEY_NAMAZ_CITY_NAME.equals(key) || KEY_NAMAZ_AUTO_TAG_NAME.equals(key)) {
             updateSummaries();
         } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
             RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());

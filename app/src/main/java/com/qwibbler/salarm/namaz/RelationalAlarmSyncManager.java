@@ -85,6 +85,16 @@ public class RelationalAlarmSyncManager {
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
             nativeAlarm.label = "\uD83D\uDD14 " + RelationalRule.getEventName(context, rule.anchorEvent);
+
+            // Add auto-tag if enabled
+            SharedPreferences prefs = getDefaultSharedPreferences(context);
+            if (SettingsDAO.isNamazAutoTagEnabled(prefs)) {
+                String tagName = SettingsDAO.getNamazAutoTagName(prefs);
+                if (!nativeAlarm.tags.contains(tagName)) {
+                    nativeAlarm.tags.add(tagName);
+                }
+            }
+
             nativeAlarm.addAlarm(cr);
             LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
         } else {

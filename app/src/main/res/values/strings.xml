@@ -98,6 +98,7 @@
     <string name="alarm_log_view_timeline">Timeline</string>
     <string name="alarm_log_view_grouped">Grouped</string>
     <string name="today">Today</string>
+    <string name="all_alarms_filter">All</string>
     <string name="yesterday">Yesterday</string>
 
     <!-- ******************* -->
@@ -1582,6 +1583,11 @@
     <string name="label_set_location">Set Location</string>
     <!-- Namaz Error Saving -->
     <string name="namaz_error_saving">Failed to save Namaz alarm. Please try again.</string>
+
+    <!-- Namaz Alarm Tagging -->
+    <string name="namaz_tagging_category_title">Alarm Tagging</string>
+    <string name="namaz_auto_tag_title">Auto tag Namaz alarms</string>
+    <string name="namaz_auto_tag_name_title">Auto tag name</string>
     <!-- Namaz Error Background Sync -->
     <string name="namaz_error_background_sync">Namaz sync issue</string>
     <!-- Namaz Error Background Sync Details -->

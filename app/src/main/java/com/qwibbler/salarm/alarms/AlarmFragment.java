@@ -67,6 +67,7 @@ import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.AlarmFragmentBinding;
+import com.qwibbler.salarm.databinding.ItemTagFilterBinding;
 import com.qwibbler.salarm.dialogfragment.AlarmDelayPickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmVolumeDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
@@ -152,6 +153,9 @@ public final class AlarmFragment extends SalarmFragment
     private long mScrollToAlarmId = Alarm.INVALID_ID;
     private long mCurrentUpdateToken;
     private String mLastSortOrder = null;
+    private final List<AlarmItemHolder> mAllItemHolders = new ArrayList<>();
+    private final List<String> mSelectedTags = new ArrayList<>();
+    private TagFilterAdapter mTagFilterAdapter;
 
     // Controllers
     private AlarmAdapter mItemAdapter;
@@ -201,6 +205,15 @@ public final class AlarmFragment extends SalarmFragment
                 RingtoneUtils.fixAlarmStreamLow(requireContext());
             }
         );
+
+        mTagFilterAdapter = new TagFilterAdapter();
+        mBinding.tagFilterRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
+        mBinding.tagFilterRecyclerView.setAdapter(mTagFilterAdapter);
+
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            toggleAllVisibleAlarms(isChecked);
+        });
 
         mEmptyViewController = new EmptyViewController(mBinding.alarmRootView, mBinding.alarmRecyclerView, mBinding.alarmEmptyView);
         mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), this, mBinding.alarmRootView);
@@ -457,7 +470,7 @@ public final class AlarmFragment extends SalarmFragment
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> cursorLoader, Cursor data) {
-        final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
+        mAllItemHolders.clear();
 
         // Convert each row in the cursor into an AlarmItemHolder.
         // Note: If the user selected Manual Sort or Creation Date, the cursor is ALREADY correctly sorted by the SQL query
@@ -467,9 +480,55 @@ public final class AlarmFragment extends SalarmFragment
             final AlarmInstance alarmInstance = new AlarmInstance(data, true);
             final AlarmItemHolder itemHolder = new AlarmItemHolder(alarm, alarmInstance, mAlarmTimeClickHandler);
 
-            itemHolders.add(itemHolder);
+            mAllItemHolders.add(itemHolder);
         }
 
+        applyFilters();
+    }
+
+    private void applyFilters() {
+        if (mItemAdapter == null || mTagFilterAdapter == null || mBinding == null) {
+            return;
+        }
+
+        List<AlarmItemHolder> filteredList = new ArrayList<>();
+        List<String> availableTags = new ArrayList<>();
+
+        for (AlarmItemHolder holder : mAllItemHolders) {
+            boolean matches = true;
+            for (String selectedTag : mSelectedTags) {
+                if (!containsCaseInsensitive(holder.item.tags, selectedTag)) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                filteredList.add(holder);
+                // Collect tags from this visible alarm
+                if (holder.item.tags != null) {
+                    for (String t : holder.item.tags) {
+                        if (!containsCaseInsensitive(availableTags, t)) {
+                            availableTags.add(t);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sort by name or time as before
+        sortItemHolders(filteredList);
+
+        Collections.sort(availableTags);
+
+        setAdapterItems(filteredList, SystemClock.elapsedRealtime());
+        mTagFilterAdapter.setTags(availableTags);
+
+        // Update toggle state based on visible alarms
+        updateAllAlarmsToggleState(filteredList);
+    }
+
+    private void sortItemHolders(List<AlarmItemHolder> itemHolders) {
         final boolean wantsSortByNextAlarmTime = SettingsDAO.getAlarmSorting(mPrefs).equals(SORT_ALARM_BY_NEXT_ALARM_TIME);
         final boolean wantsSortByName = SettingsDAO.getAlarmSorting(mPrefs).equals(SORT_ALARM_BY_NAME);
         final boolean areEnabledAlarmsFirst = SettingsDAO.areEnabledAlarmsDisplayedFirst(mPrefs);
@@ -509,9 +568,102 @@ public final class AlarmFragment extends SalarmFragment
                 return Long.compare(t1.getTimeInMillis(), t2.getTimeInMillis());
             });
         }
+    }
 
-        // Apply the final list to the adapter
-        setAdapterItems(itemHolders, SystemClock.elapsedRealtime());
+    private void toggleAllVisibleAlarms(boolean enabled) {
+        List<AlarmItemHolder> visibleAlarms = mItemAdapter.getItems();
+        for (AlarmItemHolder holder : visibleAlarms) {
+            if (holder.item.enabled != enabled) {
+                holder.item.enabled = enabled;
+                mAlarmUpdateHandler.asyncUpdateAlarm(holder.item, false, false);
+            }
+        }
+    }
+
+    private boolean containsCaseInsensitive(List<String> list, String value) {
+        if (list == null || value == null) return false;
+        for (String s : list) {
+            if (value.equalsIgnoreCase(s)) return true;
+        }
+        return false;
+    }
+
+    private void updateAllAlarmsToggleState(List<AlarmItemHolder> visibleAlarms) {
+        if (visibleAlarms.isEmpty()) {
+            mBinding.allAlarmsToggle.setEnabled(false);
+            mBinding.allAlarmsToggle.setChecked(false);
+            return;
+        }
+        mBinding.allAlarmsToggle.setEnabled(true);
+        boolean allEnabled = true;
+        for (AlarmItemHolder holder : visibleAlarms) {
+            if (!holder.item.enabled) {
+                allEnabled = false;
+                break;
+            }
+        }
+        // Use a listener-safe check to avoid triggering the toggle listener
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener(null);
+        mBinding.allAlarmsToggle.setChecked(allEnabled);
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            toggleAllVisibleAlarms(isChecked);
+        });
+    }
+
+    private class TagFilterAdapter extends RecyclerView.Adapter<TagFilterViewHolder> {
+        private List<String> mAvailableTags = new ArrayList<>();
+
+        @SuppressLint("NotifyDataSetChanged")
+        public void setTags(List<String> tags) {
+            mAvailableTags = tags;
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public TagFilterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new TagFilterViewHolder(ItemTagFilterBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull TagFilterViewHolder holder, int position) {
+            if (position == 0) {
+                holder.binding.tagChip.setText(R.string.all_alarms_filter);
+                holder.binding.tagChip.setCheckable(true);
+                holder.binding.tagChip.setChecked(mSelectedTags.isEmpty());
+                holder.binding.tagChip.setOnClickListener(v -> {
+                    mSelectedTags.clear();
+                    applyFilters();
+                });
+            } else {
+                String tag = mAvailableTags.get(position - 1);
+                holder.binding.tagChip.setText(tag);
+                holder.binding.tagChip.setCheckable(true);
+                holder.binding.tagChip.setChecked(mSelectedTags.contains(tag));
+                holder.binding.tagChip.setOnClickListener(v -> {
+                    if (mSelectedTags.contains(tag)) {
+                        mSelectedTags.remove(tag);
+                    } else {
+                        mSelectedTags.add(tag);
+                    }
+                    applyFilters();
+                });
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mAvailableTags.size() + 1;
+        }
+    }
+
+    private static class TagFilterViewHolder extends RecyclerView.ViewHolder {
+        ItemTagFilterBinding binding;
+        public TagFilterViewHolder(ItemTagFilterBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
     }
 
     @Override
