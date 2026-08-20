@@ -94,7 +94,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
             requireContext(),
             null,
             null,
-            "Select Tags",
+            getString(R.string.select_tags_dialog_title),
             null,
             mBinding.getRoot(),
             getString(android.R.string.ok),

@@ -21,7 +21,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="New tag">
+            android:hint="@string/new_tag_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/new_tag_input"
@@ -37,6 +37,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Add" />
+            android:text="@string/add_tag_button" />
     </LinearLayout>
 </LinearLayout>

@@ -1588,6 +1588,18 @@
     <string name="namaz_tagging_category_title">Alarm Tagging</string>
     <string name="namaz_auto_tag_title">Auto tag Namaz alarms</string>
     <string name="namaz_auto_tag_name_title">Auto tag name</string>
+    <!-- Display tags in the alarm setting title -->
+    <string name="display_alarm_tags_title">Display tags in the alarm</string>
+    <!-- Add tags label -->
+    <string name="add_tags">Add tags</string>
+    <!-- New tag hint -->
+    <string name="new_tag_hint">New tag</string>
+    <!-- Add tag button text -->
+    <string name="add_tag_button">Add</string>
+    <!-- Select tags dialog title -->
+    <string name="select_tags_dialog_title">Select Tags</string>
+    <!-- Tooltip for the all alarms toggle -->
+    <string name="all_alarms_toggle_tooltip">Toggle all visible alarms</string>
     <!-- Namaz Error Background Sync -->
     <string name="namaz_error_background_sync">Namaz sync issue</string>
     <!-- Namaz Error Background Sync Details -->

@@ -673,7 +673,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.editTags.setText(sb.toString());
             mBinding.editTags.setAlpha(1f);
         } else {
-            mBinding.editTags.setText("Add tags");
+            mBinding.editTags.setText(R.string.add_tags);
             mBinding.editTags.setAlpha(0.6f);
         }
         mBinding.editTags.setTypeface(mGeneralTypeface);

@@ -190,7 +190,7 @@
                 android:drawableTint="?attr/colorOnSurfaceVariant"
                 android:gravity="center_vertical"
                 android:focusable="true"
-                android:text="Add tags"
+                android:text="@string/add_tags"
                 app:layout_constraintTop_toBottomOf="@id/edit_label" />
 
             <com.google.android.material.textview.MaterialTextView
