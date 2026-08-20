@@ -7,13 +7,11 @@
 package com.qwibbler.salarm.alarms;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatActivity;

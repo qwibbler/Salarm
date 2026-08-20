@@ -18,7 +18,6 @@ import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;

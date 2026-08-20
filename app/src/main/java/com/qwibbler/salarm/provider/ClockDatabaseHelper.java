@@ -99,8 +99,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         LogUtils.i("Instance table created");
     }
 
-    private static void createAlarmLogTable(SQLiteDatabase db, String alarmLogTableName) {
-        db.execSQL("CREATE TABLE " + alarmLogTableName + " (" +
+    private static void createAlarmLogTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + ClockDatabaseHelper.ALARM_LOG_TABLE_NAME + " (" +
             ClockContract.AlarmLogColumns._ID + " INTEGER PRIMARY KEY," +
             ClockContract.AlarmLogColumns.ALARM_ID + " INTEGER NOT NULL, " +
             ClockContract.AlarmLogColumns.INSTANCE_ID + " INTEGER NOT NULL, " +
@@ -119,7 +119,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         createAlarmsTable(db, ALARMS_TABLE_NAME);
         createInstanceTable(db, INSTANCES_TABLE_NAME);
-        createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
+        createAlarmLogTable(db);
     }
 
     @Override
@@ -365,14 +365,14 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < 34) {
-            createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
+            createAlarmLogTable(db);
             LogUtils.i("Alarm log table added for version 34 upgrade.");
         }
 
         if (oldVersion < 35) {
             // Re-create the alarm log table with new columns if it was already created in v34
             db.execSQL("DROP TABLE IF EXISTS " + ALARM_LOG_TABLE_NAME + ";");
-            createAlarmLogTable(db, ALARM_LOG_TABLE_NAME);
+            createAlarmLogTable(db);
             LogUtils.i("Alarm log table re-created for version 35 upgrade.");
         }
 

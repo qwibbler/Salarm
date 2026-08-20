@@ -8,7 +8,6 @@ package com.qwibbler.salarm.settings.custompreference;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -18,10 +17,6 @@ import androidx.preference.Preference;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
 import com.qwibbler.salarm.utils.AlarmUtils;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class AlarmLogPreference extends Preference {
 

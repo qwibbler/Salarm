@@ -33,7 +33,6 @@ import com.qwibbler.salarm.utils.AlarmUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -173,14 +172,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
         return new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date(timeMillis));
     }
 
-    private String getFormattedDateTime(Context context, long timeMillis) {
-        String time = AlarmUtils.getSimpleFormattedTime(context, timeMillis);
-        return time;
-    }
-
-    private static class HeaderItem {
-        final String title;
-        HeaderItem(String title) { this.title = title; }
+    private record HeaderItem(String title) {
     }
 
     private static class LogEntry {
@@ -239,7 +231,7 @@ public class AlarmLogFragment extends BaseSettingsScreenFragment {
 
             String alarmName;
             if (label == null || label.isEmpty()) {
-                String originalTime = fragment.getFormattedDateTime(context, firedTime);
+                String originalTime = AlarmUtils.getSimpleFormattedTime(context, firedTime);
                 alarmName = context.getString(R.string.default_label) + " (" + originalTime + ")";
             } else {
                 alarmName = context.getString(R.string.default_label) + " (" + label + ")";
