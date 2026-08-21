@@ -94,7 +94,13 @@ public class TagSelectionDialogFragment extends DialogFragment {
             null,
             mBinding.getRoot(),
             getString(android.R.string.ok),
-            (d, w) -> notifyChange(),
+            (d, w) -> {
+                String name = mBinding.newTagInput.getText().toString().trim();
+                if (!name.isEmpty()) {
+                    addTag(name);
+                }
+                notifyChange();
+            },
             getString(android.R.string.cancel),
             null,
             null,
