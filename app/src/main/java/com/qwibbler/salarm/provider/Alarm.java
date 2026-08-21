@@ -786,7 +786,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             if (valA != valB) {
                 return Integer.compare(valB, valA);
             }
-            return a.compareToIgnoreCase(b);
+            return a.compareTo(b);
         });
         return allTags;
     }

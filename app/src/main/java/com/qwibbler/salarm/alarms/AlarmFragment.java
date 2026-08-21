@@ -504,7 +504,7 @@ public final class AlarmFragment extends SalarmFragment
         for (AlarmItemHolder holder : mAllItemHolders) {
             boolean matches = true;
             for (String selectedTag : mSelectedTags) {
-                if (!containsCaseInsensitive(holder.item.tags, selectedTag)) {
+                if (holder.item.tags == null || !holder.item.tags.contains(selectedTag)) {
                     matches = false;
                     break;
                 }
@@ -515,7 +515,7 @@ public final class AlarmFragment extends SalarmFragment
                 // Collect tags from this visible alarm
                 if (holder.item.tags != null) {
                     for (String t : holder.item.tags) {
-                        if (!containsCaseInsensitive(availableTags, t)) {
+                        if (!availableTags.contains(t)) {
                             availableTags.add(t);
                         }
                     }
@@ -585,14 +585,6 @@ public final class AlarmFragment extends SalarmFragment
                 mAlarmUpdateHandler.asyncUpdateAlarm(holder.item, false, false);
             }
         }
-    }
-
-    private boolean containsCaseInsensitive(List<String> list, String value) {
-        if (list == null || value == null) return false;
-        for (String s : list) {
-            if (value.equalsIgnoreCase(s)) return true;
-        }
-        return false;
     }
 
     private void updateAllAlarmsToggleState(List<AlarmItemHolder> visibleAlarms) {

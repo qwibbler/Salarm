@@ -56,14 +56,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
         // Ensure all currently selected tags are in mAllTags for display
         for (String st : mSelectedTags) {
-            boolean exists = false;
-            for (String t : mAllTags) {
-                if (t.equalsIgnoreCase(st)) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (!exists) {
+            if (!mAllTags.contains(st)) {
                 mAllTags.add(st);
             }
         }
@@ -121,7 +114,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
                 Chip chip = new Chip(requireContext());
                 chip.setText(tag);
                 chip.setCheckable(true);
-                chip.setChecked(containsCaseInsensitive(mSelectedTags, tag));
+                chip.setChecked(mSelectedTags.contains(tag));
 
                 com.google.android.flexbox.FlexboxLayout.LayoutParams params =
                     new com.google.android.flexbox.FlexboxLayout.LayoutParams(
@@ -133,9 +126,9 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
-                        if (!containsCaseInsensitive(mSelectedTags, tag)) mSelectedTags.add(tag);
+                        if (!mSelectedTags.contains(tag)) mSelectedTags.add(tag);
                     } else {
-                        removeFromListCaseInsensitive(mSelectedTags, tag);
+                        mSelectedTags.remove(tag);
                     }
                     notifyChange();
                 });
@@ -146,9 +139,9 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
     private void addTag(String name) {
         if (!name.isEmpty()) {
-            if (!containsCaseInsensitive(mSelectedTags, name)) {
+            if (!mSelectedTags.contains(name)) {
                 mSelectedTags.add(name);
-                if (!containsCaseInsensitive(mAllTags, name)) {
+                if (!mAllTags.contains(name)) {
                     mAllTags.add(0, name); // Add to top if new
                 }
                 refreshChips();
@@ -170,21 +163,5 @@ public class TagSelectionDialogFragment extends DialogFragment {
         Bundle result = new Bundle();
         result.putStringArrayList(RESULT_TAGS, new ArrayList<>(mSelectedTags));
         getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
-    }
-
-    private boolean containsCaseInsensitive(List<String> list, String value) {
-        for (String s : list) {
-            if (s.equalsIgnoreCase(value)) return true;
-        }
-        return false;
-    }
-
-    private void removeFromListCaseInsensitive(List<String> list, String value) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equalsIgnoreCase(value)) {
-                list.remove(i);
-                i--;
-            }
-        }
     }
 }
