@@ -24,7 +24,9 @@ import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TagSelectionDialogFragment extends DialogFragment {
 
@@ -34,7 +36,8 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
     private AlarmTagSelectionDialogBinding mBinding;
     private List<String> mAllTags;
-    private List<String> mSelectedTags;
+    private Set<String> mSelectedTags;
+    private ArrayAdapter<String> mAutoAdapter;
 
     public static TagSelectionDialogFragment newInstance(ArrayList<String> initialTags) {
         Bundle args = new Bundle();
@@ -50,25 +53,24 @@ public class TagSelectionDialogFragment extends DialogFragment {
         mBinding = AlarmTagSelectionDialogBinding.inflate(getLayoutInflater());
 
         ArrayList<String> initial = requireArguments().getStringArrayList(ARG_INITIAL_TAGS);
-        mSelectedTags = initial != null ? new ArrayList<>(initial) : new ArrayList<>();
+        mSelectedTags = initial != null ? new LinkedHashSet<>(initial) : new LinkedHashSet<>();
 
         mAllTags = Alarm.getTagsByUsage(requireContext().getContentResolver());
 
         // Ensure all currently selected tags are in mAllTags for display
-        for (String st : mSelectedTags) {
-            if (!mAllTags.contains(st)) {
-                mAllTags.add(st);
-            }
-        }
+        Set<String> allTagsSet = new LinkedHashSet<>(mAllTags);
+        allTagsSet.addAll(mSelectedTags);
+        mAllTags = new ArrayList<>(allTagsSet);
 
         refreshChips();
 
         mBinding.newTagInput.setTypeface(ThemeUtils.loadFont(SettingsDAO.getGeneralFont(getDefaultSharedPreferences(requireContext()))));
-        mBinding.newTagInput.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, mAllTags));
+        mAutoAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, mAllTags);
+        mBinding.newTagInput.setAdapter(mAutoAdapter);
         mBinding.newTagInput.setOnItemClickListener((parent, view, position, id) -> {
-            Object item = parent.getAdapter().getItem(position);
+            String item = mAutoAdapter.getItem(position);
             if (item != null) {
-                addTag(item.toString());
+                addTag(item);
             }
         });
         mBinding.newTagInput.setOnEditorActionListener((v, actionId, event) -> {
@@ -126,7 +128,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     if (isChecked) {
-                        if (!mSelectedTags.contains(tag)) mSelectedTags.add(tag);
+                        mSelectedTags.add(tag);
                     } else {
                         mSelectedTags.remove(tag);
                     }
@@ -139,19 +141,17 @@ public class TagSelectionDialogFragment extends DialogFragment {
 
     private void addTag(String name) {
         if (!name.isEmpty()) {
-            if (!mSelectedTags.contains(name)) {
-                mSelectedTags.add(name);
+            if (mSelectedTags.add(name)) {
                 if (!mAllTags.contains(name)) {
                     mAllTags.add(0, name); // Add to top if new
                 }
                 refreshChips();
 
                 // Update autocomplete adapter
-                ArrayAdapter<String> autoAdapter = (ArrayAdapter<String>) mBinding.newTagInput.getAdapter();
-                if (autoAdapter != null) {
-                    autoAdapter.clear();
-                    autoAdapter.addAll(mAllTags);
-                    autoAdapter.notifyDataSetChanged();
+                if (mAutoAdapter != null) {
+                    mAutoAdapter.clear();
+                    mAutoAdapter.addAll(mAllTags);
+                    mAutoAdapter.notifyDataSetChanged();
                 }
                 notifyChange();
             }
