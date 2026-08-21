@@ -420,6 +420,13 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if tags should be displayed in the alarm item.
+     */
+    public static boolean areAlarmTagsDisplayed(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_DISPLAY_ALARM_TAGS, DEFAULT_DISPLAY_ALARM_TAGS);
+    }
+
+    /**
      * @return {@code true} if the Namaz alarm style override is enabled.
      */
     public static boolean isNamazAlarmStyleOverrideEnabled(SharedPreferences prefs) {

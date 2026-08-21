@@ -760,21 +760,34 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     public static List<String> getAllTags(ContentResolver cr) {
-        List<String> allTags = new ArrayList<>();
+        return getTagsByUsage(cr);
+    }
+
+    public static List<String> getTagsByUsage(ContentResolver cr) {
+        final java.util.Map<String, Integer> usageMap = new java.util.HashMap<>();
         try (Cursor cursor = cr.query(CONTENT_URI, new String[]{TAGS}, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     String tagsString = cursor.getString(0);
                     List<String> tags = parseTags(tagsString);
                     for (String tag : tags) {
-                        if (!allTags.contains(tag)) {
-                            allTags.add(tag);
-                        }
+                        Integer count = usageMap.get(tag);
+                        usageMap.put(tag, count == null ? 1 : count + 1);
                     }
                 } while (cursor.moveToNext());
             }
         }
-        Collections.sort(allTags);
+        List<String> allTags = new ArrayList<>(usageMap.keySet());
+        Collections.sort(allTags, (a, b) -> {
+            Integer countA = usageMap.get(a);
+            Integer countB = usageMap.get(b);
+            int valA = countA == null ? 0 : countA;
+            int valB = countB == null ? 0 : countB;
+            if (valA != valB) {
+                return Integer.compare(valB, valA);
+            }
+            return a.compareToIgnoreCase(b);
+        });
         return allTags;
     }
 

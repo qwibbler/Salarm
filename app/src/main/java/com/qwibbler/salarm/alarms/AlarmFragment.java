@@ -16,6 +16,7 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SORT_ALARM_B
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SORT_ALARM_MANUALLY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ALARM_FONT;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_ALARM_TAGS;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING;
 import static com.qwibbler.salarm.uidata.UiDataModel.Tab.ALARMS;
 
@@ -50,6 +51,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -67,7 +69,7 @@ import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.AlarmFragmentBinding;
-import com.qwibbler.salarm.databinding.ItemTagFilterBinding;
+import com.qwibbler.salarm.databinding.AlarmTagFilterItemBinding;
 import com.qwibbler.salarm.dialogfragment.AlarmDelayPickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmVolumeDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
@@ -135,7 +137,7 @@ public final class AlarmFragment extends SalarmFragment
     private final SharedPreferences.OnSharedPreferenceChangeListener mPrefListener = (prefs, key) -> {
         if (key != null) {
             switch (key) {
-                case KEY_ALARM_FONT, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING -> {
+                case KEY_ALARM_FONT, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING, KEY_DISPLAY_ALARM_TAGS -> {
 
                     mAreSettingsChanged = true;
 
@@ -213,6 +215,11 @@ public final class AlarmFragment extends SalarmFragment
         mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             toggleAllVisibleAlarms(isChecked);
+        });
+
+        mBinding.allAlarmsToggle.setOnLongClickListener(v -> {
+            CustomTooltip.showAbove(v, getString(R.string.all_alarms_toggle_tooltip), true);
+            return true;
         });
 
         mEmptyViewController = new EmptyViewController(mBinding.alarmRootView, mBinding.alarmRecyclerView, mBinding.alarmEmptyView);
@@ -609,21 +616,57 @@ public final class AlarmFragment extends SalarmFragment
             Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             toggleAllVisibleAlarms(isChecked);
         });
+
+        mBinding.allAlarmsToggle.setOnLongClickListener(v -> {
+            CustomTooltip.showAbove(v, getString(R.string.all_alarms_toggle_tooltip), true);
+            return true;
+        });
     }
 
     private class TagFilterAdapter extends RecyclerView.Adapter<TagFilterViewHolder> {
         private List<String> mAvailableTags = new ArrayList<>();
 
-        @SuppressLint("NotifyDataSetChanged")
-        public void setTags(List<String> tags) {
-            mAvailableTags = tags;
-            notifyDataSetChanged();
+        public void setTags(final List<String> newTags) {
+            final List<String> oldTags = new ArrayList<>(mAvailableTags);
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldTags.size() + 1;
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newTags.size() + 1;
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    if (oldItemPosition == 0 || newItemPosition == 0) {
+                        return oldItemPosition == newItemPosition;
+                    }
+                    return oldTags.get(oldItemPosition - 1).equals(newTags.get(newItemPosition - 1));
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    if (oldItemPosition == 0 || newItemPosition == 0) {
+                        if (oldItemPosition != newItemPosition) return false;
+                        // Always update the "All" chip to ensure its checked state is correct
+                        return false;
+                    }
+                    String tag = newTags.get(newItemPosition - 1);
+                    String oldTag = oldTags.get(oldItemPosition - 1);
+                    return tag.equals(oldTag) && mSelectedTags.contains(tag) == mSelectedTags.contains(oldTag);
+                }
+            });
+            mAvailableTags = newTags;
+            result.dispatchUpdatesTo(this);
         }
 
         @NonNull
         @Override
         public TagFilterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new TagFilterViewHolder(ItemTagFilterBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            return new TagFilterViewHolder(AlarmTagFilterItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
 
         @Override
@@ -659,8 +702,8 @@ public final class AlarmFragment extends SalarmFragment
     }
 
     private static class TagFilterViewHolder extends RecyclerView.ViewHolder {
-        ItemTagFilterBinding binding;
-        public TagFilterViewHolder(ItemTagFilterBinding binding) {
+        AlarmTagFilterItemBinding binding;
+        public TagFilterViewHolder(AlarmTagFilterItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

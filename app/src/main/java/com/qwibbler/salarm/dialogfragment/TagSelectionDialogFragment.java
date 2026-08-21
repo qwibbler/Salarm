@@ -8,18 +8,17 @@ import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.ArrayAdapter;
+import com.google.android.material.chip.Chip;
 
+import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.SettingsDAO;
-import com.qwibbler.salarm.databinding.DialogTagSelectionBinding;
-import com.qwibbler.salarm.databinding.ItemTagSelectionBinding;
+import com.qwibbler.salarm.databinding.AlarmTagSelectionDialogBinding;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -33,8 +32,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
     public static final String RESULT_TAGS = "result_tags";
     private static final String ARG_INITIAL_TAGS = "arg_initial_tags";
 
-    private DialogTagSelectionBinding mBinding;
-    private TagAdapter mAdapter;
+    private AlarmTagSelectionDialogBinding mBinding;
     private List<String> mAllTags;
     private List<String> mSelectedTags;
 
@@ -49,12 +47,12 @@ public class TagSelectionDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        mBinding = DialogTagSelectionBinding.inflate(getLayoutInflater());
+        mBinding = AlarmTagSelectionDialogBinding.inflate(getLayoutInflater());
 
         ArrayList<String> initial = requireArguments().getStringArrayList(ARG_INITIAL_TAGS);
         mSelectedTags = initial != null ? new ArrayList<>(initial) : new ArrayList<>();
 
-        mAllTags = Alarm.getAllTags(requireContext().getContentResolver());
+        mAllTags = Alarm.getTagsByUsage(requireContext().getContentResolver());
 
         // Ensure all currently selected tags are in mAllTags for display
         for (String st : mSelectedTags) {
@@ -70,24 +68,27 @@ public class TagSelectionDialogFragment extends DialogFragment {
             }
         }
 
-        mAdapter = new TagAdapter();
-        mBinding.tagsList.setLayoutManager(new LinearLayoutManager(requireContext()));
-        mBinding.tagsList.setAdapter(mAdapter);
+        refreshChips();
 
         mBinding.newTagInput.setTypeface(ThemeUtils.loadFont(SettingsDAO.getGeneralFont(getDefaultSharedPreferences(requireContext()))));
-
-        mBinding.addTagButton.setOnClickListener(v -> {
-            String name = mBinding.newTagInput.getText().toString().trim();
-            if (!name.isEmpty()) {
-                if (!containsCaseInsensitive(mSelectedTags, name)) {
-                    mSelectedTags.add(name);
-                    if (!containsCaseInsensitive(mAllTags, name)) {
-                        mAllTags.add(name);
-                    }
-                    mAdapter.notifyDataSetChanged();
-                }
-                mBinding.newTagInput.setText("");
+        mBinding.newTagInput.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, mAllTags));
+        mBinding.newTagInput.setOnItemClickListener((parent, view, position, id) -> {
+            Object item = parent.getAdapter().getItem(position);
+            if (item != null) {
+                addTag(item.toString());
             }
+        });
+        mBinding.newTagInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                addTag(mBinding.newTagInput.getText().toString().trim());
+                return true;
+            }
+            return false;
+        });
+
+        mBinding.newTagInputLayout.setEndIconOnClickListener(v -> {
+            String name = mBinding.newTagInput.getText().toString().trim();
+            addTag(name);
         });
 
         return CustomDialog.create(
@@ -98,11 +99,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
             null,
             mBinding.getRoot(),
             getString(android.R.string.ok),
-            (d, w) -> {
-                Bundle result = new Bundle();
-                result.putStringArrayList(RESULT_TAGS, new ArrayList<>(mSelectedTags));
-                getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
-            },
+            (d, w) -> notifyChange(),
             getString(android.R.string.cancel),
             null,
             null,
@@ -112,6 +109,69 @@ public class TagSelectionDialogFragment extends DialogFragment {
         );
     }
 
+    private void refreshChips() {
+        mBinding.tagsFlexbox.removeAllViews();
+        if (mAllTags.isEmpty()) {
+            mBinding.emptyTags.setVisibility(android.view.View.VISIBLE);
+        } else {
+            mBinding.emptyTags.setVisibility(android.view.View.GONE);
+            int hMargin = (int) (4 * getResources().getDisplayMetrics().density);
+            int vMargin = (int) (0 * getResources().getDisplayMetrics().density);
+            for (String tag : mAllTags) {
+                Chip chip = new Chip(requireContext());
+                chip.setText(tag);
+                chip.setCheckable(true);
+                chip.setChecked(containsCaseInsensitive(mSelectedTags, tag));
+
+                com.google.android.flexbox.FlexboxLayout.LayoutParams params =
+                    new com.google.android.flexbox.FlexboxLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    );
+                params.setMargins(hMargin, vMargin, hMargin, vMargin);
+                chip.setLayoutParams(params);
+
+                chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (isChecked) {
+                        if (!containsCaseInsensitive(mSelectedTags, tag)) mSelectedTags.add(tag);
+                    } else {
+                        removeFromListCaseInsensitive(mSelectedTags, tag);
+                    }
+                    notifyChange();
+                });
+                mBinding.tagsFlexbox.addView(chip);
+            }
+        }
+    }
+
+    private void addTag(String name) {
+        if (!name.isEmpty()) {
+            if (!containsCaseInsensitive(mSelectedTags, name)) {
+                mSelectedTags.add(name);
+                if (!containsCaseInsensitive(mAllTags, name)) {
+                    mAllTags.add(0, name); // Add to top if new
+                }
+                refreshChips();
+
+                // Update autocomplete adapter
+                ArrayAdapter<String> autoAdapter = (ArrayAdapter<String>) mBinding.newTagInput.getAdapter();
+                if (autoAdapter != null) {
+                    autoAdapter.clear();
+                    autoAdapter.addAll(mAllTags);
+                    autoAdapter.notifyDataSetChanged();
+                }
+                notifyChange();
+            }
+            mBinding.newTagInput.setText("");
+        }
+    }
+
+    private void notifyChange() {
+        Bundle result = new Bundle();
+        result.putStringArrayList(RESULT_TAGS, new ArrayList<>(mSelectedTags));
+        getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
+    }
+
     private boolean containsCaseInsensitive(List<String> list, String value) {
         for (String s : list) {
             if (s.equalsIgnoreCase(value)) return true;
@@ -119,48 +179,12 @@ public class TagSelectionDialogFragment extends DialogFragment {
         return false;
     }
 
-    private class TagAdapter extends RecyclerView.Adapter<TagViewHolder> {
-        @NonNull
-        @Override
-        public TagViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new TagViewHolder(ItemTagSelectionBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull TagViewHolder holder, int position) {
-            String tag = mAllTags.get(position);
-            holder.binding.tagCheckbox.setText(tag);
-            holder.binding.tagCheckbox.setOnCheckedChangeListener(null);
-            holder.binding.tagCheckbox.setChecked(containsCaseInsensitive(mSelectedTags, tag));
-            holder.binding.tagCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    if (!containsCaseInsensitive(mSelectedTags, tag)) mSelectedTags.add(tag);
-                } else {
-                    removeFromListCaseInsensitive(mSelectedTags, tag);
-                }
-            });
-        }
-
-        private void removeFromListCaseInsensitive(List<String> list, String value) {
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).equalsIgnoreCase(value)) {
-                    list.remove(i);
-                    i--;
-                }
+    private void removeFromListCaseInsensitive(List<String> list, String value) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equalsIgnoreCase(value)) {
+                list.remove(i);
+                i--;
             }
-        }
-
-        @Override
-        public int getItemCount() {
-            return mAllTags.size();
-        }
-    }
-
-    private static class TagViewHolder extends RecyclerView.ViewHolder {
-        ItemTagSelectionBinding binding;
-        public TagViewHolder(ItemTagSelectionBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
         }
     }
 }
