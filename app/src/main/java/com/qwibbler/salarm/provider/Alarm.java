@@ -759,10 +759,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         contentResolver.update(getContentUri(id), values, null, null);
     }
 
-    public static List<String> getAllTags(ContentResolver cr) {
-        return getTagsByUsage(cr);
-    }
-
     public static List<String> getTagsByUsage(ContentResolver cr) {
         final java.util.Map<String, Integer> usageMap = new java.util.HashMap<>();
         try (Cursor cursor = cr.query(CONTENT_URI, new String[]{TAGS}, null, null, null)) {
