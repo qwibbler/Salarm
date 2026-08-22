@@ -60,7 +60,7 @@ public class NamazErrorHandler {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(SYNC_ERROR_CHANNEL_ID,
-                "Namaz Synchronization Issues", NotificationManager.IMPORTANCE_DEFAULT);
+                "Salah Synchronization Issues", NotificationManager.IMPORTANCE_DEFAULT);
             nm.createNotificationChannel(channel);
         }
 

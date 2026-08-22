@@ -1402,8 +1402,8 @@
     <!-- Namaz Location Permission -->
     <string name="location_permission_title">ENABLE LOCATION</string>
     <string name="location_dialog_title">Location</string>
-    <string name="location_dialog_text">This app uses location to automatically calculate Namaz (prayer) times based on your current geographical position.
-        \n\nIf you prefer not to grant this permission, you can still use the app by manually selecting your city in the Namaz settings.</string>
+    <string name="location_dialog_text">This app uses location to automatically calculate salah times based on your current geographical position.
+        \n\nIf you prefer not to grant this permission, you can still use the app by manually selecting your city in the Salah Settings.</string>
     <!-- Foreground service -->
     <string name="foreground_service_title">Display a foreground notification</string>
     <string name="foreground_service_dialog_message">To prevent your device from aggressively closing the app and missing alarms, this will display a persistent, silent notification.\n\nThis ensures the app stays in memory, though it may slightly increase battery usage.\n\nNote: Enabling this setting is not necessary for most devices. Only enable it if you experience missed alarms.</string>
@@ -1574,19 +1574,19 @@
     <!-- Namaz City Search -->
     <string name="namaz_city_search_title">Select City</string>
     <!-- Namaz Settings -->
-    <string name="namaz_settings_title">Namaz Settings</string>
+    <string name="namaz_settings_title">Salah Settings</string>
     <!-- Namaz Location Not Set Title -->
     <string name="namaz_location_not_set_title">Location Not Set</string>
     <!-- Namaz Location Not Set Message -->
-    <string name="namaz_location_not_set_message">Namaz Alarms are not active at this moment as the location has not been set. Please set the location in Namaz Settings to use Namaz Alarms.</string>
+    <string name="namaz_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
     <!-- Label Set Location -->
     <string name="label_set_location">Set Location</string>
     <!-- Namaz Error Saving -->
-    <string name="namaz_error_saving">Failed to save Namaz alarm. Please try again.</string>
+    <string name="namaz_error_saving">Failed to save salah alarm. Please try again.</string>
 
     <!-- Namaz Alarm Tagging -->
     <string name="namaz_tagging_category_title">Alarm Tagging</string>
-    <string name="namaz_auto_tag_title">Auto tag Namaz alarms</string>
+    <string name="namaz_auto_tag_title">Auto tag salah alarms</string>
     <string name="namaz_auto_tag_name_title">Auto tag name</string>
     <!-- Display tags in the alarm setting title -->
     <string name="display_alarm_tags_title">Display tags in the alarm</string>
@@ -1603,7 +1603,7 @@
     <!-- Tooltip for the all alarms toggle -->
     <string name="all_alarms_toggle_tooltip">Toggle all visible alarms</string>
     <!-- Namaz Error Background Sync -->
-    <string name="namaz_error_background_sync">Namaz sync issue</string>
+    <string name="namaz_error_background_sync">Salah sync issue</string>
     <!-- Namaz Error Background Sync Details -->
     <string name="namaz_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
     <!-- Namaz Detecting Location -->
@@ -1619,7 +1619,7 @@
     <!-- See both Asrs in the alarm events setting title -->
     <string name="show_both_asr_in_alarm_events_title">See both Asr in the alarm events</string>
     <!-- See both Asrs in the namaz times setting title -->
-    <string name="show_both_asr_in_namaz_times_title">See both Asr in the namaz times</string>
+    <string name="show_both_asr_in_namaz_times_title">See both Asr in the Salah Times page</string>
     <!-- See both Asrs in the widgets setting title -->
     <string name="show_both_asr_in_widgets_title">See both Asr in the widgets</string>
     <!-- Asr labels -->
@@ -1628,9 +1628,9 @@
     <string name="asr_shafii_label">Asr Shafi\'i</string>
 
     <!-- Namaz Alarms Settings -->
-    <string name="namaz_alarms_settings_title">Namaz Alarms</string>
-    <string name="namaz_alarms_settings_summary">Settings for Namaz alarms</string>
-    <string name="show_rounding_option_title">Show option to round the namaz alarms</string>
+    <string name="namaz_alarms_settings_title">Salah Alarms</string>
+    <string name="namaz_alarms_settings_summary">Settings for salah alarms</string>
+    <string name="show_rounding_option_title">Show option to round the salah alarms</string>
     <string name="namaz_alarm_style_override_title">Override normal alarm style</string>
     <string name="namaz_alarm_display_style_override_title">Override normal alarm display style</string>
     <string name="namaz_alarm_colors_override_title">Override normal alarm colors</string>
@@ -1641,11 +1641,11 @@
     <string name="namaz_alarm_vibration_override_title">Override normal alarm vibration settings</string>
     <string name="namaz_alarm_actions_override_title">Override normal alarm action settings</string>
     <string name="namaz_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
-    <string name="namaz_alarm_display_settings_title">Namaz alarm display settings</string>
+    <string name="namaz_alarm_display_settings_title">Salah alarm display settings</string>
 
     <!-- Namaz Alarms Additional Settings -->
     <string name="autodismiss_default_title">Auto-dismiss by default</string>
-    <string name="autodismiss_default_summary">Automatically enable auto-dismiss for new Namaz alarms</string>
+    <string name="autodismiss_default_summary">Automatically enable auto-dismiss for new salah alarms</string>
     <string name="adjust_alarm_after_rounding_title">Adjust alarm after rounding</string>
     <string name="adjust_alarm_after_rounding_summary">Adjust the alarm trigger time based on rounding rules</string>
     <string name="namaz_display_next_event_info_title">Display next event time</string>
@@ -1657,7 +1657,7 @@
     <string name="namaz_next_event_info_time_format">%1$s at %2$s</string>
 
     <!-- Relational Alarm -->
-    <string name="dialog_add_relational_alarm_title">Namaz Alarm</string>
+    <string name="dialog_add_relational_alarm_title">Salah Alarm</string>
     <string name="relational_alarm_primary_alarm">Primary Alarm set at</string>
     <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
@@ -1721,7 +1721,7 @@
     <string name="menu_previous_page">Back</string>
 
     <!-- Namaz Times Tab -->
-    <string name="menu_namaz">Namaz Times</string>
+    <string name="menu_namaz">Salah Times</string>
     <string name="namaz_countdown_format">%1$s To %2$s</string>
     <string name="namaz_timezone_warning">Note: These times are shown in %1$s, while your phone is in %2$s.</string>
 
@@ -1735,10 +1735,10 @@
     <string name="isha_label">Isha</string>
 
     <string name="namaz_widget_show_countdown_title">Show countdown</string>
-    <string name="namaz_widget_show_alarms_title">Show upcoming namaz alarms</string>
+    <string name="namaz_widget_show_alarms_title">Show upcoming salah alarms</string>
     <string name="visible_events_title">Visible events</string>
-    <string name="namaz_timeline_widget_label">Namaz Times</string>
-    <string name="namaz_countdown_widget_label">Namaz Countdown</string>
+    <string name="namaz_timeline_widget_label">Salah Times</string>
+    <string name="namaz_countdown_widget_label">Salah Countdown</string>
     <string name="apply_padding_title">Apply padding</string>
     <string name="namaz_widget_highlight_item_title">Highlight current/next events</string>
     <string name="namaz_widget_highlight_active_default_color_title">Use default color for current event highlight</string>
@@ -1748,7 +1748,7 @@
 
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>
-    <string name="qibla_location_not_set">Location not set. Please enable GPS or select a city in Namaz Settings to see the Qibla direction.</string>
+    <string name="qibla_location_not_set">Location not set. Please enable GPS or select a city in Salah Settings to see the Qibla direction.</string>
     <string name="qibla_sensors_unavailable">Compass sensors are unavailable on this device.</string>
     <string name="qibla_calibration_tip">Calibrate your compass by moving the device in a figure-8 motion.</string>
 

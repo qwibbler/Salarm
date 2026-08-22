@@ -160,7 +160,7 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING = false;
     public static final String DEFAULT_NAMAZ_DISPLAY_NEXT_EVENT_INFO = "countdown";
     public static final boolean DEFAULT_NAMAZ_AUTO_TAG = true;
-    public static final String DEFAULT_NAMAZ_AUTO_TAG_NAME = "Namaz";
+    public static final String DEFAULT_NAMAZ_AUTO_TAG_NAME = "Salah";
     public static final boolean DEFAULT_NAMAZ_ALARM_STYLE_OVERRIDE = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE = false;
     public static final boolean DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE = false;
