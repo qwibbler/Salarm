@@ -55,21 +55,22 @@
                         android:paddingStart="0dp"
                         android:paddingEnd="0dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="555" />
+                        tools:text="999" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:text="@string/relational_alarm_minutes"
-                    android:layout_marginStart="8dp" />
+                    android:text="@string/relational_alarm_minutes" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/primary_offset_toggle"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="-8dp"
                     android:minWidth="0dp"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
@@ -80,10 +81,6 @@
                     style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_flexGrow="1"
-                    app:layout_flexShrink="0"
-                    android:minWidth="180dp"
-                    android:layout_marginStart="4dp"
                     app:endIconMinSize="28dp"
                     app:boxBackgroundColor="@android:color/transparent"
                     app:hintEnabled="false">
@@ -98,7 +95,7 @@
                         android:paddingStart="0dp"
                         android:paddingEnd="0dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="Fajr" />
+                        tools:text="Asr Hanafi" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </com.google.android.flexbox.FlexboxLayout>
@@ -109,6 +106,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginStart="-6dp"
+                android:minHeight="0dp"
                 android:text="@string/relational_alarm_round"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/colorPrimary" />
@@ -119,6 +118,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:layout_marginStart="-8dp"
                 app:flexWrap="wrap"
                 app:alignItems="center">
 
@@ -137,7 +137,6 @@
                     style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
                     app:endIconMinSize="28dp"
                     app:boxBackgroundColor="@android:color/transparent"
                     app:hintEnabled="false">
@@ -148,10 +147,11 @@
                         android:inputType="number"
                         android:maxLength="3"
                         android:paddingVertical="8dp"
-                        android:paddingHorizontal="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
                         android:gravity="center"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="0" />
+                        tools:text="999" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -168,6 +168,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginStart="-6dp"
                 android:minHeight="0dp"
                 android:checked="false"
                 android:text="@string/relational_alarm_adjust_alarm"
@@ -197,16 +198,16 @@
                         android:inputType="number"
                         android:maxLength="3"
                         android:paddingVertical="8dp"
-                        android:paddingHorizontal="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
                         android:gravity="center"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="0" />
+                        tools:text="999" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:text="@string/relational_alarm_minutes" />
 
@@ -218,7 +219,6 @@
                     android:minWidth="0dp"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:layout_marginStart="4dp"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     tools:text="Earlier" />
             </com.google.android.flexbox.FlexboxLayout>
@@ -243,6 +243,7 @@
                 android:id="@+id/safety_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="-6dp"
                 android:minHeight="0dp"
                 android:checked="false"
                 android:text="@string/relational_alarm_safety_boundary"
@@ -284,15 +285,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:text="@string/relational_alarm_than"
-                        android:layout_marginEnd="4dp" />
+                        android:text="@string/relational_alarm_than" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                         android:layout_width="64dp"
                         android:layout_height="wrap_content"
                         app:endIconMinSize="28dp"
-                            app:boxBackgroundColor="@android:color/transparent"
+                        app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_offset_value"
@@ -301,18 +301,19 @@
                             android:inputType="number"
                             android:maxLength="3"
                             android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="5" />
+                            tools:text="999" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:text="@string/relational_alarm_minutes"
-                        android:layout_marginStart="4dp" />
+                        android:text="@string/relational_alarm_minutes" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/safety_offset_toggle"
@@ -320,6 +321,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minWidth="0dp"
+                        android:layout_marginStart="-8dp"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
@@ -331,8 +333,6 @@
                         android:layout_height="wrap_content"
                         app:layout_flexGrow="1"
                         app:layout_flexShrink="0"
-                        android:minWidth="180dp"
-                        android:layout_marginStart="4dp"
                         app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
@@ -357,6 +357,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:layout_marginStart="-8dp"
+                    android:minHeight="0dp"
                     android:text="@string/relational_alarm_round"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textColor="?attr/colorPrimary" />
@@ -367,6 +369,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
+                    android:layout_marginStart="-8dp"
                     app:flexWrap="wrap"
                     app:alignItems="center">
 
@@ -385,9 +388,8 @@
                         style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                         android:layout_width="64dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         app:endIconMinSize="28dp"
-                            app:boxBackgroundColor="@android:color/transparent"
+                        app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_round_value"
@@ -396,16 +398,16 @@
                             android:inputType="number"
                             android:maxLength="3"
                             android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="0" />
+                            tools:text="999" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:text="@string/relational_alarm_minutes" />
                 </com.google.android.flexbox.FlexboxLayout>
@@ -431,6 +433,7 @@
                 android:id="@+id/autostop_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="-6dp"
                 android:minHeight="0dp"
                 android:checked="true"
                 android:text="@string/relational_alarm_auto_stop"
@@ -465,16 +468,16 @@
                             android:inputType="number"
                             android:maxLength="3"
                             android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="0" />
+                            tools:text="999" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:text="@string/relational_alarm_minutes" />
 
@@ -495,8 +498,6 @@
                         android:layout_height="wrap_content"
                         app:layout_flexGrow="1"
                         app:layout_flexShrink="0"
-                        android:minWidth="180dp"
-                        android:layout_marginStart="4dp"
                         app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
