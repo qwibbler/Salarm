@@ -1658,16 +1658,17 @@
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Namaz Alarm</string>
-    <string name="relational_alarm_primary_alarm">Primary Alarm</string>
+    <string name="relational_alarm_primary_alarm">Primary Alarm set at</string>
     <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
     <string name="relational_alarm_round">Rounded:</string>
-    <string name="relational_alarm_safety_boundary">Safety Boundary (Cap)</string>
+    <string name="relational_alarm_safety_boundary">Cap Alarm to</string>
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>
     <string name="relational_alarm_stop_ringing">Dismiss Alarm</string>
-    <string name="relational_alarm_adjust_alarm">Adjust Alarm</string>
+    <string name="relational_alarm_adjust_alarm">Adjust Alarm by</string>
     <string name="relational_alarm_adjusted_by">Adjusted by</string>
+    <string name="relational_alarm_custom">Custom</string>
     <string name="relational_alarm_save">SAVE</string>
     <string name="relational_alarm_than">Than</string>
 

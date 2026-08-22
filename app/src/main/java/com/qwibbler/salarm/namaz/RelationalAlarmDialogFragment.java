@@ -183,6 +183,15 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     }
 
     private void setupAdapters() {
+        RelationalAlarmUiHelper.setupNumericDropdowns(
+                mBinding.primaryOffsetValue,
+                mBinding.primaryRoundValue,
+                mBinding.adjustmentValue,
+                mBinding.safetyOffsetValue,
+                mBinding.safetyRoundValue,
+                mBinding.autostopOffsetValue
+        );
+
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 

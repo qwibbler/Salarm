@@ -30,7 +30,9 @@
         android:paddingHorizontal="10dp"
         android:paddingVertical="0dp"
         android:gravity="center_vertical"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/alarm_volume_warning_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tag_filter_recycler_view"
@@ -39,7 +41,7 @@
             android:layout_weight="1"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_tag_filter" />
+            tools:listitem="@layout/alarm_tag_filter_item" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/all_alarms_toggle"
@@ -67,11 +69,15 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/alarm_empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:paddingBottom="@dimen/alarm_empty_view_bottom_padding"
         android:visibility="gone"
-        android:alpha="0.7">
+        android:alpha="0.7"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:layout_width="0dp"
