@@ -53,6 +53,15 @@ public class NamazTimesFragment extends SalarmFragment {
     private TextView mTimezoneWarningText;
     private final Calendar mSelectedDate = Calendar.getInstance();
 
+    private void updateTimezone() {
+        Context context = getContext();
+        if (context == null) return;
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
+        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        TimeZone tz = TimeZone.getTimeZone(tzId);
+        mSelectedDate.setTimeZone(tz);
+    }
+
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = (prefs, key) -> {
         if (PreferencesKeys.KEY_NAMAZ_CITY_NAME.equals(key) || PreferencesKeys.KEY_NAMAZ_LATITUDE.equals(key)) {
@@ -194,6 +203,7 @@ public class NamazTimesFragment extends SalarmFragment {
         Context context = getContext();
         if (context == null) return;
 
+        updateTimezone();
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
         // Use local VIEW overrides if present, otherwise fall back to global settings
@@ -250,22 +260,28 @@ public class NamazTimesFragment extends SalarmFragment {
     }
 
     private void updateDateHeader() {
-        Calendar today = Calendar.getInstance();
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
+        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        TimeZone tz = TimeZone.getTimeZone(tzId);
+
+        Calendar today = Calendar.getInstance(tz);
         String label;
         if (isSameDay(mSelectedDate, today)) {
             label = getString(R.string.salarm_today_prefix) + formatDateLabel(mSelectedDate);
         } else {
-            Calendar yesterday = Calendar.getInstance();
+            Calendar yesterday = Calendar.getInstance(tz);
             yesterday.add(Calendar.DAY_OF_YEAR, -1);
             if (isSameDay(mSelectedDate, yesterday)) {
                 label = getString(R.string.salarm_yesterday_prefix) + formatDateLabel(mSelectedDate);
             } else {
-                Calendar tomorrow = Calendar.getInstance();
+                Calendar tomorrow = Calendar.getInstance(tz);
                 tomorrow.add(Calendar.DAY_OF_YEAR, 1);
                 if (isSameDay(mSelectedDate, tomorrow)) {
                     label = getString(R.string.salarm_tomorrow_prefix) + formatDateLabel(mSelectedDate);
                 } else {
-                    label = new SimpleDateFormat(getString(R.string.salarm_full_date_format), Locale.getDefault()).format(mSelectedDate.getTime());
+                    SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.salarm_full_date_format), Locale.getDefault());
+                    sdf.setTimeZone(tz);
+                    label = sdf.format(mSelectedDate.getTime());
                 }
             }
         }
@@ -318,7 +334,7 @@ public class NamazTimesFragment extends SalarmFragment {
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
-        // Countdown uses GLOBAL coordinates and TODAY's date
+        // Countdown uses GLOBAL coordinates and TODAY's date in device timezone
         String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
         String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
         double lat, lon;
@@ -455,8 +471,9 @@ public class NamazTimesFragment extends SalarmFragment {
                 isCurrent = now.after(item.time) || now.before(mItems.get(0).time);
             }
 
-            // Only highlight if it's today
-            boolean isToday = isSameDay(mSelectedDate, Calendar.getInstance());
+            // Only highlight if it's today in the preview timezone
+            Calendar previewNow = Calendar.getInstance(tz);
+            boolean isToday = isSameDay(mSelectedDate, previewNow);
 
             if (isToday && isCurrent) {
                 @ColorInt int highlightColor = MaterialColors.getColor(context,
