@@ -9,20 +9,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Looper;
-
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.utils.LogUtils;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
 
 /**
  * Manages location settings and GPS updates for Namaz prayer times.
@@ -33,7 +24,7 @@ public class NamazLocationManager {
         GPS, MANUAL
     }
 
-    private static final int LOCATION_UPDATE_THRESHOLD_METERS = 10000; // 10km
+    private static final int LOCATION_UPDATE_THRESHOLD_METERS = 50000; // 50km
 
     /**
      * Sets the location mode (GPS or MANUAL) and triggers an update.
@@ -94,49 +85,28 @@ public class NamazLocationManager {
             return;
         }
 
-        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(context);
-        client.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                handleNewLocation(context, location.getLatitude(), location.getLongitude(), true, false);
-            } else {
-                LogUtils.i("Last location null, requesting fresh update...");
-                requestFreshLocation(context, client);
-            }
-        });
+        Location lastKnown = AndroidLocationProvider.getBestLastKnownLocation(context);
+        if (lastKnown != null) {
+            handleNewLocation(context, lastKnown.getLatitude(), lastKnown.getLongitude(), true, false);
+        } else {
+            LogUtils.i("No suitable last location, requesting fresh update...");
+            requestFreshLocation(context);
+        }
     }
 
-    private static void requestFreshLocation(Context context, FusedLocationProviderClient client) {
+    private static void requestFreshLocation(Context context) {
         final Context appContext = context.getApplicationContext();
-        LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10000)
-                .setMaxUpdates(1)
-                .build();
-
-        if (ActivityCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(appContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            final LocationCallback callback = new LocationCallback() {
-                @Override
-                public void onLocationResult(@NonNull LocationResult locationResult) {
-                    Location location = locationResult.getLastLocation();
-                    if (location != null) {
-                        handleNewLocation(appContext, location.getLatitude(), location.getLongitude(), true, false);
-                    }
-                    client.removeLocationUpdates(this);
-                }
-            };
-
-            client.requestLocationUpdates(request, callback, Looper.getMainLooper());
-
-            // Add a timeout to stop searching and clear status if no location found
-            AppExecutors.getMainThread().postDelayed(() -> {
-                client.removeLocationUpdates(callback);
+        AndroidLocationProvider.requestSingleUpdate(appContext, 30000, location -> {
+            if (location != null) {
+                handleNewLocation(appContext, location.getLatitude(), location.getLongitude(), true, false);
+            } else {
                 // If we're still stuck in "Detecting...", revert to a neutral state
                 SharedPreferences prefs = getDefaultSharedPreferences(appContext);
                 if (appContext.getString(R.string.namaz_detecting_location).equals(prefs.getString(KEY_NAMAZ_CITY_NAME, ""))) {
                     prefs.edit().putString(KEY_NAMAZ_CITY_NAME, "Not detected").apply();
                 }
-            }, 30000); // 30 second timeout
-        }
+            }
+        });
     }
 
     /**
@@ -153,11 +123,11 @@ public class NamazLocationManager {
         double oldLon = oldCoords[1];
 
         double distance = NamazUtils.calculateDistance(lat, lon, oldLat, oldLon);
-        boolean significantChange = forceSync || distance > LOCATION_UPDATE_THRESHOLD_METERS;
+        boolean significantDistance = forceSync || distance > LOCATION_UPDATE_THRESHOLD_METERS;
 
         // Also resolve if city name is missing or "Detecting..."
         String currentCity = prefs.getString(KEY_NAMAZ_CITY_NAME, "");
-        boolean needsResolution = significantChange || currentCity.isEmpty() ||
+        boolean needsResolution = significantDistance || currentCity.isEmpty() ||
                 currentCity.equals(context.getString(R.string.namaz_detecting_location));
 
         prefs.edit()

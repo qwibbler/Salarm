@@ -465,7 +465,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         }
     }
 
-    private class EventAdapter extends ArrayAdapter<EventItem> {
+    private static class EventAdapter extends ArrayAdapter<EventItem> {
         EventAdapter(Context context, List<EventItem> items) {
             super(context, R.layout.namaz_visible_event_item, items);
         }

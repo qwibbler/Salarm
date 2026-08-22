@@ -8,7 +8,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -44,7 +43,7 @@ public class AndroidLocationProvider {
     @SuppressLint("MissingPermission")
     @Nullable
     public static Location getBestLastKnownLocation(Context context) {
-        if (!hasLocationPermission(context)) return null;
+        if (missingLocationPermission(context)) return null;
 
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null) return null;
@@ -79,7 +78,7 @@ public class AndroidLocationProvider {
     @SuppressLint("MissingPermission")
     public static void requestSingleUpdate(Context context, long timeoutMs, LocationResultListener listener) {
         final Context appContext = context.getApplicationContext();
-        if (!hasLocationPermission(appContext)) {
+        if (missingLocationPermission(appContext)) {
             listener.onLocationResult(null);
             return;
         }
@@ -103,10 +102,6 @@ public class AndroidLocationProvider {
                     listener.onLocationResult(location);
                 }
             }
-
-            @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-            @Override public void onProviderEnabled(@NonNull String provider) {}
-            @Override public void onProviderDisabled(@NonNull String provider) {}
         };
 
         final Runnable timeoutRunnable = () -> {
@@ -181,9 +176,9 @@ public class AndroidLocationProvider {
         return result;
     }
 
-    private static boolean hasLocationPermission(Context context) {
-        return ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    private static boolean missingLocationPermission(Context context) {
+        return ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
     }
 
     /**

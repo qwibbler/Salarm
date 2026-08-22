@@ -35,8 +35,6 @@ import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.namaz.NamazCalculator;
-import com.qwibbler.salarm.namaz.RelationalRule;
-import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -46,7 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -108,8 +105,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             List<PrayerItem> allPrayers = times != null ? getAllPrayers(context, times, prefs, finalInstances) : new ArrayList<>();
 
             com.qwibbler.salarm.base.AppExecutors.getMainThread().post(() -> {
-                final RemoteViews portrait = buildRemoteViews(context, wm, widgetId, finalOptions, true, times, allPrayers);
-                final RemoteViews landscape = buildRemoteViews(context, wm, widgetId, finalOptions, false, times, allPrayers);
+                final RemoteViews portrait = buildRemoteViews(context, finalOptions, true, times, allPrayers);
+                final RemoteViews landscape = buildRemoteViews(context, finalOptions, false, times, allPrayers);
 
                 final RemoteViews widget = new RemoteViews(landscape, portrait);
                 wm.updateAppWidget(widgetId, widget);
@@ -117,7 +114,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         });
     }
 
-    private RemoteViews buildRemoteViews(Context context, AppWidgetManager wm, int widgetId, Bundle options, boolean portrait, NamazCalculator.NamazTimes times, List<PrayerItem> allPrayers) {
+    private RemoteViews buildRemoteViews(Context context, Bundle options, boolean portrait, NamazCalculator.NamazTimes times, List<PrayerItem> allPrayers) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         RemoteViews rv = new RemoteViews(context.getPackageName(), WidgetDAO.isTextShadowDisplayedOnNamazWidget(prefs)
                 ? R.layout.appwidget_namaz_timeline_with_shadow
@@ -566,12 +563,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
                     }
                 }
             }
-            Collections.sort(items, new Comparator<PrayerItem>() {
-                @Override
-                public int compare(PrayerItem o1, PrayerItem o2) {
-                    return o1.time.compareTo(o2.time);
-                }
-            });
+            Collections.sort(items, (o1, o2) -> o1.time.compareTo(o2.time));
         }
 
         return items;
