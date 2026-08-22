@@ -1661,7 +1661,7 @@
     <string name="relational_alarm_primary_alarm">Primary Alarm set at</string>
     <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
-    <string name="relational_alarm_round">Rounded:</string>
+    <string name="relational_alarm_round">Round Alarm</string>
     <string name="relational_alarm_safety_boundary">Cap Alarm to</string>
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>

@@ -89,7 +89,7 @@
                     app:hintEnabled="false">
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/primary_event"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:focusable="false"
@@ -103,14 +103,15 @@
 
             </com.google.android.flexbox.FlexboxLayout>
 
-            <!-- Rounding Section Title -->
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/primary_round_title"
+            <!-- Rounding Section -->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/primary_round_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="@string/relational_alarm_round"
-                android:textAppearance="?attr/textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorPrimary" />
 
             <!-- Rounding Row: [Round Toggle] [Round Value] min -->
             <com.google.android.flexbox.FlexboxLayout
@@ -337,7 +338,7 @@
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_event"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:inputType="none"
                             android:focusable="false"
@@ -350,14 +351,15 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </com.google.android.flexbox.FlexboxLayout>
 
-                <!-- Rounding Section Title -->
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/safety_round_title"
+                <!-- Rounding Section -->
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/safety_round_enabled_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="@string/relational_alarm_round"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorPrimary" />
 
                 <!-- Rounding Row: [Round Toggle] [Round Value] min -->
                 <com.google.android.flexbox.FlexboxLayout
@@ -500,7 +502,7 @@
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/autostop_event"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:inputType="none"
                             android:focusable="false"

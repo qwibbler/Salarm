@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -39,6 +38,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private static final String KEY_PRIMARY_VALUE = "primary_value";
     private static final String KEY_PRIMARY_OFFSET_IDX = "primary_offset_idx";
     private static final String KEY_PRIMARY_EVENT = "primary_event";
+    private static final String KEY_PRIMARY_ROUND_ENABLED = "primary_round_enabled";
     private static final String KEY_PRIMARY_ROUND_IDX = "primary_round_idx";
     private static final String KEY_PRIMARY_ROUND_VALUE = "primary_round_value";
 
@@ -47,6 +47,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private static final String KEY_SAFETY_VALUE = "safety_value";
     private static final String KEY_SAFETY_OFFSET_IDX = "safety_offset_idx";
     private static final String KEY_SAFETY_EVENT = "safety_event";
+    private static final String KEY_SAFETY_ROUND_ENABLED = "safety_round_enabled";
     private static final String KEY_SAFETY_ROUND_IDX = "safety_round_idx";
     private static final String KEY_SAFETY_ROUND_VALUE = "safety_round_value";
 
@@ -155,6 +156,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             outState.putString(KEY_PRIMARY_VALUE, getText(mBinding.primaryOffsetValue));
             outState.putInt(KEY_PRIMARY_OFFSET_IDX, mPrimaryOffsetIdx);
             outState.putString(KEY_PRIMARY_EVENT, getText(mBinding.primaryEvent));
+            outState.putBoolean(KEY_PRIMARY_ROUND_ENABLED, mBinding.primaryRoundEnabledCheckbox.isChecked());
             outState.putInt(KEY_PRIMARY_ROUND_IDX, mPrimaryRoundIdx);
             outState.putString(KEY_PRIMARY_ROUND_VALUE, getText(mBinding.primaryRoundValue));
 
@@ -163,6 +165,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             outState.putString(KEY_SAFETY_VALUE, getText(mBinding.safetyOffsetValue));
             outState.putInt(KEY_SAFETY_OFFSET_IDX, mSafetyOffsetIdx);
             outState.putString(KEY_SAFETY_EVENT, getText(mBinding.safetyEvent));
+            outState.putBoolean(KEY_SAFETY_ROUND_ENABLED, mBinding.safetyRoundEnabledCheckbox.isChecked());
             outState.putInt(KEY_SAFETY_ROUND_IDX, mSafetyRoundIdx);
             outState.putString(KEY_SAFETY_ROUND_VALUE, getText(mBinding.safetyRoundValue));
 
@@ -222,6 +225,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         mBinding.primaryOffsetValue.setText("5");
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        mBinding.primaryRoundEnabledCheckbox.setChecked(false);
         updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
         mBinding.primaryRoundValue.setText("0");
 
@@ -229,6 +233,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
         mBinding.safetyOffsetValue.setText("5");
         updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        mBinding.safetyRoundEnabledCheckbox.setChecked(false);
         updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
         mBinding.safetyRoundValue.setText("0");
 
@@ -242,8 +247,11 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
 
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+        updateBlockState(mBinding.safetyRoundEnabledCheckbox.isChecked(), mBinding.safetyRoundContainer);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateAdjustmentVisibility();
 
         if (mBinding.primaryEvent.getAdapter().getCount() > 0) {
             mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
@@ -257,6 +265,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mPrimaryOffsetIdx = savedInstanceState.getInt(KEY_PRIMARY_OFFSET_IDX);
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
         mBinding.primaryEvent.setText(savedInstanceState.getString(KEY_PRIMARY_EVENT), false);
+        mBinding.primaryRoundEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_PRIMARY_ROUND_ENABLED));
         mPrimaryRoundIdx = savedInstanceState.getInt(KEY_PRIMARY_ROUND_IDX);
         updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
         mBinding.primaryRoundValue.setText(savedInstanceState.getString(KEY_PRIMARY_ROUND_VALUE));
@@ -268,6 +277,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mSafetyOffsetIdx = savedInstanceState.getInt(KEY_SAFETY_OFFSET_IDX);
         updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
         mBinding.safetyEvent.setText(savedInstanceState.getString(KEY_SAFETY_EVENT), false);
+        mBinding.safetyRoundEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_SAFETY_ROUND_ENABLED));
         mSafetyRoundIdx = savedInstanceState.getInt(KEY_SAFETY_ROUND_IDX);
         updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
         mBinding.safetyRoundValue.setText(savedInstanceState.getString(KEY_SAFETY_ROUND_VALUE));
@@ -285,8 +295,11 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.adjustmentEnabledCheckbox.setChecked(!adjVal.equals("0") && !adjVal.isEmpty());
 
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+        updateBlockState(mBinding.safetyRoundEnabledCheckbox.isChecked(), mBinding.safetyRoundContainer);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateAdjustmentVisibility();
     }
 
     private void updateAutostopEvent(int primaryPosition) {
@@ -297,22 +310,45 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
     private void updateRoundingVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
-        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, false);
 
         int roundingVisibility = showRounding ? View.VISIBLE : View.GONE;
-        mBinding.primaryRoundTitle.setVisibility(roundingVisibility);
-        mBinding.primaryRoundContainer.setVisibility(roundingVisibility);
-        mBinding.safetyRoundTitle.setVisibility(roundingVisibility);
-        mBinding.safetyRoundContainer.setVisibility(roundingVisibility);
+        mBinding.primaryRoundEnabledCheckbox.setVisibility(roundingVisibility);
+        if (!showRounding) {
+            mBinding.primaryRoundContainer.setVisibility(View.GONE);
+        }
+        mBinding.safetyRoundEnabledCheckbox.setVisibility(roundingVisibility);
+        if (!showRounding) {
+            mBinding.safetyRoundContainer.setVisibility(View.GONE);
+        }
 
-        int adjustmentVisibility = (showRounding && showAdjustment) ? View.VISIBLE : View.GONE;
-        mBinding.adjustmentEnabledCheckbox.setVisibility(adjustmentVisibility);
-        mBinding.adjustmentContainer.setVisibility(adjustmentVisibility);
+        updateAdjustmentVisibility();
+    }
+
+    private void updateAdjustmentVisibility() {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
+        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
+        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, false);
+
+        boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
+
+        boolean shouldShowAdjustmentCheckbox = showRounding && showAdjustment && roundingEnabled;
+
+        mBinding.adjustmentEnabledCheckbox.setVisibility(shouldShowAdjustmentCheckbox ? View.VISIBLE : View.GONE);
+        if (!shouldShowAdjustmentCheckbox) {
+            mBinding.adjustmentContainer.setVisibility(View.GONE);
+        } else {
+            updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        }
     }
 
     private void setupListeners() {
         mBinding.safetyEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.safetyContent));
         mBinding.autostopEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.autostopContent));
+        mBinding.primaryRoundEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateBlockState(isChecked, mBinding.primaryRoundContainer);
+            updateAdjustmentVisibility();
+        });
+        mBinding.safetyRoundEnabledCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> updateBlockState(isChecked, mBinding.safetyRoundContainer));
 
         mBinding.primaryOffsetToggle.setOnClickListener(v -> {
             mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
@@ -361,21 +397,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         }
     }
 
-    private void updateBlockState(boolean enabled, ViewGroup content) {
-        content.setEnabled(enabled);
-        float alpha = enabled ? 1.0f : 0.4f;
-        content.setAlpha(alpha);
-        setViewsEnabled(content, enabled);
-    }
-
-    private void setViewsEnabled(ViewGroup layout, boolean enabled) {
-        for (int i = 0; i < layout.getChildCount(); i++) {
-            View child = layout.getChildAt(i);
-            child.setEnabled(enabled);
-            if (child instanceof ViewGroup group) {
-                setViewsEnabled(group, enabled);
-            }
-        }
+    private void updateBlockState(boolean enabled, View content) {
+        content.setVisibility(enabled ? View.VISIBLE : View.GONE);
     }
 
     private String getText(TextView textView) {
@@ -396,6 +419,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(rule.offsetMinutes)));
         mPrimaryOffsetIdx = rule.offsetMinutes >= 0 ? 1 : 0;
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        mBinding.primaryRoundEnabledCheckbox.setChecked(rule.roundingIntervalMinutes > 0);
         mPrimaryRoundIdx = rule.roundingDirection != null ? rule.roundingDirection.ordinal() : 0;
         updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
         mBinding.primaryRoundValue.setText(String.valueOf(rule.roundingIntervalMinutes));
@@ -414,11 +438,13 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             mBinding.safetyOffsetValue.setText(String.valueOf(Math.abs(rule.clip.clipOffsetMinutes)));
             mSafetyOffsetIdx = rule.clip.clipOffsetMinutes >= 0 ? 1 : 0;
             updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+            mBinding.safetyRoundEnabledCheckbox.setChecked(rule.clip.clipRoundingIntervalMinutes > 0);
             mSafetyRoundIdx = rule.clip.clipRoundingDirection != null ? rule.clip.clipRoundingDirection.ordinal() : 0;
             updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
             mBinding.safetyRoundValue.setText(String.valueOf(rule.clip.clipRoundingIntervalMinutes));
         } else {
             mBinding.safetyEnabledCheckbox.setChecked(false);
+            mBinding.safetyRoundEnabledCheckbox.setChecked(false);
         }
 
         if (rule.autostopEnabled) {
@@ -448,8 +474,10 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         }
 
         updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
+        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+        updateBlockState(mBinding.safetyRoundEnabledCheckbox.isChecked(), mBinding.safetyRoundContainer);
         updateBlockState(mBinding.autostopEnabledCheckbox.isChecked(), mBinding.autostopContent);
-        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateAdjustmentVisibility();
     }
 
     private void saveRelationalAlarm() {
@@ -528,7 +556,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         rule.offsetMinutes = primaryOffset;
 
         rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
-        rule.roundingIntervalMinutes = parseMinutes(getText(mBinding.primaryRoundValue));
+        rule.roundingIntervalMinutes = mBinding.primaryRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.primaryRoundValue)) : 0;
 
         if (mBinding.safetyEnabledCheckbox.isChecked()) {
             RelationalRule.Clip clip = new RelationalRule.Clip();
@@ -540,7 +568,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
             clip.clipOffsetMinutes = safetyOffset;
 
             clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
-            clip.clipRoundingIntervalMinutes = parseMinutes(getText(mBinding.safetyRoundValue));
+            clip.clipRoundingIntervalMinutes = mBinding.safetyRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.safetyRoundValue)) : 0;
             rule.clip = clip;
         }
 
