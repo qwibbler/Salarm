@@ -171,17 +171,24 @@ public class NamazLocationManager {
             // For GPS updates, we resolve the TimeZone.
             // Try online if allowed, otherwise fallback to phone's TZ.
             AppExecutors.getNetworkIO().execute(() -> {
+                String oldTz = prefs.getString(KEY_NAMAZ_DISPLAY_TIMEZONE, NamazTimezoneUtils.getPhoneTimeZoneId());
                 String tzId = NamazTimezoneUtils.fetchTimeZoneId(context, lat, lon);
                 if (tzId == null) {
                     tzId = NamazTimezoneUtils.getPhoneTimeZoneId();
                 }
+
+                boolean tzChanged = !oldTz.equals(tzId);
+
                 getDefaultSharedPreferences(context).edit()
                         .putString(KEY_NAMAZ_DISPLAY_TIMEZONE, tzId)
                         .apply();
-            });
-        }
 
-        if (significantChange) {
+                if (significantDistance || tzChanged) {
+                    LogUtils.i((significantDistance ? "Significant distance" : "Timezone change") + " detected. Triggering alarm resync...");
+                    RelationalAlarmSyncManager.recalculateAllActiveRules(context);
+                }
+            });
+        } else if (significantDistance) {
             LogUtils.i("Significant location change detected (" + (int) distance + "m). Triggering alarm resync...");
             RelationalAlarmSyncManager.recalculateAllActiveRules(context);
         }
