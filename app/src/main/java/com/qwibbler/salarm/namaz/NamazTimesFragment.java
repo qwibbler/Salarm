@@ -221,7 +221,8 @@ public class NamazTimesFragment extends SalarmFragment {
 
         NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(mSelectedDate.getTime(), lat, lon, method);
 
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES, false);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES, false);
         String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
 
         List<PrayerItem> items = new ArrayList<>();

@@ -196,7 +196,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         );
 
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         List<String> eventsList = new ArrayList<>();
         String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);

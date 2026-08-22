@@ -149,8 +149,9 @@ public class RelationalRule {
     }
 
     public static String getEventName(android.content.Context context, AnchorEvent event) {
-        boolean showBothAsr = getDefaultSharedPreferences(context)
-                .getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        android.content.SharedPreferences prefs = getDefaultSharedPreferences(context);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         if (!showBothAsr) {
             if (event == AnchorEvent.ASR_HANAFI || event == AnchorEvent.ASR_SHAFI) {

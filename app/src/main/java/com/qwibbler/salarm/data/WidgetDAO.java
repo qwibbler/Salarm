@@ -749,7 +749,8 @@ public final class WidgetDAO {
     }
 
     public static boolean isNamazWidgetShowBothAsrs(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+        return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, false)
+            && prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
     }
 
     public static boolean isNamazWidgetFajrVisible(SharedPreferences prefs) {
