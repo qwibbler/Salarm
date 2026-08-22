@@ -46,6 +46,7 @@ import java.util.TimeZone;
 public class NamazTimesFragment extends SalarmFragment {
 
     private TextView mCountdownText;
+    private TextView mLocalTimeText;
     private NamazAdapter mAdapter;
     private TextView mSelectedDateText;
     private TextView mLocationInfoText;
@@ -85,6 +86,7 @@ public class NamazTimesFragment extends SalarmFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.namaz_times_fragment, container, false);
         mCountdownText = view.findViewById(R.id.namaz_countdown);
+        mLocalTimeText = view.findViewById(R.id.namaz_local_time);
         RecyclerView recyclerView = view.findViewById(R.id.namaz_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new NamazAdapter();
@@ -334,9 +336,15 @@ public class NamazTimesFragment extends SalarmFragment {
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
-        // Countdown uses GLOBAL coordinates and TODAY's date in device timezone
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0");
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0");
+        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        TimeZone tz = TimeZone.getTimeZone(tzId);
+
+        // Countdown uses the location currently being viewed (preview or global)
+        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE,
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0"));
+        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE,
+                prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0"));
+
         double lat, lon;
         try {
             lat = Double.parseDouble(latStr);
@@ -349,7 +357,7 @@ public class NamazTimesFragment extends SalarmFragment {
         String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
         CalculationMethod method = CalculationMethod.valueOf(methodStr);
 
-        Calendar todayCal = Calendar.getInstance();
+        Calendar todayCal = Calendar.getInstance(tz);
         NamazCalculator.NamazTimes todayTimes = NamazCalculator.calculateAllTimes(todayCal.getTime(), lat, lon, method);
 
         Date now = new Date();
@@ -369,8 +377,8 @@ public class NamazTimesFragment extends SalarmFragment {
         else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todayTimes.maghrib);
         else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todayTimes.isha);
         else {
-            // Next day's Fajr (still based on GLOBAL location)
-            Calendar tomorrow = Calendar.getInstance();
+            // Next day's Fajr
+            Calendar tomorrow = Calendar.getInstance(tz);
             tomorrow.add(Calendar.DAY_OF_YEAR, 1);
             NamazCalculator.NamazTimes tomorrowTimes = NamazCalculator.calculateAllTimes(tomorrow.getTime(), lat, lon, method);
             nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowTimes.fajr);
@@ -381,6 +389,18 @@ public class NamazTimesFragment extends SalarmFragment {
         long minutes = (diff / (60 * 1000)) % 60;
         String countdown = getString(R.string.salarm_namaz_countdown_format, hours, minutes, nextPrayer.name);
         mCountdownText.setText(countdown);
+
+        // Local time in preview timezone
+        String systemTzId = TimeZone.getDefault().getID();
+        if (!Objects.equals(tzId, systemTzId)) {
+            java.text.DateFormat localFormat = android.text.format.DateFormat.getTimeFormat(context);
+            localFormat.setTimeZone(tz);
+            String localTime = localFormat.format(now);
+            mLocalTimeText.setText(String.format("(%s in %s)", localTime, tzId));
+            mLocalTimeText.setVisibility(View.VISIBLE);
+        } else {
+            mLocalTimeText.setVisibility(View.GONE);
+        }
     }
 
     @Override

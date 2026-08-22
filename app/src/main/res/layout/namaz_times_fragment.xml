@@ -69,14 +69,30 @@
         android:background="?attr/colorOutlineVariant" />
 
     <!-- Countdown Banner -->
-    <TextView
-        android:id="@+id/namaz_countdown"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="28sp"
+        android:orientation="vertical"
         android:padding="16dp"
-        tools:text="02h 15m To Asr" />
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/namaz_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="28sp"
+            tools:text="02h 15m To Asr" />
+
+        <TextView
+            android:id="@+id/namaz_local_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="(10:24 PM in Africa/Casablanca)" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/namaz_list"
