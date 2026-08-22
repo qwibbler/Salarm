@@ -289,12 +289,25 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                 if (showAlarms) {
                     AppExecutors.getDiskIO().execute(() -> {
                         Set<String> visibleEvents = new HashSet<>(WidgetDAO.getNamazWidgetVisibleEvents(mPrefs));
-                        List<RelationalRule> rules = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
-                        for (RelationalRule rule : rules) {
-                            visibleEvents.add("rule_" + rule.id);
+
+                        // Only auto-add all rules if the set doesn't already contain any rule preferences.
+                        // This avoids overwriting the user's manual exclusions when they toggle the setting.
+                        boolean hasRulePreferences = false;
+                        for (String event : visibleEvents) {
+                            if (event.startsWith("rule_")) {
+                                hasRulePreferences = true;
+                                break;
+                            }
                         }
-                        mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, visibleEvents).apply();
-                        WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
+
+                        if (!hasRulePreferences) {
+                            List<RelationalRule> rules = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
+                            for (RelationalRule rule : rules) {
+                                visibleEvents.add("rule_" + rule.id);
+                            }
+                            mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, visibleEvents).apply();
+                            WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
+                        }
                     });
                 }
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);

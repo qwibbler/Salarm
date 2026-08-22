@@ -266,19 +266,27 @@ class LapsAdapter extends RecyclerView.Adapter<LapsAdapter.LapItemHolder> {
         final Lap lap = DataModel.getDataModel().addLap();
 
         long newLapTime = lap.getLapTime();
+        boolean minMaxChanged = false;
         if (minLapTime == Long.MAX_VALUE) {
             minLapTime = newLapTime;
             maxLapTime = newLapTime;
+            minMaxChanged = true;
         } else {
             if (newLapTime < minLapTime) {
                 minLapTime = newLapTime;
+                minMaxChanged = true;
             }
             if (newLapTime > maxLapTime) {
                 maxLapTime = newLapTime;
+                minMaxChanged = true;
             }
         }
 
-        notifyDataSetChanged();
+        if (minMaxChanged) {
+            notifyItemRangeChanged(0, getItemCount());
+        } else {
+            notifyItemInserted(0);
+        }
 
         return lap;
     }
