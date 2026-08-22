@@ -579,11 +579,17 @@ public final class AlarmFragment extends SalarmFragment
 
     private void toggleAllVisibleAlarms(boolean enabled) {
         List<AlarmItemHolder> visibleAlarms = mItemAdapter.getItems();
-        for (AlarmItemHolder holder : visibleAlarms) {
+        List<Alarm> alarmsToUpdate = new ArrayList<>();
+        for (int i = 0; i < visibleAlarms.size(); i++) {
+            AlarmItemHolder holder = visibleAlarms.get(i);
             if (holder.item.enabled != enabled) {
                 holder.item.enabled = enabled;
-                mAlarmUpdateHandler.asyncUpdateAlarm(holder.item, false, false);
+                alarmsToUpdate.add(holder.item);
+                mItemAdapter.notifyItemChanged(i);
             }
+        }
+        if (!alarmsToUpdate.isEmpty()) {
+            mAlarmUpdateHandler.asyncToggleAlarms(alarmsToUpdate, enabled);
         }
     }
 

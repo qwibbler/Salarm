@@ -224,6 +224,44 @@ public final class AlarmUpdateHandler {
     }
 
     /**
+     * Toggles multiple alarms on the background using bulk-optimized paths.
+     *
+     * @param alarms  The list of alarms to be toggled.
+     * @param enabled Whether to enable or disable the alarms.
+     */
+    public void asyncToggleAlarms(final List<Alarm> alarms, final boolean enabled) {
+        AppExecutors.getDiskIO().execute(() -> {
+            ContentResolver cr = mAppContext.getContentResolver();
+            // Capture the current next firing alarm before the bulk operation to handle Power-off RTC correctly.
+            final AlarmInstance oldNextAlarm = AlarmStateManager.getNextFiringAlarm(mAppContext);
+
+            for (Alarm alarm : alarms) {
+                alarm.enabled = enabled;
+                if (alarm.relationalRuleId > 0) {
+                    RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                } else {
+                    // Update the alarm template in the DB.
+                    alarm.updateAlarm(cr);
+
+                    // Bulk-optimized instance lifecycle:
+                    // 1. Delete existing instances without triggering global state recalculation.
+                    AlarmStateManager.deleteAllInstances(mAppContext, alarm.id, false);
+
+                    // 2. If enabling, create new instance without triggering global state recalculation.
+                    if (alarm.enabled) {
+                        AlarmInstance instance = alarm.createInstanceAfter(Calendar.getInstance());
+                        instance.addInstance(cr);
+                        AlarmStateManager.registerInstance(mAppContext, instance, false);
+                    }
+                }
+            }
+
+            // Exactly once: update global state, power-off alarm, and system indicators after the bulk work is done.
+            AlarmStateManager.updateNextAlarmInternal(mAppContext, oldNextAlarm);
+        });
+    }
+
+    /**
      * Deletes an alarm on the background.
      *
      * @param alarm The alarm to be deleted.

@@ -23,6 +23,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.service.quicksettings.TileService;
@@ -128,6 +129,35 @@ public final class AlarmStateManager extends BroadcastReceiver {
     // Schedules alarm state transitions; can be mocked for testing purposes.
     private static final StateChangeScheduler sStateChangeScheduler = new AlarmManagerStateChangeScheduler();
 
+    private static Runnable sUpdateNextAlarmRunnable;
+
+    // Requirement 7: Local projection to match AlarmInstance.QUERY_COLUMNS for efficient getNextFiringAlarm query.
+    private static final String[] INSTANCE_PROJECTION = {
+        AlarmInstance._ID,
+        AlarmInstance.YEAR,
+        AlarmInstance.MONTH,
+        AlarmInstance.DAY,
+        AlarmInstance.HOUR,
+        AlarmInstance.MINUTES,
+        AlarmInstance.LABEL,
+        AlarmInstance.SYNC_BY_LABEL,
+        AlarmInstance.VIBRATE,
+        AlarmInstance.VIBRATION_PATTERN,
+        AlarmInstance.FLASH,
+        AlarmInstance.RINGTONE,
+        AlarmInstance.ALARM_ID,
+        AlarmInstance.ALARM_STATE,
+        AlarmInstance.AUTO_SILENCE_DURATION,
+        AlarmInstance.SNOOZE_DURATION,
+        AlarmInstance.MISSED_ALARM_REPEAT_COUNT,
+        AlarmInstance.MISSED_ALARM_REPEAT_LIMIT,
+        AlarmInstance.CRESCENDO_DURATION,
+        AlarmInstance.ALARM_VOLUME,
+        AlarmInstance.RELATIONAL_RULE_ID,
+        AlarmInstance.DISMISS_AFTER,
+        AlarmInstance.INITIAL_ALARM_TIME
+    };
+
     private static Calendar getCurrentTime() {
         return DataModel.getDataModel().getCalendar();
     }
@@ -146,12 +176,21 @@ public final class AlarmStateManager extends BroadcastReceiver {
      * like {@code AppWidgetManager}.</p>
      */
     public static void updateNextAlarm(Context context) {
+        final Context appContext = context.getApplicationContext();
+        // Requirement 8: Debounce on the main thread to handle individual callers efficiently.
+        AppExecutors.getMainThread().removeCallbacks(sUpdateNextAlarmRunnable);
+        sUpdateNextAlarmRunnable = () -> AppExecutors.getDiskIO().execute(() -> updateNextAlarmInternal(appContext, null));
+        AppExecutors.getMainThread().postDelayed(sUpdateNextAlarmRunnable, 20);
+    }
+
+    /**
+     * Internal/immediate update path for callers already on DiskIO or performing bulk operations.
+     * @param oldNextAlarm The previous next firing alarm, used for hardware RTC cancellation if no new alarm exists.
+     */
+    public static void updateNextAlarmInternal(Context context, AlarmInstance oldNextAlarm) {
         Context storageContext = Utils.getSafeStorageContext(context);
 
         // Important: Do not proceed if the user is locked (direct boot mode).
-        // Updating widgets may fail because credential-protected storage
-        // is not yet accessible, and AppWidgetManager.getAppWidgetIds() will throw an exception.
-        // Fix https://github.com/BlackyHawky/Clock/issues/369#issuecomment-3344303993
         if (!DeviceUtils.isUserUnlocked(storageContext)) {
             return;
         }
@@ -160,6 +199,9 @@ public final class AlarmStateManager extends BroadcastReceiver {
 
         if (nextAlarm != null) {
             setPowerOffAlarm(context, nextAlarm);
+        } else if (oldNextAlarm != null) {
+            // Requirement 1: Cancel the hardware power-off alarm using the specific timestamp of the old alarm.
+            cancelPowerOffAlarm(context, oldNextAlarm);
         }
 
         updateNextAlarmInAlarmManager(context, nextAlarm);
@@ -168,34 +210,57 @@ public final class AlarmStateManager extends BroadcastReceiver {
             TileService.requestListeningState(context, new ComponentName(context, AlarmTileService.class));
         }
 
-        // Adding a Handler ensures better fluidity when activating/deactivating the alarm
+        // Requirement 11: Move expensive broadcast and widget updates off the main thread.
         AppExecutors.getMainThread().postDelayed(() -> {
-            Intent nextAlarmChangedIntent = new Intent(ACTION_NEXT_ALARM_CHANGED_BY_CLOCK);
-            nextAlarmChangedIntent.setPackage(context.getPackageName());
-            context.sendBroadcast(nextAlarmChangedIntent);
+            AppExecutors.getDiskIO().execute(() -> {
+                Intent nextAlarmChangedIntent = new Intent(ACTION_NEXT_ALARM_CHANGED_BY_CLOCK);
+                nextAlarmChangedIntent.setPackage(context.getPackageName());
+                context.sendBroadcast(nextAlarmChangedIntent);
 
-            WidgetUtils.updateAllDigitalWidgets(context);
+                WidgetUtils.updateAllDigitalWidgets(context);
+            });
         }, 600);
     }
 
     /**
      * Returns an alarm instance of an alarm that's going to fire next.
+     * Optimized to use database sorting and limit.
      *
      * @param context application context
      * @return an alarm instance that will fire the earliest relative to current time.
      */
     public static AlarmInstance getNextFiringAlarm(Context context) {
         final ContentResolver cr = context.getContentResolver();
-        final String activeAlarmQuery = AlarmInstance.ALARM_STATE + "<" + AlarmInstance.FIRED_STATE;
-        final List<AlarmInstance> alarmInstances = AlarmInstance.getInstances(cr, activeAlarmQuery);
+        final String selection = AlarmInstance.ALARM_STATE + " < ?";
+        final String[] selectionArgs = {String.valueOf(AlarmInstance.FIRED_STATE)};
 
-        AlarmInstance nextAlarm = null;
-        for (AlarmInstance instance : alarmInstances) {
-            if (nextAlarm == null || instance.getAlarmTime().before(nextAlarm.getAlarmTime())) {
-                nextAlarm = instance;
+        // Sort by chronological time and take the first one via LIMIT in the database.
+        final String sortOrder = AlarmInstance.YEAR + " ASC, " +
+                AlarmInstance.MONTH + " ASC, " +
+                AlarmInstance.DAY + " ASC, " +
+                AlarmInstance.HOUR + " ASC, " +
+                AlarmInstance.MINUTES + " ASC LIMIT 1";
+
+        try (Cursor cursor = cr.query(AlarmInstance.CONTENT_URI, INSTANCE_PROJECTION,
+                selection, selectionArgs, sortOrder)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                return new AlarmInstance(cursor, false);
             }
+        } catch (Exception e) {
+            LogUtils.e("Error querying next firing alarm", e);
+            // Fallback for safety if the provider or DB does not support the LIMIT clause in sort order.
+            final String activeAlarmQuery = AlarmInstance.ALARM_STATE + "<" + AlarmInstance.FIRED_STATE;
+            final List<AlarmInstance> alarmInstances = AlarmInstance.getInstances(cr, activeAlarmQuery);
+
+            AlarmInstance nextAlarm = null;
+            for (AlarmInstance instance : alarmInstances) {
+                if (nextAlarm == null || instance.getAlarmTime().before(nextAlarm.getAlarmTime())) {
+                    nextAlarm = instance;
+                }
+            }
+            return nextAlarm;
         }
-        return nextAlarm;
+        return null;
     }
 
     /**
@@ -745,27 +810,44 @@ public final class AlarmStateManager extends BroadcastReceiver {
 
 
     /**
-     * This will set the instance state to DISMISSED_STATE and remove its notifications and
-     * alarm timers.
+     * This will remove instance notifications and alarm timers.
      *
      * @param context  application context
      * @param instance to unregister
      */
     public static void unregisterInstance(Context context, AlarmInstance instance) {
+        unregisterInstance(context, instance, true);
+    }
+
+    /**
+     * Bulk-optimized version of unregisterInstance.
+     */
+    public static void unregisterInstance(Context context, AlarmInstance instance, boolean updatePowerOffAlarm) {
         LogUtils.i("Unregistering instance " + instance.mId);
 
-        if (SettingsDAO.areSnoozedOrDismissedAlarmVibrationsEnabled(getDefaultSharedPreferences(context))) {
-            // Stop alarm if this instance is firing it; a single vibration will be performed
-            // if enabled in settings to indicate that the alarm is correctly dismissed.
-            AlarmService.stopAlarmWithSingleVibration(context, instance);
-        } else {
-            // Otherwise, stop alarm if this instance is firing it without vibration.
-            AlarmService.stopAlarm(context, instance);
+        // unregisterInstance() is the single owner of stopping a firing instance.
+        if (instance.mAlarmState == AlarmInstance.FIRED_STATE) {
+            if (SettingsDAO.areSnoozedOrDismissedAlarmVibrationsEnabled(getDefaultSharedPreferences(context))) {
+                AlarmService.stopAlarmWithSingleVibration(context, instance);
+            } else {
+                AlarmService.stopAlarm(context, instance);
+            }
         }
 
         AlarmNotifications.clearNotification(context, instance);
         cancelScheduledInstanceStateChange(context, instance);
-        setDismissState(context, instance);
+
+        // Requirement 2: Clean up styled repeat day without setting a redundant DB state.
+        final SharedPreferences prefs = getDefaultSharedPreferences(context);
+        final String repeatDayKey = "show_styled_repeat_day_" + instance.mAlarmId;
+        if (prefs.contains(repeatDayKey)) {
+            prefs.edit().remove(repeatDayKey).apply();
+        }
+
+        // Optionally skip per-instance global state updates.
+        if (updatePowerOffAlarm) {
+            cancelPowerOffAlarm(context, instance);
+        }
     }
 
     /**
@@ -922,14 +1004,28 @@ public final class AlarmStateManager extends BroadcastReceiver {
      * @param alarmId to find instances to delete.
      */
     public static void deleteAllInstances(Context context, long alarmId) {
+        deleteAllInstances(context, alarmId, true);
+    }
+
+    /**
+     * Bulk-optimized version of deleteAllInstances.
+     */
+    public static void deleteAllInstances(Context context, long alarmId, boolean updateNextAlarm) {
         LogUtils.i("Deleting all instances of alarm: " + alarmId);
         ContentResolver cr = context.getContentResolver();
         List<AlarmInstance> instances = AlarmInstance.getInstancesByAlarmId(cr, alarmId);
         for (AlarmInstance instance : instances) {
-            unregisterInstance(context, instance);
-            AlarmInstance.deleteInstance(context.getContentResolver(), instance.mId);
+            // Pass the updateNextAlarm flag to unregisterInstance to handle Power-off cancellation correctly.
+            unregisterInstance(context, instance, updateNextAlarm);
         }
-        updateNextAlarm(context);
+
+        // Requirement 3: Use a single bulk delete query with selection arguments.
+        cr.delete(AlarmInstance.CONTENT_URI, AlarmInstance.ALARM_ID + "=?",
+                new String[]{String.valueOf(alarmId)});
+
+        if (updateNextAlarm) {
+            updateNextAlarm(context);
+        }
     }
 
     /**
