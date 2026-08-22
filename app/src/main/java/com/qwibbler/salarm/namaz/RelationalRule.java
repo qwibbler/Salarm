@@ -174,7 +174,7 @@ public class RelationalRule {
     /**
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */
-    public static Date evaluateTime(@NonNull RelationalRule rule, @NonNull NamazCalculator.NamazTimes times, Date date) {
+    public static Date evaluateTime(@NonNull RelationalRule rule, @NonNull NamazCalculator.NamazTimes times) {
         EvaluationResult result = evaluateTimeWithConflictCheck(rule, times);
         return result.time > 0 ? new Date(result.time) : null;
     }

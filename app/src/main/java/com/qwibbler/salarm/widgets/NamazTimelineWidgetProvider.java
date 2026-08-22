@@ -35,7 +35,6 @@ import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.namaz.NamazCalculator;
-import com.qwibbler.salarm.namaz.NamazDatabase;
 import com.qwibbler.salarm.namaz.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
@@ -99,16 +98,14 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         com.qwibbler.salarm.base.AppExecutors.getDiskIO().execute(() -> {
             Bundle finalOptions = options != null ? options : wm.getAppWidgetOptions(widgetId);
             SharedPreferences prefs = com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences(context);
-            List<RelationalRule> rules = null;
-            if (WidgetDAO.isNamazWidgetShowAlarms(prefs)) {
-                rules = NamazDatabase.getDatabase(context).relationalRuleDao().getAll();
-            }
-            List<RelationalRule> finalRules = rules;
+            final List<AlarmInstance> finalInstances = WidgetDAO.isNamazWidgetShowAlarms(prefs)
+                ? AlarmInstance.getInstances(context.getContentResolver(), AlarmInstance.RELATIONAL_RULE_ID + ">0")
+                : null;
 
             // Pre-calculate NamazTimes
             Date now = new Date();
             NamazCalculator.NamazTimes times = getNamazTimes(prefs, now);
-            List<PrayerItem> allPrayers = times != null ? getAllPrayers(context, times, prefs, finalRules) : new ArrayList<>();
+            List<PrayerItem> allPrayers = times != null ? getAllPrayers(context, times, prefs, finalInstances) : new ArrayList<>();
 
             com.qwibbler.salarm.base.AppExecutors.getMainThread().post(() -> {
                 final RemoteViews portrait = buildRemoteViews(context, wm, widgetId, finalOptions, true, times, allPrayers);
@@ -504,7 +501,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         } catch (Exception e) { return null; }
     }
 
-    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs, List<RelationalRule> rules) {
+    private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs, List<AlarmInstance> instances) {
         String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
         boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(prefs);
@@ -550,19 +547,22 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             items.add(new PrayerItem(showSymbols ? "🌙" : label, label, times.isha));
         }
 
-        if (WidgetDAO.isNamazWidgetShowAlarms(prefs) && rules != null) {
+        if (WidgetDAO.isNamazWidgetShowAlarms(prefs) && instances != null) {
             Date now = new Date();
-            Calendar tomorrowCal = Calendar.getInstance();
-            tomorrowCal.add(Calendar.DAY_OF_YEAR, 1);
-            NamazCalculator.NamazTimes tomorrowTimes = getNamazTimes(prefs, tomorrowCal.getTime());
+            for (AlarmInstance instance : instances) {
+                if (WidgetDAO.isNamazWidgetRuleVisible(prefs, instance.mRelationalRuleId)) {
+                    long timeMillis = instance.getAlarmTime().getTimeInMillis();
+                    long diff = timeMillis - now.getTime();
 
-            for (RelationalRule rule : rules) {
-                if (WidgetDAO.isNamazWidgetRuleVisible(prefs, rule.id)) {
-                    // Check Today
-                    addAlarmIfValid(context, items, rule, times, now);
-                    // Check Tomorrow (rolling 24h)
-                    if (tomorrowTimes != null) {
-                        addAlarmIfValid(context, items, rule, tomorrowTimes, now);
+                    // Show if within the NEXT 24h (with 1m grace)
+                    if (diff > -TimeUnit.MINUTES.toMillis(1) && diff < TimeUnit.HOURS.toMillis(24)) {
+                        String label = instance.mLabel;
+                        Date ruleTime = new Date(timeMillis);
+                        if (WidgetDAO.isNamazWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
+                            items.add(new PrayerItem("🔔", label, ruleTime, instance.mRelationalRuleId));
+                        } else {
+                            items.add(new PrayerItem(label, label, ruleTime, instance.mRelationalRuleId));
+                        }
                     }
                 }
             }
@@ -575,53 +575,6 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         }
 
         return items;
-    }
-
-    private static void addAlarmIfValid(Context context, List<PrayerItem> items, RelationalRule rule, NamazCalculator.NamazTimes times, Date now) {
-        Date ruleTime = RelationalRule.evaluateTime(rule, times, new Date());
-        if (ruleTime.getTime() > 0) {
-            // Check if this alarm occurrence is within the NEXT 24h (with 1m grace for current/recent)
-            long diff = ruleTime.getTime() - now.getTime();
-            if (diff > -TimeUnit.MINUTES.toMillis(1) && diff < TimeUnit.HOURS.toMillis(24)) {
-                Alarm alarm = Alarm.getAlarmByRuleId(context.getContentResolver(), rule.id);
-
-                if (alarm == null || !alarm.enabled) {
-                    return;
-                }
-
-                Calendar ruleCal = Calendar.getInstance();
-                ruleCal.setTime(ruleTime);
-                if (alarm.isDatePaused(ruleCal)) {
-                    return;
-                }
-
-                // Verify there is an active instance for this alarm at this specific time and DATE.
-                // This handles dismissal/rescheduling because the instance time will change.
-                boolean hasActiveInstance = false;
-                List<AlarmInstance> instances = AlarmInstance.getInstancesByAlarmId(context.getContentResolver(), alarm.id);
-                for (AlarmInstance instance : instances) {
-                    if (instance.mYear == ruleCal.get(Calendar.YEAR) &&
-                        instance.mMonth == ruleCal.get(Calendar.MONTH) &&
-                        instance.mDay == ruleCal.get(Calendar.DAY_OF_MONTH) &&
-                        instance.mHour == ruleCal.get(Calendar.HOUR_OF_DAY) &&
-                        instance.mMinute == ruleCal.get(Calendar.MINUTE)) {
-                        hasActiveInstance = true;
-                        break;
-                    }
-                }
-
-                if (!hasActiveInstance) {
-                    return;
-                }
-
-                String label = !alarm.label.isEmpty() ? alarm.label : (RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm");
-                if (WidgetDAO.isNamazWidgetSymbolsVisible(getDefaultSharedPreferences(context))) {
-                    items.add(new PrayerItem("🔔", label, ruleTime, rule.id));
-                } else {
-                    items.add(new PrayerItem(label, label, ruleTime, rule.id));
-                }
-            }
-        }
     }
 
     private static int getActivePrayerIndex(List<PrayerItem> items) {

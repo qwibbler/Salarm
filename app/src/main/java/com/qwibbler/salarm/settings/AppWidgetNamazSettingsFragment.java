@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener {
+public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment implements Preference.OnPreferenceChangeListener, android.content.SharedPreferences.OnSharedPreferenceChangeListener {
 
     private int mAppWidgetId = INVALID_APPWIDGET_ID;
 
@@ -145,10 +145,26 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
     @Override
     public void onResume() {
         super.onResume();
+        if (mPrefs != null) {
+            mPrefs.registerOnSharedPreferenceChangeListener(this);
+        }
 
         saveCheckedPreferenceStates();
 
         updateNamazWidget();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPrefs != null) {
+            mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(android.content.SharedPreferences sharedPreferences, String key) {
+        WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
     }
 
     @Override
@@ -268,11 +284,23 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_SHOW_ALARMS ->
+            case KEY_NAMAZ_WIDGET_SHOW_ALARMS -> {
+                boolean showAlarms = (boolean) newValue;
+                if (showAlarms) {
+                    AppExecutors.getDiskIO().execute(() -> {
+                        Set<String> visibleEvents = new HashSet<>(WidgetDAO.getNamazWidgetVisibleEvents(mPrefs));
+                        List<RelationalRule> rules = NamazDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
+                        for (RelationalRule rule : rules) {
+                            visibleEvents.add("rule_" + rule.id);
+                        }
+                        mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, visibleEvents).apply();
+                        WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
+                    });
+                }
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            }
         }
 
-        WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
         return true;
     }
 

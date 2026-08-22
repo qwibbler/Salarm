@@ -105,11 +105,7 @@ public class RelationalAlarmSyncManager {
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }
 
-        if (nativeAlarm.enabled) {
-            recalculateNextInstanceInternal(context, nativeAlarm, rule, null);
-        } else {
-            AlarmStateManager.deleteAllInstances(context, nativeAlarm.id);
-        }
+        recalculateNextInstanceInternal(context, nativeAlarm, rule, null);
 
         return nativeAlarm;
     }
@@ -151,6 +147,17 @@ public class RelationalAlarmSyncManager {
     }
 
     private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime) {
+        if (!alarm.enabled) {
+            alarm.updateAlarm(context.getContentResolver());
+            if (rule.enabled) {
+                rule.enabled = false;
+                AppExecutors.getDiskIO().execute(() -> NamazDatabase.getDatabase(context).relationalRuleDao().update(rule));
+            }
+            AlarmStateManager.deleteAllInstances(context, alarm.id);
+            com.qwibbler.salarm.utils.WidgetUtils.scheduleWidgetUpdate(context, com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider.class);
+            return;
+        }
+
         ContentResolver cr = context.getContentResolver();
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final boolean wasStyledDaysEnabled = alarm.isRepeatDayStyleEnabled(prefs);
@@ -273,6 +280,8 @@ public class RelationalAlarmSyncManager {
 
         instance.addInstance(cr);
         AlarmStateManager.registerInstance(context, instance, true);
+
+        com.qwibbler.salarm.utils.WidgetUtils.scheduleWidgetUpdate(context, com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider.class);
 
         if (wasStyledDaysEnabled && skipTime != null) {
             alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);

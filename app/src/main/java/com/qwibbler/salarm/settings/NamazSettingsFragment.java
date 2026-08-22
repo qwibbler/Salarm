@@ -149,6 +149,7 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
             RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());
         } else if (KEY_NAMAZ_SHOW_BOTH_ASR.equals(key)) {
             updateUiStates();
+            WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
         } else if (KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS.equals(key)) {
             if (sharedPreferences.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, false)) {
                 Set<String> visibleEvents = sharedPreferences.getStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS);

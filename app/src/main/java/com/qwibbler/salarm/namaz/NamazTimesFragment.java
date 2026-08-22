@@ -360,13 +360,11 @@ public class NamazTimesFragment extends SalarmFragment {
             nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowTimes.fajr);
         }
 
-        if (nextPrayer != null) {
-            long diff = nextPrayer.time.getTime() - now.getTime();
-            long hours = diff / (3600 * 1000);
-            long minutes = (diff / (60 * 1000)) % 60;
-            String countdown = getString(R.string.salarm_namaz_countdown_format, hours, minutes, nextPrayer.name);
-            mCountdownText.setText(countdown);
-        }
+        long diff = nextPrayer.time.getTime() - now.getTime();
+        long hours = diff / (3600 * 1000);
+        long minutes = (diff / (60 * 1000)) % 60;
+        String countdown = getString(R.string.salarm_namaz_countdown_format, hours, minutes, nextPrayer.name);
+        mCountdownText.setText(countdown);
     }
 
     @Override
