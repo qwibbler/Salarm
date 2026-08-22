@@ -395,9 +395,32 @@ public class NamazTimesFragment extends SalarmFragment {
     private class NamazAdapter extends RecyclerView.Adapter<NamazAdapter.ViewHolder> {
         private List<PrayerItem> mItems = new ArrayList<>();
 
-        void setItems(List<PrayerItem> items) {
+        void setItems(final List<PrayerItem> items) {
+            final List<PrayerItem> oldItems = mItems;
             mItems = items;
-            notifyDataSetChanged();
+            androidx.recyclerview.widget.DiffUtil.calculateDiff(new androidx.recyclerview.widget.DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldItems.size();
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return mItems.size();
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    return oldItems.get(oldItemPosition).name.equals(mItems.get(newItemPosition).name);
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    PrayerItem oldItem = oldItems.get(oldItemPosition);
+                    PrayerItem newItem = mItems.get(newItemPosition);
+                    return oldItem.name.equals(newItem.name) && oldItem.time.equals(newItem.time);
+                }
+            }).dispatchUpdatesTo(this);
         }
 
         @NonNull
