@@ -495,7 +495,7 @@
         <item>clock</item>
         <item>timer</item>
         <item>stopwatch</item>
-        <item>namaz</item>
+        <item>salah</item>
         <item>qibla</item>
     </string-array>
     <!-- Default value for the MultiSelectListPreference related to the tabs visibility preference. -->
@@ -504,7 +504,7 @@
         <item>clock</item>
         <item>timer</item>
         <item>stopwatch</item>
-        <item>namaz</item>
+        <item>salah</item>
         <item>qibla</item>
     </string-array>
 

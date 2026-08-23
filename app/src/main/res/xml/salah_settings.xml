@@ -79,7 +79,7 @@
             app:singleLineTitle="false" />
 
         <androidx.preference.SwitchPreferenceCompat
-            android:key="key_salah_show_both_asr_in_namaz_times"
+            android:key="key_salah_show_both_asr_in_salah_times"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/show_both_asr_in_salah_times_title"
             android:defaultValue="false"

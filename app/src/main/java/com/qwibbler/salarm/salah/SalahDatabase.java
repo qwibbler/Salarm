@@ -31,7 +31,7 @@ public abstract class SalahDatabase extends RoomDatabase {
             synchronized (SalahDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    SalahDatabase.class, "namaz_database")
+                                    SalahDatabase.class, "salah_database")
                             .addMigrations(MIGRATION_6_8)
                             .fallbackToDestructiveMigration()
                             .build();

@@ -57,7 +57,7 @@ public class PreferencesDefaultValues {
     public static final String VISIBLE_TAB_CLOCK = "clock";
     public static final String VISIBLE_TAB_TIMER = "timer";
     public static final String VISIBLE_TAB_STOPWATCH = "stopwatch";
-    public static final String VISIBLE_TAB_SALAH = "namaz";
+    public static final String VISIBLE_TAB_SALAH = "salah";
     public static final String VISIBLE_TAB_QIBLA = "qibla";
     public static final Set<String> DEFAULT_VISIBLE_TABS = Set.of(
         VISIBLE_TAB_ALARM,
