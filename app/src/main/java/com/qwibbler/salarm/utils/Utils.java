@@ -18,6 +18,7 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VIBRATION_PA
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VIBRATION_PATTERN_TICK_TOCK;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_KEEP_ANDROID_OPEN_DIALOG;
 
+import android.app.Activity;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,8 +33,14 @@ import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -52,6 +59,9 @@ import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -292,6 +302,152 @@ public class Utils {
     public static void performHapticFeedback(View view, int feedbackConstant) {
         if (view != null && SettingsDAO.isVibrationsEnabled(getDefaultSharedPreferences(view.getContext()))) {
             view.performHapticFeedback(feedbackConstant);
+        }
+    }
+
+    /**
+     * Hides the soft keyboard and clears focus from the given view.
+     */
+    public static void hideKeyboardAndClearFocus(View view) {
+        if (view == null) {
+            return;
+        }
+
+        // Move focus to the root view to avoid it bouncing back to an EditText
+        View root = view.getRootView();
+        if (root != null) {
+            root.setFocusableInTouchMode(true);
+            root.requestFocus();
+        }
+
+        final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * Set up a window callback to hide the soft keyboard and clear focus when tapping
+     * outside of an EditText or starting to scroll.
+     *
+     * @param window The window to set up the callback for.
+     */
+    public static void setupTapToDismissKeyboard(@NonNull final Window window) {
+        final Window.Callback original = window.getCallback();
+        if (original == null) return;
+
+        // Avoid wrapping multiple times
+        if (Proxy.isProxyClass(original.getClass()) && Proxy.getInvocationHandler(original) instanceof TouchDismissHandler) {
+            return;
+        }
+
+        // Make decor view focusable so it can take focus away from EditTexts
+        View decorView = window.getDecorView();
+        decorView.setFocusableInTouchMode(true);
+
+        window.setCallback((Window.Callback) Proxy.newProxyInstance(
+            Window.Callback.class.getClassLoader(),
+            new Class[]{Window.Callback.class},
+            new TouchDismissHandler(window, original)
+        ));
+    }
+
+    /**
+     * Set up a window callback to hide the soft keyboard and clear focus when tapping
+     * outside of an EditText or starting to scroll.
+     *
+     * @param activity The activity whose window to set up the callback for.
+     */
+    public static void setupTapToDismissKeyboard(@NonNull Activity activity) {
+        setupTapToDismissKeyboard(activity.getWindow());
+    }
+
+    private static class TouchDismissHandler implements InvocationHandler {
+        private final Window mWindow;
+        private final Window.Callback mOriginal;
+        private final View mDecorView;
+        private ViewTreeObserver.OnScrollChangedListener mScrollListener;
+
+        TouchDismissHandler(Window window, Window.Callback original) {
+            mWindow = window;
+            mOriginal = original;
+            mDecorView = window.getDecorView();
+
+            // Handle scroll dismissal globally for this window
+            mScrollListener = () -> {
+                View v = mWindow.getCurrentFocus();
+                if (v instanceof EditText) {
+                    hideKeyboardAndClearFocus(v);
+                }
+            };
+            mDecorView.getViewTreeObserver().addOnScrollChangedListener(mScrollListener);
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            String methodName = method.getName();
+            if (methodName.equals("dispatchTouchEvent") && args != null && args.length > 0 && args[0] instanceof MotionEvent event) {
+                handleTouchEvent(event);
+            } else if (methodName.equals("onDetachedFromWindow")) {
+                cleanup();
+            }
+
+            try {
+                return method.invoke(mOriginal, args);
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (cause != null) throw cause;
+                throw e;
+            }
+        }
+
+        private void cleanup() {
+            if (mScrollListener != null) {
+                if (mDecorView.getViewTreeObserver().isAlive()) {
+                    mDecorView.getViewTreeObserver().removeOnScrollChangedListener(mScrollListener);
+                }
+                mScrollListener = null;
+            }
+        }
+
+        private void handleTouchEvent(MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                View v = mWindow.getCurrentFocus();
+                if (v instanceof EditText) {
+                    int[] location = new int[2];
+                    v.getLocationOnScreen(location);
+                    float x = event.getRawX();
+                    float y = event.getRawY();
+
+                    if (x < location[0] || x > location[0] + v.getWidth() ||
+                        y < location[1] || y > location[1] + v.getHeight()) {
+
+                        // Check if the tap is going to another EditText to avoid flicker
+                        View target = findViewAt(mWindow.getDecorView(), (int) x, (int) y);
+                        if (!(target instanceof EditText)) {
+                            hideKeyboardAndClearFocus(v);
+                        }
+                    }
+                }
+            }
+        }
+
+        private View findViewAt(View root, int x, int y) {
+            if (root instanceof ViewGroup group) {
+                for (int i = group.getChildCount() - 1; i >= 0; i--) {
+                    View child = group.getChildAt(i);
+                    if (child.getVisibility() != View.VISIBLE) continue;
+
+                    int[] location = new int[2];
+                    child.getLocationOnScreen(location);
+                    if (x >= location[0] && x <= location[0] + child.getWidth() &&
+                        y >= location[1] && y <= location[1] + child.getHeight()) {
+                        View descendant = findViewAt(child, x, y);
+                        return descendant != null ? descendant : child;
+                    }
+                }
+            }
+            return null;
         }
     }
 

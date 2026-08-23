@@ -356,6 +356,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         dialog.setOnShowListener(dialogInterface -> {
             BottomSheetDialog d = (BottomSheetDialog) dialogInterface;
+
+            if (d.getWindow() != null) {
+                Utils.setupTapToDismissKeyboard(d.getWindow());
+            }
+
             View bottomSheetInternal = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
 
             if (bottomSheetInternal != null) {
@@ -672,17 +677,16 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         if (!noTags) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mAlarm.tags.size(); i++) {
-                sb.append(mAlarm.tags.get(i));
+                sb.append("#").append(mAlarm.tags.get(i));
                 if (i < mAlarm.tags.size() - 1) {
-                    sb.append(", ");
+                    sb.append(" ");
                 }
             }
             mBinding.editTags.setText(sb.toString());
-            mBinding.editTags.setAlpha(1f);
         } else {
             mBinding.editTags.setText(R.string.add_tags);
-            mBinding.editTags.setAlpha(0.6f);
         }
+        mBinding.editTags.setAlpha(1f);
         mBinding.editTags.setTypeface(mGeneralTypeface);
 
         mBinding.editTags.setOnClickListener(v -> {

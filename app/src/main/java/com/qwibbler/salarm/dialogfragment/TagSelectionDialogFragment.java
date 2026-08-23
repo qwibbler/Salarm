@@ -22,7 +22,9 @@ import com.qwibbler.salarm.databinding.AlarmTagSelectionDialogBinding;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
+import com.qwibbler.salarm.utils.Utils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -65,7 +67,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
         refreshChips();
 
         mBinding.newTagInput.setTypeface(ThemeUtils.loadFont(SettingsDAO.getGeneralFont(getDefaultSharedPreferences(requireContext()))));
-        mAutoAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, mAllTags);
+        mAutoAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, getDisplayTags());
         mBinding.newTagInput.setAdapter(mAutoAdapter);
         mBinding.newTagInput.setOnItemClickListener((parent, view, position, id) -> {
             String item = mAutoAdapter.getItem(position);
@@ -120,7 +122,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
             int vMargin = (int) (0 * getResources().getDisplayMetrics().density);
             for (String tag : mAllTags) {
                 Chip chip = new Chip(requireContext());
-                chip.setText(tag);
+                chip.setText(MessageFormat.format("#{0}", tag));
                 chip.setCheckable(true);
                 chip.setChecked(mSelectedTags.contains(tag));
 
@@ -133,6 +135,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
                 chip.setLayoutParams(params);
 
                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    Utils.hideKeyboardAndClearFocus(mBinding.newTagInput);
                     if (isChecked) {
                         mSelectedTags.add(tag);
                     } else {
@@ -145,8 +148,17 @@ public class TagSelectionDialogFragment extends DialogFragment {
         }
     }
 
-    private void addTag(String name) {
-        if (!name.isEmpty()) {
+    private void addTag(String inputName) {
+        if (!inputName.isEmpty()) {
+            String name = inputName.trim();
+            while (name.startsWith("#")) {
+                name = name.substring(1).trim();
+            }
+            if (name.isEmpty()) {
+                mBinding.newTagInput.setText("");
+                return;
+            }
+
             if (mSelectedTags.add(name)) {
                 if (!mAllTags.contains(name)) {
                     mAllTags.add(0, name); // Add to top if new
@@ -156,13 +168,21 @@ public class TagSelectionDialogFragment extends DialogFragment {
                 // Update autocomplete adapter
                 if (mAutoAdapter != null) {
                     mAutoAdapter.clear();
-                    mAutoAdapter.addAll(mAllTags);
+                    mAutoAdapter.addAll(getDisplayTags());
                     mAutoAdapter.notifyDataSetChanged();
                 }
                 notifyChange();
             }
             mBinding.newTagInput.setText("");
         }
+    }
+
+    private List<String> getDisplayTags() {
+        List<String> display = new ArrayList<>();
+        for (String tag : mAllTags) {
+            display.add("#" + tag);
+        }
+        return display;
     }
 
     private void notifyChange() {

@@ -10,6 +10,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import com.qwibbler.salarm.salah.SalahUtils;
+import com.qwibbler.salarm.utils.SdkUtils;
+
 import java.util.Calendar;
 
 /**
@@ -22,47 +25,78 @@ public class SalahWidgetUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (Intent.ACTION_USER_PRESENT.equals(action) ||
+            Intent.ACTION_TIME_CHANGED.equals(action) ||
+            Intent.ACTION_TIMEZONE_CHANGED.equals(action) ||
+            Intent.ACTION_DATE_CHANGED.equals(action)) {
+
+            updateWidgets(context);
+            scheduleNextUpdate(context);
+            return;
+        }
+
+        updateWidgets(context);
+
         AppWidgetManager wm = AppWidgetManager.getInstance(context);
-
-        // Update Timeline Widgets
         int[] timelineIds = wm.getAppWidgetIds(new ComponentName(context, SalahTimelineWidgetProvider.class));
-        if (timelineIds.length > 0) {
-            Intent updateIntent = new Intent(context, SalahTimelineWidgetProvider.class);
-            updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, timelineIds);
-            context.sendBroadcast(updateIntent);
-        }
-
-        // Update Countdown Widgets
         int[] countdownIds = wm.getAppWidgetIds(new ComponentName(context, SalahCountdownWidgetProvider.class));
-        if (countdownIds.length > 0) {
-            Intent updateIntent = new Intent(context, SalahCountdownWidgetProvider.class);
-            updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, countdownIds);
-            context.sendBroadcast(updateIntent);
-        }
 
-        // Reschedule for the next minute if any Salah widget is still active
+        // Reschedule for the next update if any Salah widget is still active
         if (timelineIds.length > 0 || countdownIds.length > 0) {
             scheduleNextUpdate(context);
         }
     }
 
+    private void updateWidgets(Context context) {
+        AppWidgetManager wm = AppWidgetManager.getInstance(context);
+
+        // Update Timeline Widgets
+        int[] timelineIds = wm.getAppWidgetIds(new ComponentName(context, SalahTimelineWidgetProvider.class));
+        for (int id : timelineIds) {
+            SalahTimelineWidgetProvider.updateAppWidget(context, wm, id);
+        }
+
+        // Update Countdown Widgets
+        int[] countdownIds = wm.getAppWidgetIds(new ComponentName(context, SalahCountdownWidgetProvider.class));
+        for (int id : countdownIds) {
+            SalahCountdownWidgetProvider.updateAppWidget(context, wm, id);
+        }
+    }
+
     public static void scheduleNextUpdate(Context context) {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (am == null) return;
+
         Intent intent = new Intent(context, SalahWidgetUpdateReceiver.class);
         intent.setAction(ACTION_MINUTE_UPDATE);
 
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+        long triggerAtMillis;
+        if (SdkUtils.isAtLeastAndroid7()) {
+            long nextPrayer = SalahUtils.getNextPrayerTime(context);
+            if (nextPrayer > 0) {
+                // Schedule for the next prayer time + 1 second buffer to ensure calculations flip
+                triggerAtMillis = nextPrayer + 1000;
+            } else {
+                triggerAtMillis = getNextMinuteMillis();
+            }
+        } else {
+            triggerAtMillis = getNextMinuteMillis();
+        }
+
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
+    }
+
+    private static long getNextMinuteMillis() {
         // Schedule at the start of the next minute
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, 1);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-
-        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+        return calendar.getTimeInMillis();
     }
 
     public static void cancelUpdate(Context context) {

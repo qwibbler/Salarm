@@ -27,6 +27,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.DialogMessageCustomBinding;
 import com.qwibbler.salarm.databinding.DialogTitleCustomBinding;
 import com.qwibbler.salarm.utils.ThemeUtils;
+import com.qwibbler.salarm.utils.Utils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class CustomDialog {
@@ -107,6 +108,10 @@ public class CustomDialog {
 
         // Apply typeface to buttons
         dialog.setOnShowListener(d -> {
+            if (dialog.getWindow() != null) {
+                Utils.setupTapToDismissKeyboard(dialog.getWindow());
+            }
+
             if (finalDialogContent != null && finalDialogContent.findViewById(R.id.scroll_view) != null) {
                 configureScrollView(finalDialogContent);
             }

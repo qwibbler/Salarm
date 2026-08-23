@@ -54,4 +54,4 @@ Welcome to the "Salarm" project! Since you're working with the "BlackyHawky/Cloc
    app/src/main/res/layout/alarm_fragment.xml
    Gradle Config
    app/build.gradle
-   Since you're planning to integrate relational Namaz alarms, AlarmStateManager and AlarmUpdateHandler will be your most important entry points for injecting the prayer time calculation logic. How would you like to proceed? I can help you set up the dependency or start drafting a plan for the Adhan integration.
+   Since you're planning to integrate relational salah alarms, AlarmStateManager and AlarmUpdateHandler will be your most important entry points for injecting the prayer time calculation logic. How would you like to proceed? I can help you set up the dependency or start drafting a plan for the Adhan integration.
