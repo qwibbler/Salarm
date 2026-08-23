@@ -24,18 +24,19 @@ public class LocationResolutionTest {
         assertEquals(10007, distance, 100);
     }
 
-    @Test
-    public void testThresholdLogic() {
-        // Thresholds used in findNearestOfflineCity:
-        // 32187 meters (20 miles)
-        // 80467 meters (50 miles)
-
-        double d1 = 10000; // 10km
-        double d2 = 40000; // 40km
-
-        assertFalse("10km should not be 'Near'", d1 > 32187);
-        assertTrue("40km should be 'Near'", d2 > 32187 && d2 <= 80467);
-    }
+//        TODO: This test is not meaningful:
+//    @Test
+//    public void testThresholdLogic() {
+//        // Thresholds used in findNearestOfflineCity:
+//        // 32187 meters (20 miles)
+//        // 80467 meters (50 miles)
+//
+//        double d1 = 10000; // 10km
+//        double d2 = 40000; // 40km
+//
+//        assertFalse("10km should not be 'Near'", d1 > 32187);
+//        assertTrue("40km should be 'Near'", d2 > 32187 && d2 <= 80467);
+//    }
 
     @Test
     public void testCoordinateNormalization() {

@@ -15,9 +15,6 @@ public interface RelationalRuleDao {
     @Query("SELECT * FROM relational_rules")
     List<RelationalRule> getAll();
 
-    @Query("SELECT * FROM relational_rules WHERE enabled = 1")
-    List<RelationalRule> getEnabledRules();
-
     @Query("SELECT * FROM relational_rules WHERE id = :id")
     RelationalRule getById(long id);
 

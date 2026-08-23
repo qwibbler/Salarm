@@ -21,10 +21,4 @@ public interface CityCoordinateDao {
 
     @Query("SELECT * FROM city_coordinates")
     List<CityCoordinate> getAll();
-
-    @Query("DELETE FROM city_coordinates")
-    void clearAll();
-
-    @Query("DELETE FROM city_coordinates WHERE lastUsed < :timestamp")
-    void deleteOlderThan(long timestamp);
 }

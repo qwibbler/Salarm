@@ -39,7 +39,7 @@ public class SalahDatabaseTest {
         RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 15, null, 0);
         rule.enabled = true;
 
-        long id = dao.insert(rule);
+        dao.insert(rule);
 
         List<RelationalRule> rules = dao.getAll();
         assertNotNull(rules);

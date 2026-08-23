@@ -1,5 +1,7 @@
 package com.qwibbler.salarm.salah;
 
+import androidx.annotation.NonNull;
+
 import com.qwibbler.salarm.utils.LogUtils;
 
 import org.json.JSONArray;
@@ -29,6 +31,7 @@ public class OpenMeteoClient {
         public double latitude;
         public double longitude;
 
+        @NonNull
         @Override
         public String toString() {
             return name + (province != null && !province.isEmpty() ? ", " + province : "") + (country != null && !country.isEmpty() ? ", " + country : "");

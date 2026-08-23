@@ -7,16 +7,12 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_A
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.settings.PreferencesDefaultValues;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.LogUtils;
-import com.qwibbler.salarm.utils.SdkUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
