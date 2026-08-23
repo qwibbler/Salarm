@@ -672,9 +672,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         if (!noTags) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mAlarm.tags.size(); i++) {
-                sb.append(mAlarm.tags.get(i));
+                sb.append("#").append(mAlarm.tags.get(i));
                 if (i < mAlarm.tags.size() - 1) {
-                    sb.append(", ");
+                    sb.append(" ");
                 }
             }
             mBinding.editTags.setText(sb.toString());
