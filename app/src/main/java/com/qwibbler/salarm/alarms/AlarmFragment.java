@@ -75,8 +75,8 @@ import com.qwibbler.salarm.dialogfragment.AlarmVolumeDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazLocationManager;
-import com.qwibbler.salarm.namaz.RelationalAlarmDialogFragment;
+import com.qwibbler.salarm.salah.SalahLocationManager;
+import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
@@ -724,7 +724,7 @@ public final class AlarmFragment extends SalarmFragment
             startCreatingAlarm();
         } else {
             if (mSideButtonsVisible) {
-                if (!NamazLocationManager.isLocationSet(requireContext())) {
+                if (!SalahLocationManager.isLocationSet(requireContext())) {
                     com.qwibbler.salarm.uicomponents.CustomDialog.create(
                         requireContext(),
                         R.style.AppAlertDialogTheme,
@@ -748,7 +748,7 @@ public final class AlarmFragment extends SalarmFragment
                     hideSideButtonsWithFabAnimation();
                     return;
                 }
-                new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
+                new SalahAlarmDialogFragment().show(getParentFragmentManager(), SalahAlarmDialogFragment.TAG);
                 hideSideButtonsWithFabAnimation();
             } else {
                 mSideButtonsVisible = true;
@@ -913,7 +913,7 @@ public final class AlarmFragment extends SalarmFragment
         );
 
         parentFragmentManager.setFragmentResultListener(
-            RelationalAlarmDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            SalahAlarmDialogFragment.REQUEST_KEY, viewLifecycleOwner,
             (requestKey, bundle) -> {
                 long alarmId = bundle.getLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, Alarm.INVALID_ID);
                 boolean isNewAlarm = bundle.getBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, false);

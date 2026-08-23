@@ -466,8 +466,8 @@ public class WidgetUtils {
             DigitalAppWidgetProvider.class,
             NextAlarmAppWidgetProvider.class,
             VerticalAppWidgetProvider.class,
-            com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider.class,
-            com.qwibbler.salarm.widgets.NamazCountdownWidgetProvider.class
+            com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider.class,
+            com.qwibbler.salarm.widgets.SalahCountdownWidgetProvider.class
         };
 
         for (Class<?> provider : widgetProviders) {

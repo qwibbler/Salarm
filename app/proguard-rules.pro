@@ -23,7 +23,7 @@
 }
 
 # Keep Room entities and DAOs
--keep class com.qwibbler.salarm.namaz.** { *; }
+-keep class com.qwibbler.salarm.salah.** { *; }
 -keep class com.qwibbler.salarm.provider.** { *; }
 
 # Uncomment this to preserve the line number information for

@@ -230,7 +230,7 @@ public class PreferencesKeys {
     public static final String KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING = "key_display_low_alarm_volume_warning";
     public static final String KEY_DISPLAY_ALARM_TAGS = "key_display_alarm_tags";
 
-    // Namaz
+    // Salah
     public static final String KEY_SALAH_LATITUDE = "key_namaz_latitude";
     public static final String KEY_SALAH_LONGITUDE = "key_namaz_longitude";
     public static final String KEY_SALAH_MADHAB = "key_namaz_madhab";
@@ -238,8 +238,8 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_LOCATION_MODE = "key_namaz_location_mode";
     public static final String KEY_SALAH_CITY_NAME = "key_namaz_city_name";
     public static final String KEY_SALAH_SHOW_BOTH_ASR = "key_namaz_show_both_asr";
-    public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_namaz_show_both_asr_in_alarm_events";
-    public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES = "key_namaz_show_both_asr_in_namaz_times";
+    public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_salah_show_both_asr_in_alarm_events";
+    public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES = "key_salah_show_both_asr_in_salah_times";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS = "key_namaz_show_both_asr_in_widgets";
     public static final String KEY_SALAH_TABS_MIGRATED = "key_namaz_tabs_migrated";
     public static final String KEY_SALAH_DISPLAY_TIMEZONE = "key_namaz_display_timezone";

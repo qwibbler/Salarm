@@ -71,9 +71,9 @@ import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazDatabase;
-import com.qwibbler.salarm.namaz.RelationalAlarmDialogFragment;
-import com.qwibbler.salarm.namaz.RelationalRule;
+import com.qwibbler.salarm.salah.SalahDatabase;
+import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
+import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
@@ -325,7 +325,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindDaysOfWeekButtons();
         bindSelectedDate();
         bindPauseAlarm();
-        bindNamazRule();
+        bindSalahRule();
         bindLabel();
         bindTags();
         bindRingtone();
@@ -595,7 +595,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         }
     }
 
-    private void bindNamazRule() {
+    private void bindSalahRule() {
         if (mAlarm.relationalRuleId == -1) {
             mIsSalah = false;
             AppExecutors.getMainThread().post(() -> {
@@ -610,7 +610,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         mIsSalah = true;
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            mSalahRule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
+            mSalahRule = SalahDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
             if (mSalahRule != null) {
                 // Reload alarm to get potentially updated time and silence duration
                 Alarm reloadedAlarm = Alarm.getAlarm(appContext.getContentResolver(), mAlarm.id);
@@ -630,7 +630,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     mBinding.salahRuleDescription.setTypeface(mGeneralTypeface);
                     mBinding.salahRuleDescription.setText(mSalahRule.getRuleDescription(requireContext()));
                     mBinding.salahRuleDescription.setOnClickListener(v ->
-                        RelationalAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
+                        SalahAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
                     );
 
                     bindClock();
@@ -1313,8 +1313,8 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 bindAlarmVolume();
             });
 
-        childFragmentManager.setFragmentResultListener(RelationalAlarmDialogFragment.REQUEST_KEY, this,
-            (requestKey, bundle) -> bindNamazRule());
+        childFragmentManager.setFragmentResultListener(SalahAlarmDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> bindSalahRule());
 
         childFragmentManager.setFragmentResultListener(BlurIntensityDialogFragment.REQUEST_KEY, this,
             (requestKey, bundle) -> {

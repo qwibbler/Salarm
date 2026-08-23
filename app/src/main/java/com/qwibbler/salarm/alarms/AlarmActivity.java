@@ -273,7 +273,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         mVolumeBehavior = SettingsDAO.getAlarmVolumeButtonBehavior(mPrefs, mIsSalah);
         mHeadphonesButtonBehavior = SettingsDAO.getHeadphonesButtonBehavior(mPrefs, mIsSalah);
-        mShowNextEventInfo = SettingsDAO.getNamazShowNextEventInfo(mPrefs);
+        mShowNextEventInfo = SettingsDAO.getSalahShowNextEventInfo(mPrefs);
 
         initAlarmBackground();
 
@@ -1412,39 +1412,39 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        double[] coords = com.qwibbler.salarm.namaz.NamazUtils.getCoordinates(this);
-        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.namaz.NamazUtils.getCalculationMethod(this);
-        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.namaz.NamazUtils.getMadhab(this);
+        double[] coords = com.qwibbler.salarm.salah.SalahUtils.getCoordinates(this);
+        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.salah.SalahUtils.getCalculationMethod(this);
+        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.salah.SalahUtils.getMadhab(this);
         boolean showBothAsr = mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR, false)
             && mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
         long now = System.currentTimeMillis();
 
         Calendar cal = Calendar.getInstance();
-        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times =
-            com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
+        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times =
+            com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
 
-        java.util.List<com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
-        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.FAJR);
-        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.SUNRISE);
-        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.DHUHR);
+        java.util.List<com.qwibbler.salarm.salah.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
+        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.FAJR);
+        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.SUNRISE);
+        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.DHUHR);
 
         if (showBothAsr) {
-            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
-            events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI);
+            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
+            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI);
         } else {
             events.add(madhab == com.batoulapps.adhan.Madhab.HANAFI
-                ? com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_HANAFI
-                : com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ASR_SHAFI);
+                ? com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI
+                : com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
         }
 
-        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.MAGHRIB);
-        events.add(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent.ISHA);
+        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.MAGHRIB);
+        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ISHA);
 
-        com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent nextEvent = null;
+        com.qwibbler.salarm.salah.RelationalRule.AnchorEvent nextEvent = null;
         java.util.Date nextEventTime = null;
 
         // Find next event today
-        for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+        for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
             java.util.Date time = getEventTime(event, times);
             if (time != null && time.getTime() > now) {
                 if (nextEventTime == null || time.before(nextEventTime)) {
@@ -1457,8 +1457,8 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         // If no more events today, find first event tomorrow
         if (nextEventTime == null) {
             cal.add(Calendar.DAY_OF_YEAR, 1);
-            times = com.qwibbler.salarm.namaz.NamazCalculator.calculateAllTimes(cal.getTime(), coords[0], coords[1], method);
-            for (com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event : events) {
+            times = com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
+            for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
                 java.util.Date time = getEventTime(event, times);
                 if (time != null) {
                     if (nextEventTime == null || time.before(nextEventTime)) {
@@ -1476,7 +1476,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        String eventName = com.qwibbler.salarm.namaz.RelationalRule.getEventName(this, nextEvent);
+        String eventName = com.qwibbler.salarm.salah.RelationalRule.getEventName(this, nextEvent);
 
         long remainingMillis = nextEventTime.getTime() - now;
 
@@ -1508,8 +1508,8 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         }
     }
 
-    private java.util.Date getEventTime(com.qwibbler.salarm.namaz.RelationalRule.AnchorEvent event,
-                                        com.qwibbler.salarm.namaz.NamazCalculator.NamazTimes times) {
+    private java.util.Date getEventTime(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event,
+                                        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times) {
         return switch (event) {
             case FAJR -> times.fajr;
             case SUNRISE -> times.sunrise;

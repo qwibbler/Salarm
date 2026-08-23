@@ -95,7 +95,7 @@ final class TabModel {
         final boolean isClockTabVisible = SettingsDAO.isClockTabVisible(mPrefs);
         final boolean isTimerTabVisible = SettingsDAO.isTimerTabVisible(mPrefs);
         final boolean isStopwatchTabVisible = SettingsDAO.isStopwatchTabVisible(mPrefs);
-        final boolean isSalahTabVisible = SettingsDAO.isNamazTabVisible(mPrefs);
+        final boolean isSalahTabVisible = SettingsDAO.isSalahTabVisible(mPrefs);
         final boolean isQiblaTabVisible = SettingsDAO.isQiblaTabVisible(mPrefs);
 
         if (isAlarmTabVisible) {

@@ -17,9 +17,9 @@ import androidx.core.view.HapticFeedbackConstantsCompat;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazDatabase;
-import com.qwibbler.salarm.namaz.RelationalAlarmSyncManager;
-import com.qwibbler.salarm.namaz.RelationalRule;
+import com.qwibbler.salarm.salah.SalahDatabase;
+import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
@@ -121,7 +121,7 @@ public final class AlarmUpdateHandler {
             ContentResolver cr = mAppContext.getContentResolver();
 
             if (alarm.relationalRuleId > 0 && !minorUpdate) {
-                com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                com.qwibbler.salarm.salah.SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
 
                 if (popToast) {
                     final List<AlarmInstance> instanceList = AlarmInstance.getInstancesByAlarmId(cr, alarm.id);
@@ -238,7 +238,7 @@ public final class AlarmUpdateHandler {
             for (Alarm alarm : alarms) {
                 alarm.enabled = enabled;
                 if (alarm.relationalRuleId > 0) {
-                    RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                    SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
                 } else {
                     // Update the alarm template in the DB.
                     alarm.updateAlarm(cr);
@@ -276,7 +276,7 @@ public final class AlarmUpdateHandler {
 
             RelationalRule ruleToDelete = null;
             if (alarm.relationalRuleId > 0) {
-                ruleToDelete = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
+                ruleToDelete = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
             }
 
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
@@ -376,7 +376,7 @@ public final class AlarmUpdateHandler {
         AppExecutors.getDiskIO().execute(() -> {
             // 1. Re-insert the rule to get a new ID
             rule.id = 0;
-            alarm.relationalRuleId = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().insert(rule);
+            alarm.relationalRuleId = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().insert(rule);
 
             // 2. Add the alarm back to the provider
             final Alarm newAlarm = alarm.addAlarm(mAppContext.getContentResolver());
@@ -387,7 +387,7 @@ public final class AlarmUpdateHandler {
             }
 
             // 4. Sync and schedule instances
-            RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
+            SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
 
             // 5. Update widgets
             WidgetUtils.updateAllDigitalWidgets(mAppContext);

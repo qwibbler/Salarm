@@ -65,7 +65,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
 
             case KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNextAlarmSettingsFragment());
 
-            case KEY_SALAH_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNamazSettingsFragment());
+            case KEY_SALAH_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetSalahSettingsFragment());
         }
 
         return true;

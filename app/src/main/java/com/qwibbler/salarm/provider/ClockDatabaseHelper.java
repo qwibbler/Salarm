@@ -335,7 +335,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.BLUR_INTENSITY
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
-            LogUtils.i("Ensured all version 27/28 columns (Namaz + Upstream) exist.");
+            LogUtils.i("Ensured all version 27/28 columns (Salah + Upstream) exist.");
         }
 
         if (oldVersion < 30) {

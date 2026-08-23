@@ -324,7 +324,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
                     alarm.updateAlarm(cr);
                 }
             } else {
-                com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.recalculateNextInstance(context, alarm, instance.getAlarmTime());
+                com.qwibbler.salarm.salah.SalahAlarmSyncManager.recalculateNextInstance(context, alarm, instance.getAlarmTime());
             }
             return;
         }

@@ -366,7 +366,7 @@ public class ClockProvider extends ContentProvider {
                     if (ruleId > 0) {
                         Context context = getContext();
                         if (context != null) {
-                            com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.deleteRule(context, ruleId);
+                            com.qwibbler.salarm.salah.SalahAlarmSyncManager.deleteRule(context, ruleId);
                         }
                     }
                 } while (cursor.moveToNext());

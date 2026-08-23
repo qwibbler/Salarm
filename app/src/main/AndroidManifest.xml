@@ -344,7 +344,7 @@
         </receiver>
 
         <receiver
-            android:name="com.qwibbler.salarm.widgets.NamazWidgetUpdateReceiver"
+            android:name="com.qwibbler.salarm.widgets.SalahWidgetUpdateReceiver"
             android:directBootAware="true"
             android:exported="false">
             <intent-filter>
@@ -454,7 +454,7 @@
         </receiver>
 
         <activity
-            android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazWidgetConfiguration"
+            android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$SalahWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/salah_timeline_widget_label"
             android:theme="@style/Theme.Salarm" />
@@ -462,14 +462,14 @@
 
 
         <activity
-            android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazCountdownWidgetConfiguration"
+            android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$SalahCountdownWidgetConfiguration"
             android:excludeFromRecents="true"
             android:label="@string/salah_countdown_widget_label"
             android:theme="@style/Theme.Salarm" />
 
-        <!-- Namaz timeline widget -->
+        <!-- Salah timeline widget -->
         <receiver
-            android:name="com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider"
+            android:name="com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider"
             android:exported="true"
             android:label="@string/salah_timeline_widget_label">
             <intent-filter>
@@ -482,14 +482,14 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/appwidget_namaz_timeline_info" />
+                android:resource="@xml/appwidget_salah_timeline_info" />
         </receiver>
 
 
 
-        <!-- Namaz countdown widget -->
+        <!-- Salah countdown widget -->
         <receiver
-            android:name="com.qwibbler.salarm.widgets.NamazCountdownWidgetProvider"
+            android:name="com.qwibbler.salarm.widgets.SalahCountdownWidgetProvider"
             android:exported="true"
             android:label="@string/salah_countdown_widget_label">
             <intent-filter>
@@ -502,7 +502,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/appwidget_namaz_countdown_info" />
+                android:resource="@xml/appwidget_salah_countdown_info" />
         </receiver>
 
         <!-- ============================================================== -->

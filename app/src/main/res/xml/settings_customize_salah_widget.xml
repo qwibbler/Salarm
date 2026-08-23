@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:key="key_salah_widget_events_category"
+        android:title="@string/salah_widget_events_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_show_countdown"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_show_countdown_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_show_alarms"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_show_alarms_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="key_salah_widget_visible_events"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/visible_events_title"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/style_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_show_symbols"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_display_symbols_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_display_text_uppercase"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/display_text_uppercase_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_display_text_shadow"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/display_text_shadow_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_display_background"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/widget_background_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_customize_background_corner_radius"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/customize_background_corner_radius_title"
+            android:summary="@string/customize_background_corner_radius_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
+            android:key="key_salah_widget_background_corner_radius"
+            android:layout="@layout/settings_preference_slider_layout"
+            android:title="@string/background_corner_radius_title"
+            android:summary="@string/label_default"
+            android:defaultValue="24"
+            android:max="100"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_apply_horizontal_padding"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/widget_apply_horizontal_padding_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/colors_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_background_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/background_default_color_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_background_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/background_color_title"
+            android:defaultValue="#70000000"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_countdown_time_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Countdown time default color"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_countdown_time_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Countdown time color"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_countdown_label_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Countdown label default color"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_countdown_label_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Countdown label color"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_timeline_active_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline active event default color"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_timeline_active_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline active event color"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_timeline_next_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline next event default color"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_timeline_next_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline next event color"
+            android:defaultValue="#CCCCCC"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_timeline_standard_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline standard event default color"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_timeline_standard_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Timeline standard event color"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_display_item_highlight"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_highlight_item_title"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_item_active_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_highlight_active_default_color_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_item_active_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_highlight_active_custom_color_title"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <SwitchPreferenceCompat
+            android:key="key_salah_widget_default_item_next_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_highlight_next_default_color_title"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <com.qwibbler.salarm.settings.custompreference.ColorPickerPreference
+            android:key="key_salah_widget_custom_item_next_highlight_color"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_widget_highlight_next_custom_color_title"
+            android:defaultValue="#FFFFFF"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/font_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <com.qwibbler.salarm.settings.custompreference.CustomSliderPreference
+            android:key="key_salah_widget_maximum_font_size"
+            android:layout="@layout/settings_preference_slider_layout"
+            android:title="@string/max_clock_font_size_title"
+            android:summary="@string/label_default"
+            android:defaultValue="70"
+            android:max="200"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -71,7 +71,7 @@ import com.qwibbler.salarm.data.OnSilentSettingsListener;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.SalarmActivityBinding;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazLocationManager;
+import com.qwibbler.salarm.salah.SalahLocationManager;
 import com.qwibbler.salarm.settings.PermissionsManagementActivity;
 import com.qwibbler.salarm.settings.SettingsActivity;
 import com.qwibbler.salarm.setup.FirstLaunch;
@@ -329,8 +329,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             ContextCompat.startForegroundService(this, new Intent(this, KeepAliveService.class));
         }
 
-        if (NamazLocationManager.getLocationMode(this) == NamazLocationManager.LocationMode.GPS) {
-            NamazLocationManager.requestGpsUpdate(this);
+        if (SalahLocationManager.getLocationMode(this) == SalahLocationManager.LocationMode.GPS) {
+            SalahLocationManager.requestGpsUpdate(this);
         }
     }
 

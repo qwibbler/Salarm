@@ -146,7 +146,7 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING = true;
     public static final boolean DEFAULT_DISPLAY_ALARM_TAGS = true;
 
-    // Namaz
+    // Salah
     public static final String DEFAULT_SALAH_LATITUDE = "0.0";
     public static final String DEFAULT_SALAH_LONGITUDE = "0.0";
     public static final String DEFAULT_SALAH_MADHAB = "HANAFI";
@@ -302,7 +302,7 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_DATE = true;
     public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_NEXT_ALARM = true;
 
-    // Namaz Widget
+    // Salah Widget
     public static final boolean DEFAULT_SALAH_WIDGET_DISPLAY_BACKGROUND = true;
     public static final boolean DEFAULT_SALAH_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;
     public static final boolean DEFAULT_SALAH_WIDGET_TEXT_SHADOW_DISPLAYED = false;
@@ -321,7 +321,7 @@ public class PreferencesDefaultValues {
         "isha"
     );
 
-    // Namaz Countdown Widget
+    // Salah Countdown Widget
     public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;
     public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS = false;
     public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = true;

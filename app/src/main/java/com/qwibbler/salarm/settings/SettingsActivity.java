@@ -80,7 +80,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
-    public static final String KEY_SHOW_SALAH_SETTINGS = "show_namaz_settings";
+    public static final String KEY_SHOW_SALAH_SETTINGS = "show_salah_settings";
     private static final String KEY_APPBAR_EXPANDED = "key_appbar_expanded";
     private boolean mIsAppBarExpanded = true;
 
@@ -292,7 +292,7 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
             if (requireActivity().getIntent().getBooleanExtra(KEY_SHOW_SALAH_SETTINGS, false)) {
                 requireActivity().getIntent().removeExtra(KEY_SHOW_SALAH_SETTINGS);
-                animateAndShowFragment(new NamazSettingsFragment());
+                animateAndShowFragment(new SalahSettingsFragment());
             }
 
             if (BackupAndRestoreUtils.appNeedsRestart && (mRestartDialog == null || !mRestartDialog.isShowing())) {
@@ -341,9 +341,9 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
                 case KEY_STOPWATCH_SETTINGS -> animateAndShowFragment(new StopwatchSettingsFragment());
 
-                case KEY_SALAH_SETTINGS -> animateAndShowFragment(new NamazSettingsFragment());
+                case KEY_SALAH_SETTINGS -> animateAndShowFragment(new SalahSettingsFragment());
 
-                case KEY_SALAH_ALARM_SETTINGS -> animateAndShowFragment(new NamazAlarmSettingsFragment());
+                case KEY_SALAH_ALARM_SETTINGS -> animateAndShowFragment(new SalahAlarmSettingsFragment());
 
                 case KEY_SCREENSAVER_SETTINGS -> animateAndShowFragment(new ScreensaverSettingsActivity.ScreensaverSettingsFragment());
 

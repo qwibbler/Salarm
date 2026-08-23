@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.settings.AppWidgetAnalogSettingsFragment;
 import com.qwibbler.salarm.settings.AppWidgetDigitalSettingsFragment;
-import com.qwibbler.salarm.settings.AppWidgetNamazCountdownSettingsFragment;
-import com.qwibbler.salarm.settings.AppWidgetNamazSettingsFragment;
+import com.qwibbler.salarm.settings.AppWidgetSalahCountdownSettingsFragment;
+import com.qwibbler.salarm.settings.AppWidgetSalahSettingsFragment;
 import com.qwibbler.salarm.settings.AppWidgetNextAlarmSettingsFragment;
 import com.qwibbler.salarm.settings.AppWidgetVerticalSettingsFragment;
 import com.qwibbler.salarm.uicomponents.CollapsingToolbarBaseActivity;
@@ -83,7 +83,7 @@ public class WidgetConfiguration {
         }
     }
 
-    public static class NamazWidgetConfiguration extends CollapsingToolbarBaseActivity {
+    public static class SalahWidgetConfiguration extends CollapsingToolbarBaseActivity {
 
         @Override
         protected String getActivityTitle() {
@@ -94,11 +94,11 @@ public class WidgetConfiguration {
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazSettingsFragment());
+            showFragmentFromWidget(this, savedInstanceState, new AppWidgetSalahSettingsFragment());
         }
     }
 
-    public static class NamazCountdownWidgetConfiguration extends CollapsingToolbarBaseActivity {
+    public static class SalahCountdownWidgetConfiguration extends CollapsingToolbarBaseActivity {
 
         @Override
         protected String getActivityTitle() {
@@ -109,7 +109,7 @@ public class WidgetConfiguration {
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            showFragmentFromWidget(this, savedInstanceState, new AppWidgetNamazCountdownSettingsFragment());
+            showFragmentFromWidget(this, savedInstanceState, new AppWidgetSalahCountdownSettingsFragment());
         }
     }
 
