@@ -117,6 +117,7 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         bindRepeatText(context, alarm, alarmInstance);
         bindUpcomingDate(alarm, alarmInstance);
         bindPreemptiveDismissButton(context, alarm, alarmInstance);
+        bindTags(alarm);
         bindAlphaAnimation(alarm);
 
         itemView.setContentDescription(mBinding.digitalClock.getText() + " " + alarm.getLabelOrDefault(context));
@@ -288,12 +289,35 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         mBinding.preemptiveDismissButton.setVisibility(VISIBLE);
     }
 
+    private void bindTags(Alarm alarm) {
+        if (!SettingsDAO.areAlarmTagsDisplayed(mPrefs) || alarm.tags == null || alarm.tags.isEmpty()) {
+            mBinding.alarmTags.setVisibility(GONE);
+            return;
+        }
+
+        mBinding.alarmTags.setVisibility(VISIBLE);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < alarm.tags.size(); i++) {
+            sb.append("#").append(alarm.tags.get(i));
+            if (i < alarm.tags.size() - 1) {
+                sb.append(" ");
+            }
+        }
+
+        mBinding.alarmTags.setText(sb.toString());
+        mBinding.alarmTags.setOnClickListener(v ->
+            mItemHolder.getAlarmTimeClickHandler().displayBottomSheetDialog(mItemHolder.item, false, true)
+        );
+    }
+
     private void bindAlphaAnimation(Alarm alarm) {
         float targetAlpha = alarm.enabled ? CLOCK_ENABLED_ALPHA : CLOCK_DISABLED_ALPHA;
 
         mBinding.alarmLabel.animate().cancel();
         mBinding.digitalClock.animate().cancel();
         mBinding.daysOfWeek.animate().cancel();
+        mBinding.alarmTags.animate().cancel();
 
         if (mBinding.digitalClock.getAlpha() == targetAlpha) {
             return;
@@ -303,12 +327,14 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
             mBinding.alarmLabel.setAlpha(targetAlpha);
             mBinding.digitalClock.setAlpha(targetAlpha);
             mBinding.daysOfWeek.setAlpha(targetAlpha);
+            mBinding.alarmTags.setAlpha(targetAlpha);
             return;
         }
 
         mBinding.alarmLabel.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
         mBinding.digitalClock.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
         mBinding.daysOfWeek.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
+        mBinding.alarmTags.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
     }
 
     // ********************

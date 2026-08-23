@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">M<xliff:g id="separator">=</xliff:g>Manama, Bahrejn<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">B<xliff:g id="separator">=</xliff:g>Bridgetown, Barbados<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">B<xliff:g id="separator">=</xliff:g>Belmopan, Belizë<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">R<xliff:g id="separator">=</xliff:g>Rejkjavik, Islandë<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">N<xliff:g id="separator">=</xliff:g>Nju-Delhi, Indi<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">A<xliff:g id="separator">=</xliff:g>Astana, Kazakistan<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">K<xliff:g id="separator">=</xliff:g>Kuvajt, Kuvajt<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">R<xliff:g id="separator">=</xliff:g>Rabat, Marok<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">W<xliff:g id="separator">=</xliff:g>Uellington, Zelanda e Re<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">A<xliff:g id="separator">=</xliff:g>Abuxha, Nigeri<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">P<xliff:g id="separator">=</xliff:g>Pretoria, Afrika e Jugut<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">B<xliff:g id="separator">=</xliff:g>Bern, Zvicër<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">K<xliff:g id="separator">=</xliff:g>Kiev, Ukrainë<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">A<xliff:g id="separator">=</xliff:g>Abu Dabi, Emiratet e Bashkuara Arabe<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">W<xliff:g id="separator">=</xliff:g>Uashington, D.C., SHBA<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">J<xliff:g id="separator">=</xliff:g>Xheda, Arabia Saudite<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">M<xliff:g id="separator">=</xliff:g>Meka, Arabia Saudite<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">M<xliff:g id="separator">=</xliff:g>Medina, Arabia Saudite<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

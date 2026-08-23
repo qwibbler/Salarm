@@ -1753,5 +1753,95 @@
     "lat": -43.9141,
     "lon": -176.5414,
     "tz": "Pacific/Chatham"
+  },
+  "C362": {
+    "lat": 26.22,
+    "lon": 50.58,
+    "tz": "Asia/Bahrain"
+  },
+  "C363": {
+    "lat": 13.1,
+    "lon": -59.62,
+    "tz": "America/Barbados"
+  },
+  "C364": {
+    "lat": 17.25,
+    "lon": -88.77,
+    "tz": "America/Belize"
+  },
+  "C365": {
+    "lat": 64.14,
+    "lon": -21.9,
+    "tz": "Atlantic/Reykjavik"
+  },
+  "C366": {
+    "lat": 28.61,
+    "lon": 77.21,
+    "tz": "Asia/Kolkata"
+  },
+  "C367": {
+    "lat": 51.17,
+    "lon": 71.45,
+    "tz": "Asia/Almaty"
+  },
+  "C368": {
+    "lat": 29.37,
+    "lon": 47.98,
+    "tz": "Asia/Kuwait"
+  },
+  "C369": {
+    "lat": 34.02,
+    "lon": -6.84,
+    "tz": "Africa/Casablanca"
+  },
+  "C370": {
+    "lat": -41.29,
+    "lon": 174.78,
+    "tz": "Pacific/Auckland"
+  },
+  "C371": {
+    "lat": 9.06,
+    "lon": 7.49,
+    "tz": "Africa/Lagos"
+  },
+  "C372": {
+    "lat": -25.75,
+    "lon": 28.19,
+    "tz": "Africa/Johannesburg"
+  },
+  "C373": {
+    "lat": 46.95,
+    "lon": 7.45,
+    "tz": "Europe/Zurich"
+  },
+  "C374": {
+    "lat": 50.45,
+    "lon": 30.52,
+    "tz": "Europe/Kyiv"
+  },
+  "C375": {
+    "lat": 24.47,
+    "lon": 54.37,
+    "tz": "Asia/Dubai"
+  },
+  "C376": {
+    "lat": 38.9,
+    "lon": -77.04,
+    "tz": "America/New_York"
+  },
+  "C377": {
+    "lat": 21.5433,
+    "lon": 39.1728,
+    "tz": "Asia/Riyadh"
+  },
+  "C378": {
+    "lat": 21.4225,
+    "lon": 39.8261,
+    "tz": "Asia/Riyadh"
+  },
+  "C379": {
+    "lat": 24.4672,
+    "lon": 39.6068,
+    "tz": "Asia/Riyadh"
   }
 }

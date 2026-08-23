@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class RingtoneUtils {
@@ -75,7 +76,7 @@ public class RingtoneUtils {
      * <p>This excludes custom ringtones that cause problems during restoration.</p>
      */
     public static boolean isSystemRingtone(Uri uri) {
-        String uriString = uri.toString().toLowerCase();
+        String uriString = uri.toString().toLowerCase(Locale.ROOT);
         return (uriString.startsWith("content://media/external/audio/") ||
             uriString.startsWith("content://media/internal/audio/") ||
             uriString.startsWith("content://media/") ||

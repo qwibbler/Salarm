@@ -140,7 +140,10 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"ಎಲ್ಲಾ ಟೈಮರ್‌ಗಳನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"ಟೈಮರ್ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"ಸಮಯ ಮುಗಿದಿದೆ"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"<xliff:g id="NUM_TIMERS">%d</xliff:g> ಟೈಮರ್‌ಗಳ ಅವಧಿ ಮೀರಿದೆ"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="one">"<xliff:g id="NUM_TIMERS">%d</xliff:g> ಟೈಮರ್‌ಗಳ ಅವಧಿ ಮೀರಿದೆ"</item>
+        <item quantity="other">"<xliff:g id="NUM_TIMERS">%d</xliff:g> ಟೈಮರ್‌ಗಳ ಅವಧಿ ಮೀರಿದೆ"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"ಟೈಮರ್"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"ತಪ್ಪಿದ ಟೈಮರ್: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"ವಿರಾಮ"</string>
@@ -187,7 +190,10 @@
     <string name="timer_settings" msgid="7955522143086154795">"ಟೈಮರ್‌ಗಳು"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"ಟೈಮರ್ ವೈಬ್ರೇಟ್"</string>
     <string name="timer_paused" msgid="5941160896040771462">"ಟೈಮರ್ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"<xliff:g id="NUMBER">%d</xliff:g> ಟೈಮರ್‌ಗಳು"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="one">"<xliff:g id="NUMBER">%d</xliff:g> ಟೈಮರ್‌ಗಳು"</item>
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> ಟೈಮರ್‌ಗಳು"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"ರದ್ದುಮಾಡಿ"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"ಅಲಾರಮ್ ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="LABEL">%s</xliff:g></string>

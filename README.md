@@ -1,6 +1,6 @@
 <!--suppress CheckImageSize -->
 # <img width="48" height="48" alt="image" src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" /> Salarm
-**Salarm** is a customizable, privacy‑friendly, open-source clock/namaz app forked from BlackyHawky's Clock.  
+**Salarm** is a customizable, privacy‑friendly, open-source clock/salah app forked from BlackyHawky's Clock.  
 It combines modern design, powerful features, and transparency — giving you full control over your time.
 
 # 📑 Table of Contents
@@ -30,7 +30,7 @@ It combines modern design, powerful features, and transparency — giving you fu
 
 # ✨ Features
 
-### • 🕌 **Relational & Namaz Alarms (Salarm Exclusive)**
+### • 🕌 **Relational & Salah Alarms (Salarm Exclusive)**
 
 * Set alarms relative to Islamic prayer times (e.g., 15 mins before Fajr, 30 mins after Dhuhr, or halfway between Fajr and Dhuhr). 
 * One single rule lasts all year—alarm triggers dynamically shift as seasons change and daytime lengths adjust. 
@@ -39,7 +39,7 @@ It combines modern design, powerful features, and transparency — giving you fu
 * Dynamic auto-silence cutoffs tied to prayer events to mark alarms as "missed" before the next prayer window begins. 
 * Dynamic calculations for both Shafi'i and Hanafi Asr prayer times.
 
-### 🧭 **Namaz & Qibla Suite**
+### 🧭 **Salah & Qibla Suite**
 
 * Live countdown to the next prayer event alongside full daily prayer schedules. 
 * View past or future prayer schedules, adjust calculation methods, or toggle manual location overrides. 
@@ -122,7 +122,7 @@ See the [LICENSE](LICENSE) file for full details.
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/AlarmPage.jpeg" alt="Screenshot Alarm Page" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/SetSalarmAlarm.jpeg" alt="Screenshot Set Salarm Alarm" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/SalarmAlarm.jpeg" alt="Screenshot Salarm Alarm" width="200" />
- <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/NamazTimes.jpeg" alt="Screenshot Namaz Times" width="200" />
+ <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/NamazTimes.jpeg" alt="Screenshot Salah Times" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/QiblaPage.jpeg" alt="Screenshot Qibla" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" alt="Screenshot 01" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" alt="Screenshot 02" width="200" />

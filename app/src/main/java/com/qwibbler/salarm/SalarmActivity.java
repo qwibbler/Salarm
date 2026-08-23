@@ -45,6 +45,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -69,7 +71,7 @@ import com.qwibbler.salarm.data.OnSilentSettingsListener;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.SalarmActivityBinding;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazLocationManager;
+import com.qwibbler.salarm.salah.SalahLocationManager;
 import com.qwibbler.salarm.settings.PermissionsManagementActivity;
 import com.qwibbler.salarm.settings.SettingsActivity;
 import com.qwibbler.salarm.setup.FirstLaunch;
@@ -200,7 +202,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     private SharedPreferences.OnSharedPreferenceChangeListener mPrefListener;
 
     @Override
-    public void onNewIntent(Intent newIntent) {
+    public void onNewIntent(@NonNull Intent newIntent) {
         super.onNewIntent(newIntent);
 
         // Fragments may query the latest intent for information, so update the intent.
@@ -327,8 +329,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             ContextCompat.startForegroundService(this, new Intent(this, KeepAliveService.class));
         }
 
-        if (NamazLocationManager.getLocationMode(this) == NamazLocationManager.LocationMode.GPS) {
-            NamazLocationManager.requestGpsUpdate(this);
+        if (SalahLocationManager.getLocationMode(this) == SalahLocationManager.LocationMode.GPS) {
+            SalahLocationManager.requestGpsUpdate(this);
         }
     }
 
@@ -360,7 +362,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
     @SuppressLint("AlwaysShowAction")
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         menu.add(0, Menu.NONE, 1, R.string.settings).setIcon(R.drawable.ic_settings).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         if (PermissionUtils.areEssentialPermissionsNotGranted(this)) {
@@ -377,7 +379,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == 0) {
             final Intent settingIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingIntent);
@@ -396,12 +398,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      * respond to key presses even if they are not currently focused.
      */
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         return getSelectedSalarmFragment().onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         return getSelectedSalarmFragment().onKeyUp(keyCode, event) || super.onKeyUp(keyCode, event);
     }
 
@@ -497,7 +499,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
             switch (key) {
                 case KEY_TOOLBAR_TITLE, KEY_TAB_TITLE_VISIBILITY, KEY_TAB_INDICATOR, KEY_TAB_TO_DISPLAY, KEY_TAB_ANIMATION, KEY_VIBRATIONS,
-                     KEY_KEEP_SCREEN_ON, KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
+                     KEY_KEEP_SCREEN_ON, KEY_VISIBLE_TABS, KEY_ESSENTIAL_PERMISSIONS_GRANTED -> mShouldRecreate = true;
 
             }
         };
@@ -548,8 +550,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             tab = UiDataModel.Tab.TIMERS;
         } else if (itemId == R.id.page_stopwatch) {
             tab = UiDataModel.Tab.STOPWATCH;
-        } else if (itemId == R.id.page_namaz) {
-            tab = UiDataModel.Tab.NAMAZ;
+        } else if (itemId == R.id.page_salah) {
+            tab = UiDataModel.Tab.SALAH;
         } else if (itemId == R.id.page_qibla) {
             tab = UiDataModel.Tab.QIBLA;
         } else if (itemId == R.id.page_next) {
@@ -834,13 +836,13 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         }
 
         mBinding.salarmActivityBottomMenu.post(() -> {
-            if (isFinishing() || isDestroyed() || mBinding == null || mBinding.salarmActivityBottomMenu == null) {
+            if (isFinishing() || isDestroyed() || mBinding == null) {
                 return;
             }
 
             final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
-                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
                     if (Math.abs(velocityX) > Math.abs(velocityY)) {
                         if (velocityX > 0) {
                             setBottomNavPage(1);
@@ -853,12 +855,17 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 }
 
                 @Override
-                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
                     return Math.abs(distanceX) > Math.abs(distanceY);
                 }
 
                 @Override
-                public boolean onDown(MotionEvent e) {
+                public boolean onDown(@NonNull MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public boolean onSingleTapUp(@NonNull MotionEvent e) {
                     return true;
                 }
             });
@@ -869,7 +876,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                     View itemView = menuViewGroup.getChildAt(i);
                     if (itemView != null) {
                         itemView.setOnTouchListener((v, event) -> {
-                            gestureDetector.onTouchEvent(event);
+                            if (gestureDetector.onTouchEvent(event)) {
+                                if (event.getAction() == MotionEvent.ACTION_UP) {
+                                    v.performClick();
+                                }
+                                return true;
+                            }
                             return false;
                         });
                     }
@@ -878,7 +890,12 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
             if (menuView != null) {
                 menuView.setOnTouchListener((v, event) -> {
-                    gestureDetector.onTouchEvent(event);
+                    if (gestureDetector.onTouchEvent(event)) {
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            v.performClick();
+                        }
+                        return true;
+                    }
                     return false;
                 });
             }
@@ -898,7 +915,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case CLOCKS -> R.drawable.ic_tab_clock;
             case TIMERS -> R.drawable.ic_tab_timer;
             case STOPWATCH -> R.drawable.ic_tab_stopwatch;
-            case NAMAZ -> R.drawable.ic_tab_namaz;
+            case SALAH -> R.drawable.ic_tab_salah;
             case QIBLA -> R.drawable.ic_tab_qibla;
         };
     }
@@ -946,7 +963,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     @SuppressLint("RestrictedApi")
     private void applyBottomNavTooltips() {
-        if (mBinding == null || mBinding.salarmActivityBottomMenu == null) {
+        if (mBinding == null) {
             return;
         }
 
@@ -1035,7 +1052,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case CLOCKS -> R.id.page_clock;
             case TIMERS -> R.id.page_timer;
             case STOPWATCH -> R.id.page_stopwatch;
-            case NAMAZ -> R.id.page_namaz;
+            case SALAH -> R.id.page_salah;
             case QIBLA -> R.id.page_qibla;
         };
 
@@ -1284,7 +1301,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
      */
     private final class AutoStartShowListener extends AnimatorListenerAdapter {
         @Override
-        public void onAnimationEnd(Animator animation) {
+        public void onAnimationEnd(@NonNull Animator animation) {
             // Prepare the hide animation for its next use; by default do not auto-show after hide.
             mHideAnimation.removeListener(mAutoStartShowListener);
 

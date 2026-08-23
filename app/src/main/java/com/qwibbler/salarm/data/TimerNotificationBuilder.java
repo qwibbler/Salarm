@@ -303,7 +303,7 @@ class TimerNotificationBuilder {
 
             actions.add(new Action.Builder(icon2, title2, intent2).build());
         } else {
-            titleText = localizedContext.getString(R.string.timer_multi_times_up, count);
+            titleText = localizedContext.getResources().getQuantityString(R.plurals.timer_multi_times_up, count, count);
             stateText = null;
 
             // Left button: Reset all timers

@@ -21,6 +21,8 @@ import android.widget.Space;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import androidx.annotation.Keep;
 
 import com.qwibbler.salarm.R;
@@ -301,7 +303,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
         boolean isTopDateDisplayed = WidgetDAO.isTopDateDisplayedOnDigitalWidget(prefs);
         boolean isDefaultDateColor = WidgetDAO.isDigitalWidgetDefaultDateColor(prefs);
         String dateFormat = WidgetUtils.getDateFormat(context);
-        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase() : dateFormat;
+        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase(Locale.getDefault()) : dateFormat;
 
         if (isTopDateDisplayed) {
             rv.setViewVisibility(R.id.clockSpacer, GONE);
@@ -346,7 +348,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase() : nextAlarmTime;
+        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase(Locale.getDefault()) : nextAlarmTime;
 
         if (WidgetDAO.isDigitalWidgetDefaultNextAlarmColor(prefs)) {
             rv.setViewVisibility(getNextAlarmViewId(), VISIBLE);
@@ -382,7 +384,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmTitleText = isTextUppercase(prefs) ? nextAlarmTitle.toUpperCase() : nextAlarmTitle;
+        String nextAlarmTitleText = isTextUppercase(prefs) ? nextAlarmTitle.toUpperCase(Locale.getDefault()) : nextAlarmTitle;
 
         if (WidgetDAO.isDigitalWidgetDefaultNextAlarmTitleColor(prefs)) {
             rv.setViewVisibility(getLabelIconViewId(), VISIBLE);
@@ -471,7 +473,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
         boolean isTopDateDisplayed = WidgetDAO.isTopDateDisplayedOnDigitalWidget(prefs);
         boolean isDefaultDateColor = WidgetDAO.isDigitalWidgetDefaultDateColor(prefs);
         String dateFormat = WidgetUtils.getDateFormat(context);
-        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase() : dateFormat;
+        String dateText = isTextUppercase(prefs) ? dateFormat.toUpperCase(Locale.getDefault()) : dateFormat;
 
         if (isTopDateDisplayed) {
             clockSpacer.setVisibility(GONE);
@@ -519,7 +521,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase() : nextAlarmTime;
+        String nextAlarmText = isTextUppercase(prefs) ? nextAlarmTime.toUpperCase(Locale.getDefault()) : nextAlarmTime;
 
         if (WidgetDAO.isDigitalWidgetDefaultNextAlarmColor(prefs)) {
             nextAlarm.setText(nextAlarmText);
@@ -563,7 +565,7 @@ public class DigitalAppWidgetProvider extends BaseDigitalAppWidgetProvider {
             return;
         }
 
-        String nextAlarmTitleText = isTextUppercase(prefs) ? nextAlarmTitle.toUpperCase() : nextAlarmTitle;
+        String nextAlarmTitleText = isTextUppercase(prefs) ? nextAlarmTitle.toUpperCase(Locale.getDefault()) : nextAlarmTitle;
 
         if (WidgetDAO.isDigitalWidgetDefaultNextAlarmTitleColor(prefs)) {
             labelIcon.setVisibility(VISIBLE);

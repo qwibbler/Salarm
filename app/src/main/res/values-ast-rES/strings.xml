@@ -112,7 +112,10 @@
     <string name="timer_stop_all">Parar tolos temporizadores</string>
     <string name="timer_canceled">Encaboxóse\'l temporizador</string>
     <string name="timer_times_up">Tiempu agotáu</string>
-    <string name="timer_multi_times_up"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> temporizadores deteníos</string>
+    <plurals name="timer_multi_times_up">
+        <item quantity="one"><xliff:g example="1" id="NUM_TIMERS">%d</xliff:g> temporizadores deteníos</item>
+        <item quantity="other"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> temporizadores deteníos</item>
+    </plurals>
     <string name="timer_notification_label">Temporizador</string>
     <string name="missed_named_timer_notification_label">Cronu desapaecíu: <xliff:g example="Pick up kids" id="name">%s</xliff:g></string>
     <string name="timer_pause">Posar</string>
@@ -157,7 +160,10 @@
     <string name="timer_settings">Temporizadores</string>
     <string name="timer_vibrate_title">Temporizador en vibración</string>
     <string name="timer_paused">Posóse\'l temporizador</string>
-    <string name="timers_in_use"><xliff:g id="NUMBER">%d</xliff:g> temporizadores</string>
+    <plurals name="timers_in_use">
+        <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> temporizadores</item>
+        <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> temporizadores</item>
+    </plurals>
     <string name="alarm_undo">desfacer</string>
     <string name="alarm_deleted">Alarma desaniciada</string>
     <string name="world_day_of_week_label">/ <xliff:g id="LABEL">%s</xliff:g></string>

@@ -133,7 +133,9 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"หยุดใช้ตัวจับเวลาทั้งหมด"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"ยกเลิกการตั้งเวลาแล้ว"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"หมดเวลา"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"การจับเวลา <xliff:g id="NUM_TIMERS">%d</xliff:g> ครั้งครบแล้ว"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="other">"การจับเวลา <xliff:g id="NUM_TIMERS">%d</xliff:g> ครั้งครบแล้ว"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"ตัวจับเวลา"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"ตัวตั้งเวลาที่พลาดไป: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"หยุดชั่วคราว"</string>
@@ -180,7 +182,9 @@
     <string name="timer_settings" msgid="7955522143086154795">"ตัวจับเวลา"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"ตัวจับเวลาสั่น"</string>
     <string name="timer_paused" msgid="5941160896040771462">"หยุดตัวจับเวลาชั่วคราวแล้ว"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"นาฬิกาจับเวลา <xliff:g id="NUMBER">%d</xliff:g> เรือน"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="other">"นาฬิกาจับเวลา <xliff:g id="NUMBER">%d</xliff:g> เรือน"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"เลิกทำ"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"ลบการแจ้งเตือนแล้ว"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="LABEL">%s</xliff:g></string>

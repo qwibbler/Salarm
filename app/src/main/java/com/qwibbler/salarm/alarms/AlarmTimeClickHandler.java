@@ -6,15 +6,13 @@
 
 package com.qwibbler.salarm.alarms;
 
-import static android.media.AudioManager.STREAM_ALARM;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
+import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -64,11 +62,15 @@ public final class AlarmTimeClickHandler {
     }
 
     public void displayBottomSheetDialog(Alarm alarm, boolean isNewAlarm) {
+        displayBottomSheetDialog(alarm, isNewAlarm, false);
+    }
+
+    public void displayBottomSheetDialog(Alarm alarm, boolean isNewAlarm, boolean openTags) {
         AlarmEditBottomSheetFragment fragment =
-            AlarmEditBottomSheetFragment.newInstance(alarm, alarm.id, mAlarmFragment.getTag(), isNewAlarm);
+            AlarmEditBottomSheetFragment.newInstance(alarm, alarm.id, mAlarmFragment.getTag(), isNewAlarm, openTags);
 
         AlarmEditBottomSheetFragment.show(mAlarmFragment.getParentFragmentManager(), fragment);
-        LOGGER.v("Opening BottomSheet to edit alarm: " + alarm.id);
+        LOGGER.v("Opening BottomSheet to edit alarm: " + alarm.id + (openTags ? " with tags open" : ""));
     }
 
     public void setAlarmEnabled(Alarm alarm, boolean newState) {
@@ -242,17 +244,12 @@ public final class AlarmTimeClickHandler {
 
     public void setAlarm(int hour, int minute) {
         if (mSelectedAlarm == null) {
-            Alarm newAlarm = buildNewAlarm(hour, minute);
+            Uri ringtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+            Alarm newAlarm = Alarm.createDefaultAlarm(mContext, hour, minute, ringtone);
 
             AlarmVisualCache.invalidate(newAlarm.id);
 
-            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, addedAlarm ->
-                AppExecutors.getMainThread().post(() -> {
-                    if (mAlarmFragment.isAdded()) {
-                        mAlarmFragment.setPendingAlarmToEdit(addedAlarm);
-                    }
-                })
-            );
+            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, true);
         } else {
             updateExistingAlarm(hour, minute, false);
         }
@@ -267,43 +264,15 @@ public final class AlarmTimeClickHandler {
         int m = alarmTime.get(Calendar.MINUTE);
 
         if (mSelectedAlarm == null) {
-            Alarm newAlarm = buildNewAlarm(h, m);
+            Uri ringtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings();
+            Alarm newAlarm = Alarm.createDefaultAlarm(mContext, h, m, ringtone);
 
             AlarmVisualCache.invalidate(newAlarm.id);
 
-            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, addedAlarm ->
-                AppExecutors.getMainThread().post(() -> {
-                    if (mAlarmFragment.isAdded()) {
-                        mAlarmFragment.setPendingAlarmToEdit(addedAlarm);
-                    }
-                })
-            );
+            mAlarmUpdateHandler.asyncAddAlarm(newAlarm, false, true);
         } else {
             updateExistingAlarm(h, m, true);
         }
-    }
-
-    private Alarm buildNewAlarm(int hour, int minute) {
-        final Alarm alarm = new Alarm();
-        final AudioManager audioManager = mContext.getApplicationContext().getSystemService(AudioManager.class);
-
-        alarm.hour = hour;
-        alarm.minutes = minute;
-        alarm.syncByLabel = false;
-        alarm.enabled = true;
-        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(mPrefs);
-        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(mPrefs);
-        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(mPrefs);
-        alarm.deleteAfterUse = SettingsDAO.isOccasionalAlarmDeletedByDefault(mPrefs);
-        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(mPrefs);
-        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(mPrefs);
-        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(mPrefs);
-        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(mPrefs);
-        alarm.alarmVolume = audioManager.getStreamVolume(STREAM_ALARM);
-        alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
-        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(mPrefs);
-
-        return alarm;
     }
 
     private void updateExistingAlarm(int hour, int minute, boolean isFromDelay) {

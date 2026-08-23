@@ -133,7 +133,9 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"タイマーをすべて停止"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"タイマーをキャンセルしました"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"タイムアップ"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409"><xliff:g id="NUM_TIMERS">%d</xliff:g>件のタイマーが終了\"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="other"><xliff:g id="NUM_TIMERS">%d</xliff:g>件のタイマーが終了\"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"タイマー"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"未応答のタイマー: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"一時停止"</string>
@@ -180,7 +182,9 @@
     <string name="timer_settings" msgid="7955522143086154795">"タイマー"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"タイマーのバイブレーション"</string>
     <string name="timer_paused" msgid="5941160896040771462">"タイマーを一時停止しました"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"<xliff:g id="NUMBER">%d</xliff:g>件のタイマー"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g>件のタイマー"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"元に戻す"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"アラームを削除しました"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="LABEL">%s</xliff:g></string>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="?attr/dialogPreferredPadding"
+        android:orientation="vertical">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/dismiss_never_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableStart="@drawable/ic_selector_checkbox"
+            android:drawablePadding="20dp"
+            android:text="@string/label_never"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:ignore="RtlSymmetry"
+            tools:checked="true" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:dividerColor="?attr/colorOutline" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/minutes_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableStart="@drawable/ic_selector_checkbox"
+            android:drawablePadding="20dp"
+            android:text="@string/label_minutes"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:ignore="RtlSymmetry" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_layout_minutes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="44dp"
+            android:enabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_minutes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/label_minutes"
+                android:inputType="number"
+                android:maxLength="3"
+                tools:ignore="TextContrastCheck" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            app:dividerColor="?attr/colorOutline" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/snoozes_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:button="@null"
+            android:drawableStart="@drawable/ic_selector_checkbox"
+            android:drawablePadding="20dp"
+            android:text="@string/label_snoozes"
+            android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:ignore="RtlSymmetry" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/text_input_layout_snoozes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="44dp"
+            android:enabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_snoozes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/label_snoozes"
+                android:inputType="number"
+                android:maxLength="2"
+                tools:ignore="TextContrastCheck" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

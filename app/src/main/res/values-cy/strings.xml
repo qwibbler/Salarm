@@ -166,7 +166,14 @@
     <string name="timer_stop_all">Stopio pob amserydd</string>
     <string name="timer_canceled">Diddymwyd yr amserydd</string>
     <string name="timer_times_up">Amser ar ben</string>
-    <string name="timer_multi_times_up"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</string>
+    <plurals name="timer_multi_times_up">
+        <item quantity="zero"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+        <item quantity="one"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+        <item quantity="two"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+        <item quantity="few"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+        <item quantity="many"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+        <item quantity="other"><xliff:g example="2" id="NUM_TIMERS">%d</xliff:g> amserydd wedi dod i ben</item>
+    </plurals>
     <string name="timer_notification_label">Amserydd</string>
     <string name="missed_named_timer_notification_label">Amserydd wedi\'i methu: <xliff:g example="Pick up kids" id="name">%s</xliff:g></string>
     <string name="timer_pause">Saib</string>
@@ -213,7 +220,14 @@
     <string name="timer_settings">Amseryddion</string>
     <string name="timer_vibrate_title">Dirgryniad amserydd</string>
     <string name="timer_paused">Amserydd wedi ei rewi</string>
-    <string name="timers_in_use"><xliff:g example="7" id="number">%d</xliff:g> amserydd</string>
+    <plurals name="timers_in_use">
+        <item quantity="zero"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+        <item quantity="one"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+        <item quantity="two"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+        <item quantity="few"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+        <item quantity="many"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+        <item quantity="other"><xliff:g example="7" id="number">%d</xliff:g> amserydd</item>
+    </plurals>
     <string name="alarm_undo">dad-wneud</string>
     <string name="alarm_deleted">Dilëwyd y larwm</string>
     <string name="world_day_of_week_label">/ <xliff:g id="label">%s</xliff:g></string>

@@ -610,16 +610,24 @@ public final class DataModel {
      * @return the uri of the ringtone from the settings to play for all alarms
      */
     public Uri getAlarmRingtoneUriFromSettings() {
+        return getAlarmRingtoneUriFromSettings(false);
+    }
+
+    public Uri getAlarmRingtoneUriFromSettings(boolean isSalah) {
         enforceMainLooper();
-        return mAlarmModel.getAlarmRingtoneUriFromSettings();
+        return mAlarmModel.getAlarmRingtoneUriFromSettings(isSalah);
     }
 
     /**
      * @return the title of the ringtone that is played for all alarms
      */
     public String getAlarmRingtoneTitle() {
+        return getAlarmRingtoneTitle(false);
+    }
+
+    public String getAlarmRingtoneTitle(boolean isSalah) {
         enforceMainLooper();
-        return mAlarmModel.getAlarmRingtoneTitle();
+        return mAlarmModel.getAlarmRingtoneTitle(isSalah);
     }
 
     /**

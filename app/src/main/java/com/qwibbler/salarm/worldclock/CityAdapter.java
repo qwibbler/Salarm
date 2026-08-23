@@ -242,6 +242,8 @@ public class CityAdapter extends BaseAdapter implements View.OnClickListener, Co
                 holder.binding().cityOnOffCheckbox.setContentDescription(city.getName());
                 holder.binding().cityOnOffCheckbox.setOnCheckedChangeListener(this);
                 holder.binding().cityName.setText(city.getName(), TextView.BufferType.SPANNABLE);
+                holder.binding().cityCountry.setText(city.getCountry());
+                holder.binding().cityCountry.setVisibility(SettingsDAO.getShowCountry(mPrefs) && !TextUtils.isEmpty(city.getCountry()) ? View.VISIBLE : View.GONE);
                 holder.binding().cityTime.setText(getTimeCharSequence(timeZone));
 
                 final boolean showIndex = getShowIndex(position);
@@ -427,7 +429,7 @@ public class CityAdapter extends BaseAdapter implements View.OnClickListener, Co
     public void filter(String queryText) {
         mCurrentQueryText = queryText;
 
-        final String query = City.removeSpecialCharacters(queryText.toUpperCase());
+        final String query = City.removeSpecialCharacters(queryText.toUpperCase(Locale.getDefault()));
 
         // Compute the filtered list of cities.
         final List<City> filteredCities;

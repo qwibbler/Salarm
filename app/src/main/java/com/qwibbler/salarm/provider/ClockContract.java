@@ -148,12 +148,30 @@ public final class ClockContract {
          * Type: INTEGER
          */
         String BLUR_INTENSITY = "blurIntensity";
+
+        /**
+         * Alarm dismiss after duration or snooze count.
+         * <p>Type: INTEGER</p>
+         */
+        String DISMISS_AFTER = "dismissAfter";
+
+        /**
+         * The initial trigger time of the alarm instance.
+         * <p>Type: LONG</p>
+         */
+        String INITIAL_ALARM_TIME = "initialAlarmTime";
+
+        /**
+         * Alarm tags stored as a comma-separated string.
+         * <p>Type: STRING</p>
+         */
+        String TAGS = "tags";
     }
 
     /**
      * Constants for the Alarms table, which contains the user created alarms.
      */
-    protected interface AlarmsColumns extends AlarmSettingColumns, BaseColumns {
+    public interface AlarmsColumns extends AlarmSettingColumns, BaseColumns {
 
         /**
          * The content:// style URL for this table.
@@ -229,7 +247,7 @@ public final class ClockContract {
     /**
      * Constants for the Instance table, which contains the state of each alarm.
      */
-    protected interface InstancesColumns extends AlarmSettingColumns, BaseColumns {
+    public interface InstancesColumns extends AlarmSettingColumns, BaseColumns {
 
         /**
          * The content:// style URL for this table.
@@ -340,5 +358,81 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String MISSED_ALARM_REPEAT_COUNT = "missed_alarm_repeat_count";
+
+        /**
+         * Foreign key to relational rule table (Room).
+         * <p>Type: INTEGER (long)</p>
+         */
+        String RELATIONAL_RULE_ID = "relational_rule_id";
+    }
+
+    /**
+     * Constants for the alarm log table.
+     */
+    public interface AlarmLogColumns extends BaseColumns {
+        /**
+         * The content:// style URL for this table.
+         */
+        Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/alarm_log");
+
+        /**
+         * Alarm label.
+         * <p>Type: TEXT</p>
+         */
+        String LABEL = "label";
+
+        /**
+         * Time the alarm was fired (original time).
+         * <p>Type: LONG</p>
+         */
+        String FIRED_TIME = "fired_time";
+
+        /**
+         * Time the alarm was dismissed or missed.
+         * <p>Type: LONG</p>
+         */
+        String EVENT_TIME = "event_time";
+
+        /**
+         * Final state of the alarm (Dismissed or Missed).
+         * <p>Type: INTEGER</p>
+         */
+        String STATE = "state";
+
+        /**
+         * Number of times the alarm was snoozed.
+         * <p>Type: INTEGER</p>
+         */
+        String SNOOZE_COUNT = "snooze_count";
+
+        /**
+         * Alarm ID from the alarms table.
+         * <p>Type: LONG</p>
+         */
+        String ALARM_ID = "alarm_id";
+
+        /**
+         * Alarm instance ID.
+         * <p>Type: LONG</p>
+         */
+        String INSTANCE_ID = "instance_id";
+
+        /**
+         * Event type (Fired, Snoozed, etc.).
+         * <p>Type: INTEGER</p>
+         */
+        String EVENT_TYPE = "event_type";
+
+        // Event types
+        int EVENT_FIRED = 1;
+        int EVENT_SNOOZED = 2;
+        int EVENT_DISMISSED = 3;
+        int EVENT_MISSED = 4;
+        int EVENT_TIMED_OUT = 5;
+        /**
+         * Extra info for the event (e.g., snoozed until time).
+         * <p>Type: LONG</p>
+         */
+        String EXTRA_INFO = "extra_info";
     }
 }

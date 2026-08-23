@@ -14,6 +14,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.View;
 
@@ -98,6 +99,8 @@ public class CityViewHolder extends RecyclerView.ViewHolder {
 
         // Bind the city name.
         mBinding.worldClockCityContainer.cityName.setText(city.getName());
+        mBinding.worldClockCityContainer.cityCountry.setText(city.getCountry());
+        mBinding.worldClockCityContainer.cityCountry.setVisibility(mSettings.showCountry && !TextUtils.isEmpty(city.getCountry()) ? VISIBLE : GONE);
 
         // Compute if the city week day matches the weekday of the current timezone.
         final Calendar localCal = Calendar.getInstance(TimeZone.getDefault());

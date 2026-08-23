@@ -728,7 +728,7 @@ public abstract class BaseDigitalAppWidgetProvider extends AppWidgetProvider {
 
         // City name
         rowRv.setTextViewTextSize(nameId, TypedValue.COMPLEX_UNIT_PX, cityAndDayFontSize * fontScale);
-        rowRv.setTextViewText(nameId, isTextUppercase ? city.getName().toUpperCase() : city.getName());
+        rowRv.setTextViewText(nameId, isTextUppercase ? city.getName().toUpperCase(Locale.getDefault()) : city.getName());
         if (!useDefaultCityNameColor) {
             rowRv.setTextColor(nameId, customCityNameColor);
         }
@@ -739,7 +739,7 @@ public abstract class BaseDigitalAppWidgetProvider extends AppWidgetProvider {
         if (displayDay) {
             String weekday = cityCal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault());
             String slashDay = context.getString(R.string.world_day_of_week_label, weekday);
-            rowRv.setTextViewText(dayId, isTextUppercase ? slashDay.toUpperCase() : slashDay);
+            rowRv.setTextViewText(dayId, isTextUppercase ? slashDay.toUpperCase(Locale.getDefault()) : slashDay);
             rowRv.setTextViewTextSize(dayId, TypedValue.COMPLEX_UNIT_PX, cityAndDayFontSize * fontScale);
             if (!useDefaultCityNameColor) {
                 rowRv.setTextColor(dayId, customCityNameColor);
@@ -752,7 +752,7 @@ public abstract class BaseDigitalAppWidgetProvider extends AppWidgetProvider {
         boolean displayCityNote = cityNote != null && SettingsDAO.isCityNoteEnabled(prefs);
         if (displayCityNote) {
             rowRv.setTextViewTextSize(noteId, TypedValue.COMPLEX_UNIT_PX, cityAndDayFontSize * fontScale);
-            rowRv.setTextViewText(noteId, isTextUppercase ? cityNote.toUpperCase() : cityNote);
+            rowRv.setTextViewText(noteId, isTextUppercase ? cityNote.toUpperCase(Locale.getDefault()) : cityNote);
             if (!useDefaultCityNoteColor) {
                 rowRv.setTextColor(noteId, customCityNoteColor);
             }

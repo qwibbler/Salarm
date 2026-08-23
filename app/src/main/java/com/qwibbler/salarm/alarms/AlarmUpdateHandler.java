@@ -17,9 +17,9 @@ import androidx.core.view.HapticFeedbackConstantsCompat;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazDatabase;
-import com.qwibbler.salarm.namaz.RelationalAlarmSyncManager;
-import com.qwibbler.salarm.namaz.RelationalRule;
+import com.qwibbler.salarm.salah.SalahDatabase;
+import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
@@ -61,17 +61,17 @@ public final class AlarmUpdateHandler {
      * @param alarm The alarm to be added.
      */
     public void asyncAddAlarm(final Alarm alarm) {
-        asyncAddAlarm(alarm, true, null);
+        asyncAddAlarm(alarm, true, true);
     }
 
     /**
      * Adds a new alarm on the background.
      *
-     * @param alarm The alarm to be added.
-     * @param listener A callback invoked on the main thread once the alarm has been successfully saved, providing the newly created alarm
-     *                 with its generated database ID. Can be null.
+     * @param alarm          The alarm to be added.
+     * @param showSnackbar   Whether to show a snackbar after saving.
+     * @param openEditScreen Whether to open the edit screen for the new alarm.
      */
-    public void asyncAddAlarm(final Alarm alarm, final boolean showSnackbar, final OnAlarmSavedListener listener) {
+    public void asyncAddAlarm(final Alarm alarm, final boolean showSnackbar, final boolean openEditScreen) {
         AppExecutors.getDiskIO().execute(() -> {
             AlarmInstance instance = null;
             Alarm newAlarm = null;
@@ -82,11 +82,6 @@ public final class AlarmUpdateHandler {
 
                 // Add alarm to db
                 newAlarm = alarm.addAlarm(cr);
-
-                // Be ready to scroll to this alarm on UI later.
-                if (mScrollHandler != null) {
-                    mScrollHandler.setSmoothScrollStableId(newAlarm.id);
-                }
 
                 // Create and add instance to db
                 if (newAlarm.enabled) {
@@ -103,8 +98,12 @@ public final class AlarmUpdateHandler {
                     AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, finalInstance.getAlarmTime().getTimeInMillis());
                 }
 
-                if (listener != null && finalNewAlarm != null) {
-                    listener.onAlarmSaved(finalNewAlarm);
+                if (mScrollHandler != null && finalNewAlarm != null) {
+                    if (openEditScreen) {
+                        mScrollHandler.setPendingAlarmToEdit(finalNewAlarm);
+                    } else {
+                        mScrollHandler.setSmoothScrollStableId(finalNewAlarm.id);
+                    }
                 }
             });
         });
@@ -122,7 +121,7 @@ public final class AlarmUpdateHandler {
             ContentResolver cr = mAppContext.getContentResolver();
 
             if (alarm.relationalRuleId > 0 && !minorUpdate) {
-                com.qwibbler.salarm.namaz.RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                com.qwibbler.salarm.salah.SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
 
                 if (popToast) {
                     final List<AlarmInstance> instanceList = AlarmInstance.getInstancesByAlarmId(cr, alarm.id);
@@ -162,6 +161,7 @@ public final class AlarmUpdateHandler {
                     newInstance.mMissedAlarmRepeatLimit = alarm.missedAlarmRepeatLimit;
                     newInstance.mCrescendoDuration = alarm.crescendoDuration;
                     newInstance.mAlarmVolume = alarm.alarmVolume;
+                    newInstance.mDismissAfter = alarm.dismissAfter;
 
                     // If the alarm is in Missed state, mark it as Dismissed and clear its notification.
                     if (newInstance.mAlarmState == AlarmInstance.MISSED_STATE) {
@@ -224,6 +224,44 @@ public final class AlarmUpdateHandler {
     }
 
     /**
+     * Toggles multiple alarms on the background using bulk-optimized paths.
+     *
+     * @param alarms  The list of alarms to be toggled.
+     * @param enabled Whether to enable or disable the alarms.
+     */
+    public void asyncToggleAlarms(final List<Alarm> alarms, final boolean enabled) {
+        AppExecutors.getDiskIO().execute(() -> {
+            ContentResolver cr = mAppContext.getContentResolver();
+            // Capture the current next firing alarm before the bulk operation to handle Power-off RTC correctly.
+            final AlarmInstance oldNextAlarm = AlarmStateManager.getNextFiringAlarm(mAppContext);
+
+            for (Alarm alarm : alarms) {
+                alarm.enabled = enabled;
+                if (alarm.relationalRuleId > 0) {
+                    SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                } else {
+                    // Update the alarm template in the DB.
+                    alarm.updateAlarm(cr);
+
+                    // Bulk-optimized instance lifecycle:
+                    // 1. Delete existing instances without triggering global state recalculation.
+                    AlarmStateManager.deleteAllInstances(mAppContext, alarm.id, false);
+
+                    // 2. If enabling, create new instance without triggering global state recalculation.
+                    if (alarm.enabled) {
+                        AlarmInstance instance = alarm.createInstanceAfter(Calendar.getInstance());
+                        instance.addInstance(cr);
+                        AlarmStateManager.registerInstance(mAppContext, instance, false);
+                    }
+                }
+            }
+
+            // Exactly once: update global state, power-off alarm, and system indicators after the bulk work is done.
+            AlarmStateManager.updateNextAlarmInternal(mAppContext, oldNextAlarm);
+        });
+    }
+
+    /**
      * Deletes an alarm on the background.
      *
      * @param alarm The alarm to be deleted.
@@ -238,7 +276,7 @@ public final class AlarmUpdateHandler {
 
             RelationalRule ruleToDelete = null;
             if (alarm.relationalRuleId > 0) {
-                ruleToDelete = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
+                ruleToDelete = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
             }
 
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
@@ -307,7 +345,7 @@ public final class AlarmUpdateHandler {
                 if (ruleToRestore != null) {
                     asyncRestoreRelationalAlarm(alarmToRestore, ruleToRestore);
                 } else {
-                    asyncAddAlarm(alarmToRestore);
+                    asyncAddAlarm(alarmToRestore, true, false);
                 }
             }
         });
@@ -338,7 +376,7 @@ public final class AlarmUpdateHandler {
         AppExecutors.getDiskIO().execute(() -> {
             // 1. Re-insert the rule to get a new ID
             rule.id = 0;
-            alarm.relationalRuleId = NamazDatabase.getDatabase(mAppContext).relationalRuleDao().insert(rule);
+            alarm.relationalRuleId = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().insert(rule);
 
             // 2. Add the alarm back to the provider
             final Alarm newAlarm = alarm.addAlarm(mAppContext.getContentResolver());
@@ -349,7 +387,7 @@ public final class AlarmUpdateHandler {
             }
 
             // 4. Sync and schedule instances
-            RelationalAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
+            SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
 
             // 5. Update widgets
             WidgetUtils.updateAllDigitalWidgets(mAppContext);
@@ -374,19 +412,6 @@ public final class AlarmUpdateHandler {
         // Register instance to state manager
         AlarmStateManager.registerInstance(mAppContext, newInstance, true);
         return newInstance;
-    }
-
-    /**
-     * Callback interface used to listen for the completion of an alarm save operation.
-     */
-    public interface OnAlarmSavedListener {
-
-        /**
-         * Invoked when the alarm has been successfully saved to the database.
-         *
-         * @param savedAlarm The newly saved alarm, including its generated database ID.
-         */
-        void onAlarmSaved(Alarm savedAlarm);
     }
 
 }

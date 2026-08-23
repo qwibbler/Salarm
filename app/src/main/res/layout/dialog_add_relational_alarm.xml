@@ -29,147 +29,180 @@
                 android:textColor="?attr/colorPrimary"
                 android:layout_marginBottom="8dp"/>
 
-            <!-- Line 1: Set Alarm At [Value] min -->
-            <LinearLayout
+            <!-- Row 1: Set Alarm At [Value] min -->
+            <com.google.android.flexbox.FlexboxLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:text="@string/relational_alarm_set_alarm_at" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:boxBackgroundColor="@android:color/transparent"
-                    app:hintEnabled="false">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/primary_offset_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:inputType="number"
-                        android:paddingVertical="8dp"
-                        android:paddingHorizontal="0dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="5" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    android:text="@string/relational_alarm_minutes" />
-            </LinearLayout>
-
-            <!-- Line 2: [Toggle] [Event] -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:boxBackgroundColor="@android:color/transparent"
-                    app:hintEnabled="false"
-                    app:endIconMode="none">
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:id="@+id/primary_offset_toggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:paddingVertical="13dp"
-                        android:paddingHorizontal="0dp"
-                        android:gravity="center"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="After" />
-                </com.google.android.material.textfield.TextInputLayout>
+                app:flexWrap="wrap"
+                app:alignItems="center">
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:layout_width="0dp"
+                    android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
+                    app:endIconMinSize="28dp"
+                    app:boxBackgroundColor="@android:color/transparent"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/primary_offset_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="999" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:text="@string/relational_alarm_minutes" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/primary_offset_toggle"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-8dp"
+                    android:minWidth="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    tools:text="After" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:endIconMinSize="28dp"
                     app:boxBackgroundColor="@android:color/transparent"
                     app:hintEnabled="false">
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/primary_event"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:inputType="none"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:paddingVertical="8dp"
-                        android:paddingHorizontal="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="Fajr" />
+                        tools:text="Asr Hanafi" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-            </LinearLayout>
+            </com.google.android.flexbox.FlexboxLayout>
 
-            <!-- Rounding Section Title -->
-            <com.google.android.material.textview.MaterialTextView
+            <!-- Rounding Section -->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/primary_round_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginStart="-6dp"
+                android:minHeight="0dp"
                 android:text="@string/relational_alarm_round"
-                android:textAppearance="?attr/textAppearanceTitleMedium" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorPrimary" />
 
             <!-- Rounding Row: [Round Toggle] [Round Value] min -->
-            <LinearLayout
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/primary_round_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:layout_marginStart="-8dp"
+                app:flexWrap="wrap"
+                app:alignItems="center">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/primary_round_toggle"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:boxBackgroundColor="@android:color/transparent"
-                    app:hintEnabled="false"
-                    app:endIconMode="none">
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:id="@+id/primary_round_toggle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:paddingVertical="8dp"
-                        android:paddingHorizontal="4dp"
-                        android:gravity="center"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="To the Nearest" />
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:minWidth="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    tools:text="To the Nearest" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                    android:layout_width="wrap_content"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                    android:layout_width="64dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    app:endIconMinSize="28dp"
                     app:boxBackgroundColor="@android:color/transparent"
                     app:hintEnabled="false">
-                    <com.google.android.material.textfield.TextInputEditText
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/primary_round_value"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="number"
+                        android:maxLength="3"
                         android:paddingVertical="8dp"
-                        android:paddingHorizontal="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
                         android:gravity="center"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        tools:text="0" />
+                        tools:text="999" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:text="@string/relational_alarm_minutes"
+                    android:layout_marginStart="4dp" />
+            </com.google.android.flexbox.FlexboxLayout>
+
+            <!-- Adjustment Section Title -->
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/adjustment_enabled_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="-6dp"
+                android:minHeight="0dp"
+                android:checked="false"
+                android:text="@string/relational_alarm_adjust_alarm"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="?attr/colorPrimary" />
+
+            <!-- Adjustment Row: Adjusted by [Value] min [Toggle] -->
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/adjustment_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:flexWrap="wrap"
+                app:alignItems="center">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    app:endIconMinSize="28dp"
+                    app:boxBackgroundColor="@android:color/transparent"
+                    app:hintEnabled="false">
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/adjustment_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:gravity="center"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="999" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -177,7 +210,18 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBodyLarge"
                     android:text="@string/relational_alarm_minutes" />
-            </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/adjustment_toggle"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="0dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    tools:text="Earlier" />
+            </com.google.android.flexbox.FlexboxLayout>
 
         </LinearLayout>
 
@@ -199,6 +243,7 @@
                 android:id="@+id/safety_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="-6dp"
                 android:minHeight="0dp"
                 android:checked="false"
                 android:text="@string/relational_alarm_safety_boundary"
@@ -213,12 +258,11 @@
                 android:paddingTop="4dp">
 
                 <!-- Sentence: No [Toggle] Than [Value] min -->
-                <LinearLayout
+                <com.google.android.flexbox.FlexboxLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
+                    app:flexWrap="wrap"
+                    app:alignItems="center">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -226,24 +270,16 @@
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:text="@string/relational_alarm_no"/>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/safety_boundary_toggle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:boxBackgroundColor="@android:color/transparent"
-                        app:hintEnabled="false"
-                        app:endIconMode="none">
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/safety_boundary_toggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:paddingVertical="8dp"
-                            android:paddingHorizontal="4dp"
-                            android:gravity="center"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="Earlier" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:minWidth="0dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="Earlier" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -252,140 +288,129 @@
                         android:text="@string/relational_alarm_than" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                        android:layout_width="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
+                        app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
-                        <com.google.android.material.textfield.TextInputEditText
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_offset_value"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="number"
+                            android:maxLength="3"
                             android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="5" />
+                            tools:text="999" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:text="@string/relational_alarm_minutes" />
-                </LinearLayout>
 
-                <!-- Sentence: [Toggle] [Event] -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/safety_offset_toggle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:boxBackgroundColor="@android:color/transparent"
-                        app:hintEnabled="false"
-                        app:endIconMode="none">
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/safety_offset_toggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:paddingVertical="13dp"
-                            android:paddingHorizontal="4dp"
-                            android:gravity="center"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="Before" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:minWidth="0dp"
+                        android:layout_marginStart="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="Before" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
+                        app:layout_flexGrow="1"
+                        app:layout_flexShrink="0"
+                        app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_event"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:inputType="none"
-                            android:paddingVertical="13dp"
-                            android:paddingHorizontal="4dp"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:paddingVertical="8dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
                             tools:text="Sunrise" />
                     </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                </com.google.android.flexbox.FlexboxLayout>
 
-                <!-- Rounding Section Title -->
-                <com.google.android.material.textview.MaterialTextView
+                <!-- Rounding Section -->
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/safety_round_enabled_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:layout_marginStart="-8dp"
+                    android:minHeight="0dp"
                     android:text="@string/relational_alarm_round"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorPrimary" />
 
                 <!-- Rounding Row: [Round Toggle] [Round Value] min -->
-                <LinearLayout
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/safety_round_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
+                    android:layout_marginStart="-8dp"
+                    app:flexWrap="wrap"
+                    app:alignItems="center">
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/safety_round_toggle"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:boxBackgroundColor="@android:color/transparent"
-                        app:hintEnabled="false"
-                        app:endIconMode="none">
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/safety_round_toggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:paddingVertical="8dp"
-                            android:paddingHorizontal="4dp"
-                            android:gravity="center"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="To the Nearest" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:minWidth="0dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="To the Nearest" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                        android:layout_width="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
+                        app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
-                        <com.google.android.material.textfield.TextInputEditText
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/safety_round_value"
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="number"
+                            android:maxLength="3"
                             android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:gravity="center"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="0" />
+                            tools:text="999" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
                         android:text="@string/relational_alarm_minutes" />
-                </LinearLayout>
+                </com.google.android.flexbox.FlexboxLayout>
             </LinearLayout>
 
         </LinearLayout>
@@ -408,6 +433,7 @@
                 android:id="@+id/autostop_enabled_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="-6dp"
                 android:minHeight="0dp"
                 android:checked="true"
                 android:text="@string/relational_alarm_auto_stop"
@@ -422,93 +448,73 @@
                 android:paddingTop="4dp">
 
                 <!-- Sentence: Dismiss Alarm [Value] min -->
-                <LinearLayout
+                <com.google.android.flexbox.FlexboxLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:text="@string/relational_alarm_stop_ringing"
-                        android:layout_marginEnd="4dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:boxBackgroundColor="@android:color/transparent"
-                        app:hintEnabled="false">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/autostop_offset_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:paddingVertical="8dp"
-                            android:paddingHorizontal="0dp"
-                            android:gravity="center"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="0" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:text="@string/relational_alarm_minutes" />
-                </LinearLayout>
-
-                <!-- Sentence: [Toggle] [Event] -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:boxBackgroundColor="@android:color/transparent"
-                        app:hintEnabled="false"
-                        app:endIconMode="none">
-                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                            android:id="@+id/autostop_offset_toggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:paddingVertical="13dp"
-                            android:paddingHorizontal="4dp"
-                            android:gravity="center"
-                            android:textAppearance="?attr/textAppearanceBodyLarge"
-                            tools:text="Before" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                    app:flexWrap="wrap"
+                    app:alignItems="center">
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                        android:layout_width="0dp"
+                        android:layout_width="64dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
+                        app:endIconMinSize="28dp"
+                            app:boxBackgroundColor="@android:color/transparent"
+                        app:hintEnabled="false">
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/autostop_offset_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="3"
+                            android:paddingVertical="8dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
+                            android:gravity="center"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            tools:text="999" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:text="@string/relational_alarm_minutes" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/autostop_offset_toggle"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="0dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        tools:text="Before" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_flexGrow="1"
+                        app:layout_flexShrink="0"
+                        app:endIconMinSize="28dp"
                         app:boxBackgroundColor="@android:color/transparent"
                         app:hintEnabled="false">
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
                             android:id="@+id/autostop_event"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:inputType="none"
-                            android:paddingVertical="13dp"
-                            android:paddingHorizontal="4dp"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:paddingVertical="8dp"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp"
                             android:textAppearance="?attr/textAppearanceBodyLarge"
                             tools:text="Sunrise" />
                     </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
+                </com.google.android.flexbox.FlexboxLayout>
             </LinearLayout>
 
         </LinearLayout>

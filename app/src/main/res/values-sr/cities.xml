@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">М<xliff:g id="separator">=</xliff:g>Манама, Бахреин<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">Б<xliff:g id="separator">=</xliff:g>Бриджтаун, Барбадос<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">Б<xliff:g id="separator">=</xliff:g>Белмопан, Белиз<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">Р<xliff:g id="separator">=</xliff:g>Рејкјавик, Исланд<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">Њ<xliff:g id="separator">=</xliff:g>Њу Делхи, Индија<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">А<xliff:g id="separator">=</xliff:g>Астана, Казахстан<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">К<xliff:g id="separator">=</xliff:g>Кувајт, Кувајт<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">Р<xliff:g id="separator">=</xliff:g>Рабат, Мароко<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">В<xliff:g id="separator">=</xliff:g>Велингтон, Нови Зеланд<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">А<xliff:g id="separator">=</xliff:g>Абуџа, Нигерија<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">П<xliff:g id="separator">=</xliff:g>Преторија, Јужноафричка Република<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">Б<xliff:g id="separator">=</xliff:g>Берн, Швајцарска<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">К<xliff:g id="separator">=</xliff:g>Кијев, Украјина<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">А<xliff:g id="separator">=</xliff:g>Абу Даби, УАЕ<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">В<xliff:g id="separator">=</xliff:g>Вашингтон, САД<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">Џ<xliff:g id="separator">=</xliff:g>Џеда, Саудијска Арабија<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">М<xliff:g id="separator">=</xliff:g>Мека, Саудитска Арабия<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">М<xliff:g id="separator">=</xliff:g>Медина, Саудитска Арабия<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

@@ -16,6 +16,7 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SORT_ALARM_B
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SORT_ALARM_MANUALLY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ALARM_FONT;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_ALARM_TAGS;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING;
 import static com.qwibbler.salarm.uidata.UiDataModel.Tab.ALARMS;
 
@@ -50,6 +51,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -67,13 +69,14 @@ import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.AlarmFragmentBinding;
+import com.qwibbler.salarm.databinding.AlarmTagFilterItemBinding;
 import com.qwibbler.salarm.dialogfragment.AlarmDelayPickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmVolumeDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.namaz.NamazLocationManager;
-import com.qwibbler.salarm.namaz.RelationalAlarmDialogFragment;
+import com.qwibbler.salarm.salah.SalahLocationManager;
+import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
@@ -134,7 +137,7 @@ public final class AlarmFragment extends SalarmFragment
     private final SharedPreferences.OnSharedPreferenceChangeListener mPrefListener = (prefs, key) -> {
         if (key != null) {
             switch (key) {
-                case KEY_ALARM_FONT, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING -> {
+                case KEY_ALARM_FONT, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING, KEY_DISPLAY_ALARM_TAGS -> {
 
                     mAreSettingsChanged = true;
 
@@ -152,6 +155,9 @@ public final class AlarmFragment extends SalarmFragment
     private long mScrollToAlarmId = Alarm.INVALID_ID;
     private long mCurrentUpdateToken;
     private String mLastSortOrder = null;
+    private final List<AlarmItemHolder> mAllItemHolders = new ArrayList<>();
+    private final List<String> mSelectedTags = new ArrayList<>();
+    private TagFilterAdapter mTagFilterAdapter;
 
     // Controllers
     private AlarmAdapter mItemAdapter;
@@ -201,6 +207,20 @@ public final class AlarmFragment extends SalarmFragment
                 RingtoneUtils.fixAlarmStreamLow(requireContext());
             }
         );
+
+        mTagFilterAdapter = new TagFilterAdapter();
+        mBinding.tagFilterRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
+        mBinding.tagFilterRecyclerView.setAdapter(mTagFilterAdapter);
+
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            toggleAllVisibleAlarms(isChecked);
+        });
+
+        mBinding.allAlarmsToggle.setOnLongClickListener(v -> {
+            CustomTooltip.showAbove(v, getString(R.string.all_alarms_toggle_tooltip), true);
+            return true;
+        });
 
         mEmptyViewController = new EmptyViewController(mBinding.alarmRootView, mBinding.alarmRecyclerView, mBinding.alarmEmptyView);
         mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), this, mBinding.alarmRootView);
@@ -457,7 +477,7 @@ public final class AlarmFragment extends SalarmFragment
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> cursorLoader, Cursor data) {
-        final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
+        mAllItemHolders.clear();
 
         // Convert each row in the cursor into an AlarmItemHolder.
         // Note: If the user selected Manual Sort or Creation Date, the cursor is ALREADY correctly sorted by the SQL query
@@ -467,9 +487,55 @@ public final class AlarmFragment extends SalarmFragment
             final AlarmInstance alarmInstance = new AlarmInstance(data, true);
             final AlarmItemHolder itemHolder = new AlarmItemHolder(alarm, alarmInstance, mAlarmTimeClickHandler);
 
-            itemHolders.add(itemHolder);
+            mAllItemHolders.add(itemHolder);
         }
 
+        applyFilters();
+    }
+
+    private void applyFilters() {
+        if (mItemAdapter == null || mTagFilterAdapter == null || mBinding == null) {
+            return;
+        }
+
+        List<AlarmItemHolder> filteredList = new ArrayList<>();
+        List<String> availableTags = new ArrayList<>();
+
+        for (AlarmItemHolder holder : mAllItemHolders) {
+            boolean matches = true;
+            for (String selectedTag : mSelectedTags) {
+                if (holder.item.tags == null || !holder.item.tags.contains(selectedTag)) {
+                    matches = false;
+                    break;
+                }
+            }
+
+            if (matches) {
+                filteredList.add(holder);
+                // Collect tags from this visible alarm
+                if (holder.item.tags != null) {
+                    for (String t : holder.item.tags) {
+                        if (!availableTags.contains(t)) {
+                            availableTags.add(t);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sort by name or time as before
+        sortItemHolders(filteredList);
+
+        Collections.sort(availableTags);
+
+        setAdapterItems(filteredList, SystemClock.elapsedRealtime());
+        mTagFilterAdapter.setTags(availableTags);
+
+        // Update toggle state based on visible alarms
+        updateAllAlarmsToggleState(filteredList);
+    }
+
+    private void sortItemHolders(List<AlarmItemHolder> itemHolders) {
         final boolean wantsSortByNextAlarmTime = SettingsDAO.getAlarmSorting(mPrefs).equals(SORT_ALARM_BY_NEXT_ALARM_TIME);
         final boolean wantsSortByName = SettingsDAO.getAlarmSorting(mPrefs).equals(SORT_ALARM_BY_NAME);
         final boolean areEnabledAlarmsFirst = SettingsDAO.areEnabledAlarmsDisplayedFirst(mPrefs);
@@ -509,9 +575,136 @@ public final class AlarmFragment extends SalarmFragment
                 return Long.compare(t1.getTimeInMillis(), t2.getTimeInMillis());
             });
         }
+    }
 
-        // Apply the final list to the adapter
-        setAdapterItems(itemHolders, SystemClock.elapsedRealtime());
+    private void toggleAllVisibleAlarms(boolean enabled) {
+        List<AlarmItemHolder> visibleAlarms = mItemAdapter.getItems();
+        List<Alarm> alarmsToUpdate = new ArrayList<>();
+        for (int i = 0; i < visibleAlarms.size(); i++) {
+            AlarmItemHolder holder = visibleAlarms.get(i);
+            if (holder.item.enabled != enabled) {
+                holder.item.enabled = enabled;
+                alarmsToUpdate.add(holder.item);
+                mItemAdapter.notifyItemChanged(i);
+            }
+        }
+        if (!alarmsToUpdate.isEmpty()) {
+            mAlarmUpdateHandler.asyncToggleAlarms(alarmsToUpdate, enabled);
+        }
+    }
+
+    private void updateAllAlarmsToggleState(List<AlarmItemHolder> visibleAlarms) {
+        if (visibleAlarms.isEmpty()) {
+            mBinding.allAlarmsToggle.setEnabled(false);
+            mBinding.allAlarmsToggle.setChecked(false);
+            return;
+        }
+        mBinding.allAlarmsToggle.setEnabled(true);
+        boolean allEnabled = true;
+        for (AlarmItemHolder holder : visibleAlarms) {
+            if (!holder.item.enabled) {
+                allEnabled = false;
+                break;
+            }
+        }
+        // Use a listener-safe check to avoid triggering the toggle listener
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener(null);
+        mBinding.allAlarmsToggle.setChecked(allEnabled);
+        mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+            toggleAllVisibleAlarms(isChecked);
+        });
+
+        mBinding.allAlarmsToggle.setOnLongClickListener(v -> {
+            CustomTooltip.showAbove(v, getString(R.string.all_alarms_toggle_tooltip), true);
+            return true;
+        });
+    }
+
+    private class TagFilterAdapter extends RecyclerView.Adapter<TagFilterViewHolder> {
+        private List<String> mAvailableTags = new ArrayList<>();
+
+        public void setTags(final List<String> newTags) {
+            final List<String> oldTags = new ArrayList<>(mAvailableTags);
+            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldTags.size() + 1;
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return newTags.size() + 1;
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    if (oldItemPosition == 0 || newItemPosition == 0) {
+                        return oldItemPosition == newItemPosition;
+                    }
+                    return oldTags.get(oldItemPosition - 1).equals(newTags.get(newItemPosition - 1));
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    if (oldItemPosition == 0 || newItemPosition == 0) {
+                        if (oldItemPosition != newItemPosition) return false;
+                        // Always update the "All" chip to ensure its checked state is correct
+                        return false;
+                    }
+                    String tag = newTags.get(newItemPosition - 1);
+                    String oldTag = oldTags.get(oldItemPosition - 1);
+                    return tag.equals(oldTag) && mSelectedTags.contains(tag) == mSelectedTags.contains(oldTag);
+                }
+            });
+            mAvailableTags = newTags;
+            result.dispatchUpdatesTo(this);
+        }
+
+        @NonNull
+        @Override
+        public TagFilterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new TagFilterViewHolder(AlarmTagFilterItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull TagFilterViewHolder holder, int position) {
+            if (position == 0) {
+                holder.binding.tagChip.setText(R.string.all_alarms_filter);
+                holder.binding.tagChip.setCheckable(true);
+                holder.binding.tagChip.setChecked(mSelectedTags.isEmpty());
+                holder.binding.tagChip.setOnClickListener(v -> {
+                    mSelectedTags.clear();
+                    applyFilters();
+                });
+            } else {
+                String tag = mAvailableTags.get(position - 1);
+                holder.binding.tagChip.setText(tag);
+                holder.binding.tagChip.setCheckable(true);
+                holder.binding.tagChip.setChecked(mSelectedTags.contains(tag));
+                holder.binding.tagChip.setOnClickListener(v -> {
+                    if (mSelectedTags.contains(tag)) {
+                        mSelectedTags.remove(tag);
+                    } else {
+                        mSelectedTags.add(tag);
+                    }
+                    applyFilters();
+                });
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mAvailableTags.size() + 1;
+        }
+    }
+
+    private static class TagFilterViewHolder extends RecyclerView.ViewHolder {
+        AlarmTagFilterItemBinding binding;
+        public TagFilterViewHolder(AlarmTagFilterItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
     }
 
     @Override
@@ -531,18 +724,18 @@ public final class AlarmFragment extends SalarmFragment
             startCreatingAlarm();
         } else {
             if (mSideButtonsVisible) {
-                if (!NamazLocationManager.isLocationSet(requireContext())) {
+                if (!SalahLocationManager.isLocationSet(requireContext())) {
                     com.qwibbler.salarm.uicomponents.CustomDialog.create(
                         requireContext(),
                         R.style.AppAlertDialogTheme,
                         null,
-                        getString(R.string.namaz_location_not_set_title),
-                        getString(R.string.namaz_location_not_set_message),
+                        getString(R.string.salah_location_not_set_title),
+                        getString(R.string.salah_location_not_set_message),
                         null,
                         getString(R.string.label_set_location),
                         (dialog, which) -> {
                             Intent intent = new Intent(requireContext(), com.qwibbler.salarm.settings.SettingsActivity.class);
-                            intent.putExtra(com.qwibbler.salarm.settings.SettingsActivity.KEY_SHOW_NAMAZ_SETTINGS, true);
+                            intent.putExtra(com.qwibbler.salarm.settings.SettingsActivity.KEY_SHOW_SALAH_SETTINGS, true);
                             startActivity(intent);
                         },
                         getString(android.R.string.cancel),
@@ -555,7 +748,7 @@ public final class AlarmFragment extends SalarmFragment
                     hideSideButtonsWithFabAnimation();
                     return;
                 }
-                new RelationalAlarmDialogFragment().show(getParentFragmentManager(), RelationalAlarmDialogFragment.TAG);
+                new SalahAlarmDialogFragment().show(getParentFragmentManager(), SalahAlarmDialogFragment.TAG);
                 hideSideButtonsWithFabAnimation();
             } else {
                 mSideButtonsVisible = true;
@@ -580,7 +773,7 @@ public final class AlarmFragment extends SalarmFragment
         } else {
             if (mSideButtonsVisible) {
                 fab.setVisibility(VISIBLE);
-                fab.setImageResource(R.drawable.ic_namaz_alarm);
+                fab.setImageResource(R.drawable.ic_salah_alarm);
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, getString(R.string.dialog_add_relational_alarm_title), true);
                     return true;
@@ -715,6 +908,26 @@ public final class AlarmFragment extends SalarmFragment
                 long alarmId = bundle.getLong(AlarmEditBottomSheetFragment.SCROLL_TO_ALARM_ID, Alarm.INVALID_ID);
                 if (alarmId != Alarm.INVALID_ID) {
                     setSmoothScrollStableId(alarmId);
+                }
+            }
+        );
+
+        parentFragmentManager.setFragmentResultListener(
+            SalahAlarmDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            (requestKey, bundle) -> {
+                long alarmId = bundle.getLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, Alarm.INVALID_ID);
+                boolean isNewAlarm = bundle.getBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, false);
+                if (alarmId != Alarm.INVALID_ID) {
+                    if (isNewAlarm) {
+                        AppExecutors.getDiskIO().execute(() -> {
+                            Alarm alarm = Alarm.getAlarm(requireContext().getContentResolver(), alarmId);
+                            if (alarm != null) {
+                                AppExecutors.getMainThread().post(() -> setPendingAlarmToEdit(alarm));
+                            }
+                        });
+                    } else {
+                        setSmoothScrollStableId(alarmId);
+                    }
                 }
             }
         );

@@ -147,7 +147,11 @@
     <string name="timer_stop_all" msgid="9080780442843034376">עצירת כל הטיימרים</string>
     <string name="timer_canceled" msgid="7327923392567128060">הטיימר בוטל</string>
     <string name="timer_times_up" msgid="9190440395938519009">"נגמר הזמן"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">‏<xliff:g id="NUM_TIMERS">%d</xliff:g> טיימרים הסתיימו</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="one">"‏טיימר <xliff:g id="NUM_TIMERS">%d</xliff:g> הסתיים"</item>
+        <item quantity="two">"‏<xliff:g id="NUM_TIMERS">%d</xliff:g> טיימרים הסתיימו"</item>
+        <item quantity="other">"‏<xliff:g id="NUM_TIMERS">%d</xliff:g> טיימרים הסתיימו"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">טיימר</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">טיימר שהוחמץ: <xliff:g example="Pick up kids" id="name">%s</xliff:g></string>
     <string name="timer_pause" msgid="3748323712728398743">השהיה</string>
@@ -191,7 +195,11 @@
     <string name="timer_settings" msgid="7955522143086154795">טיימרים</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">רטט טיימר</string>
     <string name="timer_paused" msgid="5941160896040771462">הטיימר מושהה</string>
-    <string name="timers_in_use" msgid="5570729467344408506"><xliff:g example="7" id="number">%d</xliff:g> טיימרים</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="one"><xliff:g example="7" id="number">%d</xliff:g> טיימרים</item>
+        <item quantity="two"><xliff:g example="7" id="number">%d</xliff:g> טיימרים</item>
+        <item quantity="other"><xliff:g example="7" id="number">%d</xliff:g> טיימרים</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"ביטול"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"ההתראה נמחקה"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">‏/ <xliff:g id="label">%s</xliff:g></string>

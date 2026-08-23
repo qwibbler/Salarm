@@ -80,7 +80,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
-    public static final String KEY_SHOW_NAMAZ_SETTINGS = "show_namaz_settings";
+    public static final String KEY_SHOW_SALAH_SETTINGS = "show_salah_settings";
     private static final String KEY_APPBAR_EXPANDED = "key_appbar_expanded";
     private boolean mIsAppBarExpanded = true;
 
@@ -136,12 +136,14 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         Preference mAlarmSettingsPref;
         Preference mTimerSettingsPref;
         Preference mStopwatchSettingsPref;
-        Preference mNamazSettingsPref;
+        Preference mSalahSettingsPref;
+        Preference mSalahAlarmSettingsPref;
         Preference mScreensaverSettings;
         Preference mWidgetsSettings;
         Preference mPermissionsManagement;
         Preference mPermissionMessage;
         Preference mBackupRestorePref;
+        Preference mAlarmLogPref;
 
         private AlertDialog mRestartDialog;
 
@@ -252,12 +254,14 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mAlarmSettingsPref = findPreference(KEY_ALARM_SETTINGS);
             mTimerSettingsPref = findPreference(KEY_TIMER_SETTINGS);
             mStopwatchSettingsPref = findPreference(KEY_STOPWATCH_SETTINGS);
-            mNamazSettingsPref = findPreference(KEY_NAMAZ_SETTINGS);
+            mSalahSettingsPref = findPreference(KEY_SALAH_SETTINGS);
+            mSalahAlarmSettingsPref = findPreference(KEY_SALAH_ALARM_SETTINGS);
             mScreensaverSettings = findPreference(KEY_SCREENSAVER_SETTINGS);
             mWidgetsSettings = findPreference(KEY_WIDGETS_SETTINGS);
             mPermissionsManagement = findPreference(KEY_PERMISSIONS_MANAGEMENT);
             mPermissionMessage = findPreference(KEY_PERMISSION_MESSAGE);
             mBackupRestorePref = findPreference(KEY_BACKUP_RESTORE_PREFERENCES);
+            mAlarmLogPref = findPreference(KEY_ALARM_LOG);
 
             if (savedInstanceState != null) {
                 mShowBackupRestoreDialog = savedInstanceState.getBoolean(KEY_SHOW_BACKUP_RESTORE_DIALOG, false);
@@ -286,9 +290,9 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         public void onResume() {
             super.onResume();
 
-            if (requireActivity().getIntent().getBooleanExtra(KEY_SHOW_NAMAZ_SETTINGS, false)) {
-                requireActivity().getIntent().removeExtra(KEY_SHOW_NAMAZ_SETTINGS);
-                animateAndShowFragment(new NamazSettingsFragment());
+            if (requireActivity().getIntent().getBooleanExtra(KEY_SHOW_SALAH_SETTINGS, false)) {
+                requireActivity().getIntent().removeExtra(KEY_SHOW_SALAH_SETTINGS);
+                animateAndShowFragment(new SalahSettingsFragment());
             }
 
             if (BackupAndRestoreUtils.appNeedsRestart && (mRestartDialog == null || !mRestartDialog.isShowing())) {
@@ -337,7 +341,9 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
                 case KEY_STOPWATCH_SETTINGS -> animateAndShowFragment(new StopwatchSettingsFragment());
 
-                case KEY_NAMAZ_SETTINGS -> animateAndShowFragment(new NamazSettingsFragment());
+                case KEY_SALAH_SETTINGS -> animateAndShowFragment(new SalahSettingsFragment());
+
+                case KEY_SALAH_ALARM_SETTINGS -> animateAndShowFragment(new SalahAlarmSettingsFragment());
 
                 case KEY_SCREENSAVER_SETTINGS -> animateAndShowFragment(new ScreensaverSettingsActivity.ScreensaverSettingsFragment());
 
@@ -347,6 +353,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
                     animateAndShowFragment(new PermissionsManagementActivity.PermissionsManagementFragment());
 
                 case KEY_BACKUP_RESTORE_PREFERENCES -> showBackupRestoreDialog();
+
+                case KEY_ALARM_LOG -> animateAndShowFragment(new AlarmLogFragment());
             }
 
             return true;
@@ -365,7 +373,9 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
             mStopwatchSettingsPref.setOnPreferenceClickListener(this);
 
-            mNamazSettingsPref.setOnPreferenceClickListener(this);
+            mSalahSettingsPref.setOnPreferenceClickListener(this);
+
+            mSalahAlarmSettingsPref.setOnPreferenceClickListener(this);
 
             mScreensaverSettings.setOnPreferenceClickListener(this);
 
@@ -374,6 +384,10 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mPermissionsManagement.setOnPreferenceClickListener(this);
 
             mBackupRestorePref.setOnPreferenceClickListener(this);
+
+            if (mAlarmLogPref != null) {
+                mAlarmLogPref.setOnPreferenceClickListener(this);
+            }
         }
 
         private void updateSettingsVisibility() {
@@ -583,6 +597,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mAlarmSettingsPref = null;
             mTimerSettingsPref = null;
             mStopwatchSettingsPref = null;
+            mSalahSettingsPref = null;
+            mSalahAlarmSettingsPref = null;
             mScreensaverSettings = null;
             mWidgetsSettings = null;
             mPermissionsManagement = null;

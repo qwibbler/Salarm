@@ -11,10 +11,10 @@ import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_TAB_TO_DISPLAY_INTEGER;
 import static com.qwibbler.salarm.uidata.UiDataModel.Tab;
 
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_TABS_MIGRATED;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_TABS_MIGRATED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_VISIBLE_TABS;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VISIBLE_TABS;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_NAMAZ;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_SALAH;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_QIBLA;
 
 import android.content.Context;
@@ -73,19 +73,19 @@ final class TabModel {
      */
     boolean updateActiveTabs() {
         // Migration: ensure new tabs are enabled by default for existing users
-        if (!mPrefs.getBoolean(KEY_NAMAZ_TABS_MIGRATED, false)) {
+        if (!mPrefs.getBoolean(KEY_SALAH_TABS_MIGRATED, false)) {
             Set<String> visibleTabs = mPrefs.getStringSet(KEY_VISIBLE_TABS, null);
             java.util.Set<String> newSet;
             if (visibleTabs == null) {
                 newSet = new java.util.HashSet<>(DEFAULT_VISIBLE_TABS);
             } else {
                 newSet = new java.util.HashSet<>(visibleTabs);
-                newSet.add(VISIBLE_TAB_NAMAZ);
+                newSet.add(VISIBLE_TAB_SALAH);
                 newSet.add(VISIBLE_TAB_QIBLA);
             }
             mPrefs.edit()
                     .putStringSet(KEY_VISIBLE_TABS, newSet)
-                    .putBoolean(KEY_NAMAZ_TABS_MIGRATED, true)
+                    .putBoolean(KEY_SALAH_TABS_MIGRATED, true)
                     .apply();
         }
 
@@ -95,7 +95,7 @@ final class TabModel {
         final boolean isClockTabVisible = SettingsDAO.isClockTabVisible(mPrefs);
         final boolean isTimerTabVisible = SettingsDAO.isTimerTabVisible(mPrefs);
         final boolean isStopwatchTabVisible = SettingsDAO.isStopwatchTabVisible(mPrefs);
-        final boolean isNamazTabVisible = SettingsDAO.isNamazTabVisible(mPrefs);
+        final boolean isSalahTabVisible = SettingsDAO.isSalahTabVisible(mPrefs);
         final boolean isQiblaTabVisible = SettingsDAO.isQiblaTabVisible(mPrefs);
 
         if (isAlarmTabVisible) {
@@ -114,8 +114,8 @@ final class TabModel {
             newActiveTabs.add(Tab.STOPWATCH);
         }
 
-        if (isNamazTabVisible) {
-            newActiveTabs.add(Tab.NAMAZ);
+        if (isSalahTabVisible) {
+            newActiveTabs.add(Tab.SALAH);
         }
 
         if (isQiblaTabVisible) {

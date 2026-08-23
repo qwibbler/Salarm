@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">ມ<xliff:g id="separator">=</xliff:g>ມານາມາ, ບາເຣນ<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">ບ<xliff:g id="separator">=</xliff:g>ບຣິດທາວ, ບາບາໂດສ<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">ເ<xliff:g id="separator">=</xliff:g>ເບລໂມແພນ, ເບລິສ<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">ເ<xliff:g id="separator">=</xliff:g>ເຣກຈາວິກ, ໄອສແລນ<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">ນ<xliff:g id="separator">=</xliff:g>ນິວເດລີ, ອິນເດຍ<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">ອ<xliff:g id="separator">=</xliff:g>ອັດສະຕານາ, ກາຊັກສະຖານ<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">ຄ<xliff:g id="separator">=</xliff:g>ຄູເວດຊິຕີ, ຄູເວດ<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">ຣ<xliff:g id="separator">=</xliff:g>ຣາບັດ, ມາຣົກ<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">ເ<xliff:g id="separator">=</xliff:g>ເວລລິງຕັນ, ນິວຊີແລນ<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">ອ<xliff:g id="separator">=</xliff:g>ອາບູຈາ, ນີເຈີເຣຍ<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">ເ<xliff:g id="separator">=</xliff:g>ເພຣີໂຕເຣຍ, ອາຟຣິກາໃຕ້<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">ເ<xliff:g id="separator">=</xliff:g>ເບີນ, ສະວິດເຊີແລນ<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">ກ<xliff:g id="separator">=</xliff:g>ກີຢິບ, ຢູເຄຣນ<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">ອ<xliff:g id="separator">=</xliff:g>ອາບູດາບີ, ສະຫະລັດອາຣັບເອມິເຣດ<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">ວ<xliff:g id="separator">=</xliff:g>ວໍຊິງຕັນ ດີ.ຊີ., ສະຫະລັດອາເມລິກາ<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">ເ<xliff:g id="separator">=</xliff:g>ເຈດດາ, ຊາອຸດິດ ອາຣາເບຍ;ຈັດດາ<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">ເ<xliff:g id="separator">=</xliff:g>ເມັກກາ, ຊາອຸດິດ ອາຣາເບຍ;ເມັກຄາ<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">ມ<xliff:g id="separator">=</xliff:g>ມາດີນາ, ຊາອຸດິດ ອາຣາເບຍ;ເມດີນາ<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

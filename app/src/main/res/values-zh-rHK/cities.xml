@@ -355,4 +355,22 @@
     <string name="C359">E<xliff:g id="separator">=</xliff:g>Eucla<xliff:g id="timezone">|Australia/Eucla</xliff:g></string>
     <string name="C360">L<xliff:g id="separator">=</xliff:g>Lord Howe Island<xliff:g id="timezone">|Australia/Lord_Howe</xliff:g></string>
     <string name="C361">C<xliff:g id="separator">=</xliff:g>Chatham Islands<xliff:g id="timezone">|Pacific/Chatham</xliff:g></string>
+    <string name="C362">M<xliff:g id="separator">=</xliff:g>麥納瑪，巴林<xliff:g id="timezone">|Asia/Bahrain</xliff:g></string>
+    <string name="C363">B<xliff:g id="separator">=</xliff:g>布里奇敦，巴貝多<xliff:g id="timezone">|America/Barbados</xliff:g></string>
+    <string name="C364">B<xliff:g id="separator">=</xliff:g>貝爾墨潘，貝里斯<xliff:g id="timezone">|America/Belize</xliff:g></string>
+    <string name="C365">L<xliff:g id="separator">=</xliff:g>雷克雅維克，冰島<xliff:g id="timezone">|Atlantic/Reykjavik</xliff:g></string>
+    <string name="C366">X<xliff:g id="separator">=</xliff:g>新德里，印度<xliff:g id="timezone">|Asia/Kolkata</xliff:g></string>
+    <string name="C367">A<xliff:g id="separator">=</xliff:g>阿斯塔納，哈薩克<xliff:g id="timezone">|Asia/Almaty</xliff:g></string>
+    <string name="C368">K<xliff:g id="separator">=</xliff:g>科威特城，科威特<xliff:g id="timezone">|Asia/Kuwait</xliff:g></string>
+    <string name="C369">L<xliff:g id="separator">=</xliff:g>拉巴特，摩洛哥<xliff:g id="timezone">|Africa/Casablanca</xliff:g></string>
+    <string name="C370">H<xliff:g id="separator">=</xliff:g>威靈頓，紐西蘭<xliff:g id="timezone">|Pacific/Auckland</xliff:g></string>
+    <string name="C371">A<xliff:g id="separator">=</xliff:g>阿布加，奈及利亞<xliff:g id="timezone">|Africa/Lagos</xliff:g></string>
+    <string name="C372">B<xliff:g id="separator">=</xliff:g>比勒陀利亞，南非<xliff:g id="timezone">|Africa/Johannesburg</xliff:g></string>
+    <string name="C373">B<xliff:g id="separator">=</xliff:g>伯恩，瑞士<xliff:g id="timezone">|Europe/Zurich</xliff:g></string>
+    <string name="C374">J<xliff:g id="separator">=</xliff:g>基輔，烏克蘭<xliff:g id="timezone">|Europe/Kyiv</xliff:g></string>
+    <string name="C375">A<xliff:g id="separator">=</xliff:g>阿布札比，阿聯酋<xliff:g id="timezone">|Asia/Dubai</xliff:g></string>
+    <string name="C376">H<xliff:g id="separator">=</xliff:g>華盛頓特區，美國<xliff:g id="timezone">|America/New_York</xliff:g></string>
+    <string name="C377">J<xliff:g id="separator">=</xliff:g>吉達，沙烏地阿拉伯<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C378">M<xliff:g id="separator">=</xliff:g>麥加，沙烏地阿拉伯<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
+    <string name="C379">M<xliff:g id="separator">=</xliff:g>麥地那，沙烏地阿拉伯<xliff:g id="timezone">|Asia/Riyadh</xliff:g></string>
 </resources>

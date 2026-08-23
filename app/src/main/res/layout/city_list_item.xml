@@ -29,14 +29,30 @@
         android:button="@drawable/ic_selector_checkbox"
         android:clickable="false" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/city_name"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:singleLine="true"
-        tools:text="Paris" />
+        android:orientation="vertical">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/city_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            tools:text="Paris" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/city_country"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0.7"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textSize="12sp"
+            tools:text="France" />
+    </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/city_time"

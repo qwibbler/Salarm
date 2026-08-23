@@ -194,6 +194,7 @@ public class BackupAndRestoreUtils {
             alarmObject.put("relationalRuleId", alarm.relationalRuleId);
             alarmObject.put("backgroundImage", alarm.backgroundImage);
             alarmObject.put("blurIntensity", alarm.blurIntensity);
+            alarmObject.put("dismissAfter", alarm.dismissAfter);
 
             if (alarm.daysOfWeek.isRepeating() || !alarm.isSpecifiedDate()) {
                 alarmsArray.put(alarmObject);
@@ -409,6 +410,7 @@ public class BackupAndRestoreUtils {
         String oldBackgroundImage = alarmObject.optString("backgroundImage", DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE);
         String newBackgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
         int blurIntensity = alarmObject.optInt("blurIntensity", DEFAULT_BLUR_INTENSITY);
+        int dismissAfter = alarmObject.optInt("dismissAfter", 0);
 
         if (!TextUtils.isEmpty(oldBackgroundImage)) {
             String fileName = new File(oldBackgroundImage).getName();
@@ -453,7 +455,7 @@ public class BackupAndRestoreUtils {
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes, vibrate, vibrationPattern, flash,
             Weekdays.fromBits(daysOfWeek), label, syncAlarmByLabel, alarmRingtone, deleteAfterUse, autoSilenceDuration, snoozeDuration,
             missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate,
-            relationalRuleId, newBackgroundImage, blurIntensity);
+            relationalRuleId, newBackgroundImage, blurIntensity, dismissAfter);
 
         restoredAlarm.addAlarm(contentResolver);
 

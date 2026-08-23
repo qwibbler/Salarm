@@ -147,7 +147,11 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"Atura els temporitzadors"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"S\'ha cancel·lat el temporitzador"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"S\'ha esgotat el temps"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"Temporitzadors caducats: <xliff:g id="NUM_TIMERS">%d</xliff:g>"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="one">"Temporitzadors caducats: <xliff:g id="NUM_TIMERS">%d</xliff:g>"</item>
+        <item quantity="many">"Temporitzadors caducats: <xliff:g id="NUM_TIMERS">%d</xliff:g>"</item>
+        <item quantity="other">"Temporitzadors caducats: <xliff:g id="NUM_TIMERS">%d</xliff:g>"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"Temporitzador"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"Temporitzador desatès: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"Posa en pausa"</string>
@@ -194,7 +198,11 @@
     <string name="timer_settings" msgid="7955522143086154795">"Temporitzadors"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"Vibració del temporitzador"</string>
     <string name="timer_paused" msgid="5941160896040771462">"Temporitzador en pausa"</string>
-    <string name="timers_in_use" msgid="5570729467344408506">"<xliff:g id="NUMBER">%d</xliff:g> temporitzadors"</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="one">"<xliff:g id="NUMBER">%d</xliff:g> temporitzadors"</item>
+        <item quantity="many">"<xliff:g id="NUMBER">%d</xliff:g> temporitzadors"</item>
+        <item quantity="other">"<xliff:g id="NUMBER">%d</xliff:g> temporitzadors"</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"desfés"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"Alarma suprimida"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="LABEL">%s</xliff:g></string>

@@ -26,12 +26,18 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String DATABASE_NAME = "alarms.db";
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
+    static final String ALARM_LOG_TABLE_NAME = "alarm_log";
 
-    private static final int DATABASE_VERSION = 28;
+    private static final int DATABASE_VERSION = 39;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        db.setForeignKeyConstraintsEnabled(true);
     }
 
     private static void createAlarmsTable(SQLiteDatabase db, String alarmsTableName) {
@@ -61,7 +67,9 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.AlarmsColumns.PAUSE_END_DATE + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.AlarmsColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
             ClockContract.AlarmsColumns.BACKGROUND_IMAGE + " TEXT NOT NULL DEFAULT '', " +
-            ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0);");
+            ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.AlarmsColumns.TAGS + " TEXT NOT NULL DEFAULT '', " +
+            ClockContract.AlarmsColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0);");
 
         LogUtils.i("Alarms Table created");
     }
@@ -87,6 +95,9 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.CRESCENDO_DURATION + " INTEGER NOT NULL, " +
             ClockContract.InstancesColumns.ALARM_VOLUME + " INTEGER NOT NULL, " +
+            ClockContract.InstancesColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
+            ClockContract.InstancesColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.InstancesColumns.INITIAL_ALARM_TIME + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.InstancesColumns.ALARM_ID + " INTEGER REFERENCES " +
             ALARMS_TABLE_NAME + "(" + ClockContract.AlarmsColumns._ID + ") " +
             "ON UPDATE CASCADE ON DELETE CASCADE);");
@@ -94,10 +105,27 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
         LogUtils.i("Instance table created");
     }
 
+    private static void createAlarmLogTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + ClockDatabaseHelper.ALARM_LOG_TABLE_NAME + " (" +
+            ClockContract.AlarmLogColumns._ID + " INTEGER PRIMARY KEY," +
+            ClockContract.AlarmLogColumns.ALARM_ID + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.INSTANCE_ID + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.LABEL + " TEXT NOT NULL, " +
+            ClockContract.AlarmLogColumns.FIRED_TIME + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EVENT_TIME + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.STATE + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EVENT_TYPE + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.SNOOZE_COUNT + " INTEGER NOT NULL, " +
+            ClockContract.AlarmLogColumns.EXTRA_INFO + " INTEGER NOT NULL DEFAULT 0);");
+
+        LogUtils.i("Alarm log table created");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         createAlarmsTable(db, ALARMS_TABLE_NAME);
         createInstanceTable(db, INSTANCES_TABLE_NAME);
+        createAlarmLogTable(db);
     }
 
     @Override
@@ -295,34 +323,115 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         if (oldVersion < 28) {
             // Safety check for users already on version 27 of either branch
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.RELATIONAL_RULE_ID)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.RELATIONAL_RULE_ID)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.RELATIONAL_RULE_ID
                         + " INTEGER NOT NULL DEFAULT -1;");
             }
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BACKGROUND_IMAGE)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BACKGROUND_IMAGE)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.BACKGROUND_IMAGE
                         + " TEXT NOT NULL DEFAULT '';");
             }
-            if (!columnExists(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BLUR_INTENSITY)) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.BLUR_INTENSITY)) {
                 db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.BLUR_INTENSITY
                         + " INTEGER NOT NULL DEFAULT 0;");
             }
-            LogUtils.i("Ensured all version 27/28 columns (Namaz + Upstream) exist.");
+            LogUtils.i("Ensured all version 27/28 columns (Salah + Upstream) exist.");
+        }
+
+        if (oldVersion < 30) {
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
+                        + " INTEGER NOT NULL DEFAULT -1;");
+            }
+
+            LogUtils.i("relational_rule_id column added to instances table for version 30 upgrade.");
+        }
+
+        if (oldVersion < 31) {
+            // Ensure relational_rule_id exists in instances table
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.RELATIONAL_RULE_ID)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.RELATIONAL_RULE_ID
+                        + " INTEGER NOT NULL DEFAULT -1;");
+            }
+            LogUtils.i("Ensured relational_rule_id column exists for version 31 upgrade.");
+        }
+
+        if (oldVersion < 32) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.DISMISS_AFTER
+                + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.DISMISS_AFTER
+                + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("dismissAfter column added for version 32 upgrade.");
+        }
+
+        if (oldVersion < 33) {
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
+                + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("initialAlarmTime column added for version 33 upgrade.");
+        }
+
+        if (oldVersion < 34) {
+            createAlarmLogTable(db);
+            LogUtils.i("Alarm log table added for version 34 upgrade.");
+        }
+
+        if (oldVersion < 35) {
+            // Re-create the alarm log table with new columns if it was already created in v34
+            db.execSQL("DROP TABLE IF EXISTS " + ALARM_LOG_TABLE_NAME + ";");
+            createAlarmLogTable(db);
+            LogUtils.i("Alarm log table re-created for version 35 upgrade.");
+        }
+
+        if (oldVersion < 36) {
+            // Safety check for missing columns in alarm_templates and alarm_instances
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.DISMISS_AFTER)) {
+                db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.DISMISS_AFTER
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.DISMISS_AFTER)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.DISMISS_AFTER
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.INITIAL_ALARM_TIME)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            LogUtils.i("Ensured dismissAfter and initialAlarmTime columns exist for version 36 upgrade.");
+        }
+
+        if (oldVersion < 37) {
+            if (columnMissing(db, ALARM_LOG_TABLE_NAME, ClockContract.AlarmLogColumns.EXTRA_INFO)) {
+                db.execSQL("ALTER TABLE " + ALARM_LOG_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmLogColumns.EXTRA_INFO
+                        + " INTEGER NOT NULL DEFAULT 0;");
+            }
+            LogUtils.i("Added extra_info column to alarm log for version 37 upgrade.");
+        }
+
+        if (oldVersion < 38) {
+            // Drop tables if they exist from a failed v38 attempt
+            db.execSQL("DROP TABLE IF EXISTS tags;");
+            db.execSQL("DROP TABLE IF EXISTS alarm_tags;");
+        }
+
+        if (oldVersion < 39) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.TAGS)) {
+                db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.TAGS
+                        + " TEXT NOT NULL DEFAULT '';");
+            }
+            LogUtils.i("Added tags column to alarms table for version 39 upgrade.");
         }
     }
 
-    private static boolean columnExists(SQLiteDatabase db, String table, String column) {
+    private static boolean columnMissing(SQLiteDatabase db, String table, String column) {
         try (Cursor cursor = db.rawQuery("PRAGMA table_info(" + table + ")", null)) {
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                    if (column.equalsIgnoreCase(name)) {
-                        return true;
-                    }
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                if (column.equalsIgnoreCase(name)) {
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     long fixAlarmInsert(ContentValues values) {

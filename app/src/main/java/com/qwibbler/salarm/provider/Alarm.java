@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Parcel;
@@ -31,9 +32,10 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.RingtoneUtils;
-import com.qwibbler.salarm.utils.SdkUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -151,7 +153,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         PAUSE_END_DATE,
         RELATIONAL_RULE_ID,
         BACKGROUND_IMAGE,
-        BLUR_INTENSITY
+        BLUR_INTENSITY,
+        TAGS,
+        DISMISS_AFTER
     };
     private static final String[] QUERY_ALARMS_WITH_INSTANCES_COLUMNS = {
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID,
@@ -180,6 +184,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + RELATIONAL_RULE_ID,
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + BACKGROUND_IMAGE,
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + BLUR_INTENSITY,
+        ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + TAGS,
+        ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + DISMISS_AFTER,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_STATE,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns._ID,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_ID,
@@ -199,7 +205,10 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_COUNT,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
-        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.RELATIONAL_RULE_ID,
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.DISMISS_AFTER,
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
@@ -228,33 +237,38 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     private static final int MANUAL_SORT_ORDER_INDEX = 20;
     private static final int PAUSE_START_DATE_INDEX = 21;
     private static final int PAUSE_END_DATE_INDEX = 22;
-    private static final int RELATIONAL_RULE_ID_INDEX = 23;
+    public static final int RELATIONAL_RULE_ID_INDEX = 23;
     private static final int BACKGROUND_IMAGE_INDEX = 24;
     private static final int BLUR_INTENSITY_INDEX = 25;
+    private static final int TAGS_INDEX = 26;
+    private static final int DISMISS_AFTER_INDEX = 27;
 
-    public static final int INSTANCE_STATE_INDEX = 26;
-    public static final int INSTANCE_ID_INDEX = 27;
-    public static final int INSTANCE_ALARM_ID_INDEX = 28;
-    public static final int INSTANCE_YEAR_INDEX = 29;
-    public static final int INSTANCE_MONTH_INDEX = 30;
-    public static final int INSTANCE_DAY_INDEX = 31;
-    public static final int INSTANCE_HOUR_INDEX = 32;
-    public static final int INSTANCE_MINUTE_INDEX = 33;
-    public static final int INSTANCE_LABEL_INDEX = 34;
-    public static final int INSTANCE_SYNC_BY_LABEL_INDEX = 35;
-    public static final int INSTANCE_VIBRATE_INDEX = 36;
-    public static final int INSTANCE_VIBRATION_PATTERN_INDEX = 37;
-    public static final int INSTANCE_FLASH_INDEX = 38;
-    public static final int INSTANCE_RINGTONE_INDEX = 39;
-    public static final int INSTANCE_AUTO_SILENCE_DURATION_INDEX = 40;
-    public static final int INSTANCE_SNOOZE_DURATION_INDEX = 41;
-    public static final int INSTANCE_MISSED_ALARM_REPEAT_COUNT_INDEX = 42;
-    public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 43;
-    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 44;
-    public static final int INSTANCE_ALARM_VOLUME_INDEX = 45;
+    public static final int INSTANCE_STATE_INDEX = 28;
+    public static final int INSTANCE_ID_INDEX = 29;
+    public static final int INSTANCE_ALARM_ID_INDEX = 30;
+    public static final int INSTANCE_YEAR_INDEX = 31;
+    public static final int INSTANCE_MONTH_INDEX = 32;
+    public static final int INSTANCE_DAY_INDEX = 33;
+    public static final int INSTANCE_HOUR_INDEX = 34;
+    public static final int INSTANCE_MINUTE_INDEX = 35;
+    public static final int INSTANCE_LABEL_INDEX = 36;
+    public static final int INSTANCE_SYNC_BY_LABEL_INDEX = 37;
+    public static final int INSTANCE_VIBRATE_INDEX = 38;
+    public static final int INSTANCE_VIBRATION_PATTERN_INDEX = 39;
+    public static final int INSTANCE_FLASH_INDEX = 40;
+    public static final int INSTANCE_RINGTONE_INDEX = 41;
+    public static final int INSTANCE_AUTO_SILENCE_DURATION_INDEX = 42;
+    public static final int INSTANCE_SNOOZE_DURATION_INDEX = 43;
+    public static final int INSTANCE_MISSED_ALARM_REPEAT_COUNT_INDEX = 44;
+    public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 45;
+    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 46;
+    public static final int INSTANCE_ALARM_VOLUME_INDEX = 47;
+    public static final int INSTANCE_RELATIONAL_RULE_ID_INDEX = 48;
+    public static final int INSTANCE_DISMISS_AFTER_INDEX = 49;
+    public static final int INSTANCE_INITIAL_ALARM_TIME_INDEX = 50;
 
-    private static final int COLUMN_COUNT = BLUR_INTENSITY_INDEX + 1;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 1;
+    private static final int COLUMN_COUNT = DISMISS_AFTER_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_INITIAL_ALARM_TIME_INDEX + 1;
     // Public fields
     public long id;
     public boolean enabled;
@@ -284,6 +298,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public int instanceState;
     public String backgroundImage;
     public int blurIntensity;
+    public int dismissAfter;
+    public List<String> tags = new ArrayList<>();
 
     // Creates a default alarm at the current time.
     public Alarm() {
@@ -324,13 +340,63 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.relationalRuleId = -1;
         this.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
         this.blurIntensity = DEFAULT_BLUR_INTENSITY;
+        this.dismissAfter = 0;
+        this.tags = new ArrayList<>();
+    }
+
+    /**
+     * Creates a new alarm with default settings based on user preferences.
+     *
+     * @param context  application context
+     * @param hour    alarm hour
+     * @param minute  alarm minute
+     * @param alert   alarm ringtone. If null, the default ringtone from settings will be used.
+     *                NOTE: If alert is null, this method MUST be called from the main thread.
+     * @return a new Alarm object with default settings
+     */
+    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert) {
+        return createDefaultAlarm(context, hour, minute, alert, false);
+    }
+
+    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert, boolean isSalah) {
+        final SharedPreferences prefs = getDefaultSharedPreferences(context);
+        final Alarm alarm = new Alarm(
+            Calendar.getInstance().get(Calendar.YEAR),
+            Calendar.getInstance().get(Calendar.MONTH),
+            Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
+            hour,
+            minute,
+            alert
+        );
+        final AudioManager audioManager = context.getApplicationContext().getSystemService(AudioManager.class);
+
+        alarm.syncByLabel = false;
+        alarm.enabled = true;
+        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs, isSalah);
+        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs, isSalah);
+        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs, isSalah);
+        alarm.deleteAfterUse = SettingsDAO.isOccasionalAlarmDeletedByDefault(prefs);
+        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs, isSalah);
+        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs, isSalah);
+        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs, isSalah);
+        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs, isSalah);
+        if (audioManager != null) {
+            alarm.alarmVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)
+                ? SettingsDAO.getAlarmVolume(prefs, isSalah)
+                : audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+        }
+        alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs, isSalah);
+        alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, isSalah);
+
+        return alarm;
     }
 
     // Used to back up/restore the alarm
     public Alarm(long id, boolean enabled, int year, int month, int day, int hour, int minutes, boolean vibrate, String vibrationPattern,
                  boolean flash, Weekdays daysOfWeek, String label, boolean syncByLabel, String alert, boolean deleteAfterUse,
                  int autoSilenceDuration, int snoozeDuration, int missedAlarmRepeatLimit, int crescendoDuration, int alarmVolume,
-                 int manualSortOrder, long pauseStartDate, long pauseEndDate, long relationalRuleId, String backgroundImage, int blurIntensity) {
+                 int manualSortOrder, long pauseStartDate, long pauseEndDate, long relationalRuleId, String backgroundImage, int blurIntensity, int dismissAfter) {
 
         this.id = id;
         this.enabled = enabled;
@@ -358,6 +424,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.relationalRuleId = relationalRuleId;
         this.backgroundImage = backgroundImage;
         this.blurIntensity = blurIntensity;
+        this.dismissAfter = dismissAfter;
     }
 
     // Used to create a clone of the given alarm
@@ -389,6 +456,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.relationalRuleId = original.relationalRuleId;
         this.backgroundImage = original.backgroundImage;
         this.blurIntensity = original.blurIntensity;
+        this.dismissAfter = original.dismissAfter;
+        this.tags = new ArrayList<>(original.tags);
     }
 
     public Alarm(Cursor c) {
@@ -417,6 +486,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         relationalRuleId = c.getLong(RELATIONAL_RULE_ID_INDEX);
         backgroundImage = c.getString(BACKGROUND_IMAGE_INDEX);
         blurIntensity = c.getInt(BLUR_INTENSITY_INDEX);
+        dismissAfter = c.getInt(DISMISS_AFTER_INDEX);
+        tags = parseTags(c.getString(TAGS_INDEX));
 
         if (c.getColumnCount() == ALARM_JOIN_INSTANCE_COLUMN_COUNT) {
             instanceState = c.getInt(INSTANCE_STATE_INDEX);
@@ -458,6 +529,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         relationalRuleId = p.readLong();
         backgroundImage = p.readString();
         blurIntensity = p.readInt();
+        dismissAfter = p.readInt();
+        tags = p.createStringArrayList();
     }
 
     public ContentValues createContentValues() {
@@ -490,6 +563,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         values.put(RELATIONAL_RULE_ID, relationalRuleId);
         values.put(BACKGROUND_IMAGE, backgroundImage);
         values.put(BLUR_INTENSITY, blurIntensity);
+        values.put(TAGS, joinTags(tags));
+        values.put(DISMISS_AFTER, dismissAfter);
 
         if (alert == null) {
             // We want to put null, so default alarm changes
@@ -528,6 +603,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         p.writeLong(relationalRuleId);
         p.writeString(backgroundImage);
         p.writeInt(blurIntensity);
+        p.writeInt(dismissAfter);
+        p.writeStringList(tags);
     }
 
     public int describeContents() {
@@ -682,6 +759,69 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         contentResolver.update(getContentUri(id), values, null, null);
     }
 
+    public static List<String> getTagsByUsage(ContentResolver cr) {
+        final java.util.Map<String, Integer> usageMap = new java.util.HashMap<>();
+        try (Cursor cursor = cr.query(CONTENT_URI, new String[]{TAGS}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    String tagsString = cursor.getString(0);
+                    List<String> tags = parseTags(tagsString);
+                    for (String tag : tags) {
+                        Integer count = usageMap.get(tag);
+                        usageMap.put(tag, count == null ? 1 : count + 1);
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
+        List<String> allTags = new ArrayList<>(usageMap.keySet());
+        Collections.sort(allTags, (a, b) -> {
+            Integer countA = usageMap.get(a);
+            Integer countB = usageMap.get(b);
+            int valA = countA == null ? 0 : countA;
+            int valB = countB == null ? 0 : countB;
+            if (valA != valB) {
+                return Integer.compare(valB, valA);
+            }
+            return a.compareTo(b);
+        });
+        return allTags;
+    }
+
+    private static List<String> parseTags(String tagsString) {
+        List<String> result = new ArrayList<>();
+        if (tagsString != null && !tagsString.trim().isEmpty()) {
+            for (String tag : tagsString.split(",")) {
+                String trimmed = tag.trim();
+                if (!trimmed.isEmpty()) {
+                    result.add(trimmed);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static String joinTags(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tags.size(); i++) {
+            String tag = tags.get(i);
+            if (tag != null && !tag.trim().isEmpty()) {
+                sb.append(tag.trim());
+                if (i < tags.size() - 1) {
+                    sb.append(",");
+                }
+            }
+        }
+        // Remove trailing comma if any
+        String result = sb.toString();
+        if (result.endsWith(",")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
+    }
+
     public static boolean deleteAlarm(ContentResolver contentResolver, long alarmId) {
         if (alarmId == INVALID_ID) {
             return false;
@@ -794,7 +934,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             || crescendoDuration != other.crescendoDuration
             || alarmVolume != other.alarmVolume
             || !Objects.equals(backgroundImage, other.backgroundImage)
-            || blurIntensity != other.blurIntensity;
+            || blurIntensity != other.blurIntensity
+            || !Objects.equals(tags, other.tags)
+            || dismissAfter != other.dismissAfter;
     }
 
     public boolean isTomorrow(Calendar now) {
@@ -895,6 +1037,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
 
     public AlarmInstance createInstance(Calendar time) {
         AlarmInstance result = new AlarmInstance(time, id);
+        result.mInitialAlarmTimeMillis = time.getTimeInMillis();
         result.mVibrate = vibrate;
         result.mVibrationPattern = vibrationPattern;
         result.mFlash = flash;
@@ -910,6 +1053,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         result.mMissedAlarmRepeatLimit = missedAlarmRepeatLimit;
         result.mCrescendoDuration = crescendoDuration;
         result.mAlarmVolume = alarmVolume;
+        result.mRelationalRuleId = relationalRuleId;
+        result.mDismissAfter = dismissAfter;
+        result.mIsSalah = relationalRuleId != -1;
         return result;
     }
 

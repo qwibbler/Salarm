@@ -195,23 +195,50 @@ final class CityDAO {
             return null;
         }
 
-        final String[] parts = formattedName.split("[=:]");
-        final String name = parts[1];
+        // Parse index
+        final int equalsIndex = formattedName.indexOf('=');
+        final String indexStringRaw = equalsIndex != -1 ? formattedName.substring(0, equalsIndex) : "";
+        final String rest = equalsIndex != -1 ? formattedName.substring(equalsIndex + 1) : formattedName;
+
+        // Parse alternative names (after ;)
+        final int semicolonIndex = rest.indexOf(';');
+        final String nameAndCountryRaw = semicolonIndex != -1 ? rest.substring(0, semicolonIndex) : rest;
+        final List<String> alternativeNames = new ArrayList<>();
+        if (semicolonIndex != -1) {
+            for (String alt : rest.substring(semicolonIndex + 1).split(",")) {
+                alternativeNames.add(alt.trim());
+            }
+        }
+
+        // Parse country (after ,)
+        final int commaIndex = nameAndCountryRaw.indexOf(',');
+        final String nameAndPhoneticRaw = commaIndex != -1 ? nameAndCountryRaw.substring(0, commaIndex) : nameAndCountryRaw;
+        final String country = commaIndex != -1 ? nameAndCountryRaw.substring(commaIndex + 1).trim() : null;
+
+        // Parse phonetic (after :)
+        final int colonIndex = nameAndPhoneticRaw.indexOf(':');
+        final String name = (colonIndex != -1 ? nameAndPhoneticRaw.substring(0, colonIndex) : nameAndPhoneticRaw).trim();
+        final String phoneticName = (colonIndex != -1 ? nameAndPhoneticRaw.substring(colonIndex + 1) : name).trim();
 
         // Extract the English name.
-        final String[] englishParts = englishFormattedName.split("[=:]");
-        final String englishName = englishParts[1];
+        final int engEqualsIndex = englishFormattedName.indexOf('=');
+        final String engRest = engEqualsIndex != -1 ? englishFormattedName.substring(engEqualsIndex + 1) : englishFormattedName;
+        final int engSemicolonIndex = engRest.indexOf(';');
+        final String engNameAndCountryRaw = engSemicolonIndex != -1 ? engRest.substring(0, engSemicolonIndex) : engRest;
+        final int engCommaIndex = engNameAndCountryRaw.indexOf(',');
+        final String engNameAndPhoneticRaw = engCommaIndex != -1 ? engNameAndCountryRaw.substring(0, engCommaIndex) : engNameAndCountryRaw;
+        final int engColonIndex = engNameAndPhoneticRaw.indexOf(':');
+        final String englishName = (engColonIndex != -1 ? engNameAndPhoneticRaw.substring(0, engColonIndex) : engNameAndPhoneticRaw).trim();
 
         // Extract index string from input, use the first character of city name as the index string
         // if one is not explicitly provided.
-        final String indexString = TextUtils.isEmpty(parts[0])
+        final String indexString = TextUtils.isEmpty(indexStringRaw)
             ? name.substring(0, 1)
-            : parts[0];
-        final String phoneticName = parts.length == 3 ? parts[2] : name;
+            : indexStringRaw;
 
         final Matcher matcher = NUMERIC_INDEX_REGEX.matcher(indexString);
         final int index = matcher.find() ? Integer.parseInt(matcher.group()) : -1;
 
-        return new City(id, index, indexString, name, englishName, phoneticName, tz);
+        return new City(id, index, indexString, name, englishName, phoneticName, tz, country, alternativeNames);
     }
 }

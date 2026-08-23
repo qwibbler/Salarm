@@ -49,7 +49,7 @@ public class PreferencesDefaultValues {
     public static final String TAB_TO_DISPLAY_CLOCK = "1";
     public static final String TAB_TO_DISPLAY_TIMER = "2";
     public static final String TAB_TO_DISPLAY_STOPWATCH = "3";
-    public static final String TAB_TO_DISPLAY_NAMAZ = "4";
+    public static final String TAB_TO_DISPLAY_SALAH = "4";
     public static final String TAB_TO_DISPLAY_QIBLA = "5";
     public static final boolean DEFAULT_VIBRATIONS = false;
     public static final boolean DEFAULT_TOOLBAR_TITLE = true;
@@ -57,14 +57,14 @@ public class PreferencesDefaultValues {
     public static final String VISIBLE_TAB_CLOCK = "clock";
     public static final String VISIBLE_TAB_TIMER = "timer";
     public static final String VISIBLE_TAB_STOPWATCH = "stopwatch";
-    public static final String VISIBLE_TAB_NAMAZ = "namaz";
+    public static final String VISIBLE_TAB_SALAH = "salah";
     public static final String VISIBLE_TAB_QIBLA = "qibla";
     public static final Set<String> DEFAULT_VISIBLE_TABS = Set.of(
         VISIBLE_TAB_ALARM,
         VISIBLE_TAB_CLOCK,
         VISIBLE_TAB_TIMER,
         VISIBLE_TAB_STOPWATCH,
-        VISIBLE_TAB_NAMAZ,
+        VISIBLE_TAB_SALAH,
         VISIBLE_TAB_QIBLA
     );
     public static final String DEFAULT_TAB_TITLE_VISIBILITY = "0";
@@ -100,6 +100,8 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_AUTO_SILENCE_DURATION = 600;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION = true;
     public static final int DEFAULT_ALARM_SNOOZE_DURATION = 10;
+    public static final boolean DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER = true;
+    public static final int DEFAULT_ALARM_DISMISS_AFTER = 0;
     public static final int ALARM_SNOOZE_DURATION_DISABLED = -1;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = true;
     public static final String DEFAULT_MISSED_ALARM_REPEAT_LIMIT = "-1";
@@ -134,6 +136,7 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_WEEK_START = String.valueOf(Calendar.getInstance().getFirstDayOfWeek());
     public static final boolean DEFAULT_DISPLAY_DISMISS_BUTTON = true;
     public static final int DEFAULT_ALARM_NOTIFICATION_REMINDER = 30;
+    public static final boolean DEFAULT_DISPLAY_TIMER_RINGTONE_TITLE = false;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN = false;
     public static final int DEFAULT_VIBRATION_START_DELAY = 0;
     public static final boolean DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT = false;
@@ -141,15 +144,33 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM = false;
     public static final boolean DEFAULT_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT = false;
     public static final boolean DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING = true;
+    public static final boolean DEFAULT_DISPLAY_ALARM_TAGS = true;
 
-    // Namaz
-    public static final String DEFAULT_NAMAZ_LATITUDE = "0.0";
-    public static final String DEFAULT_NAMAZ_LONGITUDE = "0.0";
-    public static final String DEFAULT_NAMAZ_MADHAB = "HANAFI";
-    public static final String DEFAULT_NAMAZ_CALC_METHOD = "KARACHI";
-    public static final String DEFAULT_NAMAZ_LOCATION_MODE = "GPS";
-    public static final String DEFAULT_NAMAZ_CITY_NAME = "Unknown";
-    public static final boolean DEFAULT_NAMAZ_SHOW_BOTH_ASR = false;
+    // Salah
+    public static final String DEFAULT_SALAH_LATITUDE = "0.0";
+    public static final String DEFAULT_SALAH_LONGITUDE = "0.0";
+    public static final String DEFAULT_SALAH_MADHAB = "HANAFI";
+    public static final String DEFAULT_SALAH_CALC_METHOD = "KARACHI";
+    public static final String DEFAULT_SALAH_LOCATION_MODE = "GPS";
+    public static final String DEFAULT_SALAH_CITY_NAME = "Unknown";
+    public static final boolean DEFAULT_SALAH_SHOW_BOTH_ASR = false;
+
+    public static final boolean DEFAULT_SALAH_ALARM_SHOW_ROUNDING = false;
+    public static final boolean DEFAULT_SALAH_AUTODISMISS_BY_DEFAULT = true;
+    public static final boolean DEFAULT_SALAH_ADJUST_ALARM_AFTER_ROUNDING = false;
+    public static final String DEFAULT_SALAH_DISPLAY_NEXT_EVENT_INFO = "countdown";
+    public static final boolean DEFAULT_SALAH_AUTO_TAG = true;
+    public static final String DEFAULT_SALAH_AUTO_TAG_NAME = "Salah";
+    public static final boolean DEFAULT_SALAH_ALARM_STYLE_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_COLORS_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_FONT_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_RINGTONE_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_VIBRATION_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_ACTIONS_OVERRIDE = false;
+    public static final boolean DEFAULT_SALAH_ALARM_MISC_OVERRIDE = false;
 
     // Alarm Display Customization
     public static final boolean DEFAULT_DISPLAY_ALARM_SECOND_HAND = true;
@@ -281,17 +302,17 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_DATE = true;
     public static final boolean DEFAULT_VERTICAL_WIDGET_DISPLAY_NEXT_ALARM = true;
 
-    // Namaz Widget
-    public static final boolean DEFAULT_NAMAZ_WIDGET_DISPLAY_BACKGROUND = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_TEXT_SHADOW_DISPLAYED = false;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_ITEM_HIGHLIGHT_DISPLAYED = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN = true;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS = false;
-    public static final boolean DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS = false;
-    public static final Set<String> DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS = Set.of(
+    // Salah Widget
+    public static final boolean DEFAULT_SALAH_WIDGET_DISPLAY_BACKGROUND = true;
+    public static final boolean DEFAULT_SALAH_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;
+    public static final boolean DEFAULT_SALAH_WIDGET_TEXT_SHADOW_DISPLAYED = false;
+    public static final boolean DEFAULT_SALAH_WIDGET_APPLY_HORIZONTAL_PADDING = true;
+    public static final boolean DEFAULT_SALAH_WIDGET_DEFAULT_COLOR = true;
+    public static final boolean DEFAULT_SALAH_WIDGET_DISPLAY_ITEM_HIGHLIGHT = true;
+    public static final boolean DEFAULT_SALAH_WIDGET_SHOW_COUNTDOWN = true;
+    public static final boolean DEFAULT_SALAH_WIDGET_SHOW_SYMBOLS = false;
+    public static final boolean DEFAULT_SALAH_WIDGET_SHOW_ALARMS = false;
+    public static final Set<String> DEFAULT_SALAH_WIDGET_VISIBLE_EVENTS = Set.of(
         "fajr",
         "sunrise",
         "dhuhr",
@@ -300,10 +321,10 @@ public class PreferencesDefaultValues {
         "isha"
     );
 
-    // Namaz Countdown Widget
-    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;
-    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS = false;
-    public static final boolean DEFAULT_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = true;
+    // Salah Countdown Widget
+    public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND = true;
+    public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS = false;
+    public static final boolean DEFAULT_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING = true;
 
     // Common widget values
     public static final boolean DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED = false;

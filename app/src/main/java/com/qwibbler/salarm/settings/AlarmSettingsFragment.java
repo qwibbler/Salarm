@@ -47,6 +47,7 @@ import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.dialogfragment.AlarmNotificationReminderDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmSnoozeDurationDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AutoSilenceDurationDialogFragment;
+import com.qwibbler.salarm.dialogfragment.DismissAfterDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationStartDelayDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
@@ -57,6 +58,7 @@ import com.qwibbler.salarm.settings.custompreference.AlarmSnoozeDurationPreferen
 import com.qwibbler.salarm.settings.custompreference.AlarmVolumePreference;
 import com.qwibbler.salarm.settings.custompreference.AutoSilenceDurationPreference;
 import com.qwibbler.salarm.settings.custompreference.CustomSliderPreference;
+import com.qwibbler.salarm.settings.custompreference.DismissAfterPreference;
 import com.qwibbler.salarm.settings.custompreference.VibrationPatternPreference;
 import com.qwibbler.salarm.settings.custompreference.VibrationStartDelayPreference;
 import com.qwibbler.salarm.settings.custompreference.VolumeCrescendoDurationPreference;
@@ -93,6 +95,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     SwitchPreferenceCompat mEnablePerAlarmAutoSilencePref;
     AlarmSnoozeDurationPreference mAlarmSnoozeDurationPref;
     SwitchPreferenceCompat mEnablePerAlarmSnoozeDurationPref;
+    DismissAfterPreference mDismissAfterPref;
+    SwitchPreferenceCompat mEnablePerAlarmDismissAfterPref;
     ListPreference mRepeatMissedAlarmPref;
     SwitchPreferenceCompat mEnablePerAlarmMissedRepeatLimitPref;
     AlarmVolumePreference mAlarmVolumePref;
@@ -202,6 +206,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mEnablePerAlarmAutoSilencePref = findPreference(KEY_ENABLE_PER_ALARM_AUTO_SILENCE);
         mAlarmSnoozeDurationPref = findPreference(KEY_ALARM_SNOOZE_DURATION);
         mEnablePerAlarmSnoozeDurationPref = findPreference(KEY_ENABLE_PER_ALARM_SNOOZE_DURATION);
+        mDismissAfterPref = findPreference(KEY_ALARM_DISMISS_AFTER);
+        mEnablePerAlarmDismissAfterPref = findPreference(KEY_ENABLE_PER_ALARM_DISMISS_AFTER);
         mRepeatMissedAlarmPref = findPreference(KEY_REPEAT_MISSED_ALARM);
         mEnablePerAlarmMissedRepeatLimitPref = findPreference(KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
         mAlarmVolumePref = findPreference(KEY_ALARM_VOLUME_SETTING);
@@ -294,7 +300,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     public void onDestroy() {
         nullifyPreferenceListeners(mAlarmDisplayCustomizationPref, mAlarmFontPref, mMaterialTimePickerStylePref,
             mMaterialDatePickerStylePref, mAlarmRingtonePref, mAlarmAutoSilencePref, mEnablePerAlarmAutoSilencePref,
-            mAlarmSnoozeDurationPref, mEnablePerAlarmSnoozeDurationPref, mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref,
+            mAlarmSnoozeDurationPref, mEnablePerAlarmSnoozeDurationPref, mDismissAfterPref, mEnablePerAlarmDismissAfterPref,
+            mRepeatMissedAlarmPref, mEnablePerAlarmMissedRepeatLimitPref,
             mAlarmVolumePref, mEnablePerAlarmVolumePref, mAlarmVolumeCrescendoDurationPref, mEnablePerAlarmVolumeCrescendoDurationPref,
             mAdvancedAudioPlaybackPref, mAutoRoutingToExternalAudioDevicePref, mSystemMediaVolumePref, mExternalAudioDeviceVolumePref,
             mAlarmVibrationCategory, mEnableAlarmVibrationsByDefaultPref, mVibrationPatternPref, mEnablePerAlarmVibrationPatternPref,
@@ -348,6 +355,23 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                     });
                 } else {
                     triggerDisableSettingDialog(KEY_ENABLE_PER_ALARM_SNOOZE_DURATION);
+                    return false;
+                }
+            }
+
+            case KEY_ENABLE_PER_ALARM_DISMISS_AFTER -> {
+                Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+                if ((boolean) newValue) {
+                    AppExecutors.getDiskIO().execute(() -> {
+                        List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
+                        for (Alarm alarm : currentAlarms) {
+                            alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(mPrefs);
+                            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+                        }
+                    });
+                } else {
+                    triggerDisableSettingDialog(KEY_ENABLE_PER_ALARM_DISMISS_AFTER);
                     return false;
                 }
             }
@@ -570,6 +594,10 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
             int currentValue = alarmSnoozeDurationPreference.getSnoozeDuration();
             AlarmSnoozeDurationDialogFragment dialogFragment = AlarmSnoozeDurationDialogFragment.newInstance(pref.getKey(), currentValue);
             AlarmSnoozeDurationDialogFragment.show(getParentFragmentManager(), dialogFragment);
+        } else if (pref instanceof DismissAfterPreference dismissAfterPreference) {
+            int currentValue = dismissAfterPreference.getDismissAfter();
+            DismissAfterDialogFragment dialogFragment = DismissAfterDialogFragment.newInstance(pref.getKey(), currentValue);
+            DismissAfterDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else if (pref instanceof VolumeCrescendoDurationPreference volumeCrescendoDurationPreference) {
             int currentValue = volumeCrescendoDurationPreference.getVolumeCrescendoDuration();
             VolumeCrescendoDurationDialogFragment dialogFragment =
@@ -616,6 +644,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mEnablePerAlarmAutoSilencePref.setOnPreferenceChangeListener(this);
 
         mEnablePerAlarmSnoozeDurationPref.setOnPreferenceChangeListener(this);
+
+        mEnablePerAlarmDismissAfterPref.setOnPreferenceChangeListener(this);
 
         updateMissedAlarmPrefsVisibility(SettingsDAO.getAlarmTimeout(mPrefs), SettingsDAO.getSnoozeLength(mPrefs));
 
@@ -762,6 +792,30 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                 }
             });
 
+        // Alarm dismiss after preference
+        parentFragmentManager.setFragmentResultListener(DismissAfterDialogFragment.REQUEST_KEY, viewLifecycleOwner,
+            (requestKey, bundle) -> {
+                String key = bundle.getString(DismissAfterDialogFragment.RESULT_PREF_KEY);
+                int newValue = bundle.getInt(DismissAfterDialogFragment.DISMISS_AFTER_VALUE);
+
+                if (key != null) {
+                    DismissAfterPreference pref = findPreference(key);
+                    if (pref != null) {
+                        pref.setDismissAfter(newValue);
+
+                        if (SettingsDAO.isPerAlarmDismissAfterDisabled(mPrefs)) {
+                            AppExecutors.getDiskIO().execute(() -> {
+                                List<Alarm> currentAlarms = Alarm.getAlarms(requireContext().getContentResolver(), null);
+                                for (Alarm alarm : currentAlarms) {
+                                    alarm.dismissAfter = newValue;
+                                    mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
         // Alarm volume crescendo duration preference
         parentFragmentManager.setFragmentResultListener(VolumeCrescendoDurationDialogFragment.REQUEST_KEY, viewLifecycleOwner,
             (requestKey, bundle) -> {
@@ -892,6 +946,11 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_snooze_duration_dialog_message,
                                 KEY_ENABLE_PER_ALARM_SNOOZE_DURATION, mEnablePerAlarmSnoozeDurationPref, mAlarmSnoozeDurationPref,
                                 alarm -> alarm.snoozeDuration = SettingsDAO.getSnoozeLength(mPrefs));
+
+                        case KEY_ENABLE_PER_ALARM_DISMISS_AFTER ->
+                            showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_dismiss_after_dialog_message,
+                                KEY_ENABLE_PER_ALARM_DISMISS_AFTER, mEnablePerAlarmDismissAfterPref, mDismissAfterPref,
+                                alarm -> alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(mPrefs));
 
                         case KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_missed_repeat_limit_dialog_message,
@@ -1038,6 +1097,8 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mEnablePerAlarmAutoSilencePref = null;
         mAlarmSnoozeDurationPref = null;
         mEnablePerAlarmSnoozeDurationPref = null;
+        mDismissAfterPref = null;
+        mEnablePerAlarmDismissAfterPref = null;
         mRepeatMissedAlarmPref = null;
         mEnablePerAlarmMissedRepeatLimitPref = null;
         mAlarmVolumePref = null;

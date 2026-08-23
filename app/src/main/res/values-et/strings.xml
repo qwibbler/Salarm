@@ -140,7 +140,10 @@
     <string name="timer_stop_all" msgid="9080780442843034376">"Kõigi taimerite peatamine"</string>
     <string name="timer_canceled" msgid="7327923392567128060">"Taimer on tühistatud"</string>
     <string name="timer_times_up" msgid="9190440395938519009">"Aeg on läbi"</string>
-    <string name="timer_multi_times_up" msgid="1239104626836080409">"<xliff:g id="NUM_TIMERS">%d</xliff:g> taimerit on aegunud"</string>
+    <plurals name="timer_multi_times_up" msgid="1239104626836080409">
+        <item quantity="one">"<xliff:g id="NUM_TIMERS">%d</xliff:g> taimerit on aegunud"</item>
+        <item quantity="other">"<xliff:g id="NUM_TIMERS">%d</xliff:g> taimerit on aegunud"</item>
+    </plurals>
     <string name="timer_notification_label" msgid="4933184831583137249">"Taimer"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">Vahelejäänud taimer: <xliff:g example="Too lapsed lasteaiast" id="name">%s</xliff:g></string>
     <string name="timer_pause" msgid="3748323712728398743">"Peata"</string>
@@ -187,7 +190,10 @@
     <string name="timer_settings" msgid="7955522143086154795">"Taimerid"</string>
     <string name="timer_vibrate_title" msgid="7788920024785587518">"Taimeri vibratsioon"</string>
     <string name="timer_paused" msgid="5941160896040771462">"Taimer peatati"</string>
-    <string name="timers_in_use" msgid="5570729467344408506"><xliff:g example="7" id="number">%d</xliff:g> taimerit</string>
+    <plurals name="timers_in_use" msgid="5570729467344408506">
+        <item quantity="one"><xliff:g example="7" id="number">%d</xliff:g> taimerit</item>
+        <item quantity="other"><xliff:g example="7" id="number">%d</xliff:g> taimerit</item>
+    </plurals>
     <string name="alarm_undo" msgid="5710042601177655254">"võta tagasi"</string>
     <string name="alarm_deleted" msgid="6131529309389084785">"Äratus on kustutatud"</string>
     <string name="world_day_of_week_label" msgid="5911196322328341288">/ <xliff:g id="label">%s</xliff:g></string>
@@ -247,7 +253,7 @@
     <string name="alarm_notification_reminder_title">Teavituse meeldetuletus</string>
     <string name="enable_alarm_vibrations_by_default_setting_title">Äratuse käivitamisel lülita vibreerimine sisse</string>
     <string name="timer_add_custom_time">+ %s</string>
-    <string name="app_slogan">AOSP-l põhinev, 100% avatud lähtekoodiga kell</string>
+    <string name="app_slogan">AOSP-l põhinev, 100%% avatud lähtekoodiga kell</string>
     <string name="display_background_border_summary">See eelistus võimaldab mõnede rakenduse elementide (äratused, linnad, taimeri nupud, jne) puhul kuvada taustu äärejoontega</string>
     <string name="display_background_border_title">Kuva taustade äärejooni</string>
     <string name="settings_vibration_title">Kasuta vibreerimist/värinat</string>

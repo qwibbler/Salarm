@@ -333,7 +333,7 @@ public abstract class BaseDigitalAppWidgetCityViewsFactory implements RemoteView
 
         // City name
         rv.setTextViewTextSize(labelId, TypedValue.COMPLEX_UNIT_PX, mCityAndDayFontSize * mFontScale);
-        rv.setTextViewText(labelId, isTextUppercase ? city.getName().toUpperCase() : city.getName());
+        rv.setTextViewText(labelId, isTextUppercase ? city.getName().toUpperCase(Locale.getDefault()) : city.getName());
         if (!useDefaultCityNameColor) {
             rv.setTextColor(labelId, customCityNameColor);
         }
@@ -349,7 +349,7 @@ public abstract class BaseDigitalAppWidgetCityViewsFactory implements RemoteView
             final String weekday = cityCal.getDisplayName(DAY_OF_WEEK, Calendar.SHORT, locale);
             final String slashDay = mContext.getString(R.string.world_day_of_week_label, weekday);
             rv.setTextViewTextSize(dayId, TypedValue.COMPLEX_UNIT_PX, mCityAndDayFontSize * mFontScale);
-            rv.setTextViewText(dayId, isTextUppercase ? slashDay.toUpperCase() : slashDay);
+            rv.setTextViewText(dayId, isTextUppercase ? slashDay.toUpperCase(Locale.getDefault()) : slashDay);
             if (!useDefaultCityNameColor) {
                 rv.setTextColor(dayId, customCityNameColor);
             }
@@ -363,7 +363,7 @@ public abstract class BaseDigitalAppWidgetCityViewsFactory implements RemoteView
 
         if (displayCityNote) {
             rv.setTextViewTextSize(noteId, TypedValue.COMPLEX_UNIT_PX, mCityAndDayFontSize * mFontScale);
-            rv.setTextViewText(noteId, isTextUppercase ? cityNote.toUpperCase() : cityNote);
+            rv.setTextViewText(noteId, isTextUppercase ? cityNote.toUpperCase(Locale.getDefault()) : cityNote);
             if (!useDefaultCityNoteColor) {
                 rv.setTextColor(noteId, customCityNoteColor);
             }
