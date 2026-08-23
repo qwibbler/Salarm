@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -185,19 +186,28 @@ public class SalahTimelineWidgetProvider extends AppWidgetProvider {
     private static void updateCountdown(RemoteViews rv, Context context, SharedPreferences prefs, PrayerItem next, float timeFontSize, float labelFontSize) {
         if (next == null) return;
 
-        long diff = next.time.getTime() - System.currentTimeMillis();
-        long hours = TimeUnit.MILLISECONDS.toHours(diff);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
+        if (SdkUtils.isAtLeastAndroid7()) {
+            long base = SystemClock.elapsedRealtime() + (next.time.getTime() - System.currentTimeMillis());
+            rv.setChronometer(R.id.countdown_time, base, null, true);
+            rv.setChronometerCountDown(R.id.countdown_time, true);
+        } else {
+            long diff = next.time.getTime() - System.currentTimeMillis();
+            long hours = TimeUnit.MILLISECONDS.toHours(diff);
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
 
-        String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
-        String label = context.getString(R.string.salah_countdown_format, "", next.fullName).replace(" To ", "").trim();
-        if (WidgetDAO.isTextUppercaseDisplayedOnSalahWidget(prefs)) {
-            timeLeft = timeLeft.toUpperCase(Locale.getDefault());
-            label = label.toUpperCase(Locale.getDefault());
+            String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
+            if (WidgetDAO.isTextUppercaseDisplayedOnSalahWidget(prefs)) {
+                timeLeft = timeLeft.toUpperCase(Locale.getDefault());
+            }
+            rv.setTextViewText(R.id.countdown_time, timeLeft);
         }
 
-        rv.setTextViewText(R.id.countdown_time, timeLeft);
         rv.setTextViewTextSize(R.id.countdown_time, COMPLEX_UNIT_PX, timeFontSize);
+
+        String label = context.getString(R.string.salah_countdown_format, "", next.fullName).replace(" To ", "").trim();
+        if (WidgetDAO.isTextUppercaseDisplayedOnSalahWidget(prefs)) {
+            label = label.toUpperCase(Locale.getDefault());
+        }
 
         rv.setTextViewText(R.id.countdown_label, "TO " + label);
         rv.setTextViewTextSize(R.id.countdown_label, COMPLEX_UNIT_PX, labelFontSize);

@@ -16,6 +16,8 @@ import com.qwibbler.salarm.utils.LogUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONObject;
@@ -225,5 +227,39 @@ public class SalahUtils {
         }
 
         return bestMatch;
+    }
+
+    /**
+     * Finds the time of the next prayer relative to now.
+     * Used for scheduling widget updates.
+     */
+    public static long getNextPrayerTime(Context context) {
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, null);
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, null);
+        if (latStr == null || lonStr == null) return -1;
+
+        double[] coords = getCoordinates(context);
+        CalculationMethod method = getCalculationMethod(context);
+        Madhab madhab = getMadhab(context);
+
+        Date now = new Date();
+        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(now, coords[0], coords[1], method);
+
+        Date asrTime = (madhab == Madhab.SHAFI) ? times.asrShafi : times.asrHanafi;
+
+        long nowMs = now.getTime();
+        if (nowMs < times.fajr.getTime()) return times.fajr.getTime();
+        if (nowMs < times.sunrise.getTime()) return times.sunrise.getTime();
+        if (nowMs < times.dhuhr.getTime()) return times.dhuhr.getTime();
+        if (nowMs < asrTime.getTime()) return asrTime.getTime();
+        if (nowMs < times.maghrib.getTime()) return times.maghrib.getTime();
+        if (nowMs < times.isha.getTime()) return times.isha.getTime();
+
+        // Tomorrow's Fajr
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        SalahCalculator.SalahTimes tomorrowTimes = SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
+        return tomorrowTimes.fajr.getTime();
     }
 }
