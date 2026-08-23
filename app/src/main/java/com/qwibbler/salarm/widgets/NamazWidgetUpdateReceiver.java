@@ -18,7 +18,7 @@ import java.util.Calendar;
  */
 public class NamazWidgetUpdateReceiver extends BroadcastReceiver {
 
-    public static final String ACTION_MINUTE_UPDATE = "com.qwibbler.salarm.NAMAZ_MINUTE_UPDATE";
+    public static final String ACTION_MINUTE_UPDATE = "com.qwibbler.salarm.SALAH_MINUTE_UPDATE";
 
     @Override
     public void onReceive(Context context, Intent intent) {

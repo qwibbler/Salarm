@@ -127,12 +127,12 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     private DisplayMetrics mDisplayMetrics;
     private Alarm mAlarm;
     private Alarm mOriginalAlarm;
-    private RelationalRule mNamazRule;
+    private RelationalRule mSalahRule;
     private AlarmUpdateHandler mAlarmUpdateHandler;
     private String mTag;
     private boolean mIsNewAlarm;
     private boolean mIsDeleted;
-    private boolean mIsNamaz;
+    private boolean mIsSalah;
     private int mScreenHeight;
     private int mVisualPadding;
 
@@ -301,9 +301,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mOriginalAlarm = new Alarm(alarmFromArguments);
         mAlarm = new Alarm(alarmFromArguments);
-        mIsNamaz = mAlarm.relationalRuleId != -1;
+        mIsSalah = mAlarm.relationalRuleId != -1;
 
-        mAlarmBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getAlarmFont(mPrefs, mIsNamaz));
+        mAlarmBoldTypeface = ThemeUtils.boldTypeface(SettingsDAO.getAlarmFont(mPrefs, mIsSalah));
 
         mBinding = AlarmEditBottomSheetBinding.inflate(getLayoutInflater());
 
@@ -390,7 +390,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         // This catches any system volume changes the user might have made
         // (e.g., using hardware buttons) while the UI was frozen, ensuring the banner state
         // remains perfectly synchronized.
-        if (SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsNamaz)) {
+        if (SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsSalah)) {
             Fragment parentFragment = getParentFragmentManager().findFragmentByTag(mTag);
             if (parentFragment instanceof AlarmFragment alarmFragment) {
                 alarmFragment.updateWarningBannerVisibility();
@@ -552,15 +552,15 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
     private void bindPauseAlarm() {
         boolean isRepeating = mAlarm.daysOfWeek.isRepeating();
-        boolean isNamazAlarm = mAlarm.relationalRuleId > 0;
+        boolean isSalahAlarm = mAlarm.relationalRuleId > 0;
 
-        mBinding.pauseAlarmLayout.setEnabled(isRepeating || isNamazAlarm);
-        mBinding.pauseAlarm.setEnabled(isRepeating || isNamazAlarm);
+        mBinding.pauseAlarmLayout.setEnabled(isRepeating || isSalahAlarm);
+        mBinding.pauseAlarm.setEnabled(isRepeating || isSalahAlarm);
         mBinding.pauseAlarm.setTypeface(mGeneralTypeface);
 
         mAlarm.clearPauseIfExpired();
 
-        if ((isRepeating || isNamazAlarm) && mAlarm.isPauseSet()) {
+        if ((isRepeating || isSalahAlarm) && mAlarm.isPauseSet()) {
             String dateRangeStr = AlarmUtils.formatPauseDateRange(requireContext(), mAlarm.pauseStartDate, mAlarm.pauseEndDate);
 
             mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_range, dateRangeStr));
@@ -573,7 +573,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.cancelPauseAlarm.setVisibility(View.GONE);
         }
 
-        if (isRepeating || isNamazAlarm) {
+        if (isRepeating || isSalahAlarm) {
             mBinding.pauseAlarmLayout.setOnClickListener(v -> DatePickerDialogFragment.showMaterialDateRangePicker(
                 getChildFragmentManager(),
                 mPrefs,
@@ -597,21 +597,21 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
     private void bindNamazRule() {
         if (mAlarm.relationalRuleId == -1) {
-            mIsNamaz = false;
+            mIsSalah = false;
             AppExecutors.getMainThread().post(() -> {
                 if (!isAdded() || mBinding == null) return;
-                mBinding.namazRuleDescription.setVisibility(View.GONE);
+                mBinding.salahRuleDescription.setVisibility(View.GONE);
                 bindDismissAfterValue();
                 updateAllGroupBackgrounds();
             });
             return;
         }
 
-        mIsNamaz = true;
+        mIsSalah = true;
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            mNamazRule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
-            if (mNamazRule != null) {
+            mSalahRule = NamazDatabase.getDatabase(appContext).relationalRuleDao().getById(mAlarm.relationalRuleId);
+            if (mSalahRule != null) {
                 // Reload alarm to get potentially updated time and silence duration
                 Alarm reloadedAlarm = Alarm.getAlarm(appContext.getContentResolver(), mAlarm.id);
                 if (reloadedAlarm != null) {
@@ -626,10 +626,10 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
-                    mBinding.namazRuleDescription.setVisibility(View.VISIBLE);
-                    mBinding.namazRuleDescription.setTypeface(mGeneralTypeface);
-                    mBinding.namazRuleDescription.setText(mNamazRule.getRuleDescription(requireContext()));
-                    mBinding.namazRuleDescription.setOnClickListener(v ->
+                    mBinding.salahRuleDescription.setVisibility(View.VISIBLE);
+                    mBinding.salahRuleDescription.setTypeface(mGeneralTypeface);
+                    mBinding.salahRuleDescription.setText(mSalahRule.getRuleDescription(requireContext()));
+                    mBinding.salahRuleDescription.setOnClickListener(v ->
                         RelationalAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
                     );
 
@@ -642,7 +642,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             } else {
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
-                    mBinding.namazRuleDescription.setVisibility(View.GONE);
+                    mBinding.salahRuleDescription.setVisibility(View.GONE);
                     bindDismissAfterValue();
                     updateAllGroupBackgrounds();
                 });
@@ -744,7 +744,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindVibrationPattern() {
-        if (!mAlarm.vibrate || !SettingsDAO.isPerAlarmVibrationPatternEnabled(mPrefs, mIsNamaz)) {
+        if (!mAlarm.vibrate || !SettingsDAO.isPerAlarmVibrationPatternEnabled(mPrefs, mIsSalah)) {
             mBinding.vibrationPatternLayout.setVisibility(GONE);
             return;
         }
@@ -805,7 +805,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAutoSilenceValue() {
-        if (SettingsDAO.isPerAlarmAutoSilenceDisabled(mPrefs, mIsNamaz)) {
+        if (SettingsDAO.isPerAlarmAutoSilenceDisabled(mPrefs, mIsSalah)) {
             mBinding.autoSilenceDurationLayout.setVisibility(GONE);
             return;
         }
@@ -848,7 +848,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindSnoozeDurationValue() {
-        if (SettingsDAO.isPerAlarmSnoozeDurationDisabled(mPrefs, mIsNamaz)) {
+        if (SettingsDAO.isPerAlarmSnoozeDurationDisabled(mPrefs, mIsSalah)) {
             mBinding.snoozeDurationLayout.setVisibility(GONE);
             return;
         }
@@ -904,7 +904,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding.dismissAfterLayout.setVisibility(VISIBLE);
 
-        boolean isAutostopEnabled = mNamazRule != null && mNamazRule.autostopEnabled;
+        boolean isAutostopEnabled = mSalahRule != null && mSalahRule.autostopEnabled;
         mBinding.dismissAfterLayout.setEnabled(!isAutostopEnabled);
         mBinding.dismissAfterLayout.setAlpha(isAutostopEnabled ? 0.4f : 1.0f);
 
@@ -923,7 +923,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindMissedAlarmRepeatLimit() {
-        if (SettingsDAO.isPerAlarmMissedRepeatLimitDisabled(mPrefs, mIsNamaz)
+        if (SettingsDAO.isPerAlarmMissedRepeatLimitDisabled(mPrefs, mIsSalah)
             || mAlarm.autoSilenceDuration == TIMEOUT_NEVER
             || mAlarm.snoozeDuration == ALARM_SNOOZE_DURATION_DISABLED) {
             mBinding.missedAlarmRepeatLimitLayout.setVisibility(GONE);
@@ -959,7 +959,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindCrescendoDuration() {
-        if (!SettingsDAO.isPerAlarmCrescendoDurationEnabled(mPrefs, mIsNamaz)) {
+        if (!SettingsDAO.isPerAlarmCrescendoDurationEnabled(mPrefs, mIsSalah)) {
             mBinding.crescendoDurationLayout.setVisibility(GONE);
             return;
         }
@@ -1002,7 +1002,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAlarmVolume() {
-        if (!SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsNamaz)) {
+        if (!SettingsDAO.isPerAlarmVolumeEnabled(mPrefs, mIsSalah)) {
             mBinding.alarmVolumeLayout.setVisibility(GONE);
             return;
         }
@@ -1052,7 +1052,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindAlarmBackgroundImage() {
-        if (!SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsNamaz)) {
+        if (!SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsSalah)) {
             mBinding.alarmBackgroundImageLayout.setVisibility(GONE);
             return;
         }
@@ -1083,11 +1083,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void bindBlurIntensity() {
-        final boolean hasGlobalImage = !TextUtils.isEmpty(SettingsDAO.getAlarmBackgroundImage(mPrefs, mIsNamaz));
+        final boolean hasGlobalImage = !TextUtils.isEmpty(SettingsDAO.getAlarmBackgroundImage(mPrefs, mIsSalah));
         final boolean hasSpecificImage = !TextUtils.isEmpty(mAlarm.backgroundImage);
 
         if (SdkUtils.isBeforeAndroid12()
-            || !SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsNamaz)
+            || !SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, mIsSalah)
             || (!hasGlobalImage && !hasSpecificImage)) {
             mBinding.alarmBlurIntensityLayout.setVisibility(GONE);
             return;
@@ -1581,7 +1581,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         ThemeUtils.applyExpressiveBackgroundsToGroup(
             requireContext(),
             mPrefs,
-            mBinding.namazRuleDescription,
+            mBinding.salahRuleDescription,
             mBinding.editLabel,
             mBinding.editTags,
             mBinding.chooseRingtone

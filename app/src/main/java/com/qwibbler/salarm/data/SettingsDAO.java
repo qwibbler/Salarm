@@ -381,42 +381,42 @@ public final class SettingsDAO {
      * @return {@code true} if the Namaz tab is visible in the bottom navigation menu. {@code false} otherwise.
      */
     public static boolean isNamazTabVisible(SharedPreferences prefs) {
-        return getVisibleTabs(prefs).contains(VISIBLE_TAB_NAMAZ);
+        return getVisibleTabs(prefs).contains(VISIBLE_TAB_SALAH);
     }
 
     /**
      * @return {@code true} if Namaz auto-dismiss is enabled by default.
      */
     public static boolean isNamazAutoDismissByDefaultEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_AUTODISMISS_BY_DEFAULT, DEFAULT_NAMAZ_AUTODISMISS_BY_DEFAULT);
+        return prefs.getBoolean(KEY_SALAH_AUTODISMISS_BY_DEFAULT, DEFAULT_SALAH_AUTODISMISS_BY_DEFAULT);
     }
 
     /**
      * @return {@code true} if the Namaz alarm should be adjusted after rounding.
      */
     public static boolean isNamazAdjustAlarmAfterRoundingEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, DEFAULT_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING);
+        return prefs.getBoolean(KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING, DEFAULT_SALAH_ADJUST_ALARM_AFTER_ROUNDING);
     }
 
     /**
      * @return a value indicating what next event info to display when the alarm is ringing.
      */
     public static String getNamazShowNextEventInfo(SharedPreferences prefs) {
-        return prefs.getString(KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO, DEFAULT_NAMAZ_DISPLAY_NEXT_EVENT_INFO);
+        return prefs.getString(KEY_SALAH_DISPLAY_NEXT_EVENT_INFO, DEFAULT_SALAH_DISPLAY_NEXT_EVENT_INFO);
     }
 
     /**
      * @return {@code true} if Namaz alarms should be automatically tagged.
      */
     public static boolean isNamazAutoTagEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_AUTO_TAG, DEFAULT_NAMAZ_AUTO_TAG);
+        return prefs.getBoolean(KEY_SALAH_AUTO_TAG, DEFAULT_SALAH_AUTO_TAG);
     }
 
     /**
      * @return the name of the tag to automatically add to Namaz alarms.
      */
     public static String getNamazAutoTagName(SharedPreferences prefs) {
-        return prefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME);
+        return prefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME);
     }
 
     /**
@@ -430,70 +430,70 @@ public final class SettingsDAO {
      * @return {@code true} if the Namaz alarm style override is enabled.
      */
     public static boolean isNamazAlarmStyleOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_STYLE_OVERRIDE, DEFAULT_NAMAZ_ALARM_STYLE_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_STYLE_OVERRIDE, DEFAULT_SALAH_ALARM_STYLE_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm display style override is enabled.
      */
     public static boolean isNamazAlarmDisplayStyleOverrideEnabled(SharedPreferences prefs) {
-        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE, DEFAULT_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE, DEFAULT_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm ringtone override is enabled.
      */
     public static boolean isNamazAlarmRingtoneOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE, DEFAULT_NAMAZ_ALARM_RINGTONE_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_RINGTONE_OVERRIDE, DEFAULT_SALAH_ALARM_RINGTONE_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm colors override is enabled.
      */
     public static boolean isNamazAlarmColorsOverrideEnabled(SharedPreferences prefs) {
-        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_COLORS_OVERRIDE, DEFAULT_NAMAZ_ALARM_COLORS_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_SALAH_ALARM_COLORS_OVERRIDE, DEFAULT_SALAH_ALARM_COLORS_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm font override is enabled.
      */
     public static boolean isNamazAlarmFontOverrideEnabled(SharedPreferences prefs) {
-        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_FONT_OVERRIDE, DEFAULT_NAMAZ_ALARM_FONT_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_SALAH_ALARM_FONT_OVERRIDE, DEFAULT_SALAH_ALARM_FONT_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm background image override is enabled.
      */
     public static boolean isNamazAlarmBackgroundImageOverrideEnabled(SharedPreferences prefs) {
-        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE, DEFAULT_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
+        return isNamazAlarmStyleOverrideEnabled(prefs) && prefs.getBoolean(KEY_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE, DEFAULT_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm advanced audio override is enabled.
      */
     public static boolean isNamazAlarmAdvancedAudioOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE, DEFAULT_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE, DEFAULT_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm vibration override is enabled.
      */
     public static boolean isNamazAlarmVibrationOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE, DEFAULT_NAMAZ_ALARM_VIBRATION_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_VIBRATION_OVERRIDE, DEFAULT_SALAH_ALARM_VIBRATION_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm actions override is enabled.
      */
     public static boolean isNamazAlarmActionsOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE, DEFAULT_NAMAZ_ALARM_ACTIONS_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_ACTIONS_OVERRIDE, DEFAULT_SALAH_ALARM_ACTIONS_OVERRIDE);
     }
 
     /**
      * @return {@code true} if the Namaz alarm miscellaneous override is enabled.
      */
     public static boolean isNamazAlarmMiscOverrideEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_ALARM_MISC_OVERRIDE, DEFAULT_NAMAZ_ALARM_MISC_OVERRIDE);
+        return prefs.getBoolean(KEY_SALAH_ALARM_MISC_OVERRIDE, DEFAULT_SALAH_ALARM_MISC_OVERRIDE);
     }
 
     /**
@@ -1085,8 +1085,8 @@ public final class SettingsDAO {
         return getAlarmRingtoneUriFromSettings(prefs, defaultUri, false);
     }
 
-    public static Uri getAlarmRingtoneUriFromSettings(SharedPreferences prefs, Uri defaultUri, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_DEFAULT_ALARM_RINGTONE : KEY_DEFAULT_ALARM_RINGTONE;
+    public static Uri getAlarmRingtoneUriFromSettings(SharedPreferences prefs, Uri defaultUri, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_DEFAULT_ALARM_RINGTONE : KEY_DEFAULT_ALARM_RINGTONE;
         final String uriString = prefs.getString(key, null);
         return uriString == null ? defaultUri : Uri.parse(uriString);
     }
@@ -1102,7 +1102,7 @@ public final class SettingsDAO {
      * @param uri the uri of the ringtone from the settings to play for Namaz alarms
      */
     public static void setNamazAlarmRingtoneUriFromSettings(SharedPreferences prefs, Uri uri) {
-        prefs.edit().putString(KEY_NAMAZ_DEFAULT_ALARM_RINGTONE, uri.toString()).apply();
+        prefs.edit().putString(KEY_SALAH_DEFAULT_ALARM_RINGTONE, uri.toString()).apply();
     }
 
     /**
@@ -1113,8 +1113,8 @@ public final class SettingsDAO {
         return isPerAlarmVolumeEnabled(prefs, false);
     }
 
-    public static boolean isPerAlarmVolumeEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME : KEY_ENABLE_PER_ALARM_VOLUME;
+    public static boolean isPerAlarmVolumeEnabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VOLUME : KEY_ENABLE_PER_ALARM_VOLUME;
         return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VOLUME);
     }
 
@@ -1134,8 +1134,8 @@ public final class SettingsDAO {
         return isPerAlarmCrescendoDurationEnabled(prefs, false);
     }
 
-    public static boolean isPerAlarmCrescendoDurationEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION;
+    public static boolean isPerAlarmCrescendoDurationEnabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION;
         return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
     }
 
@@ -1147,8 +1147,8 @@ public final class SettingsDAO {
         return getAlarmVolumeCrescendoDuration(prefs, false);
     }
 
-    public static int getAlarmVolumeCrescendoDuration(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ALARM_VOLUME_CRESCENDO_DURATION;
+    public static int getAlarmVolumeCrescendoDuration(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ALARM_VOLUME_CRESCENDO_DURATION;
         return prefs.getInt(key, DEFAULT_VOLUME_CRESCENDO_DURATION);
     }
 
@@ -1160,8 +1160,8 @@ public final class SettingsDAO {
         return isAdvancedAudioPlaybackEnabled(prefs, false);
     }
 
-    public static boolean isAdvancedAudioPlaybackEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_NAMAZ_ADVANCED_AUDIO_PLAYBACK : KEY_ADVANCED_AUDIO_PLAYBACK;
+    public static boolean isAdvancedAudioPlaybackEnabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_ADVANCED_AUDIO_PLAYBACK : KEY_ADVANCED_AUDIO_PLAYBACK;
         return prefs.getBoolean(key, DEFAULT_ADVANCED_AUDIO_PLAYBACK);
     }
 
@@ -1173,8 +1173,8 @@ public final class SettingsDAO {
         return isAutoRoutingToExternalAudioDevice(prefs, false);
     }
 
-    public static boolean isAutoRoutingToExternalAudioDevice(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_NAMAZ_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE : KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE;
+    public static boolean isAutoRoutingToExternalAudioDevice(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE : KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE;
         return prefs.getBoolean(key, DEFAULT_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
     }
 
@@ -1186,8 +1186,8 @@ public final class SettingsDAO {
         return shouldUseCustomMediaVolume(prefs, false);
     }
 
-    public static boolean shouldUseCustomMediaVolume(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_NAMAZ_SYSTEM_MEDIA_VOLUME : KEY_SYSTEM_MEDIA_VOLUME;
+    public static boolean shouldUseCustomMediaVolume(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_SYSTEM_MEDIA_VOLUME : KEY_SYSTEM_MEDIA_VOLUME;
         return !prefs.getBoolean(key, DEFAULT_SYSTEM_MEDIA_VOLUME);
     }
 
@@ -1198,8 +1198,8 @@ public final class SettingsDAO {
         return getExternalAudioDeviceVolumeValue(prefs, false);
     }
 
-    public static int getExternalAudioDeviceVolumeValue(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_NAMAZ_EXTERNAL_AUDIO_DEVICE_VOLUME : KEY_EXTERNAL_AUDIO_DEVICE_VOLUME;
+    public static int getExternalAudioDeviceVolumeValue(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_EXTERNAL_AUDIO_DEVICE_VOLUME : KEY_EXTERNAL_AUDIO_DEVICE_VOLUME;
         return prefs.getInt(key, DEFAULT_EXTERNAL_AUDIO_DEVICE_VOLUME);
     }
 
@@ -1227,9 +1227,9 @@ public final class SettingsDAO {
         return isSwipeActionEnabled(pref, false);
     }
 
-    public static boolean isSwipeActionEnabled(SharedPreferences pref, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(pref) && isNamazAlarmDisplayStyleOverrideEnabled(pref)) {
-            return pref.getBoolean(KEY_NAMAZ_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
+    public static boolean isSwipeActionEnabled(SharedPreferences pref, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(pref) && isNamazAlarmDisplayStyleOverrideEnabled(pref)) {
+            return pref.getBoolean(KEY_SALAH_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
         }
         // Default value must match the one in res/xml/settings_alarm.xml
         return pref.getBoolean(KEY_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
@@ -1281,8 +1281,8 @@ public final class SettingsDAO {
         return getAlarmVolumeButtonBehavior(prefs, false);
     }
 
-    public static VolumeButtonBehavior getAlarmVolumeButtonBehavior(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_NAMAZ_VOLUME_BUTTONS : KEY_VOLUME_BUTTONS;
+    public static VolumeButtonBehavior getAlarmVolumeButtonBehavior(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_VOLUME_BUTTONS : KEY_VOLUME_BUTTONS;
         final String value = prefs.getString(key, DEFAULT_VOLUME_BEHAVIOR);
         return switch (value) {
             case DEFAULT_VOLUME_BEHAVIOR -> VolumeButtonBehavior.NOTHING;
@@ -1300,8 +1300,8 @@ public final class SettingsDAO {
         return getAlarmPowerButtonBehavior(prefs, false);
     }
 
-    public static PowerButtonBehavior getAlarmPowerButtonBehavior(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_NAMAZ_POWER_BUTTON : KEY_POWER_BUTTON;
+    public static PowerButtonBehavior getAlarmPowerButtonBehavior(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_POWER_BUTTON : KEY_POWER_BUTTON;
         final String value = prefs.getString(key, DEFAULT_POWER_BEHAVIOR);
         return switch (value) {
             case DEFAULT_POWER_BEHAVIOR -> PowerButtonBehavior.NOTHING;
@@ -1318,8 +1318,8 @@ public final class SettingsDAO {
         return getHeadphonesButtonBehavior(prefs, false);
     }
 
-    public static HeadphonesButtonBehavior getHeadphonesButtonBehavior(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_NAMAZ_HEADPHONES_BUTTON : KEY_HEADPHONES_BUTTON;
+    public static HeadphonesButtonBehavior getHeadphonesButtonBehavior(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_HEADPHONES_BUTTON : KEY_HEADPHONES_BUTTON;
         final String value = prefs.getString(key, DEFAULT_HEADPHONES_BUTTON_BEHAVIOR);
         return switch (value) {
             case DEFAULT_HEADPHONES_BUTTON_BEHAVIOR -> HeadphonesButtonBehavior.NOTHING;
@@ -1329,8 +1329,8 @@ public final class SettingsDAO {
         };
     }
 
-    public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE : KEY_ENABLE_PER_ALARM_AUTO_SILENCE;
+    public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE : KEY_ENABLE_PER_ALARM_AUTO_SILENCE;
         return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE);
     }
 
@@ -1341,8 +1341,8 @@ public final class SettingsDAO {
         return isPerAlarmAutoSilenceDisabled(prefs, false);
     }
 
-    public static boolean isPerAlarmAutoSilenceEnabled(SharedPreferences prefs, boolean isNamaz) {
-        return !isPerAlarmAutoSilenceDisabled(prefs, isNamaz);
+    public static boolean isPerAlarmAutoSilenceEnabled(SharedPreferences prefs, boolean isSalah) {
+        return !isPerAlarmAutoSilenceDisabled(prefs, isSalah);
     }
 
     /**
@@ -1352,13 +1352,13 @@ public final class SettingsDAO {
         return getAlarmTimeout(prefs, false);
     }
 
-    public static int getAlarmTimeout(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_AUTO_SILENCE_DURATION : KEY_AUTO_SILENCE_DURATION;
+    public static int getAlarmTimeout(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_AUTO_SILENCE_DURATION : KEY_AUTO_SILENCE_DURATION;
         return prefs.getInt(key, DEFAULT_AUTO_SILENCE_DURATION);
     }
 
-    public static boolean isPerAlarmSnoozeDurationDisabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION : KEY_ENABLE_PER_ALARM_SNOOZE_DURATION;
+    public static boolean isPerAlarmSnoozeDurationDisabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION : KEY_ENABLE_PER_ALARM_SNOOZE_DURATION;
         return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION);
     }
 
@@ -1370,12 +1370,12 @@ public final class SettingsDAO {
         return isPerAlarmSnoozeDurationDisabled(prefs, false);
     }
 
-    public static boolean isPerAlarmSnoozeDurationEnabled(SharedPreferences prefs, boolean isNamaz) {
-        return !isPerAlarmSnoozeDurationDisabled(prefs, isNamaz);
+    public static boolean isPerAlarmSnoozeDurationEnabled(SharedPreferences prefs, boolean isSalah) {
+        return !isPerAlarmSnoozeDurationDisabled(prefs, isSalah);
     }
 
-    public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
+    public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
         return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
     }
 
@@ -1387,8 +1387,8 @@ public final class SettingsDAO {
         return isPerAlarmDismissAfterDisabled(prefs, false);
     }
 
-    public static boolean isPerAlarmDismissAfterEnabled(SharedPreferences prefs, boolean isNamaz) {
-        return !isPerAlarmDismissAfterDisabled(prefs, isNamaz);
+    public static boolean isPerAlarmDismissAfterEnabled(SharedPreferences prefs, boolean isSalah) {
+        return !isPerAlarmDismissAfterDisabled(prefs, isSalah);
     }
 
     /**
@@ -1398,8 +1398,8 @@ public final class SettingsDAO {
         return getSnoozeLength(prefs, false);
     }
 
-    public static int getSnoozeLength(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_SNOOZE_DURATION : KEY_ALARM_SNOOZE_DURATION;
+    public static int getSnoozeLength(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_SNOOZE_DURATION : KEY_ALARM_SNOOZE_DURATION;
         return prefs.getInt(key, DEFAULT_ALARM_SNOOZE_DURATION);
     }
 
@@ -1410,13 +1410,13 @@ public final class SettingsDAO {
         return getAlarmDismissAfter(prefs, false);
     }
 
-    public static int getAlarmDismissAfter(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_DISMISS_AFTER : KEY_ALARM_DISMISS_AFTER;
+    public static int getAlarmDismissAfter(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_DISMISS_AFTER : KEY_ALARM_DISMISS_AFTER;
         return prefs.getInt(key, DEFAULT_ALARM_DISMISS_AFTER);
     }
 
-    public static boolean isPerAlarmMissedRepeatLimitDisabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT : KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT;
+    public static boolean isPerAlarmMissedRepeatLimitDisabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT : KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT;
         return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
     }
 
@@ -1428,8 +1428,8 @@ public final class SettingsDAO {
         return isPerAlarmMissedRepeatLimitDisabled(prefs, false);
     }
 
-    public static boolean isPerAlarmMissedRepeatLimitEnabled(SharedPreferences prefs, boolean isNamaz) {
-        return !isPerAlarmMissedRepeatLimitDisabled(prefs, isNamaz);
+    public static boolean isPerAlarmMissedRepeatLimitEnabled(SharedPreferences prefs, boolean isSalah) {
+        return !isPerAlarmMissedRepeatLimitDisabled(prefs, isSalah);
     }
 
     /**
@@ -1439,8 +1439,8 @@ public final class SettingsDAO {
         return getMissedAlarmRepeatLimit(prefs, false);
     }
 
-    public static int getMissedAlarmRepeatLimit(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_REPEAT_MISSED_ALARM : KEY_REPEAT_MISSED_ALARM;
+    public static int getMissedAlarmRepeatLimit(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_REPEAT_MISSED_ALARM : KEY_REPEAT_MISSED_ALARM;
         final String string = prefs.getString(key, DEFAULT_MISSED_ALARM_REPEAT_LIMIT);
         return Integer.parseInt(string);
     }
@@ -1452,8 +1452,8 @@ public final class SettingsDAO {
         return getFlipAction(prefs, false);
     }
 
-    public static int getFlipAction(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_NAMAZ_FLIP_ACTION : KEY_FLIP_ACTION;
+    public static int getFlipAction(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_FLIP_ACTION : KEY_FLIP_ACTION;
         final String string = prefs.getString(key, DEFAULT_FLIP_ACTION);
         return Integer.parseInt(string);
     }
@@ -1465,8 +1465,8 @@ public final class SettingsDAO {
         return getShakeAction(prefs, false);
     }
 
-    public static int getShakeAction(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_NAMAZ_SHAKE_ACTION : KEY_SHAKE_ACTION;
+    public static int getShakeAction(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_SHAKE_ACTION : KEY_SHAKE_ACTION;
         final String string = prefs.getString(key, DEFAULT_SHAKE_ACTION);
         return Integer.parseInt(string);
     }
@@ -1478,8 +1478,8 @@ public final class SettingsDAO {
         return getShakeIntensity(pref, false);
     }
 
-    public static int getShakeIntensity(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmActionsOverrideEnabled(pref)) ? KEY_NAMAZ_SHAKE_INTENSITY : KEY_SHAKE_INTENSITY;
+    public static int getShakeIntensity(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmActionsOverrideEnabled(pref)) ? KEY_SALAH_SHAKE_INTENSITY : KEY_SHAKE_INTENSITY;
         return pref.getInt(key, DEFAULT_SHAKE_INTENSITY);
     }
 
@@ -1491,8 +1491,8 @@ public final class SettingsDAO {
         return isDismissButtonDisplayedWhenAlarmEnabled(pref, false);
     }
 
-    public static boolean isDismissButtonDisplayedWhenAlarmEnabled(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_NAMAZ_DISPLAY_DISMISS_BUTTON : KEY_DISPLAY_DISMISS_BUTTON;
+    public static boolean isDismissButtonDisplayedWhenAlarmEnabled(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_DISPLAY_DISMISS_BUTTON : KEY_DISPLAY_DISMISS_BUTTON;
         return pref.getBoolean(key, DEFAULT_DISPLAY_DISMISS_BUTTON);
     }
 
@@ -1503,8 +1503,8 @@ public final class SettingsDAO {
         return getAlarmNotificationReminderTime(prefs, false);
     }
 
-    public static int getAlarmNotificationReminderTime(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmMiscOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_NOTIFICATION_REMINDER : KEY_ALARM_NOTIFICATION_REMINDER;
+    public static int getAlarmNotificationReminderTime(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmMiscOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_NOTIFICATION_REMINDER : KEY_ALARM_NOTIFICATION_REMINDER;
         return prefs.getInt(key, DEFAULT_ALARM_NOTIFICATION_REMINDER);
     }
 
@@ -1516,8 +1516,8 @@ public final class SettingsDAO {
         return isPerAlarmVibrationPatternEnabled(prefs, false);
     }
 
-    public static boolean isPerAlarmVibrationPatternEnabled(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN : KEY_ENABLE_PER_ALARM_VIBRATION_PATTERN;
+    public static boolean isPerAlarmVibrationPatternEnabled(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN : KEY_ENABLE_PER_ALARM_VIBRATION_PATTERN;
         return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN);
     }
 
@@ -1528,8 +1528,8 @@ public final class SettingsDAO {
         return getVibrationPattern(prefs, false);
     }
 
-    public static String getVibrationPattern(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_NAMAZ_VIBRATION_PATTERN : KEY_VIBRATION_PATTERN;
+    public static String getVibrationPattern(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_VIBRATION_PATTERN : KEY_VIBRATION_PATTERN;
         return prefs.getString(key, DEFAULT_VIBRATION_PATTERN);
     }
 
@@ -1540,8 +1540,8 @@ public final class SettingsDAO {
         return getVibrationStartDelay(prefs, false);
     }
 
-    public static int getVibrationStartDelay(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_NAMAZ_VIBRATION_START_DELAY : KEY_VIBRATION_START_DELAY;
+    public static int getVibrationStartDelay(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_VIBRATION_START_DELAY : KEY_VIBRATION_START_DELAY;
         return prefs.getInt(key, DEFAULT_VIBRATION_START_DELAY);
     }
 
@@ -1552,8 +1552,8 @@ public final class SettingsDAO {
         return areAlarmVibrationsEnabledByDefault(pref, false);
     }
 
-    public static boolean areAlarmVibrationsEnabledByDefault(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmVibrationOverrideEnabled(pref)) ? KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT : KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT;
+    public static boolean areAlarmVibrationsEnabledByDefault(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmVibrationOverrideEnabled(pref)) ? KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT : KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT;
         return pref.getBoolean(key, DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
     }
 
@@ -1565,8 +1565,8 @@ public final class SettingsDAO {
         return areSnoozedOrDismissedAlarmVibrationsEnabled(pref, false);
     }
 
-    public static boolean areSnoozedOrDismissedAlarmVibrationsEnabled(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmVibrationOverrideEnabled(pref)) ? KEY_NAMAZ_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS : KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS;
+    public static boolean areSnoozedOrDismissedAlarmVibrationsEnabled(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmVibrationOverrideEnabled(pref)) ? KEY_SALAH_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS : KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS;
         return pref.getBoolean(key, DEFAULT_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
     }
 
@@ -1578,8 +1578,8 @@ public final class SettingsDAO {
         return shouldTurnOnBackFlashForTriggeredAlarm(pref, false);
     }
 
-    public static boolean shouldTurnOnBackFlashForTriggeredAlarm(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_NAMAZ_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM : KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM;
+    public static boolean shouldTurnOnBackFlashForTriggeredAlarm(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM : KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM;
         return pref.getBoolean(key, DEFAULT_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
     }
 
@@ -1598,8 +1598,8 @@ public final class SettingsDAO {
         return isLowAlarmVolumeWarningDisplayed(pref, false);
     }
 
-    public static boolean isLowAlarmVolumeWarningDisplayed(SharedPreferences pref, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING : KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING;
+    public static boolean isLowAlarmVolumeWarningDisplayed(SharedPreferences pref, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING : KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING;
         return pref.getBoolean(key, DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING);
     }
 
@@ -1626,9 +1626,9 @@ public final class SettingsDAO {
         return getAlarmClockStyle(prefs, false);
     }
 
-    public static ClockStyle getAlarmClockStyle(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return getClockStyle(prefs, KEY_NAMAZ_ALARM_CLOCK_STYLE);
+    public static ClockStyle getAlarmClockStyle(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return getClockStyle(prefs, KEY_SALAH_ALARM_CLOCK_STYLE);
         }
         return getClockStyle(prefs, KEY_ALARM_CLOCK_STYLE);
     }
@@ -1640,9 +1640,9 @@ public final class SettingsDAO {
         return getAlarmClockDial(prefs, false);
     }
 
-    public static String getAlarmClockDial(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
+    public static String getAlarmClockDial(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getString(KEY_SALAH_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
         }
         return prefs.getString(KEY_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
     }
@@ -1654,9 +1654,9 @@ public final class SettingsDAO {
         return getAlarmClockSecondHand(prefs, false);
     }
 
-    public static String getAlarmClockSecondHand(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
+    public static String getAlarmClockSecondHand(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getString(KEY_SALAH_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
         }
         return prefs.getString(KEY_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
     }
@@ -1668,9 +1668,9 @@ public final class SettingsDAO {
         return getAlarmClockDialMaterial(prefs, false);
     }
 
-    public static String getAlarmClockDialMaterial(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_NAMAZ_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
+    public static String getAlarmClockDialMaterial(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getString(KEY_SALAH_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
         }
         return prefs.getString(KEY_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
     }
@@ -1682,9 +1682,9 @@ public final class SettingsDAO {
         return getAlarmAnalogClockSize(prefs, false);
     }
 
-    public static int getAlarmAnalogClockSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
+    public static int getAlarmAnalogClockSize(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
         }
         return prefs.getInt(KEY_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
     }
@@ -1697,9 +1697,9 @@ public final class SettingsDAO {
         return isAlarmSecondHandDisplayed(prefs, false);
     }
 
-    public static boolean isAlarmSecondHandDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
+    public static boolean isAlarmSecondHandDisplayed(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
@@ -1713,9 +1713,9 @@ public final class SettingsDAO {
         return isSnoozeSelectorDisplayed(prefs, false);
     }
 
-    public static boolean isSnoozeSelectorDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
+    public static boolean isSnoozeSelectorDisplayed(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs) && isNamazAlarmDisplayStyleOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
@@ -1728,9 +1728,9 @@ public final class SettingsDAO {
         return getAlarmFont(prefs, false);
     }
 
-    public static String getAlarmFont(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_NAMAZ_ALARM_FONT, null);
+    public static String getAlarmFont(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getString(KEY_SALAH_ALARM_FONT, null);
         }
         return prefs.getString(KEY_ALARM_FONT, null);
     }
@@ -1742,9 +1742,9 @@ public final class SettingsDAO {
         return getAlarmBackgroundColor(prefs, false);
     }
 
-    public static int getAlarmBackgroundColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
+    public static int getAlarmBackgroundColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
@@ -1757,9 +1757,9 @@ public final class SettingsDAO {
         return getAlarmBackgroundAmoledColor(prefs, false);
     }
 
-    public static int getAlarmBackgroundAmoledColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
+    public static int getAlarmBackgroundAmoledColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
@@ -1772,9 +1772,9 @@ public final class SettingsDAO {
         return getAlarmClockColor(prefs, false);
     }
 
-    public static int getAlarmClockColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
+    public static int getAlarmClockColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
@@ -1787,9 +1787,9 @@ public final class SettingsDAO {
         return getAlarmSecondHandColor(prefs, context, false);
     }
 
-    public static int getAlarmSecondHandColor(SharedPreferences prefs, Context context, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
+    public static int getAlarmSecondHandColor(SharedPreferences prefs, Context context, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
@@ -1802,9 +1802,9 @@ public final class SettingsDAO {
         return getAlarmTitleColor(prefs, false);
     }
 
-    public static int getAlarmTitleColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
+    public static int getAlarmTitleColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
@@ -1817,9 +1817,9 @@ public final class SettingsDAO {
         return getSlideZoneColor(prefs, false);
     }
 
-    public static int getSlideZoneColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
+    public static int getSlideZoneColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
@@ -1832,9 +1832,9 @@ public final class SettingsDAO {
         return getAlarmButtonColor(prefs, context, false);
     }
 
-    public static int getAlarmButtonColor(SharedPreferences prefs, Context context, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+    public static int getAlarmButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
@@ -1847,9 +1847,9 @@ public final class SettingsDAO {
         return getSnoozeTitleColor(prefs, false);
     }
 
-    public static int getSnoozeTitleColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
+    public static int getSnoozeTitleColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
@@ -1862,9 +1862,9 @@ public final class SettingsDAO {
         return getSnoozeButtonColor(prefs, context, false);
     }
 
-    public static int getSnoozeButtonColor(SharedPreferences prefs, Context context, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+    public static int getSnoozeButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
@@ -1877,9 +1877,9 @@ public final class SettingsDAO {
         return getDismissTitleColor(prefs, false);
     }
 
-    public static int getDismissTitleColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
+    public static int getDismissTitleColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
@@ -1892,9 +1892,9 @@ public final class SettingsDAO {
         return getDismissButtonColor(prefs, context, false);
     }
 
-    public static int getDismissButtonColor(SharedPreferences prefs, Context context, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+    public static int getDismissButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
@@ -1907,9 +1907,9 @@ public final class SettingsDAO {
         return getSnoozeZoneColor(prefs, false);
     }
 
-    public static int getSnoozeZoneColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
+    public static int getSnoozeZoneColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
@@ -1922,9 +1922,9 @@ public final class SettingsDAO {
         return getSnoozeMinusButtonColor(prefs, false);
     }
 
-    public static int getSnoozeMinusButtonColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
+    public static int getSnoozeMinusButtonColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
@@ -1937,9 +1937,9 @@ public final class SettingsDAO {
         return getSnoozePlusButtonColor(prefs, false);
     }
 
-    public static int getSnoozePlusButtonColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
+    public static int getSnoozePlusButtonColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
@@ -1952,9 +1952,9 @@ public final class SettingsDAO {
         return getSnoozeSelectorTextColor(prefs, false);
     }
 
-    public static int getSnoozeSelectorTextColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+    public static int getSnoozeSelectorTextColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
@@ -1967,9 +1967,9 @@ public final class SettingsDAO {
         return getSnoozeMinusSymbolColor(prefs, false);
     }
 
-    public static int getSnoozeMinusSymbolColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+    public static int getSnoozeMinusSymbolColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
@@ -1982,9 +1982,9 @@ public final class SettingsDAO {
         return getSnoozePlusSymbolColor(prefs, false);
     }
 
-    public static int getSnoozePlusSymbolColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+    public static int getSnoozePlusSymbolColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmColorsOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
@@ -1997,9 +1997,9 @@ public final class SettingsDAO {
         return getAlarmDigitalClockFontSize(prefs, false);
     }
 
-    public static int getAlarmDigitalClockFontSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
+    public static int getAlarmDigitalClockFontSize(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
@@ -2012,9 +2012,9 @@ public final class SettingsDAO {
         return getAlarmTitleFontSize(prefs, false);
     }
 
-    public static int getAlarmTitleFontSize(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
+    public static int getAlarmTitleFontSize(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
@@ -2028,9 +2028,9 @@ public final class SettingsDAO {
         return isAlarmTextShadowDisplayed(prefs, false);
     }
 
-    public static boolean isAlarmTextShadowDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
+    public static boolean isAlarmTextShadowDisplayed(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
@@ -2043,9 +2043,9 @@ public final class SettingsDAO {
         return getAlarmShadowColor(prefs, false);
     }
 
-    public static int getAlarmShadowColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
+    public static int getAlarmShadowColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
@@ -2058,9 +2058,9 @@ public final class SettingsDAO {
         return getAlarmShadowOffset(prefs, false);
     }
 
-    public static int getAlarmShadowOffset(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
+    public static int getAlarmShadowOffset(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmFontOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
@@ -2073,9 +2073,9 @@ public final class SettingsDAO {
         return isAlarmActionMessageHidden(prefs, false);
     }
 
-    public static boolean isAlarmActionMessageHidden(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
-            return !prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
+    public static boolean isAlarmActionMessageHidden(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs)) {
+            return !prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return !prefs.getBoolean(KEY_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
@@ -2088,9 +2088,9 @@ public final class SettingsDAO {
         return isAlarmTitleDisplayedOnSingleLine(prefs, false);
     }
 
-    public static boolean isAlarmTitleDisplayedOnSingleLine(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
+    public static boolean isAlarmTitleDisplayedOnSingleLine(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
@@ -2104,9 +2104,9 @@ public final class SettingsDAO {
         return isRingtoneTitleDisplayed(prefs, false);
     }
 
-    public static boolean isRingtoneTitleDisplayed(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
+    public static boolean isRingtoneTitleDisplayed(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
@@ -2119,9 +2119,9 @@ public final class SettingsDAO {
         return getRingtoneTitleColor(prefs, false);
     }
 
-    public static int getRingtoneTitleColor(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
+    public static int getRingtoneTitleColor(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmStyleOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
@@ -2134,9 +2134,9 @@ public final class SettingsDAO {
         return getAlarmBackgroundImage(prefs, false);
     }
 
-    public static String getAlarmBackgroundImage(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
+    public static String getAlarmBackgroundImage(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
+            return prefs.getString(KEY_SALAH_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
         }
         return prefs.getString(KEY_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
     }
@@ -2148,9 +2148,9 @@ public final class SettingsDAO {
         return getAlarmBlurIntensity(prefs, false);
     }
 
-    public static int getAlarmBlurIntensity(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_NAMAZ_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
+    public static int getAlarmBlurIntensity(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
+            return prefs.getInt(KEY_SALAH_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getInt(KEY_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
@@ -2164,9 +2164,9 @@ public final class SettingsDAO {
         return isPerAlarmBackgroundImageEnable(prefs, false);
     }
 
-    public static boolean isPerAlarmBackgroundImageEnable(SharedPreferences prefs, boolean isNamaz) {
-        if (isNamaz && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
+    public static boolean isPerAlarmBackgroundImageEnable(SharedPreferences prefs, boolean isSalah) {
+        if (isSalah && isNamazAlarmBackgroundImageOverrideEnabled(prefs)) {
+            return prefs.getBoolean(KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
         }
         // Default value must match the one in res/xml/settings_alarm_display.xml
         return prefs.getBoolean(KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
@@ -2179,8 +2179,8 @@ public final class SettingsDAO {
         return getAlarmVolume(prefs, false);
     }
 
-    public static int getAlarmVolume(SharedPreferences prefs, boolean isNamaz) {
-        final String key = (isNamaz && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_NAMAZ_ALARM_VOLUME_SETTING : KEY_ALARM_VOLUME_SETTING;
+    public static int getAlarmVolume(SharedPreferences prefs, boolean isSalah) {
+        final String key = (isSalah && isNamazAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_VOLUME_SETTING : KEY_ALARM_VOLUME_SETTING;
         return prefs.getInt(key, DEFAULT_ALARM_VOLUME);
     }
 

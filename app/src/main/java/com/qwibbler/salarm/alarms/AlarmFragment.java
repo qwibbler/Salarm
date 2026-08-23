@@ -729,13 +729,13 @@ public final class AlarmFragment extends SalarmFragment
                         requireContext(),
                         R.style.AppAlertDialogTheme,
                         null,
-                        getString(R.string.namaz_location_not_set_title),
-                        getString(R.string.namaz_location_not_set_message),
+                        getString(R.string.salah_location_not_set_title),
+                        getString(R.string.salah_location_not_set_message),
                         null,
                         getString(R.string.label_set_location),
                         (dialog, which) -> {
                             Intent intent = new Intent(requireContext(), com.qwibbler.salarm.settings.SettingsActivity.class);
-                            intent.putExtra(com.qwibbler.salarm.settings.SettingsActivity.KEY_SHOW_NAMAZ_SETTINGS, true);
+                            intent.putExtra(com.qwibbler.salarm.settings.SettingsActivity.KEY_SHOW_SALAH_SETTINGS, true);
                             startActivity(intent);
                         },
                         getString(android.R.string.cancel),
@@ -773,7 +773,7 @@ public final class AlarmFragment extends SalarmFragment
         } else {
             if (mSideButtonsVisible) {
                 fab.setVisibility(VISIBLE);
-                fab.setImageResource(R.drawable.ic_namaz_alarm);
+                fab.setImageResource(R.drawable.ic_salah_alarm);
                 fab.setOnLongClickListener(v -> {
                     CustomTooltip.showAbove(v, getString(R.string.dialog_add_relational_alarm_title), true);
                     return true;

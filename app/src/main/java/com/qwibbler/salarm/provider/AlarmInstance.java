@@ -129,7 +129,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public long mRelationalRuleId;
     public int mDismissAfter;
     public long mInitialAlarmTimeMillis;
-    public boolean mIsNamaz;
+    public boolean mIsSalah;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -155,7 +155,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mRelationalRuleId = -1;
         mDismissAfter = 0;
         mInitialAlarmTimeMillis = 0;
-        mIsNamaz = false;
+        mIsSalah = false;
     }
 
     public AlarmInstance(AlarmInstance instance) {
@@ -182,7 +182,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mRelationalRuleId = instance.mRelationalRuleId;
         this.mDismissAfter = instance.mDismissAfter;
         this.mInitialAlarmTimeMillis = instance.mInitialAlarmTimeMillis;
-        this.mIsNamaz = instance.mIsNamaz;
+        this.mIsSalah = instance.mIsSalah;
     }
 
     public AlarmInstance(Cursor c, boolean joinedTable) {
@@ -220,7 +220,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mRelationalRuleId = c.getLong(Alarm.INSTANCE_RELATIONAL_RULE_ID_INDEX);
             mDismissAfter = c.getInt(Alarm.INSTANCE_DISMISS_AFTER_INDEX);
             mInitialAlarmTimeMillis = c.getLong(Alarm.INSTANCE_INITIAL_ALARM_TIME_INDEX);
-            mIsNamaz = mRelationalRuleId != -1;
+            mIsSalah = mRelationalRuleId != -1;
 
         } else {
             mId = c.getLong(ID_INDEX);
@@ -255,7 +255,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mRelationalRuleId = c.getLong(RELATIONAL_RULE_ID_INDEX);
             mDismissAfter = c.getInt(DISMISS_AFTER_INDEX);
             mInitialAlarmTimeMillis = c.getLong(INITIAL_ALARM_TIME_INDEX);
-            mIsNamaz = mRelationalRuleId != -1;
+            mIsSalah = mRelationalRuleId != -1;
         }
     }
 
@@ -522,7 +522,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
      */
     public Calendar getNotificationTime(Context context) {
         Calendar calendar = getAlarmTime();
-        int getAlarmNotificationReminderTime = SettingsDAO.getAlarmNotificationReminderTime(getDefaultSharedPreferences(context), mIsNamaz);
+        int getAlarmNotificationReminderTime = SettingsDAO.getAlarmNotificationReminderTime(getDefaultSharedPreferences(context), mIsSalah);
         calendar.add(Calendar.MINUTE, -getAlarmNotificationReminderTime);
         return calendar;
     }

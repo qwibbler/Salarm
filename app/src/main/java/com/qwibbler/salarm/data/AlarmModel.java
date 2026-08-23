@@ -59,8 +59,8 @@ final class AlarmModel {
         return getAlarmRingtoneUriFromSettings(false);
     }
 
-    Uri getAlarmRingtoneUriFromSettings(boolean isNamaz) {
-        if (isNamaz) {
+    Uri getAlarmRingtoneUriFromSettings(boolean isSalah) {
+        if (isSalah) {
             return SettingsDAO.getAlarmRingtoneUriFromSettings(mPrefs, getDefaultAlarmRingtoneUriFromSettings(), true);
         }
 
@@ -78,8 +78,8 @@ final class AlarmModel {
         return getAlarmRingtoneTitle(false);
     }
 
-    String getAlarmRingtoneTitle(boolean isNamaz) {
-        final Uri uri = isNamaz
+    String getAlarmRingtoneTitle(boolean isSalah) {
+        final Uri uri = isSalah
             ? SettingsDAO.getAlarmRingtoneUriFromSettings(mPrefs, getDefaultAlarmRingtoneUriFromSettings(), true)
             : getAlarmRingtoneUriFromSettings();
         return mRingtoneModel.getRingtoneTitle(uri);

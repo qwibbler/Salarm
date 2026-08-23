@@ -57,19 +57,19 @@
         app:singleLineTitle="false" />
 
     <Preference
-        android:key="key_namaz_settings"
+        android:key="key_salah_settings"
         android:layout="@layout/settings_preference_layout"
-        android:title="@string/namaz_settings_title"
+        android:title="@string/salah_settings_title"
         android:summary="Prayer times and location"
         android:icon="@drawable/ic_namaz_alarm"
         app:singleLineTitle="false" />
 
     <Preference
-        android:key="key_namaz_alarm_settings"
+        android:key="key_salah_alarm_settings"
         android:layout="@layout/settings_preference_layout"
-        android:title="@string/namaz_alarms_settings_title"
-        android:summary="@string/namaz_alarms_settings_summary"
         android:icon="@drawable/ic_namaz_alarm"
+        android:title="@string/salah_alarms_settings_title"
+        android:summary="@string/salah_alarms_settings_summary"
         app:singleLineTitle="false" />
 
     <Preference

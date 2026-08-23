@@ -358,7 +358,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         return createDefaultAlarm(context, hour, minute, alert, false);
     }
 
-    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert, boolean isNamaz) {
+    public static Alarm createDefaultAlarm(Context context, int hour, int minute, Uri alert, boolean isSalah) {
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final Alarm alarm = new Alarm(
             Calendar.getInstance().get(Calendar.YEAR),
@@ -372,22 +372,22 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
 
         alarm.syncByLabel = false;
         alarm.enabled = true;
-        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs, isNamaz);
-        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs, isNamaz);
-        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs, isNamaz);
+        alarm.vibrate = SettingsDAO.areAlarmVibrationsEnabledByDefault(prefs, isSalah);
+        alarm.vibrationPattern = SettingsDAO.getVibrationPattern(prefs, isSalah);
+        alarm.flash = SettingsDAO.shouldTurnOnBackFlashForTriggeredAlarm(prefs, isSalah);
         alarm.deleteAfterUse = SettingsDAO.isOccasionalAlarmDeletedByDefault(prefs);
-        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs, isNamaz);
-        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs, isNamaz);
-        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs, isNamaz);
-        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs, isNamaz);
+        alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(prefs, isSalah);
+        alarm.snoozeDuration = SettingsDAO.getSnoozeLength(prefs, isSalah);
+        alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(prefs, isSalah);
+        alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(prefs, isSalah);
         if (audioManager != null) {
-            alarm.alarmVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isNamaz)
-                ? SettingsDAO.getAlarmVolume(prefs, isNamaz)
+            alarm.alarmVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)
+                ? SettingsDAO.getAlarmVolume(prefs, isSalah)
                 : audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
         }
         alarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
-        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs, isNamaz);
-        alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, isNamaz);
+        alarm.blurIntensity = SettingsDAO.getAlarmBlurIntensity(prefs, isSalah);
+        alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, isSalah);
 
         return alarm;
     }
@@ -1055,7 +1055,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         result.mAlarmVolume = alarmVolume;
         result.mRelationalRuleId = relationalRuleId;
         result.mDismissAfter = dismissAfter;
-        result.mIsNamaz = relationalRuleId != -1;
+        result.mIsSalah = relationalRuleId != -1;
         return result;
     }
 

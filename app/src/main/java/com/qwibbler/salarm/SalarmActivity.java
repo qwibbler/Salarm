@@ -550,8 +550,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             tab = UiDataModel.Tab.TIMERS;
         } else if (itemId == R.id.page_stopwatch) {
             tab = UiDataModel.Tab.STOPWATCH;
-        } else if (itemId == R.id.page_namaz) {
-            tab = UiDataModel.Tab.NAMAZ;
+        } else if (itemId == R.id.page_salah) {
+            tab = UiDataModel.Tab.SALAH;
         } else if (itemId == R.id.page_qibla) {
             tab = UiDataModel.Tab.QIBLA;
         } else if (itemId == R.id.page_next) {
@@ -915,7 +915,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case CLOCKS -> R.drawable.ic_tab_clock;
             case TIMERS -> R.drawable.ic_tab_timer;
             case STOPWATCH -> R.drawable.ic_tab_stopwatch;
-            case NAMAZ -> R.drawable.ic_tab_namaz;
+            case SALAH -> R.drawable.ic_tab_salah;
             case QIBLA -> R.drawable.ic_tab_qibla;
         };
     }
@@ -1052,7 +1052,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case CLOCKS -> R.id.page_clock;
             case TIMERS -> R.id.page_timer;
             case STOPWATCH -> R.id.page_stopwatch;
-            case NAMAZ -> R.id.page_namaz;
+            case SALAH -> R.id.page_salah;
             case QIBLA -> R.id.page_qibla;
         };
 

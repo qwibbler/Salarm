@@ -1572,22 +1572,22 @@
     <!-- Toast message when restore fails -->
     <string name="toast_message_restore_error">Restore failed</string>
     <!-- Namaz City Search -->
-    <string name="namaz_city_search_title">Select City</string>
+    <string name="salah_city_search_title">Select City</string>
     <!-- Namaz Settings -->
-    <string name="namaz_settings_title">Salah Settings</string>
+    <string name="salah_settings_title">Salah Settings</string>
     <!-- Namaz Location Not Set Title -->
-    <string name="namaz_location_not_set_title">Location Not Set</string>
+    <string name="salah_location_not_set_title">Location Not Set</string>
     <!-- Namaz Location Not Set Message -->
-    <string name="namaz_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
+    <string name="salah_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
     <!-- Label Set Location -->
     <string name="label_set_location">Set Location</string>
     <!-- Namaz Error Saving -->
-    <string name="namaz_error_saving">Failed to save salah alarm. Please try again.</string>
+    <string name="salah_error_saving">Failed to save salah alarm. Please try again.</string>
 
     <!-- Namaz Alarm Tagging -->
-    <string name="namaz_tagging_category_title">Alarm Tagging</string>
-    <string name="namaz_auto_tag_title">Auto tag salah alarms</string>
-    <string name="namaz_auto_tag_name_title">Auto tag name</string>
+    <string name="salah_tagging_category_title">Alarm Tagging</string>
+    <string name="salah_auto_tag_title">Auto tag salah alarms</string>
+    <string name="salah_auto_tag_name_title">Auto tag name</string>
     <!-- Display tags in the alarm setting title -->
     <string name="display_alarm_tags_title">Display tags in the alarm</string>
     <!-- Add tags label -->
@@ -1603,15 +1603,15 @@
     <!-- Tooltip for the all alarms toggle -->
     <string name="all_alarms_toggle_tooltip">Toggle all visible alarms</string>
     <!-- Namaz Error Background Sync -->
-    <string name="namaz_error_background_sync">Salah sync issue</string>
+    <string name="salah_error_background_sync">Salah sync issue</string>
     <!-- Namaz Error Background Sync Details -->
-    <string name="namaz_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
+    <string name="salah_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
     <!-- Namaz Detecting Location -->
-    <string name="namaz_detecting_location">Detecting location…</string>
+    <string name="salah_detecting_location">Detecting location…</string>
     <!-- Location category title for Namaz settings -->
-    <string name="namaz_location_category_title">Location</string>
+    <string name="salah_location_category_title">Location</string>
     <!-- Prayer settings category title for Namaz settings -->
-    <string name="namaz_prayer_settings_category_title">Prayer Settings</string>
+    <string name="salah_prayer_settings_category_title">Prayer Settings</string>
     <!-- See both Asr events setting title -->
     <string name="show_both_asr_title">See both Asr events</string>
     <!-- See both Asr events summary -->
@@ -1619,7 +1619,7 @@
     <!-- See both Asrs in the alarm events setting title -->
     <string name="show_both_asr_in_alarm_events_title">See both Asr in the alarm events</string>
     <!-- See both Asrs in the namaz times setting title -->
-    <string name="show_both_asr_in_namaz_times_title">See both Asr in the Salah Times page</string>
+    <string name="show_both_asr_in_salah_times_title">See both Asr in the Salah Times page</string>
     <!-- See both Asrs in the widgets setting title -->
     <string name="show_both_asr_in_widgets_title">See both Asr in the widgets</string>
     <!-- Asr labels -->
@@ -1628,33 +1628,33 @@
     <string name="asr_shafii_label">Asr Shafi\'i</string>
 
     <!-- Namaz Alarms Settings -->
-    <string name="namaz_alarms_settings_title">Salah Alarms</string>
-    <string name="namaz_alarms_settings_summary">Settings for salah alarms</string>
+    <string name="salah_alarms_settings_title">Salah Alarms</string>
+    <string name="salah_alarms_settings_summary">Settings for salah alarms</string>
     <string name="show_rounding_option_title">Show option to round the salah alarms</string>
-    <string name="namaz_alarm_style_override_title">Override normal alarm style</string>
-    <string name="namaz_alarm_display_style_override_title">Override normal alarm display style</string>
-    <string name="namaz_alarm_colors_override_title">Override normal alarm colors</string>
-    <string name="namaz_alarm_font_override_title">Override normal alarm font</string>
-    <string name="namaz_alarm_background_image_override_title">Override normal alarm background image</string>
-    <string name="namaz_alarm_ringtone_override_title">Override normal alarm ringtone settings</string>
-    <string name="namaz_alarm_advanced_audio_override_title">Override normal alarm advanced audio playback</string>
-    <string name="namaz_alarm_vibration_override_title">Override normal alarm vibration settings</string>
-    <string name="namaz_alarm_actions_override_title">Override normal alarm action settings</string>
-    <string name="namaz_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
-    <string name="namaz_alarm_display_settings_title">Salah alarm display settings</string>
+    <string name="salah_alarm_style_override_title">Override normal alarm style</string>
+    <string name="salah_alarm_display_style_override_title">Override normal alarm display style</string>
+    <string name="salah_alarm_colors_override_title">Override normal alarm colors</string>
+    <string name="salah_alarm_font_override_title">Override normal alarm font</string>
+    <string name="salah_alarm_background_image_override_title">Override normal alarm background image</string>
+    <string name="salah_alarm_ringtone_override_title">Override normal alarm ringtone settings</string>
+    <string name="salah_alarm_advanced_audio_override_title">Override normal alarm advanced audio playback</string>
+    <string name="salah_alarm_vibration_override_title">Override normal alarm vibration settings</string>
+    <string name="salah_alarm_actions_override_title">Override normal alarm action settings</string>
+    <string name="salah_alarm_misc_override_title">Override normal alarm miscellaneous settings</string>
+    <string name="salah_alarm_display_settings_title">Salah alarm display settings</string>
 
     <!-- Namaz Alarms Additional Settings -->
     <string name="autodismiss_default_title">Auto-dismiss by default</string>
     <string name="autodismiss_default_summary">Automatically enable auto-dismiss for new salah alarms</string>
     <string name="adjust_alarm_after_rounding_title">Adjust alarm after rounding</string>
     <string name="adjust_alarm_after_rounding_summary">Adjust the alarm trigger time based on rounding rules</string>
-    <string name="namaz_display_next_event_info_title">Display next event time</string>
-    <string name="namaz_display_next_event_info_summary">Select what information to show about the next prayer event when the alarm is ringing</string>
-    <string name="namaz_display_next_event_info_countdown">Display countdown to next event</string>
-    <string name="namaz_display_next_event_info_time">Display time of next event</string>
-    <string name="namaz_display_next_event_info_nothing">Do not show next event</string>
-    <string name="namaz_next_event_info_countdown_format">%1$s to %2$s</string>
-    <string name="namaz_next_event_info_time_format">%1$s at %2$s</string>
+    <string name="salah_display_next_event_info_title">Display next event time</string>
+    <string name="salah_display_next_event_info_summary">Select what information to show about the next prayer event when the alarm is ringing</string>
+    <string name="salah_display_next_event_info_countdown">Display countdown to next event</string>
+    <string name="salah_display_next_event_info_time">Display time of next event</string>
+    <string name="salah_display_next_event_info_nothing">Do not show next event</string>
+    <string name="salah_next_event_info_countdown_format">%1$s to %2$s</string>
+    <string name="salah_next_event_info_time_format">%1$s at %2$s</string>
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Salah Alarm</string>
@@ -1673,17 +1673,17 @@
     <string name="relational_alarm_than">Than</string>
 
     <!-- Relational Alarm Description -->
-    <string name="namaz_rule_at">at</string>
-    <string name="namaz_rule_description_base">alarm %1$s %2$s</string>
-    <string name="namaz_rule_offset_before">%1$dm before</string>
-    <string name="namaz_rule_offset_after">%1$dm after</string>
-    <string name="namaz_rule_rounded">, rounded to the nearest %1$dm</string>
-    <string name="namaz_rule_no_later">, no later than %1$s %2$s</string>
-    <string name="namaz_rule_no_earlier">, no earlier than %1$s %2$s</string>
-    <string name="namaz_rule_autostop">, auto dismissed %1$s %2$s</string>
-    <string name="namaz_rule_adjusted">, adjusted by %1$s</string>
-    <string name="namaz_rule_adjustment_earlier">%1$dm earlier</string>
-    <string name="namaz_rule_adjustment_later">%1$dm later</string>
+    <string name="salah_rule_at">at</string>
+    <string name="salah_rule_description_base">alarm %1$s %2$s</string>
+    <string name="salah_rule_offset_before">%1$dm before</string>
+    <string name="salah_rule_offset_after">%1$dm after</string>
+    <string name="salah_rule_rounded">, rounded to the nearest %1$dm</string>
+    <string name="salah_rule_no_later">, no later than %1$s %2$s</string>
+    <string name="salah_rule_no_earlier">, no earlier than %1$s %2$s</string>
+    <string name="salah_rule_autostop">, auto dismissed %1$s %2$s</string>
+    <string name="salah_rule_adjusted">, adjusted by %1$s</string>
+    <string name="salah_rule_adjustment_earlier">%1$dm earlier</string>
+    <string name="salah_rule_adjustment_later">%1$dm later</string>
 
     <string-array name="relational_alarm_offset_type">
         <item>Before</item>
@@ -1721,30 +1721,30 @@
     <string name="menu_previous_page">Back</string>
 
     <!-- Namaz Times Tab -->
-    <string name="menu_namaz">Salah Times</string>
-    <string name="namaz_countdown_format">%1$s To %2$s</string>
-    <string name="namaz_timezone_warning">Note: These times are shown in %1$s, while your phone is in %2$s.</string>
+    <string name="menu_salah">Salah Times</string>
+    <string name="salah_countdown_format">%1$s To %2$s</string>
+    <string name="salah_timezone_warning">Note: These times are shown in %1$s, while your phone is in %2$s.</string>
 
     <!-- Namaz Widgets -->
-    <string name="namaz_widget_events_category_title">Events</string>
-    <string name="namaz_widget_display_symbols_title">Display symbols instead of names</string>
+    <string name="salah_widget_events_category_title">Events</string>
+    <string name="salah_widget_display_symbols_title">Display symbols instead of names</string>
     <string name="fajr_label">Fajr</string>
     <string name="sunrise_label">Sunrise</string>
     <string name="dhuhr_label">Dhuhr</string>
     <string name="maghrib_label">Maghrib</string>
     <string name="isha_label">Isha</string>
 
-    <string name="namaz_widget_show_countdown_title">Show countdown</string>
-    <string name="namaz_widget_show_alarms_title">Show upcoming salah alarms</string>
+    <string name="salah_widget_show_countdown_title">Show countdown</string>
+    <string name="salah_widget_show_alarms_title">Show upcoming salah alarms</string>
     <string name="visible_events_title">Visible events</string>
-    <string name="namaz_timeline_widget_label">Salah Times</string>
-    <string name="namaz_countdown_widget_label">Salah Countdown</string>
+    <string name="salah_timeline_widget_label">Salah Times</string>
+    <string name="salah_countdown_widget_label">Salah Countdown</string>
     <string name="apply_padding_title">Apply padding</string>
-    <string name="namaz_widget_highlight_item_title">Highlight current/next events</string>
-    <string name="namaz_widget_highlight_active_default_color_title">Use default color for current event highlight</string>
-    <string name="namaz_widget_highlight_active_custom_color_title">Current event highlight color</string>
-    <string name="namaz_widget_highlight_next_default_color_title">Use default color for next event highlight</string>
-    <string name="namaz_widget_highlight_next_custom_color_title">Next event highlight color</string>
+    <string name="salah_widget_highlight_item_title">Highlight current/next events</string>
+    <string name="salah_widget_highlight_active_default_color_title">Use default color for current event highlight</string>
+    <string name="salah_widget_highlight_active_custom_color_title">Current event highlight color</string>
+    <string name="salah_widget_highlight_next_default_color_title">Use default color for next event highlight</string>
+    <string name="salah_widget_highlight_next_custom_color_title">Next event highlight color</string>
 
     <!-- Qibla Tab -->
     <string name="menu_qibla">Qibla</string>
@@ -1756,7 +1756,7 @@
     <string name="salarm_today_prefix">Today, </string>
     <string name="salarm_yesterday_prefix">Yesterday, </string>
     <string name="salarm_tomorrow_prefix">Tomorrow, </string>
-    <string name="salarm_namaz_countdown_format">%1$dh:%2$02dm To %3$s</string>
+    <string name="salarm_salah_countdown_format">%1$dh:%2$02dm To %3$s</string>
     <string name="salarm_full_date_format">EEE, MMM d</string>
     <string name="salarm_short_date_format">MMM d</string>
     <string name="salarm_unknown_location">Unknown</string>
@@ -1772,7 +1772,7 @@
     <string name="salarm_display_timezone_label">Display Timezone</string>
     <string name="salarm_select_timezone_hint">Select Timezone</string>
     <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
-    <string name="namaz_near_city">Near %s</string>
+    <string name="salah_near_city">Near %s</string>
 
     <!-- Widget Previews -->
     <string name="salarm_preview_countdown_time">1h:24m</string>

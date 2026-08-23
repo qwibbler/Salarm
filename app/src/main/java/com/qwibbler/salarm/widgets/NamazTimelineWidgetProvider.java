@@ -101,12 +101,12 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
 
             // Pre-calculate NamazTimes
             Date now = new Date();
-            NamazCalculator.NamazTimes times = getNamazTimes(prefs, now);
-            List<PrayerItem> allPrayers = times != null ? getAllPrayers(context, times, prefs, finalInstances) : new ArrayList<>();
+            NamazCalculator.NamazTimes salahTimes = getNamazTimes(prefs, now);
+            List<PrayerItem> allPrayers = salahTimes != null ? getAllPrayers(context, salahTimes, prefs, finalInstances) : new ArrayList<>();
 
             com.qwibbler.salarm.base.AppExecutors.getMainThread().post(() -> {
-                final RemoteViews portrait = buildRemoteViews(context, finalOptions, true, times, allPrayers);
-                final RemoteViews landscape = buildRemoteViews(context, finalOptions, false, times, allPrayers);
+                final RemoteViews portrait = buildRemoteViews(context, finalOptions, true, salahTimes, allPrayers);
+                final RemoteViews landscape = buildRemoteViews(context, finalOptions, false, salahTimes, allPrayers);
 
                 final RemoteViews widget = new RemoteViews(landscape, portrait);
                 wm.updateAppWidget(widgetId, widget);
@@ -114,13 +114,13 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         });
     }
 
-    private RemoteViews buildRemoteViews(Context context, Bundle options, boolean portrait, NamazCalculator.NamazTimes times, List<PrayerItem> allPrayers) {
+    private RemoteViews buildRemoteViews(Context context, Bundle options, boolean portrait, NamazCalculator.NamazTimes salahTimes, List<PrayerItem> allPrayers) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         RemoteViews rv = new RemoteViews(context.getPackageName(), WidgetDAO.isTextShadowDisplayedOnNamazWidget(prefs)
-                ? R.layout.appwidget_namaz_timeline_with_shadow
-                : R.layout.appwidget_namaz_timeline);
+                ? R.layout.appwidget_salah_timeline_with_shadow
+                : R.layout.appwidget_salah_timeline);
 
-        if (times == null) {
+        if (salahTimes == null) {
             rv.setTextViewText(R.id.countdown_time, "Set Location");
             rv.setViewVisibility(R.id.countdown_label, View.GONE);
             rv.setViewVisibility(R.id.timeline_container, View.GONE);
@@ -177,7 +177,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         Intent intent = new Intent(context, SalarmActivity.class);
         intent.putExtra(WidgetUtils.KEY_LAUNCHED_FROM_WIDGET, true);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        rv.setOnClickPendingIntent(R.id.namaz_widget_root, pendingIntent);
+        rv.setOnClickPendingIntent(R.id.salah_widget_root, pendingIntent);
 
         return rv;
     }
@@ -190,7 +190,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(diff) % 60;
 
         String timeLeft = String.format(Locale.getDefault(), "%dh:%02dm", hours, minutes);
-        String label = context.getString(R.string.namaz_countdown_format, "", next.fullName).replace(" To ", "").trim();
+        String label = context.getString(R.string.salah_countdown_format, "", next.fullName).replace(" To ", "").trim();
         if (WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(prefs)) {
             timeLeft = timeLeft.toUpperCase(Locale.getDefault());
             label = label.toUpperCase(Locale.getDefault());
@@ -247,8 +247,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         for (int i = 0; i < prayers.size(); i++) {
             PrayerItem prayer = prayers.get(i);
             RemoteViews itemRv = new RemoteViews(context.getPackageName(), shadowEnabled
-                    ? R.layout.namaz_widget_item_with_shadow
-                    : R.layout.namaz_widget_item);
+                    ? R.layout.salah_widget_item_with_shadow
+                    : R.layout.salah_widget_item);
 
             itemRv.setViewVisibility(R.id.mode_wide, mode == MODE_WIDE ? View.VISIBLE : View.GONE);
             itemRv.setViewVisibility(R.id.mode_narrow, mode == MODE_NARROW ? View.VISIBLE : View.GONE);
@@ -353,7 +353,7 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         int padding = (int) dpToPx(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(prefs)
                 ? 20
                 : 0, context.getResources().getDisplayMetrics());
-        rv.setViewPadding(R.id.namaz_widget_container, padding, padding, padding, padding);
+        rv.setViewPadding(R.id.salah_widget_container, padding, padding, padding, padding);
     }
 
     private DigitalWidgetSizes optimizeSizes(Context context, int targetWidthPx, int targetHeightPx,
@@ -366,8 +366,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         LayoutInflater inflater = LayoutInflater.from(context);
         @SuppressLint("InflateParams")
         View sizer = inflater.inflate(shadowEnabled
-                ? R.layout.appwidget_namaz_timeline_sizer_with_shadow
-                : R.layout.appwidget_namaz_timeline_sizer, null);
+                ? R.layout.appwidget_salah_timeline_sizer_with_shadow
+                : R.layout.appwidget_salah_timeline_sizer, null);
 
         View countdownContainer = sizer.findViewById(R.id.countdown_container);
         if (countdownContainer != null) {
@@ -380,8 +380,8 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
             container.removeAllViews();
             for (int i = 0; i < prayers.size(); i++) {
                 View item = inflater.inflate(shadowEnabled
-                        ? R.layout.namaz_widget_item_with_shadow
-                        : R.layout.namaz_widget_item, container, false);
+                        ? R.layout.salah_widget_item_with_shadow
+                        : R.layout.salah_widget_item, container, false);
                 container.addView(item);
             }
         }
@@ -487,19 +487,19 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
     }
 
     private static NamazCalculator.NamazTimes getNamazTimes(SharedPreferences prefs, Date date) {
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, null);
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, null);
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, null);
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, null);
         if (latStr == null || lonStr == null) return null;
         try {
             double lat = Double.parseDouble(latStr);
             double lon = Double.parseDouble(lonStr);
-            String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
+            String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
             return NamazCalculator.calculateAllTimes(date, lat, lon, CalculationMethod.valueOf(methodStr));
         } catch (Exception e) { return null; }
     }
 
     private static List<PrayerItem> getAllPrayers(Context context, NamazCalculator.NamazTimes times, SharedPreferences prefs, List<AlarmInstance> instances) {
-        String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+        String madhabStr = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
         boolean showBothAsr = WidgetDAO.isNamazWidgetShowBothAsrs(prefs);
         boolean showSymbols = WidgetDAO.isNamazWidgetSymbolsVisible(prefs);
@@ -587,10 +587,10 @@ public class NamazTimelineWidgetProvider extends AppWidgetProvider {
         }
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
-        NamazCalculator.NamazTimes tomorrow = getNamazTimes(prefs, cal.getTime());
-        if (tomorrow != null) {
+        NamazCalculator.NamazTimes tomorrowSalahTimes = getNamazTimes(prefs, cal.getTime());
+        if (tomorrowSalahTimes != null) {
             String label = context.getString(R.string.fajr_label);
-            return new PrayerItem(label, label, tomorrow.fajr);
+            return new PrayerItem(label, label, tomorrowSalahTimes.fajr);
         }
         return null;
     }

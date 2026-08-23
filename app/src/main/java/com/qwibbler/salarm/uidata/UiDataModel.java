@@ -284,7 +284,7 @@ public final class UiDataModel {
         CLOCKS(ClockFragment.class, R.id.page_clock, R.string.menu_clock),
         TIMERS(TimerFragment.class, R.id.page_timer, R.string.menu_timer),
         STOPWATCH(StopwatchFragment.class, R.id.page_stopwatch, R.string.menu_stopwatch),
-        NAMAZ(NamazTimesFragment.class, R.id.page_namaz, R.string.menu_namaz),
+        SALAH(NamazTimesFragment.class, R.id.page_salah, R.string.menu_salah),
         QIBLA(QiblaFragment.class, R.id.page_qibla, R.string.menu_qibla);
 
         private final String mFragmentClassName;

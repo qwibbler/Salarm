@@ -645,112 +645,112 @@ public final class WidgetDAO {
     // ******************
 
     public static boolean isTextUppercaseDisplayedOnNamazWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, DEFAULT_NAMAZ_WIDGET_TEXT_UPPERCASE_DISPLAYED);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DISPLAY_TEXT_UPPERCASE, DEFAULT_SALAH_WIDGET_TEXT_UPPERCASE_DISPLAYED);
     }
 
     public static boolean isTextShadowDisplayedOnNamazWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW, DEFAULT_NAMAZ_WIDGET_TEXT_SHADOW_DISPLAYED);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DISPLAY_TEXT_SHADOW, DEFAULT_SALAH_WIDGET_TEXT_SHADOW_DISPLAYED);
     }
 
     public static boolean isBackgroundDisplayedOnNamazWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND, DEFAULT_NAMAZ_WIDGET_DISPLAY_BACKGROUND);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DISPLAY_BACKGROUND, DEFAULT_SALAH_WIDGET_DISPLAY_BACKGROUND);
     }
 
     public static boolean isNamazWidgetBackgroundCornerRadiusCustomizable(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
     }
 
     public static int getNamazWidgetBackgroundCornerRadius(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS);
+        return prefs.getInt(KEY_SALAH_WIDGET_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS);
     }
 
     public static boolean isNamazWidgetHorizontalPaddingApplied(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, DEFAULT_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_APPLY_HORIZONTAL_PADDING, DEFAULT_SALAH_WIDGET_APPLY_HORIZONTAL_PADDING);
     }
 
     public static boolean isNamazWidgetDefaultBackgroundColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_BACKGROUND_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetBackgroundColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
     }
 
     public static boolean isNamazWidgetDefaultCountdownTimeColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetCustomCountdownTimeColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazWidgetDefaultCountdownLabelColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetCustomCountdownLabelColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazWidgetDefaultTimelineActiveColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetCustomTimelineActiveColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazWidgetDefaultTimelineNextColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetCustomTimelineNextColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazWidgetDefaultTimelineStandardColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetCustomTimelineStandardColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isItemHighlightDisplayedOnNamazWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DISPLAY_ITEM_HIGHLIGHT, DEFAULT_SALAH_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
     }
 
     public static boolean isNamazWidgetItemActiveHighlightDefaultColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetItemActiveHighlightColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazWidgetItemNextHighlightDefaultColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_NAMAZ_WIDGET_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_SALAH_WIDGET_DEFAULT_COLOR);
     }
 
     public static int getNamazWidgetItemNextHighlightColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static int getNamazWidgetMaxFontSize(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
+        return prefs.getInt(KEY_SALAH_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
     }
 
     public static boolean isNamazWidgetCountdownVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN, DEFAULT_NAMAZ_WIDGET_SHOW_COUNTDOWN);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_SHOW_COUNTDOWN, DEFAULT_SALAH_WIDGET_SHOW_COUNTDOWN);
     }
 
     public static boolean isNamazWidgetSymbolsVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_SYMBOLS, DEFAULT_NAMAZ_WIDGET_SHOW_SYMBOLS);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_SHOW_SYMBOLS, DEFAULT_SALAH_WIDGET_SHOW_SYMBOLS);
     }
 
     public static boolean isNamazWidgetShowBothAsrs(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR, false)
-            && prefs.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, DEFAULT_NAMAZ_SHOW_BOTH_ASR);
+        return prefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR, false)
+            && prefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS, DEFAULT_SALAH_SHOW_BOTH_ASR);
     }
 
     public static boolean isNamazWidgetFajrVisible(SharedPreferences prefs) {
@@ -786,11 +786,11 @@ public final class WidgetDAO {
     }
 
     public static java.util.Set<String> getNamazWidgetVisibleEvents(SharedPreferences prefs) {
-        return prefs.getStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS);
+        return prefs.getStringSet(KEY_SALAH_WIDGET_VISIBLE_EVENTS, DEFAULT_SALAH_WIDGET_VISIBLE_EVENTS);
     }
 
     public static boolean isNamazWidgetShowAlarms(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_WIDGET_SHOW_ALARMS, DEFAULT_NAMAZ_WIDGET_SHOW_ALARMS);
+        return prefs.getBoolean(KEY_SALAH_WIDGET_SHOW_ALARMS, DEFAULT_SALAH_WIDGET_SHOW_ALARMS);
     }
 
     public static boolean isNamazWidgetRuleVisible(SharedPreferences prefs, long ruleId) {
@@ -802,59 +802,59 @@ public final class WidgetDAO {
     // ****************************
 
     public static boolean isTextUppercaseDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, DEFAULT_WIDGET_TEXT_UPPERCASE_DISPLAYED);
     }
 
     public static boolean isTextShadowDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW, DEFAULT_WIDGET_TEXT_SHADOW_DISPLAYED);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW, DEFAULT_WIDGET_TEXT_SHADOW_DISPLAYED);
     }
 
     public static boolean isBackgroundDisplayedOnNamazCountdownWidget(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND, DEFAULT_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
     }
 
     public static boolean isNamazCountdownWidgetBackgroundCornerRadiusCustomizable(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGETS_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
     }
 
     public static int getNamazCountdownWidgetBackgroundCornerRadius(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS);
+        return prefs.getInt(KEY_SALAH_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS, DEFAULT_WIDGET_BACKGROUND_CORNER_RADIUS);
     }
 
     public static boolean isNamazCountdownWidgetHorizontalPaddingApplied(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING, DEFAULT_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING);
     }
 
     public static boolean isNamazCountdownWidgetDefaultBackgroundColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
     }
 
     public static int getNamazCountdownWidgetBackgroundColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
+        return prefs.getInt(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR, DEFAULT_WIDGETS_BACKGROUND_COLOR);
     }
 
     public static boolean isNamazCountdownWidgetDefaultTimeColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
     }
 
     public static int getNamazCountdownWidgetCustomTimeColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static boolean isNamazCountdownWidgetDefaultLabelColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
     }
 
     public static int getNamazCountdownWidgetCustomLabelColor(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
+        return prefs.getInt(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR, DEFAULT_WIDGETS_CUSTOM_COLOR);
     }
 
     public static int getNamazCountdownWidgetMaxFontSize(SharedPreferences prefs) {
-        return prefs.getInt(KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
+        return prefs.getInt(KEY_SALAH_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE, DEFAULT_WIDGETS_FONT_SIZE);
     }
 
     public static boolean isNamazCountdownWidgetSymbolsVisible(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS, DEFAULT_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
+        return prefs.getBoolean(KEY_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS, DEFAULT_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
     }
 
 }

@@ -196,8 +196,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
         );
 
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         List<String> eventsList = new ArrayList<>();
         String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
@@ -310,7 +310,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
     private void updateRoundingVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
+        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ALARM_SHOW_ROUNDING, false);
 
         int roundingVisibility = showRounding ? View.VISIBLE : View.GONE;
         mBinding.primaryRoundEnabledCheckbox.setVisibility(roundingVisibility);
@@ -327,8 +327,8 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
     private void updateAdjustmentVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ALARM_SHOW_ROUNDING, false);
-        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING, false);
+        boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ALARM_SHOW_ROUNDING, false);
+        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING, false);
 
         boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
 
@@ -514,7 +514,7 @@ public class RelationalAlarmDialogFragment extends DialogFragment {
 
         } catch (Exception e) {
             LogUtils.e("Error parsing relational alarm data", e);
-            android.widget.Toast.makeText(requireContext(), R.string.namaz_error_saving, android.widget.Toast.LENGTH_LONG).show();
+            android.widget.Toast.makeText(requireContext(), R.string.salah_error_saving, android.widget.Toast.LENGTH_LONG).show();
             // Re-enable button on failure
             if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
                 View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);

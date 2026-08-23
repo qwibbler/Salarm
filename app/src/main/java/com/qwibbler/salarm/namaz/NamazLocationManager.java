@@ -30,18 +30,18 @@ public class NamazLocationManager {
      */
     public static void setLocationMode(Context context, LocationMode mode) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        prefs.edit().putString(KEY_NAMAZ_LOCATION_MODE, mode.name()).apply();
+        prefs.edit().putString(KEY_SALAH_LOCATION_MODE, mode.name()).apply();
         LogUtils.i("Location mode set to: " + mode);
 
         if (mode == LocationMode.GPS) {
             // Clear manual state and any stored timezone to follow device timezone in GPS mode
             prefs.edit()
-                    .remove(KEY_NAMAZ_LATITUDE)
-                    .remove(KEY_NAMAZ_LONGITUDE)
-                    .remove(KEY_NAMAZ_CITY_NAME)
-                    .remove(KEY_NAMAZ_DISPLAY_TIMEZONE)
+                    .remove(KEY_SALAH_LATITUDE)
+                    .remove(KEY_SALAH_LONGITUDE)
+                    .remove(KEY_SALAH_CITY_NAME)
+                    .remove(KEY_SALAH_DISPLAY_TIMEZONE)
                     .apply();
-            prefs.edit().putString(KEY_NAMAZ_CITY_NAME, context.getString(R.string.namaz_detecting_location)).apply();
+            prefs.edit().putString(KEY_SALAH_CITY_NAME, context.getString(R.string.salah_detecting_location)).apply();
             requestGpsUpdate(context);
         }
 
@@ -54,7 +54,7 @@ public class NamazLocationManager {
      */
     public static LocationMode getLocationMode(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String modeStr = prefs.getString(KEY_NAMAZ_LOCATION_MODE, DEFAULT_NAMAZ_LOCATION_MODE);
+        String modeStr = prefs.getString(KEY_SALAH_LOCATION_MODE, DEFAULT_SALAH_LOCATION_MODE);
         try {
             return LocationMode.valueOf(modeStr);
         } catch (IllegalArgumentException e) {
@@ -98,8 +98,8 @@ public class NamazLocationManager {
             } else {
                 // If we're still stuck in "Detecting...", revert to a neutral state
                 SharedPreferences prefs = getDefaultSharedPreferences(appContext);
-                if (appContext.getString(R.string.namaz_detecting_location).equals(prefs.getString(KEY_NAMAZ_CITY_NAME, ""))) {
-                    prefs.edit().putString(KEY_NAMAZ_CITY_NAME, "Not detected").apply();
+                if (appContext.getString(R.string.salah_detecting_location).equals(prefs.getString(KEY_SALAH_CITY_NAME, ""))) {
+                    prefs.edit().putString(KEY_SALAH_CITY_NAME, "Not detected").apply();
                 }
             }
         });
@@ -122,13 +122,13 @@ public class NamazLocationManager {
         boolean significantDistance = forceSync || distance > LOCATION_UPDATE_THRESHOLD_METERS;
 
         // Also resolve if city name is missing or "Detecting..."
-        String currentCity = prefs.getString(KEY_NAMAZ_CITY_NAME, "");
+        String currentCity = prefs.getString(KEY_SALAH_CITY_NAME, "");
         boolean needsResolution = significantDistance || currentCity.isEmpty() ||
-                currentCity.equals(context.getString(R.string.namaz_detecting_location));
+                currentCity.equals(context.getString(R.string.salah_detecting_location));
 
         prefs.edit()
-                .putString(KEY_NAMAZ_LATITUDE, String.valueOf(lat))
-                .putString(KEY_NAMAZ_LONGITUDE, String.valueOf(lon))
+                .putString(KEY_SALAH_LATITUDE, String.valueOf(lat))
+                .putString(KEY_SALAH_LONGITUDE, String.valueOf(lon))
                 .apply();
 
         if (isGps && needsResolution) {

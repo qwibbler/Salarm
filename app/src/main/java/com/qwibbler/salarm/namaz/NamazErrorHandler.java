@@ -21,7 +21,7 @@ import com.qwibbler.salarm.utils.LogUtils;
  */
 public class NamazErrorHandler {
 
-    private static final String SYNC_ERROR_CHANNEL_ID = "namaz_sync_errors";
+    private static final String SALAH_SYNC_ERROR_CHANNEL_ID = "salah_sync_errors";
     private static final int ERROR_NOTIFICATION_ID = 1001;
 
     /**
@@ -36,8 +36,8 @@ public class NamazErrorHandler {
         // Critically important errors (DB corruption, invalid location data)
         if (isCriticalError(t)) {
             sendErrorNotification(appContext,
-                appContext.getString(R.string.namaz_error_background_sync),
-                appContext.getString(R.string.namaz_error_background_sync_details));
+                appContext.getString(R.string.salah_error_background_sync),
+                appContext.getString(R.string.salah_error_background_sync_details));
         }
     }
 
@@ -46,7 +46,7 @@ public class NamazErrorHandler {
      */
     public static void reportSaveFailure(Context context) {
         AppExecutors.getMainThread().post(() ->
-            Toast.makeText(context, R.string.namaz_error_saving, Toast.LENGTH_LONG).show());
+            Toast.makeText(context, R.string.salah_error_saving, Toast.LENGTH_LONG).show());
     }
 
     private static boolean isCriticalError(Throwable t) {
@@ -59,17 +59,17 @@ public class NamazErrorHandler {
     private static void sendErrorNotification(Context context, String title, String message) {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(SYNC_ERROR_CHANNEL_ID,
+            NotificationChannel channel = new NotificationChannel(SALAH_SYNC_ERROR_CHANNEL_ID,
                 "Salah Synchronization Issues", NotificationManager.IMPORTANCE_DEFAULT);
             nm.createNotificationChannel(channel);
         }
 
         Intent intent = new Intent(context, SettingsActivity.class);
-        intent.putExtra(SettingsActivity.KEY_SHOW_NAMAZ_SETTINGS, true);
+        intent.putExtra(SettingsActivity.KEY_SHOW_SALAH_SETTINGS, true);
         PendingIntent pi = PendingIntent.getActivity(context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        Notification notification = new NotificationCompat.Builder(context, SYNC_ERROR_CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(context, SALAH_SYNC_ERROR_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_tab_alarm_static)
                 .setContentTitle(title)
                 .setContentText(message)

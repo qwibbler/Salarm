@@ -4,7 +4,7 @@ package com.qwibbler.salarm.settings;
 
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_ANALOG_WIDGET_CUSTOMIZATION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_DIGITAL_WIDGET_CUSTOMIZATION;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_WIDGET_CUSTOMIZATION;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_WIDGET_CUSTOMIZATION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_VERTICAL_WIDGET_CUSTOMIZATION;
 
@@ -22,7 +22,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
     Preference mDigitalWidgetCustomizationPref;
     Preference mVerticalWidgetCustomizationPref;
     Preference mNextAlarmWidgetCustomizationPref;
-    Preference mNamazWidgetCustomizationPref;
+    Preference mSalahWidgetCustomizationPref;
 
     @Override
     protected String getFragmentTitle() {
@@ -39,7 +39,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
         mDigitalWidgetCustomizationPref = findPreference(KEY_DIGITAL_WIDGET_CUSTOMIZATION);
         mVerticalWidgetCustomizationPref = findPreference(KEY_VERTICAL_WIDGET_CUSTOMIZATION);
         mNextAlarmWidgetCustomizationPref = findPreference(KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION);
-        mNamazWidgetCustomizationPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOMIZATION);
+        mSalahWidgetCustomizationPref = findPreference(KEY_SALAH_WIDGET_CUSTOMIZATION);
 
         setupPreferences();
     }
@@ -47,7 +47,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
     @Override
     public void onDestroy() {
         nullifyPreferenceListeners(mAnalogWidgetCustomizationPref, mDigitalWidgetCustomizationPref, mVerticalWidgetCustomizationPref,
-            mNextAlarmWidgetCustomizationPref, mNamazWidgetCustomizationPref);
+            mNextAlarmWidgetCustomizationPref, mSalahWidgetCustomizationPref);
 
         nullifyAllPrefs();
 
@@ -65,7 +65,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
 
             case KEY_NEXT_ALARM_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNextAlarmSettingsFragment());
 
-            case KEY_NAMAZ_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNamazSettingsFragment());
+            case KEY_SALAH_WIDGET_CUSTOMIZATION -> animateAndShowFragment(new AppWidgetNamazSettingsFragment());
         }
 
         return true;
@@ -80,7 +80,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
 
         mNextAlarmWidgetCustomizationPref.setOnPreferenceClickListener(this);
 
-        mNamazWidgetCustomizationPref.setOnPreferenceClickListener(this);
+        mSalahWidgetCustomizationPref.setOnPreferenceClickListener(this);
     }
 
     private void nullifyAllPrefs() {
@@ -88,7 +88,7 @@ public class WidgetSettingsFragment extends BaseSettingsScreenFragment implement
         mDigitalWidgetCustomizationPref = null;
         mVerticalWidgetCustomizationPref = null;
         mNextAlarmWidgetCustomizationPref = null;
-        mNamazWidgetCustomizationPref = null;
+        mSalahWidgetCustomizationPref = null;
     }
 
 }

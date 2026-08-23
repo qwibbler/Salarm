@@ -1,6 +1,6 @@
 package com.qwibbler.salarm.namaz;
 
-import static com.qwibbler.salarm.uidata.UiDataModel.Tab.NAMAZ;
+import static com.qwibbler.salarm.uidata.UiDataModel.Tab.SALAH;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -47,7 +47,7 @@ public class NamazTimesFragment extends SalarmFragment {
 
     private TextView mCountdownText;
     private TextView mLocalTimeText;
-    private NamazAdapter mAdapter;
+    private NamazAdapter mSalahAdapter;
     private TextView mSelectedDateText;
     private TextView mLocationInfoText;
     private TextView mTimezoneInfoText;
@@ -58,14 +58,14 @@ public class NamazTimesFragment extends SalarmFragment {
         Context context = getContext();
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         TimeZone tz = TimeZone.getTimeZone(tzId);
         mSelectedDate.setTimeZone(tz);
     }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = (prefs, key) -> {
-        if (PreferencesKeys.KEY_NAMAZ_CITY_NAME.equals(key) || PreferencesKeys.KEY_NAMAZ_LATITUDE.equals(key)) {
+        if (PreferencesKeys.KEY_SALAH_CITY_NAME.equals(key) || PreferencesKeys.KEY_SALAH_LATITUDE.equals(key)) {
             updateUI();
         }
     };
@@ -78,29 +78,29 @@ public class NamazTimesFragment extends SalarmFragment {
     };
 
     public NamazTimesFragment() {
-        super(NAMAZ);
+        super(SALAH);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.namaz_times_fragment, container, false);
-        mCountdownText = view.findViewById(R.id.namaz_countdown);
-        mLocalTimeText = view.findViewById(R.id.namaz_local_time);
-        RecyclerView recyclerView = view.findViewById(R.id.namaz_list);
+        View view = inflater.inflate(R.layout.salah_times_fragment, container, false);
+        mCountdownText = view.findViewById(R.id.salah_countdown);
+        mLocalTimeText = view.findViewById(R.id.salah_local_time);
+        RecyclerView recyclerView = view.findViewById(R.id.salah_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mAdapter = new NamazAdapter();
-        recyclerView.setAdapter(mAdapter);
+        mSalahAdapter = new NamazAdapter();
+        recyclerView.setAdapter(mSalahAdapter);
 
         mSelectedDateText = view.findViewById(R.id.selected_date_text);
         mLocationInfoText = view.findViewById(R.id.location_info_text);
         mTimezoneInfoText = view.findViewById(R.id.timezone_info_text);
-        mTimezoneWarningText = view.findViewById(R.id.namaz_timezone_warning);
+        mTimezoneWarningText = view.findViewById(R.id.salah_timezone_warning);
 
         view.findViewById(R.id.prev_date_button).setOnClickListener(v -> changeDate(-1));
         view.findViewById(R.id.next_date_button).setOnClickListener(v -> changeDate(1));
         view.findViewById(R.id.date_picker_trigger).setOnClickListener(v -> showDatePicker());
-        view.findViewById(R.id.namaz_settings_button).setOnClickListener(v -> showSettingsDialog());
+        view.findViewById(R.id.salah_settings_button).setOnClickListener(v -> showSettingsDialog());
 
         setupHeaderSwipe(view.findViewById(R.id.date_navigation_header));
 
@@ -147,13 +147,13 @@ public class NamazTimesFragment extends SalarmFragment {
             mSelectedDate.setTimeInMillis(selection);
             updateUI();
         });
-        datePicker.show(getParentFragmentManager(), "NAMAZ_DATE_PICKER");
+        datePicker.show(getParentFragmentManager(), "SALAH_DATE_PICKER");
     }
 
     private void showSettingsDialog() {
         NamazSettingsDialog dialog = new NamazSettingsDialog();
         dialog.setOnSettingsChangedListener(this::updateUI);
-        dialog.show(getParentFragmentManager(), "NAMAZ_SETTINGS_DIALOG");
+        dialog.show(getParentFragmentManager(), "SALAH_SETTINGS_DIALOG");
     }
 
     @Override
@@ -193,10 +193,10 @@ public class NamazTimesFragment extends SalarmFragment {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
         // Revert temporary view overrides when leaving the page
         prefs.edit()
-                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE)
-                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE)
-                .remove(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME)
-                .remove(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE)
+                .remove(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE)
+                .remove(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE)
+                .remove(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME)
+                .remove(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE)
                 .apply();
         mSelectedDate.setTimeInMillis(System.currentTimeMillis());
     }
@@ -209,10 +209,10 @@ public class NamazTimesFragment extends SalarmFragment {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
         // Use local VIEW overrides if present, otherwise fall back to global settings
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0"));
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0"));
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE,
+                prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE,
+                prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
 
         double lat, lon;
         try {
@@ -223,7 +223,7 @@ public class NamazTimesFragment extends SalarmFragment {
             lon = 0.0;
         }
 
-        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
+        String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
         CalculationMethod method;
         try {
             method = CalculationMethod.valueOf(methodStr);
@@ -231,29 +231,29 @@ public class NamazTimesFragment extends SalarmFragment {
             method = CalculationMethod.MUSLIM_WORLD_LEAGUE;
         }
 
-        NamazCalculator.NamazTimes times = NamazCalculator.calculateAllTimes(mSelectedDate.getTime(), lat, lon, method);
+        NamazCalculator.NamazTimes salahTimes = NamazCalculator.calculateAllTimes(mSelectedDate.getTime(), lat, lon, method);
 
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES, false);
-        String madhab = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES, false);
+        String madhab = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, "HANAFI");
 
         List<PrayerItem> items = new ArrayList<>();
-        items.add(new PrayerItem(context.getString(R.string.fajr_label), times.fajr));
-        items.add(new PrayerItem(context.getString(R.string.sunrise_label), times.sunrise));
-        items.add(new PrayerItem(context.getString(R.string.dhuhr_label), times.dhuhr));
+        items.add(new PrayerItem(context.getString(R.string.fajr_label), salahTimes.fajr));
+        items.add(new PrayerItem(context.getString(R.string.sunrise_label), salahTimes.sunrise));
+        items.add(new PrayerItem(context.getString(R.string.dhuhr_label), salahTimes.dhuhr));
 
         if (showBothAsr) {
-            items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), times.asrShafi));
-            items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), times.asrHanafi));
+            items.add(new PrayerItem(context.getString(R.string.asr_shafii_label), salahTimes.asrShafi));
+            items.add(new PrayerItem(context.getString(R.string.asr_hanafi_label), salahTimes.asrHanafi));
         } else {
-            Date asrTime = "HANAFI".equals(madhab) ? times.asrHanafi : times.asrShafi;
+            Date asrTime = "HANAFI".equals(madhab) ? salahTimes.asrHanafi : salahTimes.asrShafi;
             items.add(new PrayerItem(context.getString(R.string.asr_label), asrTime));
         }
 
-        items.add(new PrayerItem(context.getString(R.string.maghrib_label), times.maghrib));
-        items.add(new PrayerItem(context.getString(R.string.isha_label), times.isha));
+        items.add(new PrayerItem(context.getString(R.string.maghrib_label), salahTimes.maghrib));
+        items.add(new PrayerItem(context.getString(R.string.isha_label), salahTimes.isha));
 
-        mAdapter.setItems(items);
+        mSalahAdapter.setItems(items);
 
         // Countdown always uses TODAY and GLOBAL settings
         updateCountdown();
@@ -263,7 +263,7 @@ public class NamazTimesFragment extends SalarmFragment {
 
     private void updateDateHeader() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         TimeZone tz = TimeZone.getTimeZone(tzId);
 
         Calendar today = Calendar.getInstance(tz);
@@ -304,13 +304,13 @@ public class NamazTimesFragment extends SalarmFragment {
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
-        String cityName = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, context.getString(R.string.salarm_unknown_location)));
+        String cityName = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME,
+                prefs.getString(PreferencesKeys.KEY_SALAH_CITY_NAME, context.getString(R.string.salarm_unknown_location)));
 
         NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(context);
-        boolean isOverride = prefs.contains(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME);
+        boolean isOverride = prefs.contains(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME);
 
-        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         TimeZone tz = TimeZone.getTimeZone(tzId);
         String tzName = tz.getDisplayName(false, TimeZone.SHORT);
 
@@ -324,7 +324,7 @@ public class NamazTimesFragment extends SalarmFragment {
         boolean showWarning = !Objects.equals(tzId, systemTzId);
 
         if (showWarning) {
-            mTimezoneWarningText.setText(getString(R.string.namaz_timezone_warning, tzId, systemTzId));
+            mTimezoneWarningText.setText(getString(R.string.salah_timezone_warning, tzId, systemTzId));
             mTimezoneWarningText.setVisibility(View.VISIBLE);
         } else {
             mTimezoneWarningText.setVisibility(View.GONE);
@@ -336,14 +336,14 @@ public class NamazTimesFragment extends SalarmFragment {
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
-        String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         TimeZone tz = TimeZone.getTimeZone(tzId);
 
         // Countdown uses the location currently being viewed (preview or global)
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, "0.0"));
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE,
-                prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, "0.0"));
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE,
+                prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE,
+                prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
 
         double lat, lon;
         try {
@@ -354,11 +354,11 @@ public class NamazTimesFragment extends SalarmFragment {
             lon = 0.0;
         }
 
-        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
+        String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
         CalculationMethod method = CalculationMethod.valueOf(methodStr);
 
         Calendar todayCal = Calendar.getInstance(tz);
-        NamazCalculator.NamazTimes todayTimes = NamazCalculator.calculateAllTimes(todayCal.getTime(), lat, lon, method);
+        NamazCalculator.NamazTimes todaySalahTimes = NamazCalculator.calculateAllTimes(todayCal.getTime(), lat, lon, method);
 
         Date now = new Date();
         PrayerItem nextPrayer;
@@ -366,28 +366,28 @@ public class NamazTimesFragment extends SalarmFragment {
         boolean isViewingToday = isSameDay(mSelectedDate, todayCal);
         mCountdownText.setAlpha(isViewingToday ? 1.0f : 0.5f);
 
-        String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, "HANAFI");
+        String madhabStr = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, "HANAFI");
         boolean isShafi = "SHAFI".equals(madhabStr);
-        Date asrTime = isShafi ? todayTimes.asrShafi : todayTimes.asrHanafi;
+        Date asrTime = isShafi ? todaySalahTimes.asrShafi : todaySalahTimes.asrHanafi;
 
-        if (now.before(todayTimes.fajr)) nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), todayTimes.fajr);
-        else if (now.before(todayTimes.sunrise)) nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todayTimes.sunrise);
-        else if (now.before(todayTimes.dhuhr)) nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todayTimes.dhuhr);
+        if (now.before(todaySalahTimes.fajr)) nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), todaySalahTimes.fajr);
+        else if (now.before(todaySalahTimes.sunrise)) nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todaySalahTimes.sunrise);
+        else if (now.before(todaySalahTimes.dhuhr)) nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todaySalahTimes.dhuhr);
         else if (now.before(asrTime)) nextPrayer = new PrayerItem(context.getString(R.string.asr_label), asrTime);
-        else if (now.before(todayTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todayTimes.maghrib);
-        else if (now.before(todayTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todayTimes.isha);
+        else if (now.before(todaySalahTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todaySalahTimes.maghrib);
+        else if (now.before(todaySalahTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todaySalahTimes.isha);
         else {
             // Next day's Fajr
             Calendar tomorrow = Calendar.getInstance(tz);
             tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-            NamazCalculator.NamazTimes tomorrowTimes = NamazCalculator.calculateAllTimes(tomorrow.getTime(), lat, lon, method);
-            nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowTimes.fajr);
+            NamazCalculator.NamazTimes tomorrowSalahTimes = NamazCalculator.calculateAllTimes(tomorrow.getTime(), lat, lon, method);
+            nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowSalahTimes.fajr);
         }
 
         long diff = nextPrayer.time.getTime() - now.getTime();
         long hours = diff / (3600 * 1000);
         long minutes = (diff / (60 * 1000)) % 60;
-        String countdown = getString(R.string.salarm_namaz_countdown_format, hours, minutes, nextPrayer.name);
+        String countdown = getString(R.string.salarm_salah_countdown_format, hours, minutes, nextPrayer.name);
         mCountdownText.setText(countdown);
 
         // Local time in preview timezone
@@ -475,7 +475,7 @@ public class NamazTimesFragment extends SalarmFragment {
             if (context == null) return;
 
             SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-            String tzId = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+            String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
             TimeZone tz = TimeZone.getTimeZone(tzId);
             java.text.DateFormat format = android.text.format.DateFormat.getTimeFormat(context);
             format.setTimeZone(tz);

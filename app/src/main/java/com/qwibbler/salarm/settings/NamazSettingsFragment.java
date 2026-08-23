@@ -44,27 +44,27 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_settings_title);
+        return getString(R.string.salah_settings_title);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.namaz_settings);
+        addPreferencesFromResource(R.xml.salah_settings);
 
-        Preference locationMode = findPreference(KEY_NAMAZ_LOCATION_MODE);
+        Preference locationMode = findPreference(KEY_SALAH_LOCATION_MODE);
         if (locationMode != null) locationMode.setOnPreferenceChangeListener(this);
 
-        Preference madhab = findPreference(KEY_NAMAZ_MADHAB);
+        Preference madhab = findPreference(KEY_SALAH_MADHAB);
         if (madhab != null) madhab.setOnPreferenceChangeListener(this);
 
-        Preference calcMethod = findPreference(KEY_NAMAZ_CALC_METHOD);
+        Preference calcMethod = findPreference(KEY_SALAH_CALC_METHOD);
         if (calcMethod != null) calcMethod.setOnPreferenceChangeListener(this);
 
-        Preference showBothAsr = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR);
+        Preference showBothAsr = findPreference(KEY_SALAH_SHOW_BOTH_ASR);
         if (showBothAsr != null) showBothAsr.setOnPreferenceChangeListener(this);
 
-        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        Preference cityPref = findPreference(KEY_SALAH_CITY_NAME);
         if (cityPref != null) {
             cityPref.setOnPreferenceClickListener(preference -> {
                 if (NamazLocationManager.getLocationMode(requireContext()) == NamazLocationManager.LocationMode.MANUAL) {
@@ -96,15 +96,15 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
 
     private void updateUiStates() {
         NamazLocationManager.LocationMode mode = NamazLocationManager.getLocationMode(requireContext());
-        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        Preference cityPref = findPreference(KEY_SALAH_CITY_NAME);
         if (cityPref != null) {
             cityPref.setEnabled(mode == NamazLocationManager.LocationMode.MANUAL);
         }
 
-        Preference showBothAsr = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR);
-        Preference sub1 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS);
-        Preference sub2 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_NAMAZ_TIMES);
-        Preference sub3 = findPreference(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS);
+        Preference showBothAsr = findPreference(KEY_SALAH_SHOW_BOTH_ASR);
+        Preference sub1 = findPreference(KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS);
+        Preference sub2 = findPreference(KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES);
+        Preference sub3 = findPreference(KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS);
 
         boolean bothAsrEnabled = showBothAsr instanceof SwitchPreferenceCompat sw && sw.isChecked();
 
@@ -114,14 +114,14 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
     }
 
     private void updateSummaries() {
-        Preference cityPref = findPreference(KEY_NAMAZ_CITY_NAME);
+        Preference cityPref = findPreference(KEY_SALAH_CITY_NAME);
         if (cityPref != null) {
-            cityPref.setSummary(mPrefs.getString(KEY_NAMAZ_CITY_NAME, DEFAULT_NAMAZ_CITY_NAME));
+            cityPref.setSummary(mPrefs.getString(KEY_SALAH_CITY_NAME, DEFAULT_SALAH_CITY_NAME));
         }
 
-        Preference autoTagPref = findPreference(KEY_NAMAZ_AUTO_TAG_NAME);
+        Preference autoTagPref = findPreference(KEY_SALAH_AUTO_TAG_NAME);
         if (autoTagPref != null) {
-            autoTagPref.setSummary(mPrefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME));
+            autoTagPref.setSummary(mPrefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME));
         }
     }
 
@@ -129,7 +129,7 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
     public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
         String key = preference.getKey();
 
-        if (KEY_NAMAZ_LOCATION_MODE.equals(key)) {
+        if (KEY_SALAH_LOCATION_MODE.equals(key)) {
             NamazLocationManager.LocationMode mode = NamazLocationManager.LocationMode.valueOf((String) newValue);
             if (mode == NamazLocationManager.LocationMode.GPS) {
                 checkLocationPermissions();
@@ -143,21 +143,21 @@ public class NamazSettingsFragment extends BaseSettingsScreenFragment implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (KEY_NAMAZ_CITY_NAME.equals(key) || KEY_NAMAZ_AUTO_TAG_NAME.equals(key)) {
+        if (KEY_SALAH_CITY_NAME.equals(key) || KEY_SALAH_AUTO_TAG_NAME.equals(key)) {
             updateSummaries();
-        } else if (KEY_NAMAZ_MADHAB.equals(key) || KEY_NAMAZ_CALC_METHOD.equals(key)) {
+        } else if (KEY_SALAH_MADHAB.equals(key) || KEY_SALAH_CALC_METHOD.equals(key)) {
             RelationalAlarmSyncManager.recalculateAllActiveRules(requireContext());
-        } else if (KEY_NAMAZ_SHOW_BOTH_ASR.equals(key)) {
+        } else if (KEY_SALAH_SHOW_BOTH_ASR.equals(key)) {
             updateUiStates();
             WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
-        } else if (KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS.equals(key)) {
-            if (sharedPreferences.getBoolean(KEY_NAMAZ_SHOW_BOTH_ASR_IN_WIDGETS, false)) {
-                Set<String> visibleEvents = sharedPreferences.getStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, DEFAULT_NAMAZ_WIDGET_VISIBLE_EVENTS);
+        } else if (KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS.equals(key)) {
+            if (sharedPreferences.getBoolean(KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS, false)) {
+                Set<String> visibleEvents = sharedPreferences.getStringSet(KEY_SALAH_WIDGET_VISIBLE_EVENTS, DEFAULT_SALAH_WIDGET_VISIBLE_EVENTS);
                 if (!visibleEvents.contains("asr_shafi") && !visibleEvents.contains("asr_hanafi")) {
                     Set<String> newVisibleEvents = new HashSet<>(visibleEvents);
                     newVisibleEvents.add("asr_shafi");
                     newVisibleEvents.add("asr_hanafi");
-                    sharedPreferences.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, newVisibleEvents).apply();
+                    sharedPreferences.edit().putStringSet(KEY_SALAH_WIDGET_VISIBLE_EVENTS, newVisibleEvents).apply();
                 }
             }
             WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);

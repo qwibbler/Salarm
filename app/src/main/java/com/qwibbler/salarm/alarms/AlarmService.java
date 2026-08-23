@@ -466,10 +466,10 @@ public class AlarmService extends Service {
         AlarmNotifications.showAlarmNotification(this, mCurrentAlarm);
         AlarmKlaxon.start(mCurrentAlarm);
 
-        // Update actions based on the current alarm context (normal vs Namaz)
-        mFlipAction = SettingsDAO.getFlipAction(mPrefs, mCurrentAlarm.mIsNamaz);
-        mShakeAction = SettingsDAO.getShakeAction(mPrefs, mCurrentAlarm.mIsNamaz);
-        mShakeIntensity = SettingsDAO.getShakeIntensity(mPrefs, mCurrentAlarm.mIsNamaz);
+        // Update actions based on the current alarm context (normal vs Salah)
+        mFlipAction = SettingsDAO.getFlipAction(mPrefs, mCurrentAlarm.mIsSalah);
+        mShakeAction = SettingsDAO.getShakeAction(mPrefs, mCurrentAlarm.mIsSalah);
+        mShakeIntensity = SettingsDAO.getShakeIntensity(mPrefs, mCurrentAlarm.mIsSalah);
 
         if (mCurrentAlarm.mFlash) {
             if (mIsUserFlashlightOn) {

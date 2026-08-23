@@ -348,7 +348,7 @@
             android:directBootAware="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.qwibbler.salarm.NAMAZ_MINUTE_UPDATE" />
+                <action android:name="com.qwibbler.salarm.SALAH_MINUTE_UPDATE" />
             </intent-filter>
         </receiver>
 
@@ -456,7 +456,7 @@
         <activity
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazWidgetConfiguration"
             android:excludeFromRecents="true"
-            android:label="@string/namaz_timeline_widget_label"
+            android:label="@string/salah_timeline_widget_label"
             android:theme="@style/Theme.Salarm" />
 
 
@@ -464,14 +464,14 @@
         <activity
             android:name="com.qwibbler.salarm.widgets.WidgetConfiguration$NamazCountdownWidgetConfiguration"
             android:excludeFromRecents="true"
-            android:label="@string/namaz_countdown_widget_label"
+            android:label="@string/salah_countdown_widget_label"
             android:theme="@style/Theme.Salarm" />
 
         <!-- Namaz timeline widget -->
         <receiver
             android:name="com.qwibbler.salarm.widgets.NamazTimelineWidgetProvider"
             android:exported="true"
-            android:label="@string/namaz_timeline_widget_label">
+            android:label="@string/salah_timeline_widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
@@ -491,7 +491,7 @@
         <receiver
             android:name="com.qwibbler.salarm.widgets.NamazCountdownWidgetProvider"
             android:exported="true"
-            android:label="@string/namaz_countdown_widget_label">
+            android:label="@string/salah_countdown_widget_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />

@@ -7,7 +7,7 @@
     <item name="page_clock" type="id" />
     <item name="page_timer" type="id" />
     <item name="page_stopwatch" type="id" />
-    <item name="page_namaz" type="id" />
+    <item name="page_salah" type="id" />
     <item name="page_qibla" type="id" />
     <item name="page_next" type="id" />
     <item name="page_back" type="id" />

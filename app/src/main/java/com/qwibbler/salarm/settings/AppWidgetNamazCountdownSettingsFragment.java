@@ -46,29 +46,29 @@ public class AppWidgetNamazCountdownSettingsFragment extends BaseSettingsScreenF
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_countdown_widget_label);
+        return getString(R.string.salah_countdown_widget_label);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        addPreferencesFromResource(R.xml.settings_customize_namaz_countdown_widget);
+        addPreferencesFromResource(R.xml.settings_customize_salah_countdown_widget);
 
-        mDisplayTextUppercasePref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE);
-        mShowSymbolsPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
-        mDisplayTextShadowPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW);
-        mShowBackgroundPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
-        mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
-        mBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS);
-        mApplyHorizontalPaddingPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING);
-        mDefaultBackgroundColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR);
-        mCustomBackgroundColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR);
-        mDefaultTimeColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR);
-        mCustomTimeColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR);
-        mDefaultLabelColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR);
-        mCustomLabelColorPref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR);
-        mMaxFontSizePref = findPreference(KEY_NAMAZ_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE);
+        mDisplayTextUppercasePref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE);
+        mShowSymbolsPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS);
+        mDisplayTextShadowPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW);
+        mShowBackgroundPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND);
+        mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
+        mBackgroundCornerRadiusPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_BACKGROUND_CORNER_RADIUS);
+        mApplyHorizontalPaddingPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING);
+        mDefaultBackgroundColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR);
+        mCustomBackgroundColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_BACKGROUND_COLOR);
+        mDefaultTimeColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR);
+        mCustomTimeColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_TIME_COLOR);
+        mDefaultLabelColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR);
+        mCustomLabelColorPref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_CUSTOM_LABEL_COLOR);
+        mMaxFontSizePref = findPreference(KEY_SALAH_COUNTDOWN_WIDGET_MAXIMUM_FONT_SIZE);
 
         setupPreferences();
 
@@ -106,12 +106,12 @@ public class AppWidgetNamazCountdownSettingsFragment extends BaseSettingsScreenF
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         String key = pref.getKey();
         switch (key) {
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_COUNTDOWN_WIDGET_SHOW_SYMBOLS,
-                 KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW,
-                 KEY_NAMAZ_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING ->
+            case KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_SALAH_COUNTDOWN_WIDGET_SHOW_SYMBOLS,
+                 KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_TEXT_SHADOW,
+                 KEY_SALAH_COUNTDOWN_WIDGET_APPLY_HORIZONTAL_PADDING ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND -> {
+            case KEY_SALAH_COUNTDOWN_WIDGET_DISPLAY_BACKGROUND -> {
                 boolean displayBackground = (boolean) newValue;
                 boolean isCustomColor = !WidgetDAO.isNamazCountdownWidgetDefaultBackgroundColor(mPrefs);
                 boolean isRadiusCustomizable = WidgetDAO.isNamazCountdownWidgetBackgroundCornerRadiusCustomizable(mPrefs);
@@ -128,12 +128,12 @@ public class AppWidgetNamazCountdownSettingsFragment extends BaseSettingsScreenF
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS -> {
+            case KEY_SALAH_COUNTDOWN_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS -> {
                 mBackgroundCornerRadiusPref.setVisible((boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR -> {
+            case KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_BACKGROUND_COLOR -> {
                 boolean isCustomColor = !(boolean) newValue;
                 boolean displayBackground = WidgetDAO.isBackgroundDisplayedOnNamazCountdownWidget(mPrefs);
                 boolean isRadiusCustomizable = WidgetDAO.isNamazCountdownWidgetBackgroundCornerRadiusCustomizable(mPrefs);
@@ -146,12 +146,12 @@ public class AppWidgetNamazCountdownSettingsFragment extends BaseSettingsScreenF
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR -> {
+            case KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_TIME_COLOR -> {
                 mCustomTimeColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR -> {
+            case KEY_SALAH_COUNTDOWN_WIDGET_DEFAULT_LABEL_COLOR -> {
                 mCustomLabelColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }

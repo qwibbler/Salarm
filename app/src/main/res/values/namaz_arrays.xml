@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="namaz_location_mode_entries">
+    <string-array name="salah_location_mode_entries">
         <item>GPS (Automatic)</item>
         <item>Manual</item>
     </string-array>
-    <string-array name="namaz_location_mode_values" translatable="false">
+    <string-array name="salah_location_mode_values" translatable="false">
         <item>GPS</item>
         <item>MANUAL</item>
     </string-array>
 
-    <string-array name="namaz_madhab_entries">
+    <string-array name="salah_madhab_entries">
         <item>Hanafi</item>
         <item>Shafi</item>
     </string-array>
-    <string-array name="namaz_madhab_values" translatable="false">
+    <string-array name="salah_madhab_values" translatable="false">
         <item>HANAFI</item>
         <item>SHAFI</item>
     </string-array>
 
-    <string-array name="namaz_calc_method_entries">
+    <string-array name="salah_calc_method_entries">
         <item>University of Islamic Sciences, Karachi</item>
         <item>Muslim World League</item>
         <item>Islamic Society of North America</item>
@@ -30,7 +30,7 @@
         <item>Dubai, UAE</item>
         <item>Moonsighting Committee</item>
     </string-array>
-    <string-array name="namaz_calc_method_values" translatable="false">
+    <string-array name="salah_calc_method_values" translatable="false">
         <item>KARACHI</item>
         <item>MUSLIM_WORLD_LEAGUE</item>
         <item>NORTH_AMERICA</item>
@@ -43,12 +43,12 @@
         <item>MOON_SIGHTING_COMMITTEE</item>
     </string-array>
 
-    <string-array name="namaz_display_next_event_info_entries">
-        <item>@string/namaz_display_next_event_info_countdown</item>
-        <item>@string/namaz_display_next_event_info_time</item>
-        <item>@string/namaz_display_next_event_info_nothing</item>
+    <string-array name="salah_display_next_event_info_entries">
+        <item>@string/salah_display_next_event_info_countdown</item>
+        <item>@string/salah_display_next_event_info_time</item>
+        <item>@string/salah_display_next_event_info_nothing</item>
     </string-array>
-    <string-array name="namaz_display_next_event_info_values" translatable="false">
+    <string-array name="salah_display_next_event_info_values" translatable="false">
         <item>countdown</item>
         <item>time</item>
         <item>nothing</item>

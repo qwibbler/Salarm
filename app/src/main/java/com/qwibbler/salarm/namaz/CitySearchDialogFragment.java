@@ -3,7 +3,7 @@ package com.qwibbler.salarm.namaz;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_INTERNET_ACCESS_ALLOWED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_CITY_NAME;
+import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_CITY_NAME;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -185,7 +185,7 @@ public class CitySearchDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        View view = getLayoutInflater().inflate(R.layout.namaz_city_search_dialog, null);
+        View view = getLayoutInflater().inflate(R.layout.salah_city_search_dialog, null);
 
         SearchView searchView = view.findViewById(R.id.city_search_view);
         ListView listView = view.findViewById(R.id.city_results_list);
@@ -231,7 +231,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         });
 
         return new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.namaz_city_search_title)
+                .setTitle(R.string.salah_city_search_title)
                 .setView(view)
                 .create();
     }
@@ -536,9 +536,9 @@ public class CitySearchDialogFragment extends DialogFragment {
         } else {
             NamazLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);
             android.content.SharedPreferences.Editor editor = getDefaultSharedPreferences(context).edit();
-            editor.putString(KEY_NAMAZ_CITY_NAME, finalDisplayName);
+            editor.putString(KEY_SALAH_CITY_NAME, finalDisplayName);
             if (city.timeZoneId != null) {
-                editor.putString(com.qwibbler.salarm.settings.PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, city.timeZoneId);
+                editor.putString(com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, city.timeZoneId);
             }
             editor.apply();
         }
@@ -555,7 +555,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View view = convertView;
             if (view == null) {
-                view = LayoutInflater.from(getContext()).inflate(R.layout.namaz_city_list_item, parent, false);
+                view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_list_item, parent, false);
             }
 
             CitySearchResult city = getItem(position);

@@ -129,7 +129,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             String safeTitle = FileUtils.toSafeFileName(FILE_ALARM_FONT + "_namaz");
-            String oldFontPath = mPrefs.getString(KEY_NAMAZ_ALARM_FONT, null);
+            String oldFontPath = mPrefs.getString(KEY_SALAH_ALARM_FONT, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old font if it exists
@@ -143,7 +143,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
 
                 // Save the new path
                 if (copiedUri != null) {
-                    mPrefs.edit().putString(KEY_NAMAZ_ALARM_FONT, copiedUri.getPath()).apply();
+                    mPrefs.edit().putString(KEY_SALAH_ALARM_FONT, copiedUri.getPath()).apply();
                 }
 
                 AppExecutors.getMainThread().post(() -> {
@@ -184,7 +184,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             appContext.getContentResolver().takePersistableUriPermission(sourceUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             String safeTitle = FileUtils.toSafeFileName(FILE_ALARM_BACKGROUND + "_namaz");
-            String oldImagePath = mPrefs.getString(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, null);
+            String oldImagePath = mPrefs.getString(KEY_SALAH_ALARM_BACKGROUND_IMAGE, null);
 
             AppExecutors.getDiskIO().execute(() -> {
                 // Delete the old image if it exists
@@ -195,7 +195,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
 
                 // Save the new path
                 if (copiedUri != null) {
-                    mPrefs.edit().putString(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, copiedUri.getPath()).apply();
+                    mPrefs.edit().putString(KEY_SALAH_ALARM_BACKGROUND_IMAGE, copiedUri.getPath()).apply();
                 }
 
                 AppExecutors.getMainThread().post(() -> {
@@ -224,7 +224,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_alarm_display_settings_title);
+        return getString(R.string.salah_alarm_display_settings_title);
     }
 
     @Override
@@ -233,59 +233,59 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
 
         mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, null);
 
-        addPreferencesFromResource(R.xml.settings_namaz_alarm_display);
+        addPreferencesFromResource(R.xml.settings_salah_alarm_display);
 
-        mAlarmClockStylePref = findPreference(KEY_NAMAZ_ALARM_CLOCK_STYLE);
-        mAlarmClockDialPref = findPreference(KEY_NAMAZ_ALARM_CLOCK_DIAL);
-        mAlarmClockDialMaterialPref = findPreference(KEY_NAMAZ_ALARM_CLOCK_DIAL_MATERIAL);
-        mAnalogClockSizePref = findPreference(KEY_NAMAZ_ALARM_ANALOG_CLOCK_SIZE);
-        mDisplaySecondsPref = findPreference(KEY_NAMAZ_DISPLAY_ALARM_SECOND_HAND);
-        mAlarmClockSecondHandPref = findPreference(KEY_NAMAZ_ALARM_CLOCK_SECOND_HAND);
-        mSwipeActionPref = findPreference(KEY_NAMAZ_SWIPE_ACTION);
-        mDisplaySnoozeSelectorPref = findPreference(KEY_NAMAZ_DISPLAY_SNOOZE_SELECTOR);
-        mBackgroundColorPref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_COLOR);
-        mBackgroundAmoledColorPref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_AMOLED_COLOR);
-        mAlarmClockColorPref = findPreference(KEY_NAMAZ_ALARM_CLOCK_COLOR);
-        mAlarmSecondHandColorPref = findPreference(KEY_NAMAZ_ALARM_SECOND_HAND_COLOR);
-        mAlarmTitleColorPref = findPreference(KEY_NAMAZ_ALARM_TITLE_COLOR);
-        mSlideZoneColorPref = findPreference(KEY_NAMAZ_SLIDE_ZONE_COLOR);
-        mAlarmButtonColorPref = findPreference(KEY_NAMAZ_ALARM_BUTTON_COLOR);
-        mSnoozeTitleColorPref = findPreference(KEY_NAMAZ_SNOOZE_TITLE_COLOR);
-        mSnoozeButtonColorPref = findPreference(KEY_NAMAZ_SNOOZE_BUTTON_COLOR);
-        mDismissTitleColorPref = findPreference(KEY_NAMAZ_DISMISS_TITLE_COLOR);
-        mDismissButtonColorPref = findPreference(KEY_NAMAZ_DISMISS_BUTTON_COLOR);
-        mSnoozeZoneColorPref = findPreference(KEY_NAMAZ_SNOOZE_ZONE_COLOR);
-        mSnoozeMinusButtonColorPref = findPreference(KEY_NAMAZ_SNOOZE_MINUS_BUTTON_COLOR);
-        mSnoozePlusButtonColorPref = findPreference(KEY_NAMAZ_SNOOZE_PLUS_BUTTON_COLOR);
-        mSnoozeSelectorTextColorPref = findPreference(KEY_NAMAZ_SNOOZE_SELECTOR_TEXT_COLOR);
-        mSnoozeMinusSymbolColorPref = findPreference(KEY_NAMAZ_SNOOZE_MINUS_SYMBOL_COLOR);
-        mSnoozePlusSymbolColorPref = findPreference(KEY_NAMAZ_SNOOZE_PLUS_SYMBOL_COLOR);
-        mAlarmDigitalClockFontSizePref = findPreference(KEY_NAMAZ_ALARM_DIGITAL_CLOCK_FONT_SIZE);
-        mAlarmTitleFontSizePref = findPreference(KEY_NAMAZ_ALARM_TITLE_FONT_SIZE_PREF);
-        mDisplayTextShadowPref = findPreference(KEY_NAMAZ_ALARM_DISPLAY_TEXT_SHADOW);
-        mShadowColorPref = findPreference(KEY_NAMAZ_ALARM_SHADOW_COLOR);
-        mShadowOffsetPref = findPreference(KEY_NAMAZ_ALARM_SHADOW_OFFSET);
-        mDisplayAlarmActionMessagePref = findPreference(KEY_NAMAZ_DISPLAY_ALARM_ACTION_MESSAGE);
-        mDisplayAlarmTitleOnSingleLinePref = findPreference(KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
-        mDisplayRingtoneTitlePref = findPreference(KEY_NAMAZ_DISPLAY_RINGTONE_TITLE);
-        mRingtoneTitleColorPref = findPreference(KEY_NAMAZ_RINGTONE_TITLE_COLOR);
-        mShowNextEventInfoPref = findPreference(KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO);
-        mAlarmFontPref = findPreference(KEY_NAMAZ_ALARM_FONT);
-        mAlarmBackgroundImagePref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE);
-        mAlarmBlurIntensityPref = findPreference(KEY_NAMAZ_ALARM_BLUR_INTENSITY);
-        mEnablePerAlarmBackgroundImagePref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
-        mAlarmPreviewPref = findPreference(KEY_NAMAZ_ALARM_PREVIEW);
+        mAlarmClockStylePref = findPreference(KEY_SALAH_ALARM_CLOCK_STYLE);
+        mAlarmClockDialPref = findPreference(KEY_SALAH_ALARM_CLOCK_DIAL);
+        mAlarmClockDialMaterialPref = findPreference(KEY_SALAH_ALARM_CLOCK_DIAL_MATERIAL);
+        mAnalogClockSizePref = findPreference(KEY_SALAH_ALARM_ANALOG_CLOCK_SIZE);
+        mDisplaySecondsPref = findPreference(KEY_SALAH_DISPLAY_ALARM_SECOND_HAND);
+        mAlarmClockSecondHandPref = findPreference(KEY_SALAH_ALARM_CLOCK_SECOND_HAND);
+        mSwipeActionPref = findPreference(KEY_SALAH_SWIPE_ACTION);
+        mDisplaySnoozeSelectorPref = findPreference(KEY_SALAH_DISPLAY_SNOOZE_SELECTOR);
+        mBackgroundColorPref = findPreference(KEY_SALAH_ALARM_BACKGROUND_COLOR);
+        mBackgroundAmoledColorPref = findPreference(KEY_SALAH_ALARM_BACKGROUND_AMOLED_COLOR);
+        mAlarmClockColorPref = findPreference(KEY_SALAH_ALARM_CLOCK_COLOR);
+        mAlarmSecondHandColorPref = findPreference(KEY_SALAH_ALARM_SECOND_HAND_COLOR);
+        mAlarmTitleColorPref = findPreference(KEY_SALAH_ALARM_TITLE_COLOR);
+        mSlideZoneColorPref = findPreference(KEY_SALAH_SLIDE_ZONE_COLOR);
+        mAlarmButtonColorPref = findPreference(KEY_SALAH_ALARM_BUTTON_COLOR);
+        mSnoozeTitleColorPref = findPreference(KEY_SALAH_SNOOZE_TITLE_COLOR);
+        mSnoozeButtonColorPref = findPreference(KEY_SALAH_SNOOZE_BUTTON_COLOR);
+        mDismissTitleColorPref = findPreference(KEY_SALAH_DISMISS_TITLE_COLOR);
+        mDismissButtonColorPref = findPreference(KEY_SALAH_DISMISS_BUTTON_COLOR);
+        mSnoozeZoneColorPref = findPreference(KEY_SALAH_SNOOZE_ZONE_COLOR);
+        mSnoozeMinusButtonColorPref = findPreference(KEY_SALAH_SNOOZE_MINUS_BUTTON_COLOR);
+        mSnoozePlusButtonColorPref = findPreference(KEY_SALAH_SNOOZE_PLUS_BUTTON_COLOR);
+        mSnoozeSelectorTextColorPref = findPreference(KEY_SALAH_SNOOZE_SELECTOR_TEXT_COLOR);
+        mSnoozeMinusSymbolColorPref = findPreference(KEY_SALAH_SNOOZE_MINUS_SYMBOL_COLOR);
+        mSnoozePlusSymbolColorPref = findPreference(KEY_SALAH_SNOOZE_PLUS_SYMBOL_COLOR);
+        mAlarmDigitalClockFontSizePref = findPreference(KEY_SALAH_ALARM_DIGITAL_CLOCK_FONT_SIZE);
+        mAlarmTitleFontSizePref = findPreference(KEY_SALAH_ALARM_TITLE_FONT_SIZE_PREF);
+        mDisplayTextShadowPref = findPreference(KEY_SALAH_ALARM_DISPLAY_TEXT_SHADOW);
+        mShadowColorPref = findPreference(KEY_SALAH_ALARM_SHADOW_COLOR);
+        mShadowOffsetPref = findPreference(KEY_SALAH_ALARM_SHADOW_OFFSET);
+        mDisplayAlarmActionMessagePref = findPreference(KEY_SALAH_DISPLAY_ALARM_ACTION_MESSAGE);
+        mDisplayAlarmTitleOnSingleLinePref = findPreference(KEY_SALAH_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
+        mDisplayRingtoneTitlePref = findPreference(KEY_SALAH_DISPLAY_RINGTONE_TITLE);
+        mRingtoneTitleColorPref = findPreference(KEY_SALAH_RINGTONE_TITLE_COLOR);
+        mShowNextEventInfoPref = findPreference(KEY_SALAH_DISPLAY_NEXT_EVENT_INFO);
+        mAlarmFontPref = findPreference(KEY_SALAH_ALARM_FONT);
+        mAlarmBackgroundImagePref = findPreference(KEY_SALAH_ALARM_BACKGROUND_IMAGE);
+        mAlarmBlurIntensityPref = findPreference(KEY_SALAH_ALARM_BLUR_INTENSITY);
+        mEnablePerAlarmBackgroundImagePref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
+        mAlarmPreviewPref = findPreference(KEY_SALAH_ALARM_PREVIEW);
 
-        mDisplayStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE);
-        mColorsOverridePref = findPreference(KEY_NAMAZ_ALARM_COLORS_OVERRIDE);
-        mFontOverridePref = findPreference(KEY_NAMAZ_ALARM_FONT_OVERRIDE);
-        mBackgroundImageOverridePref = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE);
+        mDisplayStyleOverridePref = findPreference(KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE);
+        mColorsOverridePref = findPreference(KEY_SALAH_ALARM_COLORS_OVERRIDE);
+        mFontOverridePref = findPreference(KEY_SALAH_ALARM_FONT_OVERRIDE);
+        mBackgroundImageOverridePref = findPreference(KEY_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE);
 
-        mStyleCategory = findPreference(KEY_NAMAZ_ALARM_STYLE_CATEGORY);
-        mColorsCategory = findPreference(KEY_NAMAZ_ALARM_COLORS_CATEGORY);
-        mFontCategory = findPreference(KEY_NAMAZ_ALARM_FONT_CATEGORY);
-        mBackgroundImageCategory = findPreference(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_CATEGORY);
-        mMiscCategory = findPreference(KEY_NAMAZ_ALARM_MISCELLANEOUS_CATEGORY);
+        mStyleCategory = findPreference(KEY_SALAH_ALARM_STYLE_CATEGORY);
+        mColorsCategory = findPreference(KEY_SALAH_ALARM_COLORS_CATEGORY);
+        mFontCategory = findPreference(KEY_SALAH_ALARM_FONT_CATEGORY);
+        mBackgroundImageCategory = findPreference(KEY_SALAH_ALARM_BACKGROUND_IMAGE_CATEGORY);
+        mMiscCategory = findPreference(KEY_SALAH_ALARM_MISCELLANEOUS_CATEGORY);
 
         mAlarmClockStyleValues = getResources().getStringArray(R.array.clock_style_values);
         mAnalogClock = mAlarmClockStyleValues[0];
@@ -314,9 +314,9 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             triggerDisableSettingDialog();
         }
 
-        restoreCustomFileDialogIfNeeded(KEY_NAMAZ_ALARM_FONT, mAlarmFontPref, fontPickerLauncher, null);
+        restoreCustomFileDialogIfNeeded(KEY_SALAH_ALARM_FONT, mAlarmFontPref, fontPickerLauncher, null);
 
-        restoreCustomFileDialogIfNeeded(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, mAlarmBackgroundImagePref, imagePickerLauncher, () ->
+        restoreCustomFileDialogIfNeeded(KEY_SALAH_ALARM_BACKGROUND_IMAGE, mAlarmBackgroundImagePref, imagePickerLauncher, () ->
             mAlarmBlurIntensityPref.setVisible(false)
         );
     }
@@ -347,13 +347,13 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE, KEY_NAMAZ_ALARM_COLORS_OVERRIDE,
-                 KEY_NAMAZ_ALARM_FONT_OVERRIDE, KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE -> {
+            case KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE, KEY_SALAH_ALARM_COLORS_OVERRIDE,
+                 KEY_SALAH_ALARM_FONT_OVERRIDE, KEY_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 updatePreferencesVisibility(key, newValue);
             }
 
-            case KEY_NAMAZ_ALARM_CLOCK_STYLE -> {
+            case KEY_SALAH_ALARM_CLOCK_STYLE -> {
                 boolean isAnalogClock = newValue.equals(mAnalogClock);
                 boolean isMaterialAnalogClock = newValue.equals(mMaterialAnalogClock);
                 boolean isDigitalClock = newValue.equals(mDigitalClock);
@@ -372,13 +372,13 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 mAlarmSecondHandColorPref.setVisible(isAnalogClock && isSecondHandDisplayed);
             }
 
-            case KEY_NAMAZ_ALARM_CLOCK_DIAL, KEY_NAMAZ_ALARM_CLOCK_DIAL_MATERIAL, KEY_NAMAZ_ALARM_CLOCK_SECOND_HAND -> {
+            case KEY_SALAH_ALARM_CLOCK_DIAL, KEY_SALAH_ALARM_CLOCK_DIAL_MATERIAL, KEY_SALAH_ALARM_CLOCK_SECOND_HAND -> {
                 final ListPreference preference = (ListPreference) pref;
                 final int index = preference.findIndexOfValue((String) newValue);
                 preference.setSummary(preference.getEntries()[index]);
             }
 
-            case KEY_NAMAZ_DISPLAY_ALARM_SECOND_HAND -> {
+            case KEY_SALAH_DISPLAY_ALARM_SECOND_HAND -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 boolean isSecondHandDisplayed = (boolean) newValue;
@@ -388,7 +388,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 mAlarmSecondHandColorPref.setVisible(isSecondHandDisplayed && alarmClockStyle != ClockStyle.ANALOG_MATERIAL);
             }
 
-            case KEY_NAMAZ_SWIPE_ACTION -> {
+            case KEY_SALAH_SWIPE_ACTION -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 boolean isSwipeActionEnabled = (boolean) newValue;
@@ -401,7 +401,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 mAlarmButtonColorPref.setVisible(isSwipeActionEnabled);
             }
 
-            case KEY_NAMAZ_DISPLAY_SNOOZE_SELECTOR -> {
+            case KEY_SALAH_DISPLAY_SNOOZE_SELECTOR -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 boolean isSnoozeSelectorDisplayed = (boolean) newValue;
@@ -414,7 +414,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 mSnoozePlusSymbolColorPref.setVisible(isSnoozeSelectorDisplayed);
             }
 
-            case KEY_NAMAZ_ALARM_DISPLAY_TEXT_SHADOW -> {
+            case KEY_SALAH_ALARM_DISPLAY_TEXT_SHADOW -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 boolean isTextShadowDisplayed = (boolean) newValue;
@@ -422,18 +422,18 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 mShadowOffsetPref.setVisible(isTextShadowDisplayed);
             }
 
-            case KEY_NAMAZ_DISPLAY_RINGTONE_TITLE -> {
+            case KEY_SALAH_DISPLAY_RINGTONE_TITLE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 mRingtoneTitleColorPref.setVisible((boolean) newValue);
             }
 
-            case KEY_NAMAZ_DISPLAY_NEXT_EVENT_INFO -> {
+            case KEY_SALAH_DISPLAY_NEXT_EVENT_INFO -> {
                 final int index = mShowNextEventInfoPref.findIndexOfValue((String) newValue);
                 mShowNextEventInfoPref.setSummary(mShowNextEventInfoPref.getEntries()[index]);
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -453,7 +453,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 }
             }
 
-            case KEY_NAMAZ_DISPLAY_ALARM_ACTION_MESSAGE, KEY_NAMAZ_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE ->
+            case KEY_SALAH_DISPLAY_ALARM_ACTION_MESSAGE, KEY_SALAH_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
         }
 
@@ -468,8 +468,8 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
         }
 
         switch (pref.getKey()) {
-            case KEY_NAMAZ_ALARM_BACKGROUND_IMAGE -> selectCustomFile(mAlarmBackgroundImagePref, imagePickerLauncher,
-                SettingsDAO.getAlarmBackgroundImage(mPrefs, true), KEY_NAMAZ_ALARM_BACKGROUND_IMAGE, false, () -> {
+            case KEY_SALAH_ALARM_BACKGROUND_IMAGE -> selectCustomFile(mAlarmBackgroundImagePref, imagePickerLauncher,
+                SettingsDAO.getAlarmBackgroundImage(mPrefs, true), KEY_SALAH_ALARM_BACKGROUND_IMAGE, false, () -> {
                 // Actions to perform when deleting a background image
 
                 if (!SettingsDAO.isPerAlarmBackgroundImageEnable(mPrefs, true)) {
@@ -494,16 +494,16 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 }
             });
 
-            case KEY_NAMAZ_ALARM_FONT -> selectCustomFile(mAlarmFontPref, fontPickerLauncher, SettingsDAO.getAlarmFont(mPrefs, true), KEY_NAMAZ_ALARM_FONT,
+            case KEY_SALAH_ALARM_FONT -> selectCustomFile(mAlarmFontPref, fontPickerLauncher, SettingsDAO.getAlarmFont(mPrefs, true), KEY_SALAH_ALARM_FONT,
                 true, null);
 
-            case KEY_NAMAZ_ALARM_PREVIEW -> {
+            case KEY_SALAH_ALARM_PREVIEW -> {
                 Intent previewIntent = new Intent(context, AlarmDisplayPreviewActivity.class);
                 Calendar now = Calendar.getInstance();
 
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, now.get(Calendar.HOUR_OF_DAY));
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, now.get(Calendar.MINUTE));
-                previewIntent.putExtra("is_namaz", true);
+                previewIntent.putExtra("is_salah", true);
 
                 ThemeUtils.startActivityWithTransition(context, previewIntent);
             }
@@ -638,10 +638,10 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
             return;
         }
 
-        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_DISPLAY_STYLE_OVERRIDE)) ? (boolean) newValue : mDisplayStyleOverridePref.isChecked();
-        boolean colorsOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_COLORS_OVERRIDE)) ? (boolean) newValue : mColorsOverridePref.isChecked();
-        boolean fontOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_FONT_OVERRIDE)) ? (boolean) newValue : mFontOverridePref.isChecked();
-        boolean backgroundImageOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_BACKGROUND_IMAGE_OVERRIDE)) ? (boolean) newValue : mBackgroundImageOverridePref.isChecked();
+        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE)) ? (boolean) newValue : mDisplayStyleOverridePref.isChecked();
+        boolean colorsOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_COLORS_OVERRIDE)) ? (boolean) newValue : mColorsOverridePref.isChecked();
+        boolean fontOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_FONT_OVERRIDE)) ? (boolean) newValue : mFontOverridePref.isChecked();
+        boolean backgroundImageOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_BACKGROUND_IMAGE_OVERRIDE)) ? (boolean) newValue : mBackgroundImageOverridePref.isChecked();
 
         if (mStyleCategory != null) {
             mStyleCategory.setVisible(true);
@@ -714,10 +714,10 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                 }
 
                 if (state.hasAny()) {
-                    mPendingDialogPrefKey = KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE;
+                    mPendingDialogPrefKey = KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE;
                     showDisablePerAlarmSettingDialog(state);
                 } else {
-                    mPrefs.edit().putBoolean(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE, false).apply();
+                    mPrefs.edit().putBoolean(KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE, false).apply();
                     mEnablePerAlarmBackgroundImagePref.setChecked(false);
                 }
             });
@@ -768,7 +768,7 @@ public class NamazAlarmDisplayCustomizationFragment extends BaseSettingsScreenFr
                     });
                 });
 
-                mPrefs.edit().putBoolean(KEY_NAMAZ_ENABLE_PER_ALARM_BACKGROUND_IMAGE, false).apply();
+                mPrefs.edit().putBoolean(KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE, false).apply();
                 mEnablePerAlarmBackgroundImagePref.setChecked(false);
             },
             getString(android.R.string.cancel),

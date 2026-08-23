@@ -139,7 +139,7 @@
             </LinearLayout>
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/namaz_rule_description"
+                android:id="@+id/salah_rule_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
@@ -147,7 +147,7 @@
                 android:minHeight="48dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="10dp"
-                android:drawableStart="@drawable/ic_namaz_alarm"
+                android:drawableStart="@drawable/ic_salah_alarm"
                 android:drawablePadding="10dp"
                 android:drawableTint="?attr/colorOnSurfaceVariant"
                 android:gravity="center_vertical"
@@ -173,7 +173,7 @@
                 android:focusable="true"
                 android:text="@string/add_label"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/namaz_rule_description"
+                app:layout_constraintTop_toBottomOf="@id/salah_rule_description"
                 app:layout_goneMarginTop="10dp" />
 
             <com.google.android.material.textview.MaterialTextView

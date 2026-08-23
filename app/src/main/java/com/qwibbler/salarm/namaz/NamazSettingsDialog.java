@@ -54,9 +54,9 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
 
             SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
             prefs.edit()
-                    .putString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME, name)
-                    .putString(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE, String.valueOf(lat))
-                    .putString(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE, String.valueOf(lon))
+                    .putString(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME, name)
+                    .putString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE, String.valueOf(lat))
+                    .putString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE, String.valueOf(lon))
                     .apply();
 
             if (tzId == null) {
@@ -64,7 +64,7 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
             }
 
             if (tzId != null) {
-                prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, tzId).apply();
+                prefs.edit().putString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, tzId).apply();
             }
 
             if (mTimezonePicker != null && tzId != null) {
@@ -81,7 +81,7 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.namaz_settings_dialog, container, false);
+        View view = inflater.inflate(R.layout.salah_settings_dialog, container, false);
 
         Context context = requireContext();
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
@@ -91,10 +91,10 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
 
         view.findViewById(R.id.use_current_location_button).setOnClickListener(v -> {
             prefs.edit()
-                    .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LATITUDE)
-                    .remove(PreferencesKeys.KEY_NAMAZ_VIEW_LONGITUDE)
-                    .remove(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME)
-                    .remove(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE)
+                    .remove(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE)
+                    .remove(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE)
+                    .remove(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME)
+                    .remove(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE)
                     .apply();
             NamazLocationManager.requestGpsUpdate(context);
             if (mListener != null) mListener.onSettingsChanged();
@@ -115,10 +115,10 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
         ArrayAdapter<String> timezoneAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, timezoneList);
         mTimezonePicker.setAdapter(timezoneAdapter);
 
-        String currentTimezone = prefs.getString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        String currentTimezone = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
         mTimezonePicker.setText(currentTimezone, false);
         mTimezonePicker.setOnItemClickListener((parent, v, position, id) -> {
-            prefs.edit().putString(PreferencesKeys.KEY_NAMAZ_DISPLAY_TIMEZONE, timezoneList.get(position)).apply();
+            prefs.edit().putString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, timezoneList.get(position)).apply();
             if (mListener != null) mListener.onSettingsChanged();
         });
 
@@ -134,9 +134,9 @@ public class NamazSettingsDialog extends BottomSheetDialogFragment {
 
     private void updateCitySummary(TextView summary, SharedPreferences prefs) {
         if (summary == null || prefs == null) return;
-        String name = prefs.getString(PreferencesKeys.KEY_NAMAZ_VIEW_CITY_NAME, null);
+        String name = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME, null);
         if (name == null) {
-            name = prefs.getString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, getString(R.string.salarm_current_location));
+            name = prefs.getString(PreferencesKeys.KEY_SALAH_CITY_NAME, getString(R.string.salarm_current_location));
         }
         summary.setText(getString(R.string.salarm_currently_viewing_prefix, name));
     }

@@ -97,24 +97,24 @@ public class RelationalRule {
         // Base: alarm [at / 5m after / 10m before] Fajr
         String offsetPart = getOffsetPart(context, offsetMinutes);
         String eventName = getEventName(context, anchorEvent);
-        sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_description_base, offsetPart, eventName));
+        sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_description_base, offsetPart, eventName));
 
         // Rounding: rounded to the nearest 5m
         if (roundingIntervalMinutes > 0) {
-            sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_rounded, roundingIntervalMinutes));
+            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_rounded, roundingIntervalMinutes));
         }
 
         // Adjustment: adjusted by 2m earlier
         if (adjustmentMinutes != 0) {
             String adjPart = getAdjustmentPart(context, adjustmentMinutes);
-            sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjusted, adjPart));
+            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_adjusted, adjPart));
         }
 
         // Clip: no later than 15m before sunrise
         if (clip != null) {
             String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
             String clipEventName = getEventName(context, clip.clipEvent);
-            int clipResId = clip.boundaryType == BoundaryType.NO_LATER_THAN ? com.qwibbler.salarm.R.string.namaz_rule_no_later : com.qwibbler.salarm.R.string.namaz_rule_no_earlier;
+            int clipResId = clip.boundaryType == BoundaryType.NO_LATER_THAN ? com.qwibbler.salarm.R.string.salah_rule_no_later : com.qwibbler.salarm.R.string.salah_rule_no_earlier;
             sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
         }
 
@@ -122,7 +122,7 @@ public class RelationalRule {
         if (autostopEnabled && autostopAnchorEvent != null) {
             String autostopOffsetPart = getOffsetPart(context, autostopOffsetMinutes);
             String autostopEventName = getEventName(context, autostopAnchorEvent);
-            sb.append(context.getString(com.qwibbler.salarm.R.string.namaz_rule_autostop, autostopOffsetPart, autostopEventName));
+            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName));
         }
 
         String description = sb.toString();
@@ -132,26 +132,26 @@ public class RelationalRule {
 
     private String getOffsetPart(android.content.Context context, int offset) {
         if (offset == 0) {
-            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_at);
+            return context.getString(com.qwibbler.salarm.R.string.salah_rule_at);
         } else if (offset > 0) {
-            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_offset_after, offset);
+            return context.getString(com.qwibbler.salarm.R.string.salah_rule_offset_after, offset);
         } else {
-            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_offset_before, Math.abs(offset));
+            return context.getString(com.qwibbler.salarm.R.string.salah_rule_offset_before, Math.abs(offset));
         }
     }
 
     private String getAdjustmentPart(android.content.Context context, int offset) {
         if (offset >= 0) {
-            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjustment_later, offset);
+            return context.getString(com.qwibbler.salarm.R.string.salah_rule_adjustment_later, offset);
         } else {
-            return context.getString(com.qwibbler.salarm.R.string.namaz_rule_adjustment_earlier, Math.abs(offset));
+            return context.getString(com.qwibbler.salarm.R.string.salah_rule_adjustment_earlier, Math.abs(offset));
         }
     }
 
     public static String getEventName(android.content.Context context, AnchorEvent event) {
         android.content.SharedPreferences prefs = getDefaultSharedPreferences(context);
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_NAMAZ_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         if (!showBothAsr) {
             if (event == AnchorEvent.ASR_HANAFI || event == AnchorEvent.ASR_SHAFI) {

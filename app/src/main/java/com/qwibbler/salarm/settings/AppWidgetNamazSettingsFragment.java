@@ -51,7 +51,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
     SwitchPreferenceCompat mDisplayTextUppercasePref;
     SwitchPreferenceCompat mShowSymbolsPref;
     SwitchPreferenceCompat mDisplayTextShadowPref;
-    SwitchPreferenceCompat mShowBackgroundOnNamazWidgetPref;
+    SwitchPreferenceCompat mShowBackgroundOnSalahWidgetPref;
     SwitchPreferenceCompat mCustomizeBackgroundCornerRadiusPref;
     CustomSliderPreference mBackgroundCornerRadiusPref;
     SwitchPreferenceCompat mApplyHorizontalPaddingPref;
@@ -75,7 +75,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
     SwitchPreferenceCompat mDefaultItemNextHighlightColorPref;
     ColorPickerPreference mCustomItemNextHighlightColorPref;
 
-    CustomSliderPreference mNamazWidgetMaxFontSizePref;
+    CustomSliderPreference mSalahWidgetMaxFontSizePref;
 
     SwitchPreferenceCompat mShowCountdownPref;
     Preference mVisibleEventsPref;
@@ -84,48 +84,48 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_timeline_widget_label);
+        return getString(R.string.salah_timeline_widget_label);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        addPreferencesFromResource(R.xml.settings_customize_namaz_widget);
+        addPreferencesFromResource(R.xml.settings_customize_salah_widget);
 
-        mDisplayTextUppercasePref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE);
-        mShowSymbolsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_SYMBOLS);
-        mDisplayTextShadowPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW);
-        mShowBackgroundOnNamazWidgetPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND);
-        mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
-        mBackgroundCornerRadiusPref = findPreference(KEY_NAMAZ_WIDGET_BACKGROUND_CORNER_RADIUS);
-        mApplyHorizontalPaddingPref = findPreference(KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING);
-        mDefaultBackgroundColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR);
-        mCustomBackgroundColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_BACKGROUND_COLOR);
+        mDisplayTextUppercasePref = findPreference(KEY_SALAH_WIDGET_DISPLAY_TEXT_UPPERCASE);
+        mShowSymbolsPref = findPreference(KEY_SALAH_WIDGET_SHOW_SYMBOLS);
+        mDisplayTextShadowPref = findPreference(KEY_SALAH_WIDGET_DISPLAY_TEXT_SHADOW);
+        mShowBackgroundOnSalahWidgetPref = findPreference(KEY_SALAH_WIDGET_DISPLAY_BACKGROUND);
+        mCustomizeBackgroundCornerRadiusPref = findPreference(KEY_SALAH_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS);
+        mBackgroundCornerRadiusPref = findPreference(KEY_SALAH_WIDGET_BACKGROUND_CORNER_RADIUS);
+        mApplyHorizontalPaddingPref = findPreference(KEY_SALAH_WIDGET_APPLY_HORIZONTAL_PADDING);
+        mDefaultBackgroundColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_BACKGROUND_COLOR);
+        mCustomBackgroundColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_BACKGROUND_COLOR);
 
-        mDefaultCountdownTimeColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR);
-        mCustomCountdownTimeColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR);
-        mDefaultCountdownLabelColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR);
-        mCustomCountdownLabelColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR);
-        mDefaultTimelineActiveColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR);
-        mCustomTimelineActiveColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR);
-        mDefaultTimelineNextColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR);
-        mCustomTimelineNextColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR);
-        mDefaultTimelineStandardColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR);
-        mCustomTimelineStandardColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR);
+        mDefaultCountdownTimeColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR);
+        mCustomCountdownTimeColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_COUNTDOWN_TIME_COLOR);
+        mDefaultCountdownLabelColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR);
+        mCustomCountdownLabelColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_COUNTDOWN_LABEL_COLOR);
+        mDefaultTimelineActiveColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR);
+        mCustomTimelineActiveColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_ACTIVE_COLOR);
+        mDefaultTimelineNextColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR);
+        mCustomTimelineNextColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_NEXT_COLOR);
+        mDefaultTimelineStandardColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR);
+        mCustomTimelineStandardColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_TIMELINE_STANDARD_COLOR);
 
-        mDisplayItemHighlightPref = findPreference(KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
-        mDefaultItemActiveHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR);
-        mCustomItemActiveHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR);
-        mDefaultItemNextHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR);
-        mCustomItemNextHighlightColorPref = findPreference(KEY_NAMAZ_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR);
+        mDisplayItemHighlightPref = findPreference(KEY_SALAH_WIDGET_DISPLAY_ITEM_HIGHLIGHT);
+        mDefaultItemActiveHighlightColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR);
+        mCustomItemActiveHighlightColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_ITEM_ACTIVE_HIGHLIGHT_COLOR);
+        mDefaultItemNextHighlightColorPref = findPreference(KEY_SALAH_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR);
+        mCustomItemNextHighlightColorPref = findPreference(KEY_SALAH_WIDGET_CUSTOM_ITEM_NEXT_HIGHLIGHT_COLOR);
 
-        mNamazWidgetMaxFontSizePref = findPreference(KEY_NAMAZ_WIDGET_MAXIMUM_FONT_SIZE);
+        mSalahWidgetMaxFontSizePref = findPreference(KEY_SALAH_WIDGET_MAXIMUM_FONT_SIZE);
 
-        mShowCountdownPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN);
-        mVisibleEventsPref = findPreference(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS);
+        mShowCountdownPref = findPreference(KEY_SALAH_WIDGET_SHOW_COUNTDOWN);
+        mVisibleEventsPref = findPreference(KEY_SALAH_WIDGET_VISIBLE_EVENTS);
 
-        mShowAlarmsPref = findPreference(KEY_NAMAZ_WIDGET_SHOW_ALARMS);
+        mShowAlarmsPref = findPreference(KEY_SALAH_WIDGET_SHOW_ALARMS);
 
         setupPreferences();
 
@@ -169,7 +169,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
     @Override
     public void onDestroy() {
-        nullifyPreferenceListeners(mDisplayTextUppercasePref, mShowSymbolsPref, mDisplayTextShadowPref, mShowBackgroundOnNamazWidgetPref,
+        nullifyPreferenceListeners(mDisplayTextUppercasePref, mShowSymbolsPref, mDisplayTextShadowPref, mShowBackgroundOnSalahWidgetPref,
             mCustomizeBackgroundCornerRadiusPref, mBackgroundCornerRadiusPref, mApplyHorizontalPaddingPref, mDefaultBackgroundColorPref,
             mCustomBackgroundColorPref, mDefaultCountdownTimeColorPref, mCustomCountdownTimeColorPref,
             mDefaultCountdownLabelColorPref, mCustomCountdownLabelColorPref, mDefaultTimelineActiveColorPref,
@@ -177,7 +177,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
             mDefaultTimelineStandardColorPref, mCustomTimelineStandardColorPref,
             mDisplayItemHighlightPref, mDefaultItemActiveHighlightColorPref, mCustomItemActiveHighlightColorPref,
             mDefaultItemNextHighlightColorPref, mCustomItemNextHighlightColorPref,
-            mNamazWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref);
+            mSalahWidgetMaxFontSizePref, mShowCountdownPref, mShowAlarmsPref);
 
         nullifyAllPrefs();
 
@@ -186,7 +186,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
     @Override
     public boolean onPreferenceTreeClick(Preference preference) {
-        if (KEY_NAMAZ_WIDGET_VISIBLE_EVENTS.equals(preference.getKey())) {
+        if (KEY_SALAH_WIDGET_VISIBLE_EVENTS.equals(preference.getKey())) {
             showVisibleEventsDialog();
             return true;
         }
@@ -198,12 +198,12 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_NAMAZ_WIDGET_SHOW_SYMBOLS,
-                 KEY_NAMAZ_WIDGET_DISPLAY_TEXT_SHADOW,
-                 KEY_NAMAZ_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_NAMAZ_WIDGET_SHOW_COUNTDOWN ->
+            case KEY_SALAH_WIDGET_DISPLAY_TEXT_UPPERCASE, KEY_SALAH_WIDGET_SHOW_SYMBOLS,
+                 KEY_SALAH_WIDGET_DISPLAY_TEXT_SHADOW,
+                 KEY_SALAH_WIDGET_APPLY_HORIZONTAL_PADDING, KEY_SALAH_WIDGET_SHOW_COUNTDOWN ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
-            case KEY_NAMAZ_WIDGET_DISPLAY_BACKGROUND -> {
+            case KEY_SALAH_WIDGET_DISPLAY_BACKGROUND -> {
                 boolean displayBackground = (boolean) newValue;
                 boolean isCustomColor = !WidgetDAO.isNamazWidgetDefaultBackgroundColor(mPrefs);
                 boolean isRadiusCustomizable = WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(mPrefs);
@@ -220,12 +220,12 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS -> {
+            case KEY_SALAH_WIDGET_CUSTOMIZE_BACKGROUND_CORNER_RADIUS -> {
                 mBackgroundCornerRadiusPref.setVisible((boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_BACKGROUND_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_BACKGROUND_COLOR -> {
                 boolean isCustomColor = !(boolean) newValue;
                 boolean displayBackground = WidgetDAO.isBackgroundDisplayedOnNamazWidget(mPrefs);
                 boolean isRadiusCustomizable = WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(mPrefs);
@@ -240,32 +240,32 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_TIME_COLOR -> {
                 mCustomCountdownTimeColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_COUNTDOWN_LABEL_COLOR -> {
                 mCustomCountdownLabelColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_TIMELINE_ACTIVE_COLOR -> {
                 mCustomTimelineActiveColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_TIMELINE_NEXT_COLOR -> {
                 mCustomTimelineNextColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_TIMELINE_STANDARD_COLOR -> {
                 mCustomTimelineStandardColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DISPLAY_ITEM_HIGHLIGHT -> {
+            case KEY_SALAH_WIDGET_DISPLAY_ITEM_HIGHLIGHT -> {
                 boolean displayHighlight = (boolean) newValue;
                 mDefaultItemActiveHighlightColorPref.setVisible(displayHighlight);
                 mCustomItemActiveHighlightColorPref.setVisible(displayHighlight && !WidgetDAO.isNamazWidgetItemActiveHighlightDefaultColor(mPrefs));
@@ -274,17 +274,17 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_ITEM_ACTIVE_HIGHLIGHT_COLOR -> {
                 mCustomItemActiveHighlightColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR -> {
+            case KEY_SALAH_WIDGET_DEFAULT_ITEM_NEXT_HIGHLIGHT_COLOR -> {
                 mCustomItemNextHighlightColorPref.setVisible(!(boolean) newValue);
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
             }
 
-            case KEY_NAMAZ_WIDGET_SHOW_ALARMS -> {
+            case KEY_SALAH_WIDGET_SHOW_ALARMS -> {
                 boolean showAlarms = (boolean) newValue;
                 if (showAlarms) {
                     AppExecutors.getDiskIO().execute(() -> {
@@ -305,7 +305,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                             for (RelationalRule rule : rules) {
                                 visibleEvents.add("rule_" + rule.id);
                             }
-                            mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, visibleEvents).apply();
+                            mPrefs.edit().putStringSet(KEY_SALAH_WIDGET_VISIBLE_EVENTS, visibleEvents).apply();
                             WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
                         }
                     });
@@ -321,7 +321,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mDisplayTextUppercasePref.setOnPreferenceChangeListener(this);
         mShowSymbolsPref.setOnPreferenceChangeListener(this);
         mDisplayTextShadowPref.setOnPreferenceChangeListener(this);
-        mShowBackgroundOnNamazWidgetPref.setOnPreferenceChangeListener(this);
+        mShowBackgroundOnSalahWidgetPref.setOnPreferenceChangeListener(this);
 
         boolean isBackgroundVisible = WidgetDAO.isBackgroundDisplayedOnNamazWidget(mPrefs);
         boolean isBackgroundCornerRadiusCustomizable = WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(mPrefs);
@@ -376,7 +376,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mCustomItemNextHighlightColorPref.setVisible(isItemHighlightVisible && !WidgetDAO.isNamazWidgetItemNextHighlightDefaultColor(mPrefs));
         mCustomItemNextHighlightColorPref.setOnPreferenceChangeListener(this);
 
-        mNamazWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
+        mSalahWidgetMaxFontSizePref.setOnPreferenceChangeListener(this);
 
         if (mShowCountdownPref != null) mShowCountdownPref.setOnPreferenceChangeListener(this);
 
@@ -442,7 +442,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
                                 selectedEvents.add(item.key);
                             }
                         }
-                        mPrefs.edit().putStringSet(KEY_NAMAZ_WIDGET_VISIBLE_EVENTS, selectedEvents).apply();
+                        mPrefs.edit().putStringSet(KEY_SALAH_WIDGET_VISIBLE_EVENTS, selectedEvents).apply();
                         WidgetUtils.scheduleWidgetUpdate(requireContext(), NamazTimelineWidgetProvider.class);
                     })
                     .setNegativeButton(android.R.string.cancel, null)
@@ -467,14 +467,14 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
 
     private static class EventAdapter extends ArrayAdapter<EventItem> {
         EventAdapter(Context context, List<EventItem> items) {
-            super(context, R.layout.namaz_visible_event_item, items);
+            super(context, R.layout.salah_visible_event_item, items);
         }
 
         @NonNull
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.namaz_visible_event_item, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.salah_visible_event_item, parent, false);
             }
 
             EventItem item = getItem(position);
@@ -508,7 +508,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mDisplayTextUppercasePref.setChecked(WidgetDAO.isTextUppercaseDisplayedOnNamazWidget(mPrefs));
         mShowSymbolsPref.setChecked(WidgetDAO.isNamazWidgetSymbolsVisible(mPrefs));
         mDisplayTextShadowPref.setChecked(WidgetDAO.isTextShadowDisplayedOnNamazWidget(mPrefs));
-        mShowBackgroundOnNamazWidgetPref.setChecked(WidgetDAO.isBackgroundDisplayedOnNamazWidget(mPrefs));
+        mShowBackgroundOnSalahWidgetPref.setChecked(WidgetDAO.isBackgroundDisplayedOnNamazWidget(mPrefs));
         mCustomizeBackgroundCornerRadiusPref.setChecked(WidgetDAO.isNamazWidgetBackgroundCornerRadiusCustomizable(mPrefs));
         mApplyHorizontalPaddingPref.setChecked(WidgetDAO.isNamazWidgetHorizontalPaddingApplied(mPrefs));
         mDefaultBackgroundColorPref.setChecked(WidgetDAO.isNamazWidgetDefaultBackgroundColor(mPrefs));
@@ -540,7 +540,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mDisplayTextUppercasePref = null;
         mShowSymbolsPref = null;
         mDisplayTextShadowPref = null;
-        mShowBackgroundOnNamazWidgetPref = null;
+        mShowBackgroundOnSalahWidgetPref = null;
         mCustomizeBackgroundCornerRadiusPref = null;
         mBackgroundCornerRadiusPref = null;
         mApplyHorizontalPaddingPref = null;
@@ -561,7 +561,7 @@ public class AppWidgetNamazSettingsFragment extends BaseSettingsScreenFragment i
         mCustomItemActiveHighlightColorPref = null;
         mDefaultItemNextHighlightColorPref = null;
         mCustomItemNextHighlightColorPref = null;
-        mNamazWidgetMaxFontSizePref = null;
+        mSalahWidgetMaxFontSizePref = null;
         mShowCountdownPref = null;
         mShowAlarmsPref = null;
     }

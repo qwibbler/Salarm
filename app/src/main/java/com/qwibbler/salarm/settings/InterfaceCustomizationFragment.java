@@ -463,8 +463,8 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
             labels.add(getString(R.string.menu_stopwatch));
         }
 
-        if (selectedTabs.contains(VISIBLE_TAB_NAMAZ)) {
-            labels.add(getString(R.string.menu_namaz));
+        if (selectedTabs.contains(VISIBLE_TAB_SALAH)) {
+            labels.add(getString(R.string.menu_salah));
         }
 
         if (selectedTabs.contains(VISIBLE_TAB_QIBLA)) {
@@ -539,9 +539,9 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
             entryValues.add(TAB_TO_DISPLAY_STOPWATCH);
         }
 
-        if (visibleTabs.contains(VISIBLE_TAB_NAMAZ)) {
-            entries.add(getString(R.string.menu_namaz));
-            entryValues.add(TAB_TO_DISPLAY_NAMAZ);
+        if (visibleTabs.contains(VISIBLE_TAB_SALAH)) {
+            entries.add(getString(R.string.menu_salah));
+            entryValues.add(TAB_TO_DISPLAY_SALAH);
         }
 
         if (visibleTabs.contains(VISIBLE_TAB_QIBLA)) {

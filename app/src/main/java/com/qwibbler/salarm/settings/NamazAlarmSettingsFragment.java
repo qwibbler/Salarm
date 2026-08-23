@@ -7,7 +7,7 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_ALARM_VOLUME;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_START_DELAY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_NAMAZ_AUTO_TAG_NAME;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SALAH_AUTO_TAG_NAME;
 import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 
 import android.content.Context;
@@ -150,7 +150,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.namaz_alarms_settings_title);
+        return getString(R.string.salah_alarms_settings_title);
     }
 
     @Override
@@ -161,55 +161,55 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         mHasExternalAudioDeviceConnected = RingtoneUtils.hasExternalAudioDeviceConnected(requireContext(), mPrefs);
         mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, null);
 
-        addPreferencesFromResource(R.xml.settings_namaz_alarms);
+        addPreferencesFromResource(R.xml.settings_salah_alarms);
 
-        mAlarmShowRoundingPref = findPreference(KEY_NAMAZ_ALARM_SHOW_ROUNDING);
-        mAdjustAlarmAfterRoundingPref = findPreference(KEY_NAMAZ_ADJUST_ALARM_AFTER_ROUNDING);
-        mAutoDismissByDefaultPref = findPreference(KEY_NAMAZ_AUTODISMISS_BY_DEFAULT);
+        mAlarmShowRoundingPref = findPreference(KEY_SALAH_ALARM_SHOW_ROUNDING);
+        mAdjustAlarmAfterRoundingPref = findPreference(KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING);
+        mAutoDismissByDefaultPref = findPreference(KEY_SALAH_AUTODISMISS_BY_DEFAULT);
 
-        mStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_STYLE_OVERRIDE);
-        mRingtoneOverridePref = findPreference(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE);
-        mAdvancedAudioOverridePref = findPreference(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE);
-        mVibrationOverridePref = findPreference(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE);
-        mActionsOverridePref = findPreference(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE);
-        mMiscOverridePref = findPreference(KEY_NAMAZ_ALARM_MISC_OVERRIDE);
+        mStyleOverridePref = findPreference(KEY_SALAH_ALARM_STYLE_OVERRIDE);
+        mRingtoneOverridePref = findPreference(KEY_SALAH_ALARM_RINGTONE_OVERRIDE);
+        mAdvancedAudioOverridePref = findPreference(KEY_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE);
+        mVibrationOverridePref = findPreference(KEY_SALAH_ALARM_VIBRATION_OVERRIDE);
+        mActionsOverridePref = findPreference(KEY_SALAH_ALARM_ACTIONS_OVERRIDE);
+        mMiscOverridePref = findPreference(KEY_SALAH_ALARM_MISC_OVERRIDE);
 
-        mAlarmDisplayCustomizationPref = findPreference(KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION);
-        mAlarmRingtonePref = findPreference(KEY_NAMAZ_DEFAULT_ALARM_RINGTONE);
-        mAlarmAutoSilencePref = findPreference(KEY_NAMAZ_AUTO_SILENCE_DURATION);
-        mEnablePerAlarmAutoSilencePref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE);
-        mAlarmSnoozeDurationPref = findPreference(KEY_NAMAZ_ALARM_SNOOZE_DURATION);
-        mEnablePerAlarmSnoozeDurationPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION);
-        mDismissAfterPref = findPreference(KEY_NAMAZ_ALARM_DISMISS_AFTER);
-        mEnablePerAlarmDismissAfterPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER);
-        mRepeatMissedAlarmPref = findPreference(KEY_NAMAZ_REPEAT_MISSED_ALARM);
-        mEnablePerAlarmMissedRepeatLimitPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
-        mAlarmVolumePref = findPreference(KEY_NAMAZ_ALARM_VOLUME_SETTING);
-        mEnablePerAlarmVolumePref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME);
-        mAlarmVolumeCrescendoDurationPref = findPreference(KEY_NAMAZ_ALARM_VOLUME_CRESCENDO_DURATION);
-        mEnablePerAlarmVolumeCrescendoDurationPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
-        mAdvancedAudioPlaybackPref = findPreference(KEY_NAMAZ_ADVANCED_AUDIO_PLAYBACK);
-        mAutoRoutingToExternalAudioDevicePref = findPreference(KEY_NAMAZ_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
-        mSystemMediaVolumePref = findPreference(KEY_NAMAZ_SYSTEM_MEDIA_VOLUME);
-        mExternalAudioDeviceVolumePref = findPreference(KEY_NAMAZ_EXTERNAL_AUDIO_DEVICE_VOLUME);
-        mEnableAlarmVibrationsByDefaultPref = findPreference(KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
-        mVibrationPatternPref = findPreference(KEY_NAMAZ_VIBRATION_PATTERN);
-        mEnablePerAlarmVibrationPatternPref = findPreference(KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN);
-        mVibrationStartDelayPref = findPreference(KEY_NAMAZ_VIBRATION_START_DELAY);
-        mEnableSnoozedOrDismissedAlarmVibrationsPref = findPreference(KEY_NAMAZ_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
-        mVolumeButtonsPref = findPreference(KEY_NAMAZ_VOLUME_BUTTONS);
-        mPowerButtonPref = findPreference(KEY_NAMAZ_POWER_BUTTON);
-        mHeadphonesButtonPref = findPreference(KEY_NAMAZ_HEADPHONES_BUTTON);
-        mFlipActionPref = findPreference(KEY_NAMAZ_FLIP_ACTION);
-        mShakeActionPref = findPreference(KEY_NAMAZ_SHAKE_ACTION);
-        mShakeIntensityPref = findPreference(KEY_NAMAZ_SHAKE_INTENSITY);
-        mDisplayDismissButtonPref = findPreference(KEY_NAMAZ_DISPLAY_DISMISS_BUTTON);
-        mAlarmNotificationReminderPref = findPreference(KEY_NAMAZ_ALARM_NOTIFICATION_REMINDER);
-        mTurnOnBackFlashForTriggeredAlarmPref = findPreference(KEY_NAMAZ_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
-        mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING);
-        mAutoTagPref = findPreference(KEY_NAMAZ_AUTO_TAG);
-        mAutoTagNamePref = findPreference(KEY_NAMAZ_AUTO_TAG_NAME);
-        mAlarmPreviewPref = findPreference(KEY_NAMAZ_ALARM_PREVIEW);
+        mAlarmDisplayCustomizationPref = findPreference(KEY_SALAH_ALARM_DISPLAY_CUSTOMIZATION);
+        mAlarmRingtonePref = findPreference(KEY_SALAH_DEFAULT_ALARM_RINGTONE);
+        mAlarmAutoSilencePref = findPreference(KEY_SALAH_AUTO_SILENCE_DURATION);
+        mEnablePerAlarmAutoSilencePref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE);
+        mAlarmSnoozeDurationPref = findPreference(KEY_SALAH_ALARM_SNOOZE_DURATION);
+        mEnablePerAlarmSnoozeDurationPref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION);
+        mDismissAfterPref = findPreference(KEY_SALAH_ALARM_DISMISS_AFTER);
+        mEnablePerAlarmDismissAfterPref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER);
+        mRepeatMissedAlarmPref = findPreference(KEY_SALAH_REPEAT_MISSED_ALARM);
+        mEnablePerAlarmMissedRepeatLimitPref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
+        mAlarmVolumePref = findPreference(KEY_SALAH_ALARM_VOLUME_SETTING);
+        mEnablePerAlarmVolumePref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_VOLUME);
+        mAlarmVolumeCrescendoDurationPref = findPreference(KEY_SALAH_ALARM_VOLUME_CRESCENDO_DURATION);
+        mEnablePerAlarmVolumeCrescendoDurationPref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
+        mAdvancedAudioPlaybackPref = findPreference(KEY_SALAH_ADVANCED_AUDIO_PLAYBACK);
+        mAutoRoutingToExternalAudioDevicePref = findPreference(KEY_SALAH_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
+        mSystemMediaVolumePref = findPreference(KEY_SALAH_SYSTEM_MEDIA_VOLUME);
+        mExternalAudioDeviceVolumePref = findPreference(KEY_SALAH_EXTERNAL_AUDIO_DEVICE_VOLUME);
+        mEnableAlarmVibrationsByDefaultPref = findPreference(KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
+        mVibrationPatternPref = findPreference(KEY_SALAH_VIBRATION_PATTERN);
+        mEnablePerAlarmVibrationPatternPref = findPreference(KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN);
+        mVibrationStartDelayPref = findPreference(KEY_SALAH_VIBRATION_START_DELAY);
+        mEnableSnoozedOrDismissedAlarmVibrationsPref = findPreference(KEY_SALAH_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
+        mVolumeButtonsPref = findPreference(KEY_SALAH_VOLUME_BUTTONS);
+        mPowerButtonPref = findPreference(KEY_SALAH_POWER_BUTTON);
+        mHeadphonesButtonPref = findPreference(KEY_SALAH_HEADPHONES_BUTTON);
+        mFlipActionPref = findPreference(KEY_SALAH_FLIP_ACTION);
+        mShakeActionPref = findPreference(KEY_SALAH_SHAKE_ACTION);
+        mShakeIntensityPref = findPreference(KEY_SALAH_SHAKE_INTENSITY);
+        mDisplayDismissButtonPref = findPreference(KEY_SALAH_DISPLAY_DISMISS_BUTTON);
+        mAlarmNotificationReminderPref = findPreference(KEY_SALAH_ALARM_NOTIFICATION_REMINDER);
+        mTurnOnBackFlashForTriggeredAlarmPref = findPreference(KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
+        mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING);
+        mAutoTagPref = findPreference(KEY_SALAH_AUTO_TAG);
+        mAutoTagNamePref = findPreference(KEY_SALAH_AUTO_TAG_NAME);
+        mAlarmPreviewPref = findPreference(KEY_SALAH_ALARM_PREVIEW);
 
         if (savedInstanceState != null) {
             mPendingDialogPrefKey = savedInstanceState.getString(KEY_PENDING_DIALOG_PREF_KEY, null);
@@ -306,7 +306,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_ALARM_SHOW_ROUNDING -> {
+            case KEY_SALAH_ALARM_SHOW_ROUNDING -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 boolean showRounding = (boolean) newValue;
                 mAdjustAlarmAfterRoundingPref.setVisible(showRounding);
@@ -315,21 +315,21 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 }
             }
 
-            case KEY_NAMAZ_ALARM_STYLE_OVERRIDE,
-                 KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE, KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE,
-                 KEY_NAMAZ_ALARM_MISC_OVERRIDE, KEY_NAMAZ_DISPLAY_LOW_ALARM_VOLUME_WARNING,
-                 KEY_NAMAZ_DISPLAY_DISMISS_BUTTON, KEY_NAMAZ_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS -> {
+            case KEY_SALAH_ALARM_STYLE_OVERRIDE,
+                 KEY_SALAH_ALARM_VIBRATION_OVERRIDE, KEY_SALAH_ALARM_ACTIONS_OVERRIDE,
+                 KEY_SALAH_ALARM_MISC_OVERRIDE, KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING,
+                 KEY_SALAH_DISPLAY_DISMISS_BUTTON, KEY_SALAH_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 updatePreferencesVisibility(key, newValue);
             }
 
-            case KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE, KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE -> {
+            case KEY_SALAH_ALARM_RINGTONE_OVERRIDE, KEY_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 stopRingtonePreview();
                 updatePreferencesVisibility(key, newValue);
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -343,12 +343,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -362,12 +362,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -381,12 +381,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -400,12 +400,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_REPEAT_MISSED_ALARM -> {
+            case KEY_SALAH_REPEAT_MISSED_ALARM -> {
                 final int index = mRepeatMissedAlarmPref.findIndexOfValue((String) newValue);
                 mRepeatMissedAlarmPref.setSummary(mRepeatMissedAlarmPref.getEntries()[index]);
 
@@ -422,7 +422,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_VOLUME -> {
                 stopRingtonePreview();
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
@@ -437,12 +437,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_VOLUME);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -456,12 +456,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN -> {
+            case KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -475,12 +475,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_ADVANCED_AUDIO_PLAYBACK -> {
+            case KEY_SALAH_ADVANCED_AUDIO_PLAYBACK -> {
                 stopRingtonePreview();
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
@@ -494,7 +494,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                     && SettingsDAO.isAutoRoutingToExternalAudioDevice(mPrefs, true));
             }
 
-            case KEY_NAMAZ_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE -> {
+            case KEY_SALAH_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE -> {
                 stopRingtonePreview();
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
@@ -505,13 +505,13 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                 mHeadphonesButtonPref.setVisible(isAutoRoutingToExternalAudioDevice);
             }
 
-            case KEY_NAMAZ_SYSTEM_MEDIA_VOLUME -> {
+            case KEY_SALAH_SYSTEM_MEDIA_VOLUME -> {
                 stopRingtonePreview();
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
                 mExternalAudioDeviceVolumePref.setVisible(!(boolean) newValue);
             }
 
-            case KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT -> {
+            case KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 if ((boolean) newValue) {
@@ -525,24 +525,24 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
                         }
                     });
                 } else {
-                    triggerDisableSettingDialog(KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
+                    triggerDisableSettingDialog(KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
                     return false;
                 }
             }
 
-            case KEY_NAMAZ_VOLUME_BUTTONS, KEY_NAMAZ_POWER_BUTTON, KEY_NAMAZ_HEADPHONES_BUTTON, KEY_NAMAZ_FLIP_ACTION -> {
+            case KEY_SALAH_VOLUME_BUTTONS, KEY_SALAH_POWER_BUTTON, KEY_SALAH_HEADPHONES_BUTTON, KEY_SALAH_FLIP_ACTION -> {
                 final ListPreference preference = (ListPreference) pref;
                 final int index = preference.findIndexOfValue((String) newValue);
                 preference.setSummary(preference.getEntries()[index]);
             }
 
-            case KEY_NAMAZ_SHAKE_ACTION -> {
+            case KEY_SALAH_SHAKE_ACTION -> {
                 final int index = mShakeActionPref.findIndexOfValue((String) newValue);
                 mShakeActionPref.setSummary(mShakeActionPref.getEntries()[index]);
                 mShakeIntensityPref.setVisible(index != 2);
             }
 
-            case KEY_NAMAZ_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM -> {
+            case KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
 
                 AppExecutors.getDiskIO().execute(() -> {
@@ -570,19 +570,19 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         String key = pref.getKey();
 
         switch (key) {
-            case KEY_NAMAZ_ALARM_DISPLAY_CUSTOMIZATION -> animateAndShowFragment(new NamazAlarmDisplayCustomizationFragment());
-            case KEY_NAMAZ_DEFAULT_ALARM_RINGTONE -> {
+            case KEY_SALAH_ALARM_DISPLAY_CUSTOMIZATION -> animateAndShowFragment(new NamazAlarmDisplayCustomizationFragment());
+            case KEY_SALAH_DEFAULT_ALARM_RINGTONE -> {
                 Intent intent = RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(context);
                 intent.putExtra(RingtonePickerActivity.EXTRA_RETURN_RESULT_ONLY, true);
                 ringtonePickerLauncher.launch(intent);
             }
-            case KEY_NAMAZ_ALARM_PREVIEW -> {
+            case KEY_SALAH_ALARM_PREVIEW -> {
                 Intent previewIntent = new Intent(context, AlarmDisplayPreviewActivity.class);
                 Calendar now = Calendar.getInstance();
 
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_HOUR, now.get(Calendar.HOUR_OF_DAY));
                 previewIntent.putExtra(AlarmUtils.EXTRA_PREVIEW_MINUTE, now.get(Calendar.MINUTE));
-                previewIntent.putExtra("is_namaz", true);
+                previewIntent.putExtra("is_salah", true);
                 previewIntent.putExtra("force_override", true);
 
                 ThemeUtils.startActivityWithTransition(context, previewIntent);
@@ -635,12 +635,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         mAlarmShowRoundingPref.setOnPreferenceChangeListener(this);
         mAdjustAlarmAfterRoundingPref.setVisible(mAlarmShowRoundingPref.isChecked());
 
-        mStyleOverridePref = findPreference(KEY_NAMAZ_ALARM_STYLE_OVERRIDE);
-        mRingtoneOverridePref = findPreference(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE);
-        mAdvancedAudioOverridePref = findPreference(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE);
-        mVibrationOverridePref = findPreference(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE);
-        mActionsOverridePref = findPreference(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE);
-        mMiscOverridePref = findPreference(KEY_NAMAZ_ALARM_MISC_OVERRIDE);
+        mStyleOverridePref = findPreference(KEY_SALAH_ALARM_STYLE_OVERRIDE);
+        mRingtoneOverridePref = findPreference(KEY_SALAH_ALARM_RINGTONE_OVERRIDE);
+        mAdvancedAudioOverridePref = findPreference(KEY_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE);
+        mVibrationOverridePref = findPreference(KEY_SALAH_ALARM_VIBRATION_OVERRIDE);
+        mActionsOverridePref = findPreference(KEY_SALAH_ALARM_ACTIONS_OVERRIDE);
+        mMiscOverridePref = findPreference(KEY_SALAH_ALARM_MISC_OVERRIDE);
 
         mStyleOverridePref.setOnPreferenceChangeListener(this);
         mRingtoneOverridePref.setOnPreferenceChangeListener(this);
@@ -718,12 +718,12 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
             return;
         }
 
-        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_STYLE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mStyleOverridePref.isChecked();
-        boolean ringtoneOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mRingtoneOverridePref.isChecked();
-        boolean advancedAudioOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ADVANCED_AUDIO_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mAdvancedAudioOverridePref.isChecked();
-        boolean vibrationOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_VIBRATION_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mVibrationOverridePref.isChecked();
-        boolean actionsOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_ACTIONS_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mActionsOverridePref.isChecked();
-        boolean miscOverride = (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_MISC_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mMiscOverridePref.isChecked();
+        boolean styleOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_STYLE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mStyleOverridePref.isChecked();
+        boolean ringtoneOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_RINGTONE_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mRingtoneOverridePref.isChecked();
+        boolean advancedAudioOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_ADVANCED_AUDIO_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mAdvancedAudioOverridePref.isChecked();
+        boolean vibrationOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_VIBRATION_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mVibrationOverridePref.isChecked();
+        boolean actionsOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_ACTIONS_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mActionsOverridePref.isChecked();
+        boolean miscOverride = (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_MISC_OVERRIDE)) ? (newValue != null && (boolean) newValue) : mMiscOverridePref.isChecked();
 
         if (mAlarmDisplayCustomizationPref != null) mAlarmDisplayCustomizationPref.setVisible(styleOverride);
 
@@ -766,7 +766,7 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
         if (mTurnOnBackFlashForTriggeredAlarmPref != null) mTurnOnBackFlashForTriggeredAlarmPref.setVisible(miscOverride && DeviceUtils.hasBackFlash(requireContext()));
         if (mDisplayLowAlarmVolumeWarningPref != null) mDisplayLowAlarmVolumeWarningPref.setVisible(miscOverride);
 
-        updateMissedAlarmPrefsVisibility(SettingsDAO.getAlarmTimeout(mPrefs, true), SettingsDAO.getSnoozeLength(mPrefs, true), (changedKey != null && changedKey.equals(KEY_NAMAZ_ALARM_RINGTONE_OVERRIDE)) ? newValue : null);
+        updateMissedAlarmPrefsVisibility(SettingsDAO.getAlarmTimeout(mPrefs, true), SettingsDAO.getSnoozeLength(mPrefs, true), (changedKey != null && changedKey.equals(KEY_SALAH_ALARM_RINGTONE_OVERRIDE)) ? newValue : null);
     }
 
     private void setupFragmentResultListeners() {
@@ -917,52 +917,52 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     private void triggerDisableSettingDialog(String prefKey) {
         AppExecutors.getDiskIO().execute(() -> {
-            boolean hasNamazAlarms = false;
+            boolean hasSalahAlarms = false;
             try (Cursor cursor = requireContext().getContentResolver().query(
                 Alarm.CONTENT_URI, new String[]{Alarm._ID}, Alarm.RELATIONAL_RULE_ID + " != -1", null, null)) {
-                hasNamazAlarms = cursor != null && cursor.getCount() > 0;
+                hasSalahAlarms = cursor != null && cursor.getCount() > 0;
             } catch (Exception e) {
-                LogUtils.e("Error checking for namaz alarms", e);
+                LogUtils.e("Error checking for salah alarms", e);
             }
 
-            final boolean finalHasAlarms = hasNamazAlarms;
+            final boolean finalHasAlarms = hasSalahAlarms;
             AppExecutors.getMainThread().post(() -> {
                 if (!isAdded() || isDetached()) return;
                 if (finalHasAlarms) {
                     mPendingDialogPrefKey = prefKey;
                     switch (prefKey) {
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_auto_silence_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_AUTO_SILENCE, mEnablePerAlarmAutoSilencePref,
+                                KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE, mEnablePerAlarmAutoSilencePref,
                                 mAlarmAutoSilencePref, alarm -> alarm.autoSilenceDuration = SettingsDAO.getAlarmTimeout(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_snooze_duration_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_SNOOZE_DURATION, mEnablePerAlarmSnoozeDurationPref, mAlarmSnoozeDurationPref,
+                                KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION, mEnablePerAlarmSnoozeDurationPref, mAlarmSnoozeDurationPref,
                                 alarm -> alarm.snoozeDuration = SettingsDAO.getSnoozeLength(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_dismiss_after_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_DISMISS_AFTER, mEnablePerAlarmDismissAfterPref, mDismissAfterPref,
+                                KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER, mEnablePerAlarmDismissAfterPref, mDismissAfterPref,
                                 alarm -> alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_missed_repeat_limit_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT, mEnablePerAlarmMissedRepeatLimitPref, mRepeatMissedAlarmPref,
+                                KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT, mEnablePerAlarmMissedRepeatLimitPref, mRepeatMissedAlarmPref,
                                 alarm -> alarm.missedAlarmRepeatLimit = SettingsDAO.getMissedAlarmRepeatLimit(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_VOLUME ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_volume_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME, mEnablePerAlarmVolumePref, mAlarmVolumePref,
+                                KEY_SALAH_ENABLE_PER_ALARM_VOLUME, mEnablePerAlarmVolumePref, mAlarmVolumePref,
                                 alarm -> alarm.alarmVolume = DEFAULT_ALARM_VOLUME);
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_crescendo_duration_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION, mEnablePerAlarmVolumeCrescendoDurationPref,
+                                KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION, mEnablePerAlarmVolumeCrescendoDurationPref,
                                 mAlarmVolumeCrescendoDurationPref, alarm ->
                                     alarm.crescendoDuration = SettingsDAO.getAlarmVolumeCrescendoDuration(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN ->
+                        case KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN ->
                             showDisablePerAlarmSettingDialog(R.string.enable_per_alarm_vibration_pattern_dialog_message,
-                                KEY_NAMAZ_ENABLE_PER_ALARM_VIBRATION_PATTERN, mEnablePerAlarmVibrationPatternPref, mVibrationPatternPref,
+                                KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN, mEnablePerAlarmVibrationPatternPref, mVibrationPatternPref,
                                 alarm -> alarm.vibrationPattern = SettingsDAO.getVibrationPattern(mPrefs, true));
-                        case KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT ->
+                        case KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT ->
                             showDisablePerAlarmSettingDialog(R.string.enable_alarm_vibrations_by_default_dialog_message,
-                                KEY_NAMAZ_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT, mEnableAlarmVibrationsByDefaultPref, null,
+                                KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT, mEnableAlarmVibrationsByDefaultPref, null,
                                 alarm -> alarm.vibrate = false);
                     }
                 } else {
@@ -1043,13 +1043,13 @@ public class NamazAlarmSettingsFragment extends BaseSettingsScreenFragment
 
     private void updateSummaries() {
         if (mAutoTagNamePref != null) {
-            mAutoTagNamePref.setSummary(mPrefs.getString(KEY_NAMAZ_AUTO_TAG_NAME, DEFAULT_NAMAZ_AUTO_TAG_NAME));
+            mAutoTagNamePref.setSummary(mPrefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME));
         }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (KEY_NAMAZ_AUTO_TAG_NAME.equals(key)) {
+        if (KEY_SALAH_AUTO_TAG_NAME.equals(key)) {
             updateSummaries();
         }
     }

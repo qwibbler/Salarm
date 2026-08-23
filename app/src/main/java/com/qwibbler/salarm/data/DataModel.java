@@ -613,9 +613,9 @@ public final class DataModel {
         return getAlarmRingtoneUriFromSettings(false);
     }
 
-    public Uri getAlarmRingtoneUriFromSettings(boolean isNamaz) {
+    public Uri getAlarmRingtoneUriFromSettings(boolean isSalah) {
         enforceMainLooper();
-        return mAlarmModel.getAlarmRingtoneUriFromSettings(isNamaz);
+        return mAlarmModel.getAlarmRingtoneUriFromSettings(isSalah);
     }
 
     /**
@@ -625,9 +625,9 @@ public final class DataModel {
         return getAlarmRingtoneTitle(false);
     }
 
-    public String getAlarmRingtoneTitle(boolean isNamaz) {
+    public String getAlarmRingtoneTitle(boolean isSalah) {
         enforceMainLooper();
-        return mAlarmModel.getAlarmRingtoneTitle(isNamaz);
+        return mAlarmModel.getAlarmRingtoneTitle(isSalah);
     }
 
     /**

@@ -57,8 +57,8 @@ public class NamazUtils {
      */
     public static double[] getCoordinates(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String latStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LATITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LATITUDE);
-        String lonStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_LONGITUDE, PreferencesDefaultValues.DEFAULT_NAMAZ_LONGITUDE);
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, PreferencesDefaultValues.DEFAULT_SALAH_LATITUDE);
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, PreferencesDefaultValues.DEFAULT_SALAH_LONGITUDE);
         try {
             double lat = Double.parseDouble(latStr);
             double lon = Double.parseDouble(lonStr);
@@ -74,12 +74,12 @@ public class NamazUtils {
      */
     public static CalculationMethod getCalculationMethod(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String methodStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_CALC_METHOD, PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
+        String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, PreferencesDefaultValues.DEFAULT_SALAH_CALC_METHOD);
         try {
             return CalculationMethod.valueOf(methodStr);
         } catch (IllegalArgumentException e) {
             LogUtils.e("Invalid calculation method in preferences: " + methodStr, e);
-            return CalculationMethod.valueOf(PreferencesDefaultValues.DEFAULT_NAMAZ_CALC_METHOD);
+            return CalculationMethod.valueOf(PreferencesDefaultValues.DEFAULT_SALAH_CALC_METHOD);
         }
     }
 
@@ -88,12 +88,12 @@ public class NamazUtils {
      */
     public static Madhab getMadhab(Context context) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        String madhabStr = prefs.getString(PreferencesKeys.KEY_NAMAZ_MADHAB, PreferencesDefaultValues.DEFAULT_NAMAZ_MADHAB);
+        String madhabStr = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, PreferencesDefaultValues.DEFAULT_SALAH_MADHAB);
         try {
             return Madhab.valueOf(madhabStr);
         } catch (IllegalArgumentException e) {
             LogUtils.e("Invalid madhab in preferences: " + madhabStr, e);
-            return Madhab.valueOf(PreferencesDefaultValues.DEFAULT_NAMAZ_MADHAB);
+            return Madhab.valueOf(PreferencesDefaultValues.DEFAULT_SALAH_MADHAB);
         }
     }
 
@@ -107,9 +107,9 @@ public class NamazUtils {
             // 1. Try local cache/JSON first (Priority 1 & 2)
             OfflineCity match = findNearestOfflineCity(appContext, lat, lon);
             if (match != null) {
-                String displayName = match.isNear ? appContext.getString(com.qwibbler.salarm.R.string.namaz_near_city, match.name) : match.name;
+                String displayName = match.isNear ? appContext.getString(com.qwibbler.salarm.R.string.salah_near_city, match.name) : match.name;
                 getDefaultSharedPreferences(appContext).edit()
-                        .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, displayName)
+                        .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, displayName)
                         .apply();
                 return;
             }
@@ -120,7 +120,7 @@ public class NamazUtils {
                 if (res != null) {
                     String locationName = res.toString();
                     getDefaultSharedPreferences(appContext).edit()
-                            .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, locationName)
+                            .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, locationName)
                             .apply();
 
                     // Save successful online lookup to Room cache (normalized)
@@ -137,7 +137,7 @@ public class NamazUtils {
             // 3. Fallback (Priority 4)
             String fallbackName = String.format(Locale.getDefault(), "Lat: %.4f, Lon: %.4f", lat, lon);
             getDefaultSharedPreferences(appContext).edit()
-                    .putString(PreferencesKeys.KEY_NAMAZ_CITY_NAME, fallbackName)
+                    .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, fallbackName)
                     .apply();
         });
     }
