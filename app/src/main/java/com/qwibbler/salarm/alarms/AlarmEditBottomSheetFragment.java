@@ -356,6 +356,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         dialog.setOnShowListener(dialogInterface -> {
             BottomSheetDialog d = (BottomSheetDialog) dialogInterface;
+
+            if (d.getWindow() != null) {
+                Utils.setupTapToDismissKeyboard(d.getWindow());
+            }
+
             View bottomSheetInternal = d.findViewById(com.google.android.material.R.id.design_bottom_sheet);
 
             if (bottomSheetInternal != null) {

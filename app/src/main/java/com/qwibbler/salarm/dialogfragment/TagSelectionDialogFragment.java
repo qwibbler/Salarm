@@ -6,6 +6,7 @@ package com.qwibbler.salarm.dialogfragment;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.qwibbler.salarm.databinding.AlarmTagSelectionDialogBinding;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
+import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -133,6 +135,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
                 chip.setLayoutParams(params);
 
                 chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    Utils.hideKeyboardAndClearFocus(mBinding.newTagInput);
                     if (isChecked) {
                         mSelectedTags.add(tag);
                     } else {

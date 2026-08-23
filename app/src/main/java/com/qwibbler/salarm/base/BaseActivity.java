@@ -79,6 +79,8 @@ public class BaseActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
+        Utils.setupTapToDismissKeyboard(this);
+
         registerThemeListener();
     }
 
