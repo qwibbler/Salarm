@@ -6,7 +6,6 @@ package com.qwibbler.salarm.dialogfragment;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -122,7 +122,7 @@ public class TagSelectionDialogFragment extends DialogFragment {
             int vMargin = (int) (0 * getResources().getDisplayMetrics().density);
             for (String tag : mAllTags) {
                 Chip chip = new Chip(requireContext());
-                chip.setText("#" + tag);
+                chip.setText(MessageFormat.format("#{0}", tag));
                 chip.setCheckable(true);
                 chip.setChecked(mSelectedTags.contains(tag));
 

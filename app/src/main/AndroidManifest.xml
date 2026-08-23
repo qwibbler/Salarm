@@ -346,7 +346,8 @@
         <receiver
             android:name="com.qwibbler.salarm.widgets.SalahWidgetUpdateReceiver"
             android:directBootAware="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.qwibbler.salarm.SALAH_MINUTE_UPDATE" />
                 <action android:name="android.intent.action.USER_PRESENT" />
