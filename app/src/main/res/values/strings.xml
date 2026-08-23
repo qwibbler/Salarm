@@ -665,7 +665,7 @@
     <!-- Dialog message when the use of a custom volume increase duration is disabled. -->
     <string name="enable_per_alarm_crescendo_duration_dialog_message">Custom volume increase durations will be reset.%s</string>
     <!-- Auto silence preference title -->
-    <string name="auto_silence_title">Silence after</string>
+    <string name="auto_silence_title">Silence ringing after</string>
     <!-- Auto silence summary when set at "The end of the ringtone" or for changing the auto silence.-->
     <string name="auto_silence_end_of_ringtone">The end of the ringtone</string>
     <!-- Dialog message when the use of a custom stop duration is disabled. -->
