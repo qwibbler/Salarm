@@ -63,15 +63,6 @@ public final class AlarmUpdateHandler {
     /**
      * Adds a new alarm on the background.
      *
-     * @param alarm The alarm to be added.
-     */
-    public void asyncAddAlarm(final Alarm alarm) {
-        asyncAddAlarm(alarm, true, true);
-    }
-
-    /**
-     * Adds a new alarm on the background.
-     *
      * @param alarm          The alarm to be added.
      * @param showSnackbar   Whether to show a snackbar after saving.
      * @param openEditScreen Whether to open the edit screen for the new alarm.

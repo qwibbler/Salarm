@@ -84,7 +84,7 @@ public class SalahAlarmSyncManager {
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
-            nativeAlarm.label = "\uD83D\uDD14 " + RelationalRule.getEventName(context, rule.anchorEvent);
+            nativeAlarm.label = "🔔 " + RelationalRule.getEventName(context, rule.anchorEvent);
 
             // Add auto-tag if enabled
             SharedPreferences prefs = getDefaultSharedPreferences(context);
@@ -100,7 +100,6 @@ public class SalahAlarmSyncManager {
         } else {
             nativeAlarm = alarms.get(0);
             nativeAlarm.enabled = rule.enabled;
-            nativeAlarm.label = "🔔 " + RelationalRule.getEventName(context, rule.anchorEvent);
             nativeAlarm.updateAlarm(cr);
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }
