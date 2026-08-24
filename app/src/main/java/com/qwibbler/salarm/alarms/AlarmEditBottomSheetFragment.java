@@ -75,7 +75,6 @@ import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
-import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
 import com.qwibbler.salarm.ringtone.RingtonePickerActivity;
 import com.qwibbler.salarm.settings.AlarmDisplayPreviewActivity;
@@ -101,7 +100,6 @@ import com.google.android.material.color.MaterialColors;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -1147,42 +1145,8 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
             Events.sendAlarmEvent(R.string.action_duplicate, R.string.label_salarm);
 
-            Alarm duplicatedAlarm = new Alarm(mAlarm);
-            duplicatedAlarm.id = Alarm.INVALID_ID;
-            duplicatedAlarm.instanceState = AlarmInstance.SILENT_STATE;
-            final AlarmUpdateHandler localUpdateHandler = mAlarmUpdateHandler;
-
-            if (!TextUtils.isEmpty(duplicatedAlarm.backgroundImage) &&
-                duplicatedAlarm.backgroundImage.contains(FILE_SPECIFIC_ALARM_BACKGROUND)) {
-
-                final Context appContext = requireContext().getApplicationContext();
-
-                AppExecutors.getDiskIO().execute(() -> {
-                    File sourceFile = new File(duplicatedAlarm.backgroundImage);
-
-                    if (sourceFile.exists()) {
-                        String safeTitle = FileUtils.toSafeFileName(
-                            FILE_SPECIFIC_ALARM_BACKGROUND + "_dup_" + System.currentTimeMillis()
-                        );
-                        Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(appContext, Uri.fromFile(sourceFile), safeTitle);
-
-                        if (copiedUri != null) {
-                            duplicatedAlarm.backgroundImage = copiedUri.getPath();
-                        } else {
-                            duplicatedAlarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
-                        }
-                    } else {
-                        duplicatedAlarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
-                    }
-
-                    if (localUpdateHandler != null) {
-                        localUpdateHandler.asyncAddAlarm(duplicatedAlarm);
-                    }
-                });
-            } else {
-                if (localUpdateHandler != null) {
-                    localUpdateHandler.asyncAddAlarm(duplicatedAlarm);
-                }
+            if (mAlarmUpdateHandler != null) {
+                mAlarmUpdateHandler.asyncDuplicateAlarm(mAlarm);
             }
 
             dismiss();

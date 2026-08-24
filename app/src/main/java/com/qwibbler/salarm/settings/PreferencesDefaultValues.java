@@ -155,6 +155,17 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_SALAH_CITY_NAME = "Unknown";
     public static final boolean DEFAULT_SALAH_SHOW_BOTH_ASR = false;
 
+    public static final String ROUNDING_TO = "TO";
+    public static final String ROUNDING_UP = "UP";
+    public static final String ROUNDING_DOWN = "DOWN";
+
+    public static final String DEFAULT_SALAH_ROUNDING_FAJR = ROUNDING_TO;
+    public static final String DEFAULT_SALAH_ROUNDING_SUNRISE = ROUNDING_DOWN;
+    public static final String DEFAULT_SALAH_ROUNDING_DHUHR = ROUNDING_UP;
+    public static final String DEFAULT_SALAH_ROUNDING_ASR = ROUNDING_UP;
+    public static final String DEFAULT_SALAH_ROUNDING_MAGHRIB = ROUNDING_UP;
+    public static final String DEFAULT_SALAH_ROUNDING_ISHA = ROUNDING_UP;
+
     public static final boolean DEFAULT_SALAH_ALARM_SHOW_ROUNDING = false;
     public static final boolean DEFAULT_SALAH_AUTODISMISS_BY_DEFAULT = true;
     public static final boolean DEFAULT_SALAH_ADJUST_ALARM_AFTER_ROUNDING = false;

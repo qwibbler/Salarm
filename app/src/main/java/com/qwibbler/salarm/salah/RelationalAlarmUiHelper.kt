@@ -15,7 +15,7 @@ object RelationalAlarmUiHelper {
         val customText = context.getString(R.string.relational_alarm_custom)
         val items = listOf("2", "5", "10", "15", "20", "30", "45", "60", customText)
 
-        val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, items)
+        val adapter = ArrayAdapter(context, R.layout.dropdown_item_relational, items)
         view.setAdapter(adapter)
 
         // Ensure we don't filter the predefined list when typing

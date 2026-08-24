@@ -1612,6 +1612,17 @@
     <string name="salah_location_category_title">Location</string>
     <!-- Prayer settings category title for Salah settings -->
     <string name="salah_prayer_settings_category_title">Prayer Settings</string>
+    <!-- Advanced settings category title for Salah settings -->
+    <string name="salah_advanced_settings_category_title">Advanced Settings</string>
+    <!-- Salah time rounding setting title -->
+    <string name="salah_time_rounding_title">Salah time rounding</string>
+    <!-- Rounding options -->
+    <string name="rounding_nearest_to">Round to the nearest minute</string>
+    <string name="rounding_up_to">Round up to the nearest minute</string>
+    <string name="rounding_down_to">Round down to the nearest minute</string>
+    <string name="rounding_nearest_to_short">To the nearest minute</string>
+    <string name="rounding_up_to_short">Up to the nearest minute</string>
+    <string name="rounding_down_to_short">Down to the nearest minute</string>
     <!-- See both Asr events setting title -->
     <string name="show_both_asr_title">See both Asr events</string>
     <!-- See both Asr events summary -->
@@ -1677,13 +1688,27 @@
     <string name="salah_rule_description_base">alarm %1$s %2$s</string>
     <string name="salah_rule_offset_before">%1$dm before</string>
     <string name="salah_rule_offset_after">%1$dm after</string>
-    <string name="salah_rule_rounded">, rounded to the nearest %1$dm</string>
+    <string name="salah_rule_rounded_nearest">, rounded to the nearest %1$dm</string>
+    <string name="salah_rule_rounded_up">, rounded up to %1$dm</string>
+    <string name="salah_rule_rounded_down">, rounded down to %1$dm</string>
     <string name="salah_rule_no_later">, no later than %1$s %2$s</string>
     <string name="salah_rule_no_earlier">, no earlier than %1$s %2$s</string>
     <string name="salah_rule_autostop">, auto dismissed %1$s %2$s</string>
     <string name="salah_rule_adjusted">, adjusted by %1$s</string>
     <string name="salah_rule_adjustment_earlier">%1$dm earlier</string>
     <string name="salah_rule_adjustment_later">%1$dm later</string>
+
+    <string-array name="salah_rounding_entries">
+        <item>@string/rounding_nearest_to_short</item>
+        <item>@string/rounding_up_to_short</item>
+        <item>@string/rounding_down_to_short</item>
+    </string-array>
+
+    <string-array name="salah_rounding_values">
+        <item>TO</item>
+        <item>UP</item>
+        <item>DOWN</item>
+    </string-array>
 
     <string-array name="relational_alarm_offset_type">
         <item>Before</item>

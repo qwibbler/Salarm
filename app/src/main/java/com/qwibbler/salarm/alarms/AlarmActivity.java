@@ -1421,7 +1421,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         Calendar cal = Calendar.getInstance();
         com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times =
-            com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
+            com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
 
         java.util.List<com.qwibbler.salarm.salah.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
         events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.FAJR);
@@ -1457,7 +1457,7 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         // If no more events today, find first event tomorrow
         if (nextEventTime == null) {
             cal.add(Calendar.DAY_OF_YEAR, 1);
-            times = com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
+            times = com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
             for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
                 java.util.Date time = getEventTime(event, times);
                 if (time != null) {

@@ -56,6 +56,14 @@ public class RelationalRule {
             this.clipRoundingIntervalMinutes = clipRoundingIntervalMinutes;
             this.boundaryType = boundaryType;
         }
+
+        public Clip(Clip other) {
+            this.clipEvent = other.clipEvent;
+            this.clipOffsetMinutes = other.clipOffsetMinutes;
+            this.clipRoundingDirection = other.clipRoundingDirection;
+            this.clipRoundingIntervalMinutes = other.clipRoundingIntervalMinutes;
+            this.boundaryType = other.boundaryType;
+        }
     }
 
     public AnchorEvent anchorEvent;
@@ -74,6 +82,20 @@ public class RelationalRule {
 
     public RelationalRule() {
         this.enabled = true;
+    }
+
+    public RelationalRule(RelationalRule other) {
+        this.id = other.id;
+        this.enabled = other.enabled;
+        this.anchorEvent = other.anchorEvent;
+        this.offsetMinutes = other.offsetMinutes;
+        this.roundingDirection = other.roundingDirection;
+        this.roundingIntervalMinutes = other.roundingIntervalMinutes;
+        this.clip = other.clip != null ? new Clip(other.clip) : null;
+        this.adjustmentMinutes = other.adjustmentMinutes;
+        this.autostopEnabled = other.autostopEnabled;
+        this.autostopOffsetMinutes = other.autostopOffsetMinutes;
+        this.autostopAnchorEvent = other.autostopAnchorEvent;
     }
 
     public RelationalRule(AnchorEvent anchorEvent, int offsetMinutes, RoundingDirection roundingDirection,
@@ -100,9 +122,7 @@ public class RelationalRule {
         sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_description_base, offsetPart, eventName));
 
         // Rounding: rounded to the nearest 5m
-        if (roundingIntervalMinutes > 0) {
-            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_rounded, roundingIntervalMinutes));
-        }
+        sb.append(getRoundingPart(context, roundingDirection, roundingIntervalMinutes));
 
         // Adjustment: adjusted by 2m earlier
         if (adjustmentMinutes != 0) {
@@ -116,6 +136,7 @@ public class RelationalRule {
             String clipEventName = getEventName(context, clip.clipEvent);
             int clipResId = clip.boundaryType == BoundaryType.NO_LATER_THAN ? com.qwibbler.salarm.R.string.salah_rule_no_later : com.qwibbler.salarm.R.string.salah_rule_no_earlier;
             sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
+            sb.append(getRoundingPart(context, clip.clipRoundingDirection, clip.clipRoundingIntervalMinutes));
         }
 
         // Autostop: auto dismissed at sunrise
@@ -138,6 +159,16 @@ public class RelationalRule {
         } else {
             return context.getString(com.qwibbler.salarm.R.string.salah_rule_offset_before, Math.abs(offset));
         }
+    }
+
+    private String getRoundingPart(android.content.Context context, RoundingDirection direction, int interval) {
+        if (interval <= 0 || direction == null) return "";
+        int resId = switch (direction) {
+            case NEAREST -> com.qwibbler.salarm.R.string.salah_rule_rounded_nearest;
+            case UP -> com.qwibbler.salarm.R.string.salah_rule_rounded_up;
+            case DOWN -> com.qwibbler.salarm.R.string.salah_rule_rounded_down;
+        };
+        return context.getString(resId, interval);
     }
 
     private String getAdjustmentPart(android.content.Context context, int offset) {

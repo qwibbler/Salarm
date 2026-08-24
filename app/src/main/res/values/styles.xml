@@ -132,6 +132,71 @@
         <item name="android:windowMinWidthMinor">100%</item>
     </style>
 
+    <!-- =========================== -->
+    <!--   RELATIONAL ALARM DIALOG   -->
+    <!-- =========================== -->
+    <style name="RelationalAlarm">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="RelationalAlarm.HeadingCheckbox">
+        <item name="android:layout_marginStart">-6dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceTitleMedium</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="RelationalAlarm.Text">
+        <item name="android:layout_marginHorizontal">6dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+    </style>
+
+    <style name="RelationalAlarm.DropdownLayout" parent="Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="endIconMinSize">28dp</item>
+        <item name="boxBackgroundColor">@android:color/transparent</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
+
+    <style name="RelationalAlarm.DropdownLayout.Numeric" parent="RelationalAlarm.DropdownLayout">
+        <item name="android:layout_width">64dp</item>
+    </style>
+
+    <style name="RelationalAlarm.AutoCompleteTextView">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+    </style>
+
+    <style name="RelationalAlarm.AutoCompleteTextView.Numeric">
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">3</item>
+    </style>
+
+    <style name="RelationalAlarm.AutoCompleteTextView.Event">
+        <item name="android:inputType">none</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+    </style>
+
+    <style name="RelationalAlarm.TextButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:layout_marginStart">-8dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+    </style>
+
+
+
     <!-- ======================= -->
     <!--   BOTTOM SHEET DIALOG   -->
     <!-- ======================= -->

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:key="key_salah_rounding_fajr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/fajr_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="TO"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_salah_rounding_sunrise"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/sunrise_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="DOWN"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_salah_rounding_dhuhr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/dhuhr_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="UP"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_salah_rounding_asr"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/asr_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="UP"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_salah_rounding_maghrib"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/maghrib_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="UP"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
+            android:key="key_salah_rounding_isha"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/isha_label"
+            android:entries="@array/salah_rounding_entries"
+            android:entryValues="@array/salah_rounding_values"
+            android:defaultValue="UP"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

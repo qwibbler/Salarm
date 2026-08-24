@@ -231,7 +231,7 @@ public class SalahTimesFragment extends SalarmFragment {
             method = CalculationMethod.MUSLIM_WORLD_LEAGUE;
         }
 
-        SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(mSelectedDate.getTime(), lat, lon, method);
+        SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(context, mSelectedDate.getTime(), lat, lon, method);
 
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
                 && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES, false);
@@ -358,7 +358,7 @@ public class SalahTimesFragment extends SalarmFragment {
         CalculationMethod method = CalculationMethod.valueOf(methodStr);
 
         Calendar todayCal = Calendar.getInstance(tz);
-        SalahCalculator.SalahTimes todaySalahTimes = SalahCalculator.calculateAllSalahTimes(todayCal.getTime(), lat, lon, method);
+        SalahCalculator.SalahTimes todaySalahTimes = SalahCalculator.calculateAllSalahTimes(context, todayCal.getTime(), lat, lon, method);
 
         Date now = new Date();
         PrayerItem nextPrayer;
@@ -380,7 +380,7 @@ public class SalahTimesFragment extends SalarmFragment {
             // Next day's Fajr
             Calendar tomorrow = Calendar.getInstance(tz);
             tomorrow.add(Calendar.DAY_OF_YEAR, 1);
-            SalahCalculator.SalahTimes tomorrowSalahTimes = SalahCalculator.calculateAllSalahTimes(tomorrow.getTime(), lat, lon, method);
+            SalahCalculator.SalahTimes tomorrowSalahTimes = SalahCalculator.calculateAllSalahTimes(context, tomorrow.getTime(), lat, lon, method);
             nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), tomorrowSalahTimes.fajr);
         }
 

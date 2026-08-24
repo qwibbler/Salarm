@@ -39,6 +39,17 @@
         app:iconSpaceReserved="false">
 
         <ListPreference
+            android:key="key_salah_calc_method"
+            android:layout="@layout/settings_preference_layout"
+            android:title="Calculation Method"
+            android:summary="%s"
+            android:entries="@array/salah_calc_method_entries"
+            android:entryValues="@array/salah_calc_method_values"
+            android:defaultValue="KARACHI"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <ListPreference
             android:key="key_salah_madhab"
             android:layout="@layout/settings_preference_layout"
             android:title="Madhab"
@@ -49,16 +60,12 @@
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
-        <ListPreference
-            android:key="key_salah_calc_method"
-            android:layout="@layout/settings_preference_layout"
-            android:title="Calculation Method"
-            android:summary="%s"
-            android:entries="@array/salah_calc_method_entries"
-            android:entryValues="@array/salah_calc_method_values"
-            android:defaultValue="KARACHI"
-            app:iconSpaceReserved="false"
-            app:singleLineTitle="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/salah_advanced_settings_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false">
 
         <androidx.preference.SwitchPreferenceCompat
             android:key="key_salah_show_both_asr"
@@ -93,6 +100,13 @@
             android:title="@string/show_both_asr_in_widgets_title"
             android:defaultValue="false"
             android:dependency="key_salah_show_both_asr"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false" />
+
+        <Preference
+            android:key="key_salah_time_rounding_settings"
+            android:layout="@layout/settings_preference_layout"
+            android:title="@string/salah_time_rounding_title"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 

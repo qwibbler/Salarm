@@ -214,7 +214,7 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         }
 
         ArrayAdapter<String> prayerEventsAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_dropdown_item_1line, eventsList);
+        R.layout.dropdown_item_relational, eventsList);
         mBinding.primaryEvent.setAdapter(prayerEventsAdapter);
         mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
         mBinding.autostopEvent.setAdapter(prayerEventsAdapter);

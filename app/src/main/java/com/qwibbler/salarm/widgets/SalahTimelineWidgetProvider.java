@@ -102,7 +102,7 @@ public class SalahTimelineWidgetProvider extends AppWidgetProvider {
 
             // Pre-calculate SalahTimes
             Date now = new Date();
-            SalahCalculator.SalahTimes salahTimes = getSalahTimes(prefs, now);
+            SalahCalculator.SalahTimes salahTimes = getSalahTimes(context, prefs, now);
             List<PrayerItem> allPrayers = salahTimes != null ? getAllPrayers(context, salahTimes, prefs, finalInstances) : new ArrayList<>();
 
             com.qwibbler.salarm.base.AppExecutors.getMainThread().post(() -> {
@@ -496,7 +496,7 @@ public class SalahTimelineWidgetProvider extends AppWidgetProvider {
         return measured;
     }
 
-    private static SalahCalculator.SalahTimes getSalahTimes(SharedPreferences prefs, Date date) {
+    private static SalahCalculator.SalahTimes getSalahTimes(Context context, SharedPreferences prefs, Date date) {
         String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, null);
         String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, null);
         if (latStr == null || lonStr == null) return null;
@@ -504,7 +504,7 @@ public class SalahTimelineWidgetProvider extends AppWidgetProvider {
             double lat = Double.parseDouble(latStr);
             double lon = Double.parseDouble(lonStr);
             String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
-            return SalahCalculator.calculateAllSalahTimes(date, lat, lon, CalculationMethod.valueOf(methodStr));
+            return SalahCalculator.calculateAllSalahTimes(context, date, lat, lon, CalculationMethod.valueOf(methodStr));
         } catch (Exception e) { return null; }
     }
 
@@ -597,7 +597,7 @@ public class SalahTimelineWidgetProvider extends AppWidgetProvider {
         }
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
-        SalahCalculator.SalahTimes tomorrowSalahTimes = getSalahTimes(prefs, cal.getTime());
+        SalahCalculator.SalahTimes tomorrowSalahTimes = getSalahTimes(context, prefs, cal.getTime());
         if (tomorrowSalahTimes != null) {
             String label = context.getString(R.string.fajr_label);
             return new PrayerItem(label, label, tomorrowSalahTimes.fajr);

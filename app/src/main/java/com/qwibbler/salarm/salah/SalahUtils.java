@@ -244,7 +244,7 @@ public class SalahUtils {
         Madhab madhab = getMadhab(context);
 
         Date now = new Date();
-        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(now, coords[0], coords[1], method);
+        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(context, now, coords[0], coords[1], method);
 
         Date asrTime = (madhab == Madhab.SHAFI) ? times.asrShafi : times.asrHanafi;
 
@@ -259,7 +259,7 @@ public class SalahUtils {
         // Tomorrow's Fajr
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
-        SalahCalculator.SalahTimes tomorrowTimes = SalahCalculator.calculateAllSalahTimes(cal.getTime(), coords[0], coords[1], method);
+        SalahCalculator.SalahTimes tomorrowTimes = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
         return tomorrowTimes.fajr.getTime();
     }
 }
