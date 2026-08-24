@@ -1677,7 +1677,9 @@
     <string name="salah_rule_description_base">alarm %1$s %2$s</string>
     <string name="salah_rule_offset_before">%1$dm before</string>
     <string name="salah_rule_offset_after">%1$dm after</string>
-    <string name="salah_rule_rounded">, rounded to the nearest %1$dm</string>
+    <string name="salah_rule_rounded_nearest">, rounded to the nearest %1$dm</string>
+    <string name="salah_rule_rounded_up">, rounded up to %1$dm</string>
+    <string name="salah_rule_rounded_down">, rounded down to %1$dm</string>
     <string name="salah_rule_no_later">, no later than %1$s %2$s</string>
     <string name="salah_rule_no_earlier">, no earlier than %1$s %2$s</string>
     <string name="salah_rule_autostop">, auto dismissed %1$s %2$s</string>
