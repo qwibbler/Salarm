@@ -56,6 +56,14 @@ public class RelationalRule {
             this.clipRoundingIntervalMinutes = clipRoundingIntervalMinutes;
             this.boundaryType = boundaryType;
         }
+
+        public Clip(Clip other) {
+            this.clipEvent = other.clipEvent;
+            this.clipOffsetMinutes = other.clipOffsetMinutes;
+            this.clipRoundingDirection = other.clipRoundingDirection;
+            this.clipRoundingIntervalMinutes = other.clipRoundingIntervalMinutes;
+            this.boundaryType = other.boundaryType;
+        }
     }
 
     public AnchorEvent anchorEvent;
@@ -74,6 +82,20 @@ public class RelationalRule {
 
     public RelationalRule() {
         this.enabled = true;
+    }
+
+    public RelationalRule(RelationalRule other) {
+        this.id = other.id;
+        this.enabled = other.enabled;
+        this.anchorEvent = other.anchorEvent;
+        this.offsetMinutes = other.offsetMinutes;
+        this.roundingDirection = other.roundingDirection;
+        this.roundingIntervalMinutes = other.roundingIntervalMinutes;
+        this.clip = other.clip != null ? new Clip(other.clip) : null;
+        this.adjustmentMinutes = other.adjustmentMinutes;
+        this.autostopEnabled = other.autostopEnabled;
+        this.autostopOffsetMinutes = other.autostopOffsetMinutes;
+        this.autostopAnchorEvent = other.autostopAnchorEvent;
     }
 
     public RelationalRule(AnchorEvent anchorEvent, int offsetMinutes, RoundingDirection roundingDirection,

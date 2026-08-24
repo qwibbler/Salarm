@@ -6,8 +6,12 @@
 
 package com.qwibbler.salarm.alarms;
 
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+import static com.qwibbler.salarm.settings.PreferencesKeys.FILE_SPECIFIC_ALARM_BACKGROUND;
+
 import android.content.ContentResolver;
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +34,7 @@ import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -295,6 +300,69 @@ public final class AlarmUpdateHandler {
                     showUndoBar();
                 }
             });
+        });
+    }
+
+    /**
+     * Duplicates an existing alarm on the background.
+     *
+     * @param alarm The alarm to be duplicated.
+     */
+    public void asyncDuplicateAlarm(final Alarm alarm) {
+        AppExecutors.getDiskIO().execute(() -> {
+            if (alarm == null) return;
+
+            final Alarm duplicatedAlarm = new Alarm(alarm);
+            duplicatedAlarm.id = Alarm.INVALID_ID;
+            duplicatedAlarm.instanceState = AlarmInstance.SILENT_STATE;
+
+            // Handle background image duplication
+            if (!TextUtils.isEmpty(duplicatedAlarm.backgroundImage) &&
+                duplicatedAlarm.backgroundImage.contains(FILE_SPECIFIC_ALARM_BACKGROUND)) {
+
+                File sourceFile = new File(duplicatedAlarm.backgroundImage);
+                if (sourceFile.exists()) {
+                    String safeTitle = FileUtils.toSafeFileName(
+                        FILE_SPECIFIC_ALARM_BACKGROUND + "_dup_" + System.currentTimeMillis()
+                    );
+                    Uri copiedUri = FileUtils.copyFileToDeviceProtectedStorage(mAppContext, Uri.fromFile(sourceFile), safeTitle);
+                    duplicatedAlarm.backgroundImage = (copiedUri != null) ? copiedUri.getPath() : DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+                } else {
+                    duplicatedAlarm.backgroundImage = DEFAULT_SPECIFIC_ALARM_BACKGROUND_IMAGE;
+                }
+            }
+
+            // Handle salah rule duplication
+            if (alarm.relationalRuleId > 0) {
+                RelationalRule originalRule = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().getById(alarm.relationalRuleId);
+                if (originalRule != null) {
+                    RelationalRule duplicatedRule = new RelationalRule(originalRule);
+                    duplicatedRule.id = 0;
+                    duplicatedAlarm.relationalRuleId = SalahDatabase.getDatabase(mAppContext).relationalRuleDao().insert(duplicatedRule);
+
+                    // Add the duplicated alarm
+                    final Alarm newAlarm = duplicatedAlarm.addAlarm(mAppContext.getContentResolver());
+
+                    // Prepare for UI scroll
+                    if (mScrollHandler != null) {
+                        mScrollHandler.setSmoothScrollStableId(newAlarm.id);
+                    }
+
+                    // Sync and schedule instances
+                    SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, newAlarm);
+
+                    // Show confirmation toast
+                    final List<AlarmInstance> instances = AlarmInstance.getInstancesByAlarmId(mAppContext.getContentResolver(), newAlarm.id);
+                    if (!instances.isEmpty()) {
+                        final long timeToDisplay = instances.get(0).getAlarmTime().getTimeInMillis();
+                        AppExecutors.getMainThread().post(() -> AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, timeToDisplay));
+                    }
+                    return;
+                }
+            }
+
+            // Normal alarm duplication (or fallback for salah alarms with missing rule)
+            asyncAddAlarm(duplicatedAlarm, true, false);
         });
     }
 
