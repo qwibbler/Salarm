@@ -237,6 +237,13 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_CALC_METHOD = "key_salah_calc_method";
     public static final String KEY_SALAH_LOCATION_MODE = "key_salah_location_mode";
     public static final String KEY_SALAH_CITY_NAME = "key_salah_city_name";
+    public static final String KEY_SALAH_TIME_ROUNDING_SETTINGS = "key_salah_time_rounding_settings";
+    public static final String KEY_SALAH_ROUNDING_FAJR = "key_salah_rounding_fajr";
+    public static final String KEY_SALAH_ROUNDING_SUNRISE = "key_salah_rounding_sunrise";
+    public static final String KEY_SALAH_ROUNDING_DHUHR = "key_salah_rounding_dhuhr";
+    public static final String KEY_SALAH_ROUNDING_ASR = "key_salah_rounding_asr";
+    public static final String KEY_SALAH_ROUNDING_MAGHRIB = "key_salah_rounding_maghrib";
+    public static final String KEY_SALAH_ROUNDING_ISHA = "key_salah_rounding_isha";
     public static final String KEY_SALAH_SHOW_BOTH_ASR = "key_salah_show_both_asr";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_salah_show_both_asr_in_alarm_events";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES = "key_salah_show_both_asr_in_salah_times";

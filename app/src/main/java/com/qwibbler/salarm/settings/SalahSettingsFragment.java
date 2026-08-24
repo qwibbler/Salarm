@@ -74,6 +74,14 @@ public class SalahSettingsFragment extends BaseSettingsScreenFragment implements
             });
         }
 
+        Preference roundingPref = findPreference(KEY_SALAH_TIME_ROUNDING_SETTINGS);
+        if (roundingPref != null) {
+            roundingPref.setOnPreferenceClickListener(preference -> {
+                animateAndShowFragment(new SalahRoundingSettingsFragment());
+                return true;
+            });
+        }
+
         updateUiStates();
     }
 

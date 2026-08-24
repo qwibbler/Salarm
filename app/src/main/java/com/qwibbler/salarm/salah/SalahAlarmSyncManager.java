@@ -212,7 +212,7 @@ public class SalahAlarmSyncManager {
                 continue;
             }
 
-            SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(candidateDate.getTime(), coords[0], coords[1], method);
+            SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(context, candidateDate.getTime(), coords[0], coords[1], method);
             result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
 
             if (result.time() > 0) {
