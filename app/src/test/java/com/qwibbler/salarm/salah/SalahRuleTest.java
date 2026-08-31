@@ -25,7 +25,7 @@ public class SalahRuleTest {
         // Rule: Fajr + 10 minutes
         RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 10, null, 0);
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         Calendar expected = Calendar.getInstance();
         expected.setTime(times.fajr);
@@ -48,7 +48,7 @@ public class SalahRuleTest {
         // If Fajr is 04:12, +7 is 04:19. Rounded UP to 5 min interval is 04:20.
         RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 7, RelationalRule.RoundingDirection.UP, 5);
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         long resultMillis = result.getTime();
         assertEquals(0, resultMillis % (5 * 60 * 1000));
@@ -83,7 +83,7 @@ public class SalahRuleTest {
         );
         RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 30, null, 0, clip);
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         Calendar expected = Calendar.getInstance();
         expected.setTime(times.fajr);
@@ -119,7 +119,7 @@ public class SalahRuleTest {
                 clip
         );
 
-        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(null, rule, times, baseDate);
 
         long fajrMillis = times.fajr.getTime();
         long sunriseMillis = times.sunrise.getTime();

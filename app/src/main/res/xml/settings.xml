@@ -73,6 +73,14 @@
         app:singleLineTitle="false" />
 
     <Preference
+        android:key="key_salah_masjid_timings"
+        android:layout="@layout/settings_preference_layout"
+        android:title="@string/salah_masjid_timings_title"
+        android:summary="@string/salah_masjid_timings_summary"
+        android:icon="@drawable/ic_salah_alarm"
+        app:singleLineTitle="false" />
+
+    <Preference
         android:key="key_screensaver_settings"
         android:layout="@layout/settings_preference_layout"
         android:title="@string/screensaver_settings_title"
