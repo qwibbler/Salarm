@@ -29,6 +29,7 @@ public class RelationalRule {
     public boolean clipIsMax;
     public String masjidSalahType; // e.g. "FAJR", "DHUHR", etc.
     public boolean isSelected; // For "Events Shown" selection
+    public boolean isManuallyDeselected; // User manually turned off masjid event
 
     public long anchorMasjidId;
     public String anchorMasjidSalahType;
@@ -112,6 +113,7 @@ public class RelationalRule {
         this.clipIsMax = other.clipIsMax;
         this.masjidSalahType = other.masjidSalahType;
         this.isSelected = other.isSelected;
+        this.isManuallyDeselected = other.isManuallyDeselected;
         this.anchorMasjidId = other.anchorMasjidId;
         this.anchorMasjidSalahType = other.anchorMasjidSalahType;
         this.clipMasjidId = other.clipMasjidId;

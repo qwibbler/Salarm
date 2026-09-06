@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class}, version = 10, exportSchema = false)
+@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class}, version = 11, exportSchema = false)
 public abstract class SalahDatabase extends RoomDatabase {
 
     private static volatile SalahDatabase INSTANCE;
@@ -49,6 +49,13 @@ public abstract class SalahDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `relational_rules` ADD COLUMN `isManuallyDeselected` INTEGER NOT NULL DEFAULT 0");
+        }
+    };
+
 
     public static SalahDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
@@ -56,7 +63,7 @@ public abstract class SalahDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     SalahDatabase.class, "salah_database")
-                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10)
+                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                             .fallbackToDestructiveMigration()
                             .build();
                 }

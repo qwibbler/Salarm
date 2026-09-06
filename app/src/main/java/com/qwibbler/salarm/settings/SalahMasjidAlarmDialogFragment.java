@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.databinding.DialogMasjidAlarmBinding;
+import com.qwibbler.salarm.salah.Masjid;
 import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahDatabase;
@@ -301,10 +302,16 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         }
 
         AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(requireContext());
+            Masjid masjid = db.masjidDao().getById(mMasjidId);
+            if (rule.id == 0 && masjid != null) {
+                rule.isSelected = masjid.showMasjidEvents;
+            }
+
             if (rule.id == 0) {
-                SalahDatabase.getDatabase(requireContext()).relationalRuleDao().insert(rule);
+                db.relationalRuleDao().insert(rule);
             } else {
-                SalahDatabase.getDatabase(requireContext()).relationalRuleDao().update(rule);
+                db.relationalRuleDao().update(rule);
             }
             SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
             getParentFragmentManager().setFragmentResult("masjid_updated", new Bundle());

@@ -146,6 +146,7 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
             pref.setSummary(calculateTimeToday(rule, masjid));
             pref.setOnPreferenceChangeListener((preference, newValue) -> {
                 rule.isSelected = (boolean) newValue;
+                rule.isManuallyDeselected = !rule.isSelected;
                 AppExecutors.getDiskIO().execute(() -> {
                     SalahDatabase.getDatabase(requireContext()).relationalRuleDao().update(rule);
                     SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());

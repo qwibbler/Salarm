@@ -1,6 +1,7 @@
 package com.qwibbler.salarm.settings;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
     private TextInputEditText mNameEdit;
     private TextView mIntervalsSummary;
+    private View mCopyButton;
 
     public static void show(FragmentManager manager, long masjidId) {
         MasjidEditDialogFragment fragment = new MasjidEditDialogFragment();
@@ -45,6 +47,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
         View view = getLayoutInflater().inflate(R.layout.dialog_edit_masjid, null);
         mNameEdit = view.findViewById(R.id.masjid_name_edit);
         mIntervalsSummary = view.findViewById(R.id.masjid_intervals_summary);
+        mCopyButton = view.findViewById(R.id.masjid_copy_button);
         View intervalsRow = view.findViewById(R.id.masjid_intervals_row);
 
         mMasjidId = getArguments().getLong(ARG_MASJID_ID);
@@ -56,6 +59,8 @@ public class MasjidEditDialogFragment extends DialogFragment {
                     if (isAdded() && mMasjid != null) {
                         mNameEdit.setText(mMasjid.name);
                         updateIntervalsSummary();
+                        mCopyButton.setVisibility(View.VISIBLE);
+                        mCopyButton.setOnClickListener(v -> copyMasjid());
                     }
                 });
             });
@@ -100,20 +105,25 @@ public class MasjidEditDialogFragment extends DialogFragment {
     private void saveMasjid() {
         if (mMasjid == null) return;
         mMasjid.name = mNameEdit.getText().toString();
+        final Context appContext = requireContext().getApplicationContext();
+        final FragmentManager fragmentManager = getParentFragmentManager();
         AppExecutors.getDiskIO().execute(() -> {
             if (mMasjid.id == 0) {
-                SalahDatabase.getDatabase(requireContext()).masjidDao().insert(mMasjid);
+                SalahDatabase.getDatabase(appContext).masjidDao().insert(mMasjid);
             } else {
-                SalahDatabase.getDatabase(requireContext()).masjidDao().update(mMasjid);
+                SalahDatabase.getDatabase(appContext).masjidDao().update(mMasjid);
             }
-            getParentFragmentManager().setFragmentResult("masjid_updated", new Bundle());
+            fragmentManager.setFragmentResult("masjid_updated", new Bundle());
         });
     }
 
     private void deleteMasjid() {
         if (mMasjidId > 0) {
+            final Context context = requireContext();
+            final Context appContext = context.getApplicationContext();
+            final FragmentManager fragmentManager = getParentFragmentManager();
             CustomDialog.create(
-                requireContext(),
+                context,
                 null,
                 null,
                 getString(R.string.delete),
@@ -122,15 +132,16 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 getString(R.string.delete),
                 (dialog, which) -> {
                     AppExecutors.getDiskIO().execute(() -> {
-                        SalahDatabase.getDatabase(requireContext()).masjidDao().deleteById(mMasjidId);
-                        List<RelationalRule> rules = SalahDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
+                        SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                        db.masjidDao().deleteById(mMasjidId);
+                        List<RelationalRule> rules = db.relationalRuleDao().getAll();
                         for (RelationalRule r : rules) {
                             if (r.masjidId == mMasjidId) {
-                                SalahDatabase.getDatabase(requireContext()).relationalRuleDao().delete(r);
+                                db.relationalRuleDao().delete(r);
                             }
                         }
-                        SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
-                        getParentFragmentManager().setFragmentResult("masjid_updated", new Bundle());
+                        SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
+                        fragmentManager.setFragmentResult("masjid_updated", new Bundle());
                     });
                     dismiss();
                 },
@@ -142,5 +153,41 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 CustomDialog.SoftInputMode.NONE
             ).show();
         }
+    }
+
+    private void copyMasjid() {
+        if (mMasjid == null || mMasjidId <= 0) return;
+
+        final Context appContext = requireContext().getApplicationContext();
+        final FragmentManager fragmentManager = getParentFragmentManager();
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
+
+            // 1. Copy Masjid
+            Masjid newMasjid = new Masjid();
+            newMasjid.name = mMasjid.name + ' ' + getString(R.string.salah_masjid_copy_suffix);
+            newMasjid.showMasjidEvents = mMasjid.showMasjidEvents;
+            newMasjid.intervalsCount = mMasjid.intervalsCount;
+            newMasjid.boundary1 = mMasjid.boundary1;
+            newMasjid.boundary2 = mMasjid.boundary2;
+
+            long newId = db.masjidDao().insert(newMasjid);
+
+            // 2. Copy Rules
+            List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(mMasjidId);
+            for (RelationalRule rule : rules) {
+                RelationalRule newRule = new RelationalRule(rule);
+                newRule.id = 0; // New record
+                newRule.masjidId = newId;
+                db.relationalRuleDao().insert(newRule);
+            }
+
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    fragmentManager.setFragmentResult("masjid_updated", new Bundle());
+                    dismiss();
+                }
+            });
+        });
     }
 }

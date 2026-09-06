@@ -1844,6 +1844,8 @@
     <string name="salah_masjid_events_default">Default</string>
     <string name="salah_masjid_not_configured">Not configured</string>
     <string name="salah_masjid_timing_title_format">%1$s Timing</string>
+    <string name="salah_masjid_copy">Copy</string>
+    <string name="salah_masjid_copy_suffix">- COPY</string>
     <string name="ordinal_1st">%1$dst</string>
     <string name="ordinal_2nd">%1$dnd</string>
     <string name="ordinal_3rd">%1$drd</string>
