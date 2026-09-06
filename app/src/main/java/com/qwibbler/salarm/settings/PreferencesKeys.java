@@ -245,6 +245,7 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_ROUNDING_MAGHRIB = "key_salah_rounding_maghrib";
     public static final String KEY_SALAH_ROUNDING_ISHA = "key_salah_rounding_isha";
     public static final String KEY_SALAH_SHOW_BOTH_ASR = "key_salah_show_both_asr";
+    public static final String KEY_SALAH_MASJID_TIMINGS = "key_salah_masjid_timings";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS = "key_salah_show_both_asr_in_alarm_events";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES = "key_salah_show_both_asr_in_salah_times";
     public static final String KEY_SALAH_SHOW_BOTH_ASR_IN_WIDGETS = "key_salah_show_both_asr_in_widgets";

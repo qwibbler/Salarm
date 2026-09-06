@@ -1672,12 +1672,12 @@
     <string name="relational_alarm_primary_alarm">Primary Alarm set at</string>
     <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
-    <string name="relational_alarm_round">Round Alarm</string>
+    <string name="relational_alarm_round">Rounded</string>
     <string name="relational_alarm_safety_boundary">Cap Alarm to</string>
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>
     <string name="relational_alarm_stop_ringing">Dismiss Alarm</string>
-    <string name="relational_alarm_adjust_alarm">Adjust Alarm by</string>
+    <string name="relational_alarm_adjust_alarm">Adjusted by</string>
     <string name="relational_alarm_adjusted_by">Adjusted by</string>
     <string name="relational_alarm_custom">Custom</string>
     <string name="relational_alarm_save">SAVE</string>
@@ -1810,4 +1810,50 @@
     <string name="salarm_preview_dhuhr_time">12:30 PM</string>
     <string name="salarm_preview_asr_time">04:15 PM</string>
     <string name="salarm_preview_maghrib_time">07:20 PM</string>
+
+    <!-- Masjid Timings -->
+    <string name="salah_masjid_timings_title">Masjid Timings</string>
+    <string name="salah_masjid_timings_summary">Configure prayer timings for local masjids</string>
+    <string name="salah_masjid_events_shown_title">Events Shown</string>
+    <string name="salah_masjid_events_shown_summary">Choose which Salah events appear in the system</string>
+    <string name="salah_masjids_category_title">Masjids</string>
+    <string name="salah_add_new_masjid">Add a New Masjid</string>
+    <string name="salah_masjid_name_title">Masjid Name</string>
+    <string name="salah_masjid_intervals_title">Masjid Intervals</string>
+    <string name="salah_masjid_intervals_dialog_title">Configure Intervals</string>
+    <string name="salah_masjid_show_events_title">Show Masjid Events</string>
+    <string name="salah_masjid_save">Save</string>
+    <string name="salah_masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
+    <string name="salah_download_card">Download Card</string>
+
+    <string name="salah_extreme_min">min</string>
+    <string name="salah_extreme_max">max</string>
+    <string name="salah_intervals_2">2 Intervals</string>
+    <string name="salah_intervals_3">3 Intervals</string>
+    <string name="salah_intervals_adjust_hint">Adjust the boundaries to set interval ranges (1 to 31)</string>
+    <string name="salah_masjid_edit_title">Edit Masjid</string>
+    <string name="salah_masjid_default_name">Masjid 1</string>
+    <string name="salah_masjid_event_time_set_at">Event time set at</string>
+    <string name="salah_masjid_minutes">minutes</string>
+    <string name="salah_masjid_time_of">time of</string>
+    <string name="salah_masjid_round_event_time">Round event time</string>
+    <string name="salah_masjid_adjust_event_time_by">Adjust event time by</string>
+    <string name="salah_masjid_cap_event_time_to">Cap event time to</string>
+    <string name="salah_masjid_than">than</string>
+    <string name="salah_masjid_before">before</string>
+    <string name="salah_masjid_events_default">Default</string>
+    <string name="salah_masjid_not_configured">Not configured</string>
+    <string name="salah_masjid_timing_title_format">%1$s Timing</string>
+    <string name="ordinal_1st">%1$dst</string>
+    <string name="ordinal_2nd">%1$dnd</string>
+    <string name="ordinal_3rd">%1$drd</string>
+    <string name="ordinal_th">%1$dth</string>
+    <string name="salah_masjid_interval_range">%1$s to %2$s</string>
+
+    <string name="salah_rule_description_base_max">alarm %1$s max time of %2$s</string>
+    <string name="salah_rule_description_base_min">alarm %1$s min time of %2$s</string>
+    <string name="salah_rule_no_later_max">, no later than %1$s max time of %2$s</string>
+    <string name="salah_rule_no_later_min">, no later than %1$s min time of %2$s</string>
+    <string name="salah_rule_no_earlier_max">, no earlier than %1$s max time of %2$s</string>
+    <string name="salah_rule_no_earlier_min">, no earlier than %1$s min time of %2$s</string>
 </resources>

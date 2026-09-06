@@ -211,6 +211,8 @@ public final class AlarmFragment extends SalarmFragment
         mTagFilterAdapter = new TagFilterAdapter();
         mBinding.tagFilterRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
         mBinding.tagFilterRecyclerView.setAdapter(mTagFilterAdapter);
+        mBinding.tagFilterRecyclerView.setItemAnimator(null);
+        mBinding.tagFilterRecyclerView.setItemAnimator(null);
 
         mBinding.allAlarmsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
@@ -528,8 +530,7 @@ public final class AlarmFragment extends SalarmFragment
 
         Collections.sort(availableTags);
 
-        setAdapterItems(filteredList, SystemClock.elapsedRealtime());
-        mTagFilterAdapter.setTags(availableTags);
+        setAdapterItems(filteredList, availableTags, SystemClock.elapsedRealtime());
 
         // Update toggle state based on visible alarms
         updateAllAlarmsToggleState(filteredList);
@@ -1004,7 +1005,7 @@ public final class AlarmFragment extends SalarmFragment
      * @param updateToken a monotonically increasing value used to preserve ordering of deferred
      *                    updates
      */
-    private void setAdapterItems(final List<AlarmItemHolder> items, final long updateToken) {
+    private void setAdapterItems(final List<AlarmItemHolder> items, final List<String> availableTags, final long updateToken) {
         if (mBinding == null || !isAdded() || mIsReordering) {
             return;
         }
@@ -1014,20 +1015,24 @@ public final class AlarmFragment extends SalarmFragment
             return;
         }
 
-        if (Objects.requireNonNull(mBinding.alarmRecyclerView.getItemAnimator()).isRunning()) {
+        boolean mainAnimatorRunning = Objects.requireNonNull(mBinding.alarmRecyclerView.getItemAnimator()).isRunning();
+        boolean tagAnimatorRunning = mBinding.tagFilterRecyclerView.getItemAnimator() != null && mBinding.tagFilterRecyclerView.getItemAnimator().isRunning();
+
+        if (mainAnimatorRunning || tagAnimatorRunning) {
             // RecyclerView is currently animating -> defer update.
-            mBinding.alarmRecyclerView.getItemAnimator().isRunning(() -> setAdapterItems(items, updateToken));
-        } else if (mBinding.alarmRecyclerView.isComputingLayout()) {
+            mBinding.alarmRecyclerView.getItemAnimator().isRunning(() -> setAdapterItems(items, availableTags, updateToken));
+        } else if (mBinding.alarmRecyclerView.isComputingLayout() || mBinding.tagFilterRecyclerView.isComputingLayout()) {
             // RecyclerView is currently computing a layout -> defer update.
-            mBinding.alarmRecyclerView.post(() -> {
+            mBinding.alarmRootView.post(() -> {
                 if (mBinding != null) {
-                    setAdapterItems(items, updateToken);
+                    setAdapterItems(items, availableTags, updateToken);
                 }
             });
         } else {
             mCurrentUpdateToken = updateToken;
 
             mItemAdapter.setItems(items);
+            mTagFilterAdapter.setTags(availableTags);
 
             // Show or hide the empty view as appropriate.
             final boolean noAlarms = items.isEmpty();

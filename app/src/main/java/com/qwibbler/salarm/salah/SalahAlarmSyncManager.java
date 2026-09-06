@@ -52,7 +52,7 @@ public class SalahAlarmSyncManager {
                 }
 
                 // Sync to AOSP SQLite
-                Alarm syncedAlarm = syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
+                Alarm syncedAlarm = syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone, null);
 
                 if (listener != null) {
                     AppExecutors.getMainThread().post(() -> listener.onRuleSynced(syncedAlarm));
@@ -64,7 +64,63 @@ public class SalahAlarmSyncManager {
         });
     }
 
-    private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
+    public static void syncSelectedRulesToAlarms(Context context) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                List<RelationalRule> allRules = db.relationalRuleDao().getAll();
+                List<Masjid> allMasjids = db.masjidDao().getAll();
+
+                for (RelationalRule rule : allRules) {
+                    boolean shouldBeActive = rule.isSelected;
+
+                    // Masjid Event definitions (rules defining the masjid prayer time)
+                    // are NOT native alarms. They are used as anchor events for other alarms.
+                    if (rule.masjidSalahType != null) {
+                        shouldBeActive = false;
+                    }
+
+                    Masjid masjid = null;
+                    if (rule.anchorMasjidId > 0) {
+                        // If this rule is anchored to a masjid, we might want to check
+                        // if that masjid exists and is enabled.
+                        for (Masjid m : allMasjids) {
+                            if (m.id == rule.anchorMasjidId) {
+                                masjid = m;
+                                break;
+                            }
+                        }
+                        if (masjid == null || !masjid.showMasjidEvents) {
+                            shouldBeActive = false;
+                        }
+                    }
+
+                    if (shouldBeActive && rule.enabled) {
+                        syncRuleToNativeAlarmInternal(appContext, rule, null, masjid);
+                    } else {
+                        disableNativeAlarmForRule(appContext, rule.id);
+                    }
+                }
+            } catch (Throwable t) {
+                LogUtils.e("Error syncing selected rules", t);
+            }
+        });
+    }
+
+    private static void disableNativeAlarmForRule(Context context, long ruleId) {
+        ContentResolver cr = context.getContentResolver();
+        List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(ruleId));
+        for (Alarm alarm : alarms) {
+            if (alarm.enabled) {
+                alarm.enabled = false;
+                alarm.updateAlarm(cr);
+                AlarmStateManager.deleteAllInstances(context, alarm.id);
+            }
+        }
+    }
+
+    private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone, Masjid providedMasjid) {
         ContentResolver cr = context.getContentResolver();
 
         // Find existing alarm mapped to this rule
@@ -84,7 +140,19 @@ public class SalahAlarmSyncManager {
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
-            nativeAlarm.label = "🔔 " + RelationalRule.getEventName(context, rule.anchorEvent);
+
+            String label;
+            if (rule.anchorMasjidId > 0) {
+                Masjid masjid = providedMasjid;
+                if (masjid == null) {
+                    masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.anchorMasjidId);
+                }
+                String masjidName = masjid != null ? masjid.name : "Masjid";
+                label = SalahUtils.getLocalizedSalahName(context, rule.anchorMasjidSalahType) + " - " + masjidName;
+            } else {
+                label = RelationalRule.getEventName(context, rule.anchorEvent);
+            }
+            nativeAlarm.label = "🔔 " + label;
 
             // Add auto-tag if enabled
             SharedPreferences prefs = getDefaultSharedPreferences(context);
@@ -104,7 +172,7 @@ public class SalahAlarmSyncManager {
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }
 
-        recalculateNextInstanceInternal(context, nativeAlarm, rule, null);
+        recalculateNextInstanceInternal(context, nativeAlarm, rule, null, providedMasjid);
 
         return nativeAlarm;
     }
@@ -138,14 +206,14 @@ public class SalahAlarmSyncManager {
             RelationalRule targetRule = db.relationalRuleDao().getById(alarm.relationalRuleId);
 
             if (targetRule != null) {
-                recalculateNextInstanceInternal(context, alarm, targetRule, skipTime);
+                recalculateNextInstanceInternal(context, alarm, targetRule, skipTime, null);
             }
         } catch (Throwable t) {
             SalahErrorHandler.handleSyncError(context, t);
         }
     }
 
-    private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime) {
+    private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime, Masjid providedMasjid) {
         if (!alarm.enabled) {
             alarm.updateAlarm(context.getContentResolver());
             if (rule.enabled) {
@@ -188,7 +256,7 @@ public class SalahAlarmSyncManager {
             }
         }
 
-        // If it's a one-time alarm for a specific date, start from that date unless already past it
+        // If it's a one-time alarm for a specific day, start from that date unless already past it
         if (alarm.year > 0) {
             Calendar specificDate = Calendar.getInstance();
             specificDate.set(alarm.year, alarm.month, alarm.day, 0, 0, 0);
@@ -213,7 +281,7 @@ public class SalahAlarmSyncManager {
             }
 
             SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(context, candidateDate.getTime(), coords[0], coords[1], method);
-            result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+            result = RelationalRule.evaluateTimeWithConflictCheck(context, rule, times, candidateDate.getTime(), providedMasjid);
 
             if (result.time() > 0) {
                 long resultMin = (result.time() / 60000) * 60000;

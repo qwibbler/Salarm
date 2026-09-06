@@ -106,22 +106,41 @@ public class MasjidEditDialogFragment extends DialogFragment {
             } else {
                 SalahDatabase.getDatabase(requireContext()).masjidDao().update(mMasjid);
             }
+            getParentFragmentManager().setFragmentResult("masjid_updated", new Bundle());
         });
     }
 
     private void deleteMasjid() {
         if (mMasjidId > 0) {
-            AppExecutors.getDiskIO().execute(() -> {
-                SalahDatabase.getDatabase(requireContext()).masjidDao().deleteById(mMasjidId);
-                // Also delete related rules?
-                List<RelationalRule> rules = SalahDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
-                for (RelationalRule r : rules) {
-                    if (r.masjidId == mMasjidId) {
-                        SalahDatabase.getDatabase(requireContext()).relationalRuleDao().delete(r);
-                    }
-                }
-                SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
-            });
+            CustomDialog.create(
+                requireContext(),
+                null,
+                null,
+                getString(R.string.delete),
+                getString(R.string.salah_masjid_delete_confirm),
+                null,
+                getString(R.string.delete),
+                (dialog, which) -> {
+                    AppExecutors.getDiskIO().execute(() -> {
+                        SalahDatabase.getDatabase(requireContext()).masjidDao().deleteById(mMasjidId);
+                        List<RelationalRule> rules = SalahDatabase.getDatabase(requireContext()).relationalRuleDao().getAll();
+                        for (RelationalRule r : rules) {
+                            if (r.masjidId == mMasjidId) {
+                                SalahDatabase.getDatabase(requireContext()).relationalRuleDao().delete(r);
+                            }
+                        }
+                        SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
+                        getParentFragmentManager().setFragmentResult("masjid_updated", new Bundle());
+                    });
+                    dismiss();
+                },
+                getString(android.R.string.cancel),
+                null,
+                null,
+                null,
+                null,
+                CustomDialog.SoftInputMode.NONE
+            ).show();
         }
     }
 }

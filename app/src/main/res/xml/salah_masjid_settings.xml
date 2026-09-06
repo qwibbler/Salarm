@@ -13,6 +13,8 @@
     <PreferenceCategory
         android:key="category_masjids"
         android:title="@string/salah_masjids_category_title"
+        app:allowDividerAbove="false"
+        app:allowDividerBelow="false"
         app:iconSpaceReserved="false">
 
         <Preference

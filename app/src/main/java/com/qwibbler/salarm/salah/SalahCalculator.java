@@ -12,6 +12,7 @@ import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.settings.PreferencesDefaultValues;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -61,6 +62,89 @@ public class SalahCalculator {
             default -> Math.round(time / 60000.0) * 60000;
         };
         return new Date(rounded);
+    }
+
+    public static Date getIntervalExtremeTime(Context context, Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+        Masjid.Interval targetInterval = null;
+        for (Masjid.Interval interval : masjid.getIntervals()) {
+            if (dayOfMonth >= interval.startDay && dayOfMonth <= interval.endDay) {
+                targetInterval = interval;
+                break;
+            }
+        }
+
+        if (targetInterval == null) return null;
+
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
+        double lat = Double.parseDouble(latStr);
+        double lon = Double.parseDouble(lonStr);
+        CalculationMethod method = SalahUtils.getCalculationMethod(context);
+
+        Date extremeTime = null;
+
+        Calendar loopCal = (Calendar) cal.clone();
+        for (int day = targetInterval.startDay; day <= targetInterval.endDay; day++) {
+            loopCal.set(Calendar.DAY_OF_MONTH, day);
+            SalahTimes times = calculateAllSalahTimes(context, loopCal.getTime(), lat, lon, method);
+            Date currentTime = switch (event) {
+                case FAJR -> times.fajr;
+                case SUNRISE -> times.sunrise;
+                case DHUHR -> times.dhuhr;
+                case ASR_SHAFI -> times.asrShafi;
+                case ASR_HANAFI -> times.asrHanafi;
+                case MAGHRIB -> times.maghrib;
+                case ISHA -> times.isha;
+            };
+
+            if (currentTime == null) continue;
+
+            if (extremeTime == null) {
+                extremeTime = currentTime;
+            } else {
+                if (isMax) {
+                    // Compare only time of day?
+                    // The requirement says "max time of Fajr".
+                    // Usually this means the latest time in the day.
+                    if (getTimeOfDay(currentTime) > getTimeOfDay(extremeTime)) {
+                        extremeTime = currentTime;
+                    }
+                } else {
+                    if (getTimeOfDay(currentTime) < getTimeOfDay(extremeTime)) {
+                        extremeTime = currentTime;
+                    }
+                }
+            }
+        }
+
+        // Return the extreme time but adjusted to the target date's year/month/day
+        if (extremeTime != null) {
+            Calendar resultCal = Calendar.getInstance();
+            resultCal.setTime(date);
+            Calendar extremeCal = Calendar.getInstance();
+            extremeCal.setTime(extremeTime);
+            resultCal.set(Calendar.HOUR_OF_DAY, extremeCal.get(Calendar.HOUR_OF_DAY));
+            resultCal.set(Calendar.MINUTE, extremeCal.get(Calendar.MINUTE));
+            resultCal.set(Calendar.SECOND, extremeCal.get(Calendar.SECOND));
+            resultCal.set(Calendar.MILLISECOND, extremeCal.get(Calendar.MILLISECOND));
+            return resultCal.getTime();
+        }
+
+        return null;
+    }
+
+    private static long getTimeOfDay(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.HOUR_OF_DAY) * 3600000L +
+               cal.get(Calendar.MINUTE) * 60000L +
+               cal.get(Calendar.SECOND) * 1000L +
+               cal.get(Calendar.MILLISECOND);
     }
 
     public static class SalahTimes {

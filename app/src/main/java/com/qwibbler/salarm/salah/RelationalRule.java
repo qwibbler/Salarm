@@ -24,6 +24,17 @@ public class RelationalRule {
 
     public boolean enabled;
 
+    public long masjidId; // 0 if not a masjid rule
+    public boolean anchorIsMax;
+    public boolean clipIsMax;
+    public String masjidSalahType; // e.g. "FAJR", "DHUHR", etc.
+    public boolean isSelected; // For "Events Shown" selection
+
+    public long anchorMasjidId;
+    public String anchorMasjidSalahType;
+    public long clipMasjidId;
+    public String clipMasjidSalahType;
+
     public enum AnchorEvent {
         FAJR, SUNRISE, DHUHR, ASR_SHAFI, ASR_HANAFI, MAGHRIB, ISHA
     }
@@ -96,6 +107,15 @@ public class RelationalRule {
         this.autostopEnabled = other.autostopEnabled;
         this.autostopOffsetMinutes = other.autostopOffsetMinutes;
         this.autostopAnchorEvent = other.autostopAnchorEvent;
+        this.masjidId = other.masjidId;
+        this.anchorIsMax = other.anchorIsMax;
+        this.clipIsMax = other.clipIsMax;
+        this.masjidSalahType = other.masjidSalahType;
+        this.isSelected = other.isSelected;
+        this.anchorMasjidId = other.anchorMasjidId;
+        this.anchorMasjidSalahType = other.anchorMasjidSalahType;
+        this.clipMasjidId = other.clipMasjidId;
+        this.clipMasjidSalahType = other.clipMasjidSalahType;
     }
 
     public RelationalRule(AnchorEvent anchorEvent, int offsetMinutes, RoundingDirection roundingDirection,
@@ -119,7 +139,13 @@ public class RelationalRule {
         // Base: alarm [at / 5m after / 10m before] Fajr
         String offsetPart = getOffsetPart(context, offsetMinutes);
         String eventName = getEventName(context, anchorEvent);
-        sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_description_base, offsetPart, eventName));
+        int baseResId;
+        if (masjidSalahType != null) {
+            baseResId = anchorIsMax ? com.qwibbler.salarm.R.string.salah_rule_description_base_max : com.qwibbler.salarm.R.string.salah_rule_description_base_min;
+        } else {
+            baseResId = com.qwibbler.salarm.R.string.salah_rule_description_base;
+        }
+        sb.append(context.getString(baseResId, offsetPart, eventName));
 
         // Rounding: rounded to the nearest 5m
         sb.append(getRoundingPart(context, roundingDirection, roundingIntervalMinutes));
@@ -134,7 +160,20 @@ public class RelationalRule {
         if (clip != null) {
             String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
             String clipEventName = getEventName(context, clip.clipEvent);
-            int clipResId = clip.boundaryType == BoundaryType.NO_LATER_THAN ? com.qwibbler.salarm.R.string.salah_rule_no_later : com.qwibbler.salarm.R.string.salah_rule_no_earlier;
+            int clipResId;
+            if (clip.boundaryType == BoundaryType.NO_LATER_THAN) {
+                if (masjidSalahType != null) {
+                    clipResId = clipIsMax ? com.qwibbler.salarm.R.string.salah_rule_no_later_max : com.qwibbler.salarm.R.string.salah_rule_no_later_min;
+                } else {
+                    clipResId = com.qwibbler.salarm.R.string.salah_rule_no_later;
+                }
+            } else {
+                if (masjidSalahType != null) {
+                    clipResId = clipIsMax ? com.qwibbler.salarm.R.string.salah_rule_no_earlier_max : com.qwibbler.salarm.R.string.salah_rule_no_earlier_min;
+                } else {
+                    clipResId = com.qwibbler.salarm.R.string.salah_rule_no_earlier;
+                }
+            }
             sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
             sb.append(getRoundingPart(context, clip.clipRoundingDirection, clip.clipRoundingIntervalMinutes));
         }
@@ -205,14 +244,44 @@ public class RelationalRule {
     /**
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */
-    public static Date evaluateTime(@NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times) {
-        EvaluationResult result = evaluateTimeWithConflictCheck(rule, times);
-        return result.time > 0 ? new Date(result.time) : null;
+    public static Date evaluateTime(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
+        return evaluateTime(context, rule, times, date, null);
+    }
+
+    public static Date evaluateTime(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid masjid) {
+        EvaluationResult result = evaluateTimeWithConflictCheck(context, rule, times, date, masjid);
+        return result.time() > 0 ? new Date(result.time()) : null;
     }
 
     @NonNull
-    public static EvaluationResult evaluateTimeWithConflictCheck(@NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times) {
-        Date anchorTime = getEventTime(rule.anchorEvent, times);
+    public static EvaluationResult evaluateTimeWithConflictCheck(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
+        return evaluateTimeWithConflictCheck(context, rule, times, date, null);
+    }
+
+    @NonNull
+    public static EvaluationResult evaluateTimeWithConflictCheck(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid providedMasjid) {
+        Date anchorTime;
+        if (rule.anchorMasjidId > 0 && context != null) {
+            RelationalRule masjidEventRule = SalahDatabase.getDatabase(context).relationalRuleDao().getMasjidEventRule(rule.anchorMasjidId, rule.anchorMasjidSalahType);
+            if (masjidEventRule != null) {
+                anchorTime = evaluateTime(context, masjidEventRule, times, date);
+            } else {
+                anchorTime = getEventTime(rule.anchorEvent, times);
+            }
+        } else if (rule.masjidId > 0 && context != null) {
+            Masjid masjid = providedMasjid;
+            if (masjid == null) {
+                masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.masjidId);
+            }
+            if (masjid != null) {
+                anchorTime = SalahCalculator.getIntervalExtremeTime(context, date, masjid, rule.anchorEvent, rule.anchorIsMax);
+            } else {
+                anchorTime = getEventTime(rule.anchorEvent, times);
+            }
+        } else {
+            anchorTime = getEventTime(rule.anchorEvent, times);
+        }
+
         if (anchorTime == null) {
             LogUtils.w("Anchor time is null for event: " + rule.anchorEvent);
             return new EvaluationResult(0, -1);
@@ -224,7 +293,28 @@ public class RelationalRule {
         LogUtils.i("Initial target time: " + new Date(targetMillis));
 
         if (rule.clip != null) {
-            Date clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
+            Date clipAnchorTime;
+            if (rule.clipMasjidId > 0 && context != null) {
+                RelationalRule clipMasjidEventRule = SalahDatabase.getDatabase(context).relationalRuleDao().getMasjidEventRule(rule.clipMasjidId, rule.clipMasjidSalahType);
+                if (clipMasjidEventRule != null) {
+                    clipAnchorTime = evaluateTime(context, clipMasjidEventRule, times, date);
+                } else {
+                    clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
+                }
+            } else if (rule.masjidId > 0 && context != null) {
+                Masjid masjid = providedMasjid;
+                if (masjid == null) {
+                    masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.masjidId);
+                }
+                if (masjid != null) {
+                    clipAnchorTime = SalahCalculator.getIntervalExtremeTime(context, date, masjid, rule.clip.clipEvent, rule.clipIsMax);
+                } else {
+                    clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
+                }
+            } else {
+                clipAnchorTime = getEventTime(rule.clip.clipEvent, times);
+            }
+
             if (clipAnchorTime != null) {
                 long clipMillis = applyRule(clipAnchorTime, rule.clip.clipOffsetMinutes, rule.clip.clipRoundingDirection,
                         rule.clip.clipRoundingIntervalMinutes);

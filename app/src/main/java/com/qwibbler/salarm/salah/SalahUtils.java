@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
+import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.settings.PreferencesDefaultValues;
 import com.qwibbler.salarm.settings.PreferencesKeys;
@@ -261,5 +262,18 @@ public class SalahUtils {
         cal.add(Calendar.DAY_OF_YEAR, 1);
         SalahCalculator.SalahTimes tomorrowTimes = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
         return tomorrowTimes.fajr.getTime();
+    }
+
+    public static String getLocalizedSalahName(Context context, String type) {
+        if (type == null) return "";
+        return switch (type) {
+            case "FAJR" -> context.getString(R.string.fajr_label);
+            case "DHUHR" -> context.getString(R.string.dhuhr_label);
+            case "ASR" -> context.getString(R.string.asr_label);
+            case "MAGHRIB" -> context.getString(R.string.maghrib_label);
+            case "ISHA" -> context.getString(R.string.isha_label);
+            case "SUNRISE" -> context.getString(R.string.sunrise_label);
+            default -> type;
+        };
     }
 }
