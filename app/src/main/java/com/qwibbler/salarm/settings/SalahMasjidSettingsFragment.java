@@ -114,32 +114,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             masjidSection.setTitle(masjid.name);
             screen.addPreference(masjidSection);
 
-            SwitchPreferenceCompat showEventsToggle = new SwitchPreferenceCompat(context);
-            showEventsToggle.setTitle(R.string.salah_masjid_show_events_title);
-            showEventsToggle.setLayoutResource(R.layout.settings_preference_layout);
-            showEventsToggle.setChecked(masjid.showMasjidEvents);
-            showEventsToggle.setOnPreferenceChangeListener((preference, newValue) -> {
-                masjid.showMasjidEvents = (boolean) newValue;
-                AppExecutors.getDiskIO().execute(() -> {
-                    SalahDatabase db = SalahDatabase.getDatabase(requireContext());
-                    db.masjidDao().update(masjid);
-
-                    List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(masjid.id);
-                    for (RelationalRule rule : rules) {
-                        if (masjid.showMasjidEvents) {
-                            if (!rule.isManuallyDeselected) {
-                                rule.isSelected = true;
-                            }
-                        } else {
-                            rule.isSelected = false;
-                        }
-                        db.relationalRuleDao().update(rule);
-                    }
-
-                    SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
-                });
-                return true;
-            });
+            SwitchPreferenceCompat showEventsToggle = getSwitchPreferenceCompat(masjid, context);
             masjidSection.addPreference(showEventsToggle);
 
             addSalahPreference(masjidSection, masjid, "FAJR");
@@ -155,6 +130,38 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         downloadCard.setTitle(R.string.salah_download_card);
         downloadCard.setLayoutResource(R.layout.settings_preference_layout);
         screen.addPreference(downloadCard);
+    }
+
+    @NonNull
+    private SwitchPreferenceCompat getSwitchPreferenceCompat(Masjid masjid, Context context) {
+        SwitchPreferenceCompat showEventsToggle = new SwitchPreferenceCompat(context);
+        showEventsToggle.setTitle(R.string.salah_masjid_show_events_title);
+        showEventsToggle.setLayoutResource(R.layout.settings_preference_layout);
+        showEventsToggle.setIconSpaceReserved(false);
+        showEventsToggle.setChecked(masjid.showMasjidEvents);
+        showEventsToggle.setOnPreferenceChangeListener((preference, newValue) -> {
+            masjid.showMasjidEvents = (boolean) newValue;
+            AppExecutors.getDiskIO().execute(() -> {
+                SalahDatabase db = SalahDatabase.getDatabase(requireContext());
+                db.masjidDao().update(masjid);
+
+                List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(masjid.id);
+                for (RelationalRule rule : rules) {
+                    if (masjid.showMasjidEvents) {
+                        if (!rule.isManuallyDeselected) {
+                            rule.isSelected = true;
+                        }
+                    } else {
+                        rule.isSelected = false;
+                    }
+                    db.relationalRuleDao().update(rule);
+                }
+
+                SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
+            });
+            return true;
+        });
+        return showEventsToggle;
     }
 
     private void setupFixedPreferences() {
@@ -182,6 +189,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         Preference pref = new Preference(context);
         pref.setTitle(SalahUtils.getLocalizedSalahName(context, type));
         pref.setLayoutResource(R.layout.settings_preference_layout);
+        pref.setIconSpaceReserved(false);
 
         final Context appContext = context.getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
