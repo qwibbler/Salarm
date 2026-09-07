@@ -82,132 +82,106 @@ public class DismissAfterDialogFragment extends DialogFragment {
         mBinding = AlarmDismissAfterDialogBinding.inflate(getLayoutInflater());
 
         mBinding.dismissNeverCheckbox.setTypeface(typeFace);
-        mBinding.editMinutes.setTypeface(typeFace);
-        mBinding.editSnoozes.setTypeface(typeFace);
+        mBinding.editValue.setTypeface(typeFace);
 
         if (dismissAfter == 0) {
             mBinding.dismissNeverCheckbox.setChecked(true);
             mBinding.minutesCheckbox.setChecked(false);
             mBinding.snoozesCheckbox.setChecked(false);
-            mBinding.editMinutes.setText("");
-            mBinding.editSnoozes.setText("");
+            mBinding.editValue.setText("");
         } else if (dismissAfter > 0) {
             mBinding.dismissNeverCheckbox.setChecked(false);
             mBinding.minutesCheckbox.setChecked(true);
             mBinding.snoozesCheckbox.setChecked(false);
-            mBinding.editMinutes.setText(String.valueOf(dismissAfter));
-            mBinding.editSnoozes.setText("");
+            mBinding.editValue.setText(String.valueOf(dismissAfter));
         } else {
             mBinding.dismissNeverCheckbox.setChecked(false);
             mBinding.minutesCheckbox.setChecked(false);
             mBinding.snoozesCheckbox.setChecked(true);
-            mBinding.editMinutes.setText("");
-            mBinding.editSnoozes.setText(String.valueOf(Math.abs(dismissAfter)));
+            mBinding.editValue.setText(String.valueOf(Math.abs(dismissAfter)));
         }
 
         updateInputState();
 
         mBinding.dismissNeverCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isUpdatingInputs || !isChecked) return;
+            if (isUpdatingInputs) return;
             isUpdatingInputs = true;
-            mBinding.minutesCheckbox.setChecked(false);
-            mBinding.snoozesCheckbox.setChecked(false);
-            mBinding.editMinutes.setText("");
-            mBinding.editSnoozes.setText("");
+            if (isChecked) {
+                mBinding.minutesCheckbox.setChecked(false);
+                mBinding.snoozesCheckbox.setChecked(false);
+                mBinding.editValue.setText("");
+            } else {
+                // At least one must be checked
+                mBinding.dismissNeverCheckbox.setChecked(true);
+            }
             updateInputState();
             isUpdatingInputs = false;
         });
 
         mBinding.minutesCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isUpdatingInputs || !isChecked) return;
+            if (isUpdatingInputs) return;
             isUpdatingInputs = true;
-            mBinding.dismissNeverCheckbox.setChecked(false);
-            mBinding.snoozesCheckbox.setChecked(false);
-            mBinding.editSnoozes.setText("");
-            updateInputState();
-            mBinding.editMinutes.requestFocus();
-            if (mInput != null) {
-                mInput.showSoftInput(mBinding.editMinutes, InputMethodManager.SHOW_IMPLICIT);
+            if (isChecked) {
+                mBinding.dismissNeverCheckbox.setChecked(false);
+                mBinding.snoozesCheckbox.setChecked(false);
+                updateInputState();
+                mBinding.editValue.requestFocus();
+                if (mInput != null) {
+                    mInput.showSoftInput(mBinding.editValue, InputMethodManager.SHOW_IMPLICIT);
+                }
+            } else if (!mBinding.dismissNeverCheckbox.isChecked() && !mBinding.snoozesCheckbox.isChecked()) {
+                mBinding.dismissNeverCheckbox.setChecked(true);
+                mBinding.editValue.setText("");
+                updateInputState();
             }
             isUpdatingInputs = false;
         });
 
         mBinding.snoozesCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isUpdatingInputs || !isChecked) return;
+            if (isUpdatingInputs) return;
             isUpdatingInputs = true;
-            mBinding.dismissNeverCheckbox.setChecked(false);
-            mBinding.minutesCheckbox.setChecked(false);
-            mBinding.editMinutes.setText("");
-            updateInputState();
-            mBinding.editSnoozes.requestFocus();
-            if (mInput != null) {
-                mInput.showSoftInput(mBinding.editSnoozes, InputMethodManager.SHOW_IMPLICIT);
+            if (isChecked) {
+                mBinding.dismissNeverCheckbox.setChecked(false);
+                mBinding.minutesCheckbox.setChecked(false);
+                updateInputState();
+                mBinding.editValue.requestFocus();
+                if (mInput != null) {
+                    mInput.showSoftInput(mBinding.editValue, InputMethodManager.SHOW_IMPLICIT);
+                }
+            } else if (!mBinding.dismissNeverCheckbox.isChecked() && !mBinding.minutesCheckbox.isChecked()) {
+                mBinding.dismissNeverCheckbox.setChecked(true);
+                mBinding.editValue.setText("");
+                updateInputState();
             }
             isUpdatingInputs = false;
         });
 
-        mBinding.editMinutes.addTextChangedListener(new TextWatcher() {
+        mBinding.editValue.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (isUpdatingInputs) return;
-                if (!s.toString().isEmpty()) {
-                    isUpdatingInputs = true;
-                    mBinding.dismissNeverCheckbox.setChecked(false);
-                    mBinding.minutesCheckbox.setChecked(true);
-                    mBinding.snoozesCheckbox.setChecked(false);
-                    mBinding.editSnoozes.setText("");
-                    isUpdatingInputs = false;
-                }
-                updateInputState();
+                updateOkButton();
             }
             @Override public void afterTextChanged(Editable s) {
-                if (isUpdatingInputs) return;
-                if (!s.toString().isEmpty()) {
-                    try {
-                        int val = Integer.parseInt(s.toString());
-                        if (val > 120) {
-                            isUpdatingInputs = true;
-                            mBinding.editMinutes.setText("120");
-                            mBinding.editMinutes.setSelection(3);
-                            isUpdatingInputs = false;
-                        }
-                    } catch (NumberFormatException ignored) {}
-                }
+                if (isUpdatingInputs || s.toString().isEmpty()) return;
+                try {
+                    int val = Integer.parseInt(s.toString());
+                    if (mBinding.minutesCheckbox.isChecked() && val > 120) {
+                        isUpdatingInputs = true;
+                        mBinding.editValue.setText("120");
+                        mBinding.editValue.setSelection(3);
+                        isUpdatingInputs = false;
+                    } else if (mBinding.snoozesCheckbox.isChecked() && val > 24) {
+                        isUpdatingInputs = true;
+                        mBinding.editValue.setText("24");
+                        mBinding.editValue.setSelection(2);
+                        isUpdatingInputs = false;
+                    }
+                } catch (NumberFormatException ignored) {}
             }
         });
 
-        mBinding.editSnoozes.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (isUpdatingInputs) return;
-                if (!s.toString().isEmpty()) {
-                    isUpdatingInputs = true;
-                    mBinding.dismissNeverCheckbox.setChecked(false);
-                    mBinding.minutesCheckbox.setChecked(false);
-                    mBinding.snoozesCheckbox.setChecked(true);
-                    mBinding.editMinutes.setText("");
-                    isUpdatingInputs = false;
-                }
-                updateInputState();
-            }
-            @Override public void afterTextChanged(Editable s) {
-                if (isUpdatingInputs) return;
-                if (!s.toString().isEmpty()) {
-                    try {
-                        int val = Integer.parseInt(s.toString());
-                        if (val > 24) {
-                            isUpdatingInputs = true;
-                            mBinding.editSnoozes.setText("24");
-                            mBinding.editSnoozes.setSelection(2);
-                            isUpdatingInputs = false;
-                        }
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-        });
-
-        mBinding.editMinutes.setOnEditorActionListener(new ImeDoneListener());
-        mBinding.editSnoozes.setOnEditorActionListener(new ImeDoneListener());
+        mBinding.editValue.setOnEditorActionListener(new ImeDoneListener());
 
         return CustomDialog.create(
             requireContext(),
@@ -234,28 +208,34 @@ public class DismissAfterDialogFragment extends DialogFragment {
         boolean minutesChecked = mBinding.minutesCheckbox.isChecked();
         boolean snoozesChecked = mBinding.snoozesCheckbox.isChecked();
 
-        mBinding.textInputLayoutMinutes.setEnabled(minutesChecked);
-        mBinding.textInputLayoutSnoozes.setEnabled(snoozesChecked);
+        mBinding.textInputLayout.setEnabled(minutesChecked || snoozesChecked);
+        if (minutesChecked) {
+            mBinding.textInputLayout.setHint(getString(R.string.label_minutes));
+            mBinding.editValue.setHint(getString(R.string.label_minutes));
+        } else if (snoozesChecked) {
+            mBinding.textInputLayout.setHint(getString(R.string.label_snoozes));
+            mBinding.editValue.setHint(getString(R.string.label_snoozes));
+        } else {
+            mBinding.textInputLayout.setHint(null);
+            mBinding.editValue.setHint(null);
+        }
         updateOkButton();
     }
 
     private void updateOkButton() {
         if (mOkButton == null) return;
         boolean never = mBinding.dismissNeverCheckbox.isChecked();
-        boolean minutesChecked = mBinding.minutesCheckbox.isChecked();
-        boolean snoozesChecked = mBinding.snoozesCheckbox.isChecked();
-        boolean minutesFilled = !TextUtils.isEmpty(mBinding.editMinutes.getText());
-        boolean snoozesFilled = !TextUtils.isEmpty(mBinding.editSnoozes.getText());
+        boolean valueFilled = !TextUtils.isEmpty(mBinding.editValue.getText());
 
-        mOkButton.setEnabled(never || (minutesChecked && minutesFilled) || (snoozesChecked && snoozesFilled));
+        mOkButton.setEnabled(never || valueFilled);
     }
 
     private void setDismissAfterValue() {
         int value = 0;
         if (mBinding.minutesCheckbox.isChecked()) {
-            value = parseInput(mBinding.editMinutes.getText());
+            value = parseInput(mBinding.editValue.getText());
         } else if (mBinding.snoozesCheckbox.isChecked()) {
-            value = -parseInput(mBinding.editSnoozes.getText());
+            value = -parseInput(mBinding.editValue.getText());
         }
 
         Bundle result = new Bundle();
@@ -281,9 +261,11 @@ public class DismissAfterDialogFragment extends DialogFragment {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                setDismissAfterValue();
-                dismiss();
-                return true;
+                if (mOkButton != null && mOkButton.isEnabled()) {
+                    setDismissAfterValue();
+                    dismiss();
+                    return true;
+                }
             }
             return false;
         }
