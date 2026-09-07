@@ -26,7 +26,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
 
     private static final String KEY_EVENTS_SHOWN = "key_masjid_events_shown";
     private static final String KEY_ADD_MASJID = "key_add_new_masjid";
-    private static final String KEY_DOWNLOAD_CARD = "key_download_card";
 
     @Override
     protected String getFragmentTitle() {
@@ -54,14 +53,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         if (addMasjid != null) {
             addMasjid.setOnPreferenceClickListener(preference -> {
                 MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
-                return true;
-            });
-        }
-
-        Preference downloadCard = findPreference(KEY_DOWNLOAD_CARD);
-        if (downloadCard != null) {
-            downloadCard.setOnPreferenceClickListener(preference -> {
-                // Placeholder
                 return true;
             });
         }
@@ -119,13 +110,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             addSalahPreference(masjidSection, masjid, "MAGHRIB");
             addSalahPreference(masjidSection, masjid, "ISHA");
         }
-
-        // Add download card at the bottom
-        Preference downloadCard = new Preference(context);
-        downloadCard.setKey(KEY_DOWNLOAD_CARD);
-        downloadCard.setTitle(R.string.salah_download_card);
-        downloadCard.setLayoutResource(R.layout.settings_preference_layout);
-        screen.addPreference(downloadCard);
     }
 
 

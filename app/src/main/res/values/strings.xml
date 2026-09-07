@@ -1824,7 +1824,6 @@
     <string name="salah_masjid_show_events_title">Show Masjid Events</string>
     <string name="salah_masjid_save">Save</string>
     <string name="salah_masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
-    <string name="salah_download_card">Download Card</string>
 
     <string name="salah_extreme_min">min</string>
     <string name="salah_extreme_max">max</string>
