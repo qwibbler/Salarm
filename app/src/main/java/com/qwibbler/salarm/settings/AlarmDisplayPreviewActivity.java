@@ -89,7 +89,7 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
     private static final int TRANSLATION_DURATION_MILLIS = 1000;
     private static final int ALPHA_DURATION_MILLIS = 400;
     private static final int ALERT_REVEAL_DURATION_MILLIS = 500;
-    private static final int ALERT_DISMISS_DELAY_MILLIS = 2500;
+    private static final int ALERT_DISMISS_DELAY_MILLIS = 50;
 
     private AlarmActivityBinding mBinding;
 
