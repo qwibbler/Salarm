@@ -10,7 +10,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SwitchPreferenceCompat;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
@@ -110,12 +109,9 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         setupFixedPreferences();
 
         for (Masjid masjid : masjids) {
-            MasjidPreferenceCategory masjidSection = new MasjidPreferenceCategory(context, masjid.id, getParentFragmentManager());
+            MasjidPreferenceCategory masjidSection = new MasjidPreferenceCategory(context, masjid, getParentFragmentManager());
             masjidSection.setTitle(masjid.name);
             screen.addPreference(masjidSection);
-
-            SwitchPreferenceCompat showEventsToggle = getSwitchPreferenceCompat(masjid, context);
-            masjidSection.addPreference(showEventsToggle);
 
             addSalahPreference(masjidSection, masjid, "FAJR");
             addSalahPreference(masjidSection, masjid, "DHUHR");
@@ -132,37 +128,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         screen.addPreference(downloadCard);
     }
 
-    @NonNull
-    private SwitchPreferenceCompat getSwitchPreferenceCompat(Masjid masjid, Context context) {
-        SwitchPreferenceCompat showEventsToggle = new SwitchPreferenceCompat(context);
-        showEventsToggle.setTitle(R.string.salah_masjid_show_events_title);
-        showEventsToggle.setLayoutResource(R.layout.settings_preference_layout);
-        showEventsToggle.setIconSpaceReserved(false);
-        showEventsToggle.setChecked(masjid.showMasjidEvents);
-        showEventsToggle.setOnPreferenceChangeListener((preference, newValue) -> {
-            masjid.showMasjidEvents = (boolean) newValue;
-            AppExecutors.getDiskIO().execute(() -> {
-                SalahDatabase db = SalahDatabase.getDatabase(requireContext());
-                db.masjidDao().update(masjid);
-
-                List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(masjid.id);
-                for (RelationalRule rule : rules) {
-                    if (masjid.showMasjidEvents) {
-                        if (!rule.isManuallyDeselected) {
-                            rule.isSelected = true;
-                        }
-                    } else {
-                        rule.isSelected = false;
-                    }
-                    db.relationalRuleDao().update(rule);
-                }
-
-                SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
-            });
-            return true;
-        });
-        return showEventsToggle;
-    }
 
     private void setupFixedPreferences() {
         Preference eventsShown = findPreference(KEY_EVENTS_SHOWN);
@@ -221,12 +186,12 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private static class MasjidPreferenceCategory extends PreferenceCategory {
-        private final long masjidId;
+        private final Masjid masjid;
         private final FragmentManager fragmentManager;
 
-        public MasjidPreferenceCategory(Context context, long masjidId, FragmentManager fragmentManager) {
+        public MasjidPreferenceCategory(Context context, Masjid masjid, FragmentManager fragmentManager) {
             super(context);
-            this.masjidId = masjidId;
+            this.masjid = masjid;
             this.fragmentManager = fragmentManager;
             setLayoutResource(R.layout.settings_masjid_category);
         }
@@ -237,9 +202,42 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             View editButton = holder.findViewById(R.id.edit_masjid_button);
             if (editButton != null) {
                 editButton.setOnClickListener(v -> {
-                    MasjidEditDialogFragment.show(fragmentManager, masjidId);
+                    MasjidEditDialogFragment.show(fragmentManager, masjid.id);
                 });
             }
+
+            com.google.android.material.button.MaterialButton visibilityButton = (com.google.android.material.button.MaterialButton) holder.findViewById(R.id.visibility_masjid_button);
+            if (visibilityButton != null) {
+                updateVisibilityIcon(visibilityButton);
+                visibilityButton.setOnClickListener(v -> {
+                    masjid.showMasjidEvents = !masjid.showMasjidEvents;
+                    updateVisibilityIcon(visibilityButton);
+
+                    final Context context = getContext().getApplicationContext();
+                    AppExecutors.getDiskIO().execute(() -> {
+                        SalahDatabase db = SalahDatabase.getDatabase(context);
+                        db.masjidDao().update(masjid);
+
+                        List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(masjid.id);
+                        for (RelationalRule rule : rules) {
+                            if (masjid.showMasjidEvents) {
+                                if (!rule.isManuallyDeselected) {
+                                    rule.isSelected = true;
+                                }
+                            } else {
+                                rule.isSelected = false;
+                            }
+                            db.relationalRuleDao().update(rule);
+                        }
+
+                        SalahAlarmSyncManager.syncSelectedRulesToAlarms(context);
+                    });
+                });
+            }
+        }
+
+        private void updateVisibilityIcon(com.google.android.material.button.MaterialButton button) {
+            button.setIconResource(masjid.showMasjidEvents ? R.drawable.ic_visibility : R.drawable.ic_visibility_off);
         }
     }
 }

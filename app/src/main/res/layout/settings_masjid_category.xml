@@ -22,6 +22,16 @@
         tools:text="MASJID NAME" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/visibility_masjid_button"
+        style="@style/Widget.Material3.Button.IconButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:icon="@drawable/ic_visibility"
+        app:iconSize="24dp"
+        app:iconGravity="textStart"
+        app:iconTint="?attr/colorOnSurfaceVariant" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/edit_masjid_button"
         style="@style/Widget.Material3.Button.IconButton"
         android:layout_width="48dp"
