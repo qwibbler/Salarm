@@ -1,13 +1,19 @@
 package com.qwibbler.salarm.salah;
 
+import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.text.format.DateFormat;
+
 import androidx.annotation.NonNull;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.settings.PreferencesKeys;
-import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
+import com.qwibbler.salarm.utils.LogUtils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -143,9 +149,9 @@ public class RelationalRule {
         String eventName = getEventName(context, anchorEvent);
         int baseResId;
         if (masjidSalahType != null) {
-            baseResId = anchorIsMax ? com.qwibbler.salarm.R.string.salah_rule_description_base_max : com.qwibbler.salarm.R.string.salah_rule_description_base_min;
+            baseResId = anchorIsMax ? R.string.salah_rule_description_base_max : R.string.salah_rule_description_base_min;
         } else {
-            baseResId = com.qwibbler.salarm.R.string.salah_rule_description_base;
+            baseResId = R.string.salah_rule_description_base;
         }
         sb.append(context.getString(baseResId, offsetPart, eventName));
 
@@ -155,27 +161,14 @@ public class RelationalRule {
         // Adjustment: adjusted by 2m earlier
         if (adjustmentMinutes != 0) {
             String adjPart = getAdjustmentPart(context, adjustmentMinutes);
-            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_adjusted, adjPart));
+            sb.append(context.getString(R.string.salah_rule_adjusted, adjPart));
         }
 
         // Clip: no later than 15m before sunrise
         if (clip != null) {
             String clipOffsetPart = getOffsetPart(context, clip.clipOffsetMinutes);
             String clipEventName = getEventName(context, clip.clipEvent);
-            int clipResId;
-            if (clip.boundaryType == BoundaryType.NO_LATER_THAN) {
-                if (masjidSalahType != null) {
-                    clipResId = clipIsMax ? com.qwibbler.salarm.R.string.salah_rule_no_later_max : com.qwibbler.salarm.R.string.salah_rule_no_later_min;
-                } else {
-                    clipResId = com.qwibbler.salarm.R.string.salah_rule_no_later;
-                }
-            } else {
-                if (masjidSalahType != null) {
-                    clipResId = clipIsMax ? com.qwibbler.salarm.R.string.salah_rule_no_earlier_max : com.qwibbler.salarm.R.string.salah_rule_no_earlier_min;
-                } else {
-                    clipResId = com.qwibbler.salarm.R.string.salah_rule_no_earlier;
-                }
-            }
+            int clipResId = getClipResId();
             sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
             sb.append(getRoundingPart(context, clip.clipRoundingDirection, clip.clipRoundingIntervalMinutes));
         }
@@ -184,7 +177,7 @@ public class RelationalRule {
         if (autostopEnabled && autostopAnchorEvent != null) {
             String autostopOffsetPart = getOffsetPart(context, autostopOffsetMinutes);
             String autostopEventName = getEventName(context, autostopAnchorEvent);
-            sb.append(context.getString(com.qwibbler.salarm.R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName));
+            sb.append(context.getString(R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName));
         }
 
         String description = sb.toString();
@@ -192,53 +185,75 @@ public class RelationalRule {
         return description.substring(0, 1).toUpperCase(Locale.getDefault()) + description.substring(1);
     }
 
-    private String getOffsetPart(android.content.Context context, int offset) {
-        if (offset == 0) {
-            return context.getString(com.qwibbler.salarm.R.string.salah_rule_at);
-        } else if (offset > 0) {
-            return context.getString(com.qwibbler.salarm.R.string.salah_rule_offset_after, offset);
+    private int getClipResId() {
+        if (clip == null || clip.boundaryType == null) {
+            return masjidSalahType != null ? R.string.salah_rule_no_later_min : R.string.salah_rule_no_later;
+        }
+
+        int clipResId;
+        if (clip.boundaryType == BoundaryType.NO_LATER_THAN) {
+            if (masjidSalahType != null) {
+                clipResId = clipIsMax ? R.string.salah_rule_no_later_max : R.string.salah_rule_no_later_min;
+            } else {
+                clipResId = R.string.salah_rule_no_later;
+            }
         } else {
-            return context.getString(com.qwibbler.salarm.R.string.salah_rule_offset_before, Math.abs(offset));
+            if (masjidSalahType != null) {
+                clipResId = clipIsMax ? R.string.salah_rule_no_earlier_max : R.string.salah_rule_no_earlier_min;
+            } else {
+                clipResId = R.string.salah_rule_no_earlier;
+            }
+        }
+        return clipResId;
+    }
+
+    private String getOffsetPart(Context context, int offset) {
+        if (offset == 0) {
+            return context.getString(R.string.salah_rule_at);
+        } else if (offset > 0) {
+            return context.getString(R.string.salah_rule_offset_after, offset);
+        } else {
+            return context.getString(R.string.salah_rule_offset_before, Math.abs(offset));
         }
     }
 
-    private String getRoundingPart(android.content.Context context, RoundingDirection direction, int interval) {
+    private String getRoundingPart(Context context, RoundingDirection direction, int interval) {
         if (interval <= 0 || direction == null) return "";
         int resId = switch (direction) {
-            case NEAREST -> com.qwibbler.salarm.R.string.salah_rule_rounded_nearest;
-            case UP -> com.qwibbler.salarm.R.string.salah_rule_rounded_up;
-            case DOWN -> com.qwibbler.salarm.R.string.salah_rule_rounded_down;
+            case NEAREST -> R.string.salah_rule_rounded_nearest;
+            case UP -> R.string.salah_rule_rounded_up;
+            case DOWN -> R.string.salah_rule_rounded_down;
         };
         return context.getString(resId, interval);
     }
 
-    private String getAdjustmentPart(android.content.Context context, int offset) {
+    private String getAdjustmentPart(Context context, int offset) {
         if (offset >= 0) {
-            return context.getString(com.qwibbler.salarm.R.string.salah_rule_adjustment_later, offset);
+            return context.getString(R.string.salah_rule_adjustment_later, offset);
         } else {
-            return context.getString(com.qwibbler.salarm.R.string.salah_rule_adjustment_earlier, Math.abs(offset));
+            return context.getString(R.string.salah_rule_adjustment_earlier, Math.abs(offset));
         }
     }
 
-    public static String getEventName(android.content.Context context, AnchorEvent event) {
         android.content.SharedPreferences prefs = getDefaultSharedPreferences(context);
+    public static String getEventName(Context context, AnchorEvent event) {
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+            && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         if (!showBothAsr) {
             if (event == AnchorEvent.ASR_HANAFI || event == AnchorEvent.ASR_SHAFI) {
-                return context.getString(com.qwibbler.salarm.R.string.asr_label);
+                return context.getString(R.string.asr_label);
             }
         }
 
         int resId = switch (event) {
-            case FAJR -> com.qwibbler.salarm.R.string.fajr_label;
-            case SUNRISE -> com.qwibbler.salarm.R.string.sunrise_label;
-            case DHUHR -> com.qwibbler.salarm.R.string.dhuhr_label;
-            case ASR_SHAFI -> com.qwibbler.salarm.R.string.asr_shafii_label;
-            case ASR_HANAFI -> com.qwibbler.salarm.R.string.asr_hanafi_label;
-            case MAGHRIB -> com.qwibbler.salarm.R.string.maghrib_label;
-            case ISHA -> com.qwibbler.salarm.R.string.isha_label;
+            case FAJR -> R.string.fajr_label;
+            case SUNRISE -> R.string.sunrise_label;
+            case DHUHR -> R.string.dhuhr_label;
+            case ASR_SHAFI -> R.string.asr_shafii_label;
+            case ASR_HANAFI -> R.string.asr_hanafi_label;
+            case MAGHRIB -> R.string.maghrib_label;
+            case ISHA -> R.string.isha_label;
         };
         return context.getString(resId);
     }
@@ -246,22 +261,22 @@ public class RelationalRule {
     /**
      * Evaluates the trigger time for this rule based on calculated prayer times.
      */
-    public static Date evaluateTime(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
+    public static Date evaluateTime(Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
         return evaluateTime(context, rule, times, date, null);
     }
 
-    public static Date evaluateTime(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid masjid) {
+    public static Date evaluateTime(Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid masjid) {
         EvaluationResult result = evaluateTimeWithConflictCheck(context, rule, times, date, masjid);
         return result.time() > 0 ? new Date(result.time()) : null;
     }
 
     @NonNull
-    public static EvaluationResult evaluateTimeWithConflictCheck(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
+    public static EvaluationResult evaluateTimeWithConflictCheck(Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date) {
         return evaluateTimeWithConflictCheck(context, rule, times, date, null);
     }
 
     @NonNull
-    public static EvaluationResult evaluateTimeWithConflictCheck(android.content.Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid providedMasjid) {
+    public static EvaluationResult evaluateTimeWithConflictCheck(Context context, @NonNull RelationalRule rule, @NonNull SalahCalculator.SalahTimes times, Date date, Masjid providedMasjid) {
         Date anchorTime;
         if (rule.anchorMasjidId > 0 && context != null) {
             RelationalRule masjidEventRule = SalahDatabase.getDatabase(context).relationalRuleDao().getMasjidEventRule(rule.anchorMasjidId, rule.anchorMasjidSalahType);
@@ -319,7 +334,7 @@ public class RelationalRule {
 
             if (clipAnchorTime != null) {
                 long clipMillis = applyRule(clipAnchorTime, rule.clip.clipOffsetMinutes, rule.clip.clipRoundingDirection,
-                        rule.clip.clipRoundingIntervalMinutes);
+                    rule.clip.clipRoundingIntervalMinutes);
                 LogUtils.i("Clip time (" + rule.clip.boundaryType + "): " + new Date(clipMillis));
 
                 switch (rule.clip.boundaryType) {

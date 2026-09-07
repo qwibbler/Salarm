@@ -168,12 +168,12 @@ public class SalahAlarmDialogFragment extends DialogFragment {
 
     private void setupAdapters(Bundle savedInstanceState) {
         RelationalAlarmUiHelper.setupNumericDropdowns(
-                mBinding.primaryOffsetValue,
-                mBinding.primaryRoundValue,
-                mBinding.adjustmentValue,
-                mBinding.safetyOffsetValue,
-                mBinding.safetyRoundValue,
-                mBinding.autostopOffsetValue
+            mBinding.primaryOffsetValue,
+            mBinding.primaryRoundValue,
+            mBinding.adjustmentValue,
+            mBinding.safetyOffsetValue,
+            mBinding.safetyRoundValue,
+            mBinding.autostopOffsetValue
         );
 
         final Context appContext = requireContext().getApplicationContext();

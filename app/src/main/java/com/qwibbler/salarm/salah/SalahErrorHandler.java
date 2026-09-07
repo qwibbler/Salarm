@@ -62,10 +62,7 @@ public class SalahErrorHandler {
                                   t instanceof SQLiteTableLockedException ||
                                   t instanceof SQLiteCantOpenDatabaseException;
 
-            if (SystemClock.elapsedRealtime() < 120_000 && isTransient) {
-                return false;
-            }
-            return true;
+            return SystemClock.elapsedRealtime() >= 120_000 || !isTransient;
         }
 
         return t instanceof NullPointerException;

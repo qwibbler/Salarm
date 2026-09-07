@@ -1758,6 +1758,7 @@
     <string name="dhuhr_label">Dhuhr</string>
     <string name="maghrib_label">Maghrib</string>
     <string name="isha_label">Isha</string>
+    <string name="juma_label">Juma</string>
 
     <string name="salah_widget_show_countdown_title">Show countdown</string>
     <string name="salah_widget_show_alarms_title">Show upcoming salah alarms</string>

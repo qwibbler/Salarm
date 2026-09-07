@@ -10,14 +10,14 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 
 import com.qwibbler.salarm.R;
-import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.salah.Masjid;
 import com.qwibbler.salarm.salah.RelationalRule;
-import com.qwibbler.salarm.salah.SalahDatabase;
-import com.qwibbler.salarm.salah.SalahCalculator;
-import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.SalahCalculator;
+import com.qwibbler.salarm.salah.SalahDatabase;
+import com.qwibbler.salarm.salah.SalahUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,9 +38,7 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> {
-            loadData();
-        });
+        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadData());
         loadData();
     }
 
@@ -73,11 +71,9 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
 
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
 
-        String[] salahTypes = {"FAJR", "DHUHR", "ASR", "MAGHRIB", "ISHA"};
+        String[] salahTypes = {"FAJR", "DHUHR", "JUMA", "ASR", "MAGHRIB", "ISHA"};
 
-        for (int i = 0; i < salahTypes.length; i++) {
-            String type = salahTypes[i];
-
+        for (String type : salahTypes) {
             // 1. Actual event
             RelationalRule defaultRule = findRule(rules, 0, type);
 
@@ -98,26 +94,17 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
                 screen.addPreference(category);
 
                 if (defaultRule != null) {
-                    addEventPreference(category, SalahUtils.getLocalizedSalahName(context, type), getString(R.string.salah_masjid_events_default), defaultRule, type, null);
+                    addEventPreference(category, SalahUtils.getLocalizedSalahName(context, type), getString(R.string.salah_masjid_events_default), defaultRule, null);
                 }
 
                 for (Pair<RelationalRule, Masjid> p : activeMasjidRules) {
-                    addEventPreference(category, SalahUtils.getLocalizedSalahName(context, type), p.second.name, p.first, type, p.second);
+                    addEventPreference(category, SalahUtils.getLocalizedSalahName(context, type), p.second.name, p.first, p.second);
                 }
             }
         }
         setPreferenceScreen(screen);
         setDivider(null);
         setDividerHeight(0);
-    }
-
-    private static class Pair<F, S> {
-        public final F first;
-        public final S second;
-        public Pair(F first, S second) {
-            this.first = first;
-            this.second = second;
-        }
     }
 
     private RelationalRule findRule(List<RelationalRule> rules, long masjidId, String type) {
@@ -129,7 +116,7 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
         return null;
     }
 
-    private void addEventPreference(PreferenceCategory category, String localizedTitle, String label, RelationalRule rule, String type, Masjid masjid) {
+    private void addEventPreference(PreferenceCategory category, String localizedTitle, String label, RelationalRule rule, Masjid masjid) {
         Context context = getContext();
         if (context == null) return;
 
@@ -182,5 +169,8 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
             return android.text.format.DateFormat.getTimeFormat(context).format(evaluated);
         }
         return "";
+    }
+
+    private record Pair<F, S>(F first, S second) {
     }
 }

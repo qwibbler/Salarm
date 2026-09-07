@@ -2,6 +2,7 @@ package com.qwibbler.salarm.settings;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -12,7 +13,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.databinding.DialogMasjidAlarmBinding;
 import com.qwibbler.salarm.salah.Masjid;
@@ -20,8 +23,8 @@ import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahUtils;
-import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.Utils;
 
@@ -83,29 +86,29 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         loadRule();
 
         return CustomDialog.create(
-                requireContext(),
-                R.style.RelationalAlarmDialogTheme,
-                null,
-                getString(R.string.salah_masjid_timing_title_format, SalahUtils.getLocalizedSalahName(requireContext(), mSalahType)),
-                null,
-                mBinding.getRoot(),
-                getString(R.string.salah_masjid_save),
-                (dialog, which) -> saveRule(),
-                getString(android.R.string.cancel),
-                null,
-                getString(R.string.delete),
-                (dialog, which) -> deleteRule(),
-                null,
-                CustomDialog.SoftInputMode.NONE
+            context,
+            R.style.RelationalAlarmDialogTheme,
+            null,
+            getString(R.string.salah_masjid_timing_title_format, SalahUtils.getLocalizedSalahName(context, mSalahType)),
+            null,
+            mBinding.getRoot(),
+            getString(R.string.salah_masjid_save),
+            (dialog, which) -> saveRule(),
+            getString(android.R.string.cancel),
+            null,
+            getString(R.string.delete),
+            (dialog, which) -> deleteRule(),
+            null,
+            CustomDialog.SoftInputMode.NONE
         );
     }
 
     private void setupAdapters() {
         RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue, mBinding.safetyOffsetValue);
 
-        android.content.SharedPreferences prefs = com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences(requireContext());
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+            && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         List<String> eventsList = new ArrayList<>();
         String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);

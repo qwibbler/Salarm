@@ -11,6 +11,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceViewHolder;
 
+import com.google.android.material.button.MaterialButton;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.AppExecutors;
@@ -37,9 +38,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.salah_masjid_settings);
 
-        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> {
-            loadMasjids();
-        });
+        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadMasjids());
 
         Preference eventsShown = findPreference(KEY_EVENTS_SHOWN);
         if (eventsShown != null) {
@@ -106,6 +105,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
 
             addSalahPreference(masjidSection, masjid, "FAJR");
             addSalahPreference(masjidSection, masjid, "DHUHR");
+            addSalahPreference(masjidSection, masjid, "JUMA");
             addSalahPreference(masjidSection, masjid, "ASR");
             addSalahPreference(masjidSection, masjid, "MAGHRIB");
             addSalahPreference(masjidSection, masjid, "ISHA");
@@ -181,16 +181,14 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         }
 
         @Override
-        public void onBindViewHolder(PreferenceViewHolder holder) {
+        public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
             super.onBindViewHolder(holder);
             View editButton = holder.findViewById(R.id.edit_masjid_button);
             if (editButton != null) {
-                editButton.setOnClickListener(v -> {
-                    MasjidEditDialogFragment.show(fragmentManager, masjid.id);
-                });
+                editButton.setOnClickListener(v -> MasjidEditDialogFragment.show(fragmentManager, masjid.id));
             }
 
-            com.google.android.material.button.MaterialButton visibilityButton = (com.google.android.material.button.MaterialButton) holder.findViewById(R.id.visibility_masjid_button);
+            MaterialButton visibilityButton = (MaterialButton) holder.findViewById(R.id.visibility_masjid_button);
             if (visibilityButton != null) {
                 updateVisibilityIcon(visibilityButton);
                 visibilityButton.setOnClickListener(v -> {
@@ -220,7 +218,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             }
         }
 
-        private void updateVisibilityIcon(com.google.android.material.button.MaterialButton button) {
+        private void updateVisibilityIcon(MaterialButton button) {
             button.setIconResource(masjid.showMasjidEvents ? R.drawable.ic_visibility : R.drawable.ic_visibility_off);
         }
     }

@@ -273,6 +273,7 @@ public class SalahUtils {
             case "MAGHRIB" -> context.getString(R.string.maghrib_label);
             case "ISHA" -> context.getString(R.string.isha_label);
             case "SUNRISE" -> context.getString(R.string.sunrise_label);
+            case "JUMA" -> context.getString(R.string.juma_label);
             default -> type;
         };
     }

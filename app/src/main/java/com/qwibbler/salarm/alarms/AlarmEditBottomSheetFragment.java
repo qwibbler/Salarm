@@ -47,8 +47,15 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.qwibbler.salarm.SalarmActivity;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.timepicker.MaterialTimePicker;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
@@ -68,15 +75,15 @@ import com.qwibbler.salarm.dialogfragment.LabelDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerDatePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
+import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.salah.SalahDatabase;
-import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
-import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
-import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
 import com.qwibbler.salarm.ringtone.RingtonePickerActivity;
+import com.qwibbler.salarm.salah.RelationalRule;
+import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
+import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.settings.AlarmDisplayPreviewActivity;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
@@ -92,13 +99,6 @@ import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.DigitalAppWidgetProvider;
 import com.qwibbler.salarm.widgets.NextAlarmAppWidgetProvider;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.color.MaterialColors;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.timepicker.MaterialTimePicker;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -522,11 +522,12 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding.scheduleAlarm.setTypeface(mGeneralTypeface);
 
-        mBinding.scheduleAlarmLayout.setOnClickListener(v -> DatePickerDialogFragment.show(
-            getChildFragmentManager(),
-            mPrefs,
-            mAlarm,
-            this::applyDate)
+        mBinding.scheduleAlarmLayout.setOnClickListener(v ->
+            DatePickerDialogFragment.show(
+                getChildFragmentManager(),
+                mPrefs,
+                mAlarm,
+                this::applyDate)
         );
 
         if (mAlarm.daysOfWeek.isRepeating()) {
@@ -569,11 +570,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_range, dateRangeStr));
 
             mBinding.cancelPauseAlarm.setTypeface(mGeneralTypeface);
-            mBinding.cancelPauseAlarm.setVisibility(View.VISIBLE);
+            mBinding.cancelPauseAlarm.setVisibility(VISIBLE);
         } else {
-            mBinding.pauseAlarm.setText(R.string.pause_alarm_title);
+            mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_title));
 
-            mBinding.cancelPauseAlarm.setVisibility(View.GONE);
+            mBinding.cancelPauseAlarm.setVisibility(GONE);
         }
 
         if (isRepeating || isSalahAlarm) {
@@ -602,8 +603,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         if (mAlarm.relationalRuleId == -1) {
             mIsSalah = false;
             AppExecutors.getMainThread().post(() -> {
-                if (!isAdded() || mBinding == null) return;
-                mBinding.salahRuleDescription.setVisibility(View.GONE);
+                mBinding.salahRuleDescription.setVisibility(GONE);
                 bindDismissAfterValue();
                 updateAllGroupBackgrounds();
             });
@@ -629,7 +629,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
-                    mBinding.salahRuleDescription.setVisibility(View.VISIBLE);
+                    mBinding.salahRuleDescription.setVisibility(VISIBLE);
                     mBinding.salahRuleDescription.setTypeface(mGeneralTypeface);
                     mBinding.salahRuleDescription.setText(mSalahRule.getRuleDescription(requireContext()));
                     mBinding.salahRuleDescription.setOnClickListener(v ->
@@ -644,8 +644,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 });
             } else {
                 AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded() || mBinding == null) return;
-                    mBinding.salahRuleDescription.setVisibility(View.GONE);
+                    mBinding.salahRuleDescription.setVisibility(GONE);
                     bindDismissAfterValue();
                     updateAllGroupBackgrounds();
                 });
@@ -682,7 +681,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             }
             mBinding.editTags.setText(sb.toString());
         } else {
-            mBinding.editTags.setText(R.string.add_tags);
+            mBinding.editTags.setText(getString(R.string.add_tags));
         }
         mBinding.editTags.setAlpha(1f);
         mBinding.editTags.setTypeface(mGeneralTypeface);
@@ -1101,7 +1100,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         int blurIntensity = mAlarm.blurIntensity;
 
         if (blurIntensity == DEFAULT_BLUR_INTENSITY) {
-            mBinding.alarmBlurIntensityValue.setText(R.string.label_none);
+            mBinding.alarmBlurIntensityValue.setText(getString(R.string.label_none));
         } else {
             mBinding.alarmBlurIntensityValue.setText(String.valueOf(blurIntensity));
         }
