@@ -21,6 +21,7 @@ import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MasjidEditDialogFragment extends DialogFragment {
@@ -31,7 +32,6 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
     private TextInputEditText mNameEdit;
     private TextView mIntervalsSummary;
-    private View mCopyButton;
 
     public static void show(FragmentManager manager, long masjidId) {
         MasjidEditDialogFragment fragment = new MasjidEditDialogFragment();
@@ -47,7 +47,6 @@ public class MasjidEditDialogFragment extends DialogFragment {
         View view = getLayoutInflater().inflate(R.layout.dialog_edit_masjid, null);
         mNameEdit = view.findViewById(R.id.masjid_name_edit);
         mIntervalsSummary = view.findViewById(R.id.masjid_intervals_summary);
-        mCopyButton = view.findViewById(R.id.masjid_copy_button);
         View intervalsRow = view.findViewById(R.id.masjid_intervals_row);
 
         mMasjidId = getArguments().getLong(ARG_MASJID_ID);
@@ -59,8 +58,6 @@ public class MasjidEditDialogFragment extends DialogFragment {
                     if (isAdded() && mMasjid != null) {
                         mNameEdit.setText(mMasjid.name);
                         updateIntervalsSummary();
-                        mCopyButton.setVisibility(View.VISIBLE);
-                        mCopyButton.setOnClickListener(v -> copyMasjid());
                     }
                 });
             });
@@ -78,6 +75,16 @@ public class MasjidEditDialogFragment extends DialogFragment {
             });
         });
 
+        List<CustomDialog.DialogButton> buttons = new ArrayList<>();
+        if (mMasjidId > 0) {
+            buttons.add(new CustomDialog.DialogButton(getString(R.string.delete), (dialog, which) -> deleteMasjid()));
+        }
+        buttons.add(new CustomDialog.DialogButton(getString(android.R.string.cancel), null));
+        if (mMasjidId > 0) {
+            buttons.add(new CustomDialog.DialogButton(getString(R.string.salah_masjid_copy), (dialog, which) -> copyMasjid()));
+        }
+        buttons.add(new CustomDialog.DialogButton(getString(R.string.salah_masjid_save), (dialog, which) -> saveMasjid()));
+
         return CustomDialog.create(
                 requireContext(),
                 R.style.RelationalAlarmDialogTheme,
@@ -85,16 +92,12 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 getString(mMasjidId > 0 ? R.string.salah_masjid_edit_title : R.string.salah_add_new_masjid),
                 null,
                 view,
-                getString(R.string.salah_masjid_save),
-                (dialog, which) -> saveMasjid(),
-                getString(android.R.string.cancel),
                 null,
-                mMasjidId > 0 ? getString(R.string.delete) : null,
-                (dialog, which) -> deleteMasjid(),
-                null,
-                CustomDialog.SoftInputMode.NONE
+                CustomDialog.SoftInputMode.NONE,
+                buttons.toArray(new CustomDialog.DialogButton[0])
         );
     }
+
 
     private void updateIntervalsSummary() {
         if (mMasjid != null) {
@@ -129,8 +132,10 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 getString(R.string.delete),
                 getString(R.string.salah_masjid_delete_confirm),
                 null,
-                getString(R.string.delete),
-                (dialog, which) -> {
+                null,
+                CustomDialog.SoftInputMode.NONE,
+                new CustomDialog.DialogButton(getString(android.R.string.cancel), null),
+                new CustomDialog.DialogButton(getString(R.string.delete), (dialog, which) -> {
                     AppExecutors.getDiskIO().execute(() -> {
                         SalahDatabase db = SalahDatabase.getDatabase(appContext);
                         db.masjidDao().deleteById(mMasjidId);
@@ -144,13 +149,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
                         fragmentManager.setFragmentResult("masjid_updated", new Bundle());
                     });
                     dismiss();
-                },
-                getString(android.R.string.cancel),
-                null,
-                null,
-                null,
-                null,
-                CustomDialog.SoftInputMode.NONE
+                })
             ).show();
         }
     }
