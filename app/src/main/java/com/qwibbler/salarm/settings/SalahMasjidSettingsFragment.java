@@ -132,11 +132,8 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private void addSalahPreference(PreferenceCategory category, Masjid masjid, String type) {
-        Context context = getContext();
-        if (context == null) return;
-
-        Preference pref = new Preference(context);
-        pref.setTitle(SalahUtils.getLocalizedSalahName(context, type));
+        Preference pref = new Preference(requireContext());
+        pref.setTitle(SalahUtils.getLocalizedSalahName(requireContext(), type));
         pref.setLayoutResource(R.layout.settings_preference_layout);
         pref.setIconSpaceReserved(false);
 
@@ -163,10 +160,150 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         });
 
         pref.setOnPreferenceClickListener(preference -> {
-            SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), masjid.id, type);
+            if ("DHUHR".equals(type) || "JUMA".equals(type)) {
+                showFixedTimeDialogue(masjid, type);
+            } else {
+                SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), masjid.id, type);
+            }
             return true;
         });
         category.addPreference(pref);
+    }
+
+    private void showFixedTimeDialogue(Masjid masjid, String type) {
+        final Context appContext = requireContext().getApplicationContext();
+
+        // Verify type is supported for fixed time (Dhuhr or Juma only)
+        if (!"DHUHR".equals(type) && !"JUMA".equals(type)) {
+            LogUtils.w("Attempted to show fixed time dialogue for unsupported type: " + type);
+            return;
+        }
+
+        // Fetch ringtone on main thread to avoid enforceMainLooper crash
+        final Uri ringtone = DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
+
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
+            if (db == null) {
+                LogUtils.e("SalahDatabase is null in showFixedTimeDialogue");
+                return;
+            }
+            RelationalRule rule = db.relationalRuleDao().getMasjidEventRule(masjid.id, type);
+            if (rule == null) {
+                rule = new RelationalRule();
+                rule.masjidId = masjid.id;
+                rule.masjidSalahType = type;
+                rule.isFixedTime = true;
+
+                // Try to set a sensible default from current prayer times
+                double[] coords = SalahUtils.getCoordinates(appContext);
+                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
+                Date prayerTime = switch (type) {
+                    case "DHUHR", "JUMA" -> st.dhuhr;
+                    default -> null;
+                };
+
+                if (prayerTime != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(prayerTime);
+                    rule.fixedHour = cal.get(Calendar.HOUR_OF_DAY);
+                    rule.fixedMinute = cal.get(Calendar.MINUTE);
+                } else {
+                    rule.fixedHour = 12;
+                    rule.fixedMinute = 0;
+                }
+                rule.id = db.relationalRuleDao().insert(rule);
+            } else if (!rule.isFixedTime) {
+                // Migrate to fixed time: use current evaluation if possible
+                double[] coords = SalahUtils.getCoordinates(appContext);
+                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
+                Date evaluated = RelationalRule.evaluateTime(appContext, rule, st, new Date(), masjid);
+                if (evaluated != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(evaluated);
+                    rule.fixedHour = cal.get(Calendar.HOUR_OF_DAY);
+                    rule.fixedMinute = cal.get(Calendar.MINUTE);
+                } else {
+                    rule.fixedHour = 12;
+                    rule.fixedMinute = 0;
+                }
+                rule.isFixedTime = true;
+                db.relationalRuleDao().update(rule);
+            }
+
+            final RelationalRule finalRule = rule;
+
+            // Find or create native alarm
+            List<Alarm> alarms = Alarm.getAlarms(appContext.getContentResolver(), Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(finalRule.id));
+            if (alarms.isEmpty()) {
+                Alarm nativeAlarm = Alarm.createDefaultAlarm(appContext, finalRule.fixedHour, finalRule.fixedMinute, ringtone, true);
+                nativeAlarm.relationalRuleId = finalRule.id;
+                nativeAlarm.enabled = false;
+                nativeAlarm.label = masjid.name + " " + SalahUtils.getLocalizedSalahName(appContext, type);
+                if (!nativeAlarm.tags.contains(".masjid_definition")) {
+                    nativeAlarm.tags.add(".masjid_definition");
+                }
+                nativeAlarm.addAlarm(appContext.getContentResolver());
+            } else {
+                Alarm nativeAlarm = alarms.get(0);
+                if (nativeAlarm != null && !nativeAlarm.tags.contains(".masjid_definition")) {
+                    nativeAlarm.tags.add(".masjid_definition");
+                    nativeAlarm.updateAlarm(appContext.getContentResolver());
+                }
+            }
+
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    showTimePicker(finalRule);
+                }
+            });
+        });
+    }
+
+    private void showTimePicker(RelationalRule rule) {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
+
+        if (SPINNER_TIME_PICKER_STYLE.equals(SettingsDAO.getMaterialTimePickerStyle(prefs))) {
+            final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(rule.fixedHour, rule.fixedMinute);
+            getChildFragmentManager().setFragmentResultListener(SpinnerTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
+                int h = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_HOURS);
+                int m = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
+                updateRuleTime(rule, h, m);
+            });
+            SpinnerTimePickerDialogFragment.show(getChildFragmentManager(), fragment);
+        } else {
+            getChildFragmentManager().setFragmentResultListener(MaterialTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
+                int h = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_HOURS);
+                int m = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
+                updateRuleTime(rule, h, m);
+            });
+            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", rule.fixedHour, rule.fixedMinute, prefs);
+        }
+    }
+
+    private void updateRuleTime(RelationalRule rule, int hour, int minute) {
+        rule.fixedHour = hour;
+        rule.fixedMinute = minute;
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(requireContext());
+            db.relationalRuleDao().update(rule);
+
+            // Also update the native alarm if it exists
+            List<Alarm> alarms = Alarm.getAlarms(requireContext().getContentResolver(), Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(rule.id));
+            if (!alarms.isEmpty()) {
+                Alarm nativeAlarm = alarms.get(0);
+                nativeAlarm.hour = hour;
+                nativeAlarm.minutes = minute;
+                nativeAlarm.updateAlarm(requireContext().getContentResolver());
+            }
+
+            SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    loadMasjids();
+                }
+            });
+        });
     }
 
     private static class MasjidPreferenceCategory extends PreferenceCategory {

@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -240,10 +241,16 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     public void onStart() {
         super.onStart();
 
-        SalarmActivity activity = (SalarmActivity) requireActivity();
-        SalarmActivityBinding activityBinding = activity.getSalarmActivityBinding();
+        final View snackbarAnchor;
+        if (requireActivity() instanceof SalarmActivity activity) {
+            snackbarAnchor = activity.getSalarmActivityBinding().contentView;
+        } else {
+            snackbarAnchor = requireActivity().findViewById(android.R.id.content);
+        }
 
-        mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, activityBinding.contentView);
+        if (snackbarAnchor instanceof ViewGroup group) {
+            mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, group);
+        }
     }
 
     @Override
