@@ -86,6 +86,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         setupAdapters();
         setupListeners();
 
+        initializeUiWithDefaults();
+
         loadEvent();
 
         return CustomDialog.create(
@@ -183,6 +185,31 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         if (v != null) v.setVisibility(enabled ? View.VISIBLE : View.GONE);
     }
 
+    private void initializeUiWithDefaults() {
+        mBinding.primaryOffsetValue.setText("0");
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, 1);
+        updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, 1);
+        mBinding.primaryEvent.setText(SalahUtils.getLocalizedSalahName(requireContext(), mSalahType), false);
+
+        mBinding.primaryRoundEnabledCheckbox.setChecked(false);
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, 0);
+        mBinding.primaryRoundValue.setText("0");
+
+        mBinding.adjustmentEnabledCheckbox.setChecked(false);
+        mBinding.adjustmentValue.setText("0");
+        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
+
+        mBinding.safetyEnabledCheckbox.setChecked(false);
+        mSafetyBoundIdx = 1; // Later
+        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        mBinding.safetyOffsetValue.setText("5");
+        mSafetyOffsetIdx = 0; // Before
+        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        mSafetyIsMax = false;
+        updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, 0); // Min
+        mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
+    }
+
     private void loadEvent() {
         AppExecutors.getDiskIO().execute(() -> {
             mEvent = SalahDatabase.getDatabase(requireContext()).masjidEventDao().getMasjidEvent(mMasjidId, mSalahType);
@@ -195,28 +222,9 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void populateUi() {
-        if (mEvent == null) {
-            mBinding.primaryOffsetValue.setText("0");
-            updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, 1);
-            updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, 1);
-            mBinding.primaryEvent.setText(SalahUtils.getLocalizedSalahName(requireContext(), mSalahType), false);
+        initializeUiWithDefaults();
 
-            mBinding.primaryRoundEnabledCheckbox.setChecked(false);
-            updateToggle(mBinding.primaryRoundToggle, mRoundTypes, 0);
-            mBinding.primaryRoundValue.setText("0");
-
-            mBinding.adjustmentEnabledCheckbox.setChecked(false);
-            mBinding.adjustmentValue.setText("0");
-            updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
-
-            mBinding.safetyEnabledCheckbox.setChecked(false);
-            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, 1);
-            mBinding.safetyOffsetValue.setText("0");
-            updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, 0);
-            updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, 0);
-            // Default next event logic
-            mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
-        } else {
+        if (mEvent != null) {
             mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.offsetMinutes)));
             mPrimaryOffsetIdx = mEvent.definition.calculation.offsetMinutes >= 0 ? 1 : 0;
             updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);

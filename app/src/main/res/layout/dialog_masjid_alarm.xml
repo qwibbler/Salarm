@@ -59,7 +59,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/primary_extreme_toggle"
                     style="@style/RelationalAlarm.TextButton"
-                    tools:text="Max" />
+                    tools:text="@string/salah_extreme_max" />
 
                 <TextView
                     style="@style/RelationalAlarm.Text"
@@ -220,7 +220,7 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/safety_extreme_toggle"
                         style="@style/RelationalAlarm.TextButton"
-                        tools:text="Min" />
+                        tools:text="@string/salah_extreme_min" />
 
                     <TextView
                         style="@style/RelationalAlarm.Text"

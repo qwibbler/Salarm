@@ -115,6 +115,9 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         setupAdapters(savedInstanceState);
         setupListeners();
 
+        // Initialize button text synchronously to avoid blank buttons in FlexboxLayout
+        initializeButtonToggles();
+
         updateRoundingVisibility();
 
         return CustomDialog.create(
@@ -380,6 +383,16 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         } else {
             updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
         }
+    }
+
+    private void initializeButtonToggles() {
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+        updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
     }
 
     private void setupListeners() {
