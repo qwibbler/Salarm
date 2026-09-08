@@ -1858,4 +1858,12 @@
     <string name="salah_rule_no_later_min">, no later than %1$s min time of %2$s</string>
     <string name="salah_rule_no_earlier_max">, no earlier than %1$s max time of %2$s</string>
     <string name="salah_rule_no_earlier_min">, no earlier than %1$s min time of %2$s</string>
+    <string name="masjid_card_editor_title">Masjid Card Editor</string>
+    <string name="masjid_card_export_png">Export PNG</string>
+    <string name="masjid_card_export_pdf">Export PDF</string>
+    <string name="masjid_card_export_svg">Export SVG</string>
+    <string name="masjid_card_front">Front</string>
+    <string name="masjid_card_back">Back</string>
+    <string name="masjid_card_name_label">Masjid Name</string>
+    <string name="masjid_card_footer_label">Footer Text</string>
 </resources>

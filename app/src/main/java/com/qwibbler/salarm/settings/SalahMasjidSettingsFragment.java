@@ -1,6 +1,7 @@
 package com.qwibbler.salarm.settings;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -30,6 +31,7 @@ import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.data.SettingsDAO;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 
+import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import java.util.List;
 import java.util.Date;
 import java.util.Calendar;
@@ -300,6 +302,15 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             View editButton = holder.findViewById(R.id.edit_masjid_button);
             if (editButton != null) {
                 editButton.setOnClickListener(v -> MasjidEditDialogFragment.show(fragmentManager, masjid.id));
+            }
+
+            View downloadButton = holder.findViewById(R.id.download_card);
+            if (downloadButton != null) {
+                downloadButton.setOnClickListener(v -> {
+                    Intent intent = new Intent(getContext(), MasjidCardEditorActivity.class);
+                    intent.putExtra("masjid_id", masjid.id);
+                    getContext().startActivity(intent);
+                });
             }
 
             MaterialButton visibilityButton = (MaterialButton) holder.findViewById(R.id.visibility_masjid_button);
