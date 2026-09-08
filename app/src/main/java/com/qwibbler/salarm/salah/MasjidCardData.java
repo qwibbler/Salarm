@@ -5,6 +5,7 @@ import java.util.List;
 
 public class MasjidCardData {
     public String masjidName;
+    public String subtitle;
     public String footerTextFront;
     public String footerTextBack;
     public boolean isFront;

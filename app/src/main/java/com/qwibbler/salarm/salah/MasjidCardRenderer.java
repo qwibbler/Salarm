@@ -31,10 +31,10 @@ public class MasjidCardRenderer {
     }
 
     public void render(DrawTarget target, MasjidCardData data) {
-        // Colors
+        // Colors - Black and White
         int colorText = Color.BLACK;
-        int colorSecondaryText = Color.GRAY;
-        int colorLine = 0xFF0000FF; // Blue
+        int colorSecondaryText = 0xFF555555; // Dark gray
+        int colorLine = Color.BLACK;
         int colorBorder = Color.BLACK;
         int colorBackground = Color.WHITE;
 
@@ -44,40 +44,45 @@ public class MasjidCardRenderer {
         // Draw outer border
         target.drawRect(5, 5, VIRTUAL_WIDTH - 5, VIRTUAL_HEIGHT - 5, 2, colorBorder, false);
 
-        float padding = 30;
-        float currentY = padding + 40;
+        float padding = 40;
+        float currentY = padding + 50;
 
         // Header
-        target.drawText(data.masjidName != null ? data.masjidName : "", VIRTUAL_WIDTH / 2, currentY, 35, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText(data.masjidName != null ? data.masjidName : "", VIRTUAL_WIDTH / 2, currentY, 45, Paint.Align.CENTER, colorText, true, 0);
+
+        if (data.subtitle != null && !data.subtitle.isEmpty()) {
+            currentY += 40;
+            target.drawText(data.subtitle, VIRTUAL_WIDTH / 2, currentY, 28, Paint.Align.CENTER, colorSecondaryText, false, 0);
+        }
 
         // QR Placeholder (Top Right)
-        float qrSize = 60;
+        float qrSize = 75;
         target.drawRect(VIRTUAL_WIDTH - padding - qrSize, padding, VIRTUAL_WIDTH - padding, padding + qrSize, 1, colorSecondaryText, false);
-        target.drawText("QR", VIRTUAL_WIDTH - padding - qrSize / 2, padding + qrSize / 2 + 5, 12, Paint.Align.CENTER, colorSecondaryText, false, 0);
+        target.drawText("QR", VIRTUAL_WIDTH - padding - qrSize / 2, padding + qrSize / 2 + 7, 16, Paint.Align.CENTER, colorSecondaryText, false, 0);
 
-        currentY += 40;
+        currentY += 90;
 
         // Table Header
         float colX_fajr = 250;
         float colX_asr = 350;
         float colX_mgrb = 450;
         float colX_isha = 550;
-        float headerSize = 25;
+        float headerSize = 30;
 
         target.drawText("Fajr", colX_fajr, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
         target.drawText("Asr", colX_asr, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
         target.drawText("Mgrb", colX_mgrb, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
         target.drawText("Isha", colX_isha, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
 
-        currentY += 15;
-        target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1, colorLine);
-        currentY += 30;
+        currentY += 20;
+        target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
+        currentY += 45;
 
         // Months
-        float monthNameX = 60;
-        float dayX = 120;
-        float rowHeight = 35;
-        float textSize = 22;
+        float monthNameX = 50;
+        float dayX = 95;
+        float rowHeight = 40;
+        float textSize = 26;
 
         for (MasjidCardData.MonthGroup month : data.months) {
             float monthStartY = currentY - rowHeight + 10;
@@ -97,19 +102,25 @@ public class MasjidCardRenderer {
 
             // Separator between months
             target.drawLine(padding, currentY - 10, VIRTUAL_WIDTH - padding, currentY - 10, 1, colorLine);
-            currentY += 10;
+            currentY += 20;
         }
 
-        // Footer
+        // Footer - allow two lines
         String footer = data.getFooterText();
         if (footer != null && !footer.isEmpty()) {
-            target.drawText(footer, VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT - padding - 10, 25, Paint.Align.CENTER, colorText, false, 0);
+            String[] lines = footer.split("\n");
+            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 50 : 20);
+            for (String line : lines) {
+                target.drawText(line.trim(), VIRTUAL_WIDTH / 2, footerY, 28, Paint.Align.CENTER, colorText, false, 0);
+                footerY += 35;
+            }
         }
     }
 
     public MasjidCardData generateData(Masjid masjid) {
         MasjidCardData data = new MasjidCardData();
         data.masjidName = masjid.name;
+        data.subtitle = "";
         data.isFront = true;
         data.footerTextFront = calculateDefaultFooter(masjid);
         data.footerTextBack = "";

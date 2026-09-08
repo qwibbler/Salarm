@@ -1865,5 +1865,6 @@
     <string name="masjid_card_front">Front</string>
     <string name="masjid_card_back">Back</string>
     <string name="masjid_card_name_label">Masjid Name</string>
-    <string name="masjid_card_footer_label">Footer Text</string>
+    <string name="masjid_card_subtitle_label">Subtitle (Optional)</string>
+    <string name="masjid_card_footer_label">Footer Text (Multi-line)</string>
 </resources>

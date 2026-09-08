@@ -320,6 +320,12 @@
             android:taskAffinity=""
             android:theme="@style/Theme.Salarm" />
 
+        <activity
+            android:name="com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity"
+            android:label="@string/masjid_card_editor_title"
+            android:theme="@style/Theme.Salarm"
+            android:exported="false" />
+
         <service
             android:name="com.qwibbler.salarm.screensaver.Screensaver"
             android:exported="true"

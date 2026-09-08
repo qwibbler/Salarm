@@ -10,8 +10,6 @@ import android.view.MenuItem;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
@@ -22,8 +20,9 @@ import com.qwibbler.salarm.salah.MasjidCardData;
 import com.qwibbler.salarm.salah.MasjidCardExporter;
 import com.qwibbler.salarm.salah.MasjidCardRenderer;
 import com.qwibbler.salarm.salah.SalahDatabase;
+import com.qwibbler.salarm.uicomponents.CollapsingToolbarBaseActivity;
 
-public class MasjidCardEditorActivity extends AppCompatActivity {
+public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
 
     private Masjid masjid;
     private MasjidCardData cardData;
@@ -31,11 +30,17 @@ public class MasjidCardEditorActivity extends AppCompatActivity {
 
     private MasjidCardView cardPreview;
     private TextInputEditText editName;
+    private TextInputEditText editSubtitle;
     private TextInputEditText editFooter;
     private MaterialButtonToggleGroup toggleSide;
 
     private String currentExportType;
     private ActivityResultLauncher<Intent> createDocumentLauncher;
+
+    @Override
+    protected String getActivityTitle() {
+        return getString(R.string.masjid_card_editor_title);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +56,9 @@ public class MasjidCardEditorActivity extends AppCompatActivity {
             }
         });
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
         cardPreview = findViewById(R.id.card_preview);
         editName = findViewById(R.id.edit_masjid_name);
+        editSubtitle = findViewById(R.id.edit_masjid_subtitle);
         editFooter = findViewById(R.id.edit_footer_text);
         toggleSide = findViewById(R.id.toggle_side);
 
@@ -81,6 +81,7 @@ public class MasjidCardEditorActivity extends AppCompatActivity {
 
                 AppExecutors.getMainThread().post(() -> {
                     editName.setText(cardData.masjidName);
+                    editSubtitle.setText(cardData.subtitle);
                     editFooter.setText(cardData.getFooterText());
                     toggleSide.check(R.id.btn_front);
                     cardPreview.setData(cardData);
@@ -96,6 +97,17 @@ public class MasjidCardEditorActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {
                 if (cardData != null) {
                     cardData.masjidName = s.toString();
+                    cardPreview.invalidate();
+                }
+            }
+        });
+
+        editSubtitle.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                if (cardData != null) {
+                    cardData.subtitle = s.toString();
                     cardPreview.invalidate();
                 }
             }
