@@ -31,7 +31,4 @@ public interface MasjidEventDao {
 
     @Delete
     void delete(MasjidEvent event);
-
-    @Query("DELETE FROM masjid_events WHERE id = :id")
-    void deleteById(long id);
 }

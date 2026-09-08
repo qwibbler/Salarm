@@ -32,6 +32,7 @@ import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SalahMigration;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.events.LogEventTracker;
+import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uidata.UiDataModel;
 import com.qwibbler.salarm.utils.NotificationUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -55,6 +56,7 @@ public class SalarmApplication extends Application implements Application.Activi
         initDebugAndNightlyDefaults();
 
         SalahMigration.migrate(this);
+        SalahUtils.ensureDefaultRulesExist(this);
 
         String theme = SettingsDAO.getTheme(getDefaultSharedPreferences(this));
         applySystemNightMode(theme);

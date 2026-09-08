@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class}, version = 11, exportSchema = false)
+@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class, MasjidEvent.class}, version = 13)
 public abstract class SalahDatabase extends RoomDatabase {
 
     private static volatile SalahDatabase INSTANCE;
@@ -185,7 +185,7 @@ public abstract class SalahDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     SalahDatabase.class, "salah_database")
-                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                             .fallbackToDestructiveMigration()
                             .build();
                 }

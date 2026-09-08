@@ -279,4 +279,42 @@ public class SalahUtils {
             default -> type;
         };
     }
+
+    public static void ensureDefaultRulesExist(Context context) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
+            List<RelationalRule> rules = db.relationalRuleDao().getAll();
+
+            String[] types = {"FAJR", "DHUHR", "JUMA", "ASR", "MAGHRIB", "ISHA"};
+            for (String type : types) {
+                boolean exists = false;
+                for (RelationalRule r : rules) {
+                    if (r.masjidId == 0 && type.equals(r.masjidSalahType)) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists) {
+                    RelationalRule rule = new RelationalRule();
+                    rule.masjidId = 0;
+                    rule.masjidSalahType = type;
+                    rule.isSelected = false; // Default to unselected
+                    rule.enabled = true;
+
+                    // Set default anchors
+                    switch (type) {
+                        case "FAJR" -> rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+                        case "DHUHR", "JUMA" -> rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.DHUHR;
+                        case "ASR" -> rule.definition.anchor.basicEvent =
+                                getMadhab(appContext) == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI;
+                        case "MAGHRIB" -> rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.MAGHRIB;
+                        case "ISHA" -> rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.ISHA;
+                    }
+                    db.relationalRuleDao().insert(rule);
+                }
+            }
+        });
+    }
 }

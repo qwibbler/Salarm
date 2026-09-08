@@ -46,6 +46,7 @@ import androidx.core.util.Pair;
 import androidx.core.view.HapticFeedbackConstantsCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -63,7 +64,6 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.databinding.AlarmEditBottomSheetBinding;
-import com.qwibbler.salarm.databinding.SalarmActivityBinding;
 import com.qwibbler.salarm.dialogfragment.AlarmDelayPickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmMissedRepeatLimitDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmSnoozeDurationDialogFragment;
@@ -241,11 +241,14 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     public void onStart() {
         super.onStart();
 
+        final FragmentActivity hostActivity = getActivity();
         final View snackbarAnchor;
-        if (requireActivity() instanceof SalarmActivity activity) {
-            snackbarAnchor = activity.getSalarmActivityBinding().contentView;
+        if (hostActivity instanceof SalarmActivity) {
+            snackbarAnchor = ((SalarmActivity) hostActivity).getSalarmActivityBinding().contentView;
+        } else if (hostActivity != null) {
+            snackbarAnchor = hostActivity.findViewById(android.R.id.content);
         } else {
-            snackbarAnchor = requireActivity().findViewById(android.R.id.content);
+            snackbarAnchor = null;
         }
 
         if (snackbarAnchor instanceof ViewGroup group) {
@@ -634,11 +637,13 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     mAlarm.tags = reloadedAlarm.tags;
                 }
 
+                String description = mSalahRule.getRuleDescription(requireContext());
+
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
                     mBinding.salahRuleDescription.setVisibility(VISIBLE);
                     mBinding.salahRuleDescription.setTypeface(mGeneralTypeface);
-                    mBinding.salahRuleDescription.setText(mSalahRule.getRuleDescription(requireContext()));
+                    mBinding.salahRuleDescription.setText(description);
                     mBinding.salahRuleDescription.setOnClickListener(v ->
                         SalahAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
                     );

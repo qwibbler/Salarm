@@ -145,6 +145,129 @@ public class SalahCalculator {
                cal.get(Calendar.MILLISECOND);
     }
 
+    public static long evaluateDefinition(Context context, RelationalDefinition definition, SalahTimes times, Date date) {
+        if (definition.isFixedTime) {
+            Calendar cal = Calendar.getInstance();
+            if (date != null) {
+                cal.setTime(date);
+            }
+            cal.set(Calendar.HOUR_OF_DAY, definition.fixedHour);
+            cal.set(Calendar.MINUTE, definition.fixedMinute);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            return cal.getTimeInMillis();
+        }
+
+        long anchorTime = evaluateAnchor(context, definition.anchor, times, date);
+        if (anchorTime <= 0) return 0;
+
+        long targetMillis = applyCalculation(anchorTime,
+                definition.calculation.offsetMinutes,
+                definition.calculation.roundingDirection,
+                definition.calculation.roundingIntervalMinutes,
+                definition.calculation.adjustmentMinutes);
+
+        if (definition.clip != null) {
+            long clipAnchorTime = evaluateAnchor(context, definition.clip.anchor, times, date);
+            if (clipAnchorTime > 0) {
+                long clipMillis = applyCalculation(clipAnchorTime,
+                        definition.clip.offsetMinutes,
+                        definition.clip.roundingDirection,
+                        definition.clip.roundingIntervalMinutes,
+                        0);
+
+                switch (definition.clip.boundaryType) {
+                    case NO_LATER_THAN -> {
+                        if (targetMillis > clipMillis) targetMillis = clipMillis;
+                    }
+                    case NO_EARLIER_THAN -> {
+                        if (targetMillis < clipMillis) targetMillis = clipMillis;
+                    }
+                }
+            }
+        }
+
+        return targetMillis;
+    }
+
+    public static long evaluateAnchor(Context context, RelationalAnchor anchor, SalahTimes times, Date date) {
+        if (anchor.masjidEventId != null && context != null) {
+            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(anchor.masjidEventId);
+            if (event != null) {
+                return evaluateMasjidEvent(context, event, times, date);
+            }
+        }
+
+        if (anchor.basicEvent != null) {
+            Date time = getEventTime(anchor.basicEvent, times);
+            return time != null ? time.getTime() : 0;
+        }
+
+        return 0;
+    }
+
+    public static long evaluateMasjidEvent(Context context, MasjidEvent event, SalahTimes times, Date date) {
+        if ("JUMA".equals(event.salahType)) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+                return 0;
+            }
+        }
+
+        if (!event.definition.isFixedTime && event.definition.anchor.basicEvent != null) {
+            Masjid masjid = SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId);
+            if (masjid != null) {
+                Date extreme = getIntervalExtremeTime(context, date, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
+                if (extreme != null) {
+                    return applyCalculation(extreme.getTime(),
+                            event.definition.calculation.offsetMinutes,
+                            event.definition.calculation.roundingDirection,
+                            event.definition.calculation.roundingIntervalMinutes,
+                            event.definition.calculation.adjustmentMinutes);
+                }
+            }
+        }
+
+        return evaluateDefinition(context, event.definition, times, date);
+    }
+
+    public static long applyCalculation(long baseMillis, int offsetMinutes, RelationalRule.RoundingDirection direction, int intervalMinutes, int adjustmentMinutes) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(baseMillis);
+        cal.add(Calendar.MINUTE, offsetMinutes);
+
+        long millis = cal.getTimeInMillis();
+        if (intervalMinutes > 0 && direction != null) {
+            long intervalMillis = intervalMinutes * 60 * 1000L;
+            if (direction == RelationalRule.RoundingDirection.NEAREST) {
+                millis = Math.round((double) millis / intervalMillis) * intervalMillis;
+            } else if (direction == RelationalRule.RoundingDirection.UP) {
+                millis = (long) Math.ceil((double) millis / intervalMillis) * intervalMillis;
+            } else if (direction == RelationalRule.RoundingDirection.DOWN) {
+                millis = (long) Math.floor((double) millis / intervalMillis) * intervalMillis;
+            }
+        }
+
+        if (adjustmentMinutes != 0) {
+            millis += adjustmentMinutes * 60 * 1000L;
+        }
+
+        return millis;
+    }
+
+    private static Date getEventTime(RelationalRule.AnchorEvent event, SalahTimes times) {
+        return switch (event) {
+            case FAJR -> times.fajr;
+            case SUNRISE -> times.sunrise;
+            case DHUHR -> times.dhuhr;
+            case ASR_SHAFI -> times.asrShafi;
+            case ASR_HANAFI -> times.asrHanafi;
+            case MAGHRIB -> times.maghrib;
+            case ISHA -> times.isha;
+        };
+    }
+
     public static class SalahTimes {
         public Date fajr;
         public Date sunrise;

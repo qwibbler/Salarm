@@ -15,6 +15,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.salah.Masjid;
+import com.qwibbler.salarm.salah.MasjidEvent;
+import com.qwibbler.salarm.salah.RelationalDefinition;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
@@ -22,7 +24,9 @@ import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MasjidEditDialogFragment extends DialogFragment {
 
@@ -68,12 +72,12 @@ public class MasjidEditDialogFragment extends DialogFragment {
             updateIntervalsSummary();
         }
 
-        intervalsRow.setOnClickListener(v -> {
+        intervalsRow.setOnClickListener(v ->
             MasjidIntervalsDialogFragment.show(getChildFragmentManager(), mMasjid, (updatedMasjid) -> {
                 mMasjid = updatedMasjid;
                 updateIntervalsSummary();
-            });
-        });
+            })
+        );
 
         List<CustomDialog.DialogButton> buttons = new ArrayList<>();
         if (mMasjidId > 0) {
@@ -139,6 +143,13 @@ public class MasjidEditDialogFragment extends DialogFragment {
                     AppExecutors.getDiskIO().execute(() -> {
                         SalahDatabase db = SalahDatabase.getDatabase(appContext);
                         db.masjidDao().deleteById(mMasjidId);
+
+                        // Delete associated events
+                        List<MasjidEvent> events = db.masjidEventDao().getByMasjidId(mMasjidId);
+                        for (MasjidEvent e : events) {
+                            db.masjidEventDao().delete(e);
+                        }
+
                         List<RelationalRule> rules = db.relationalRuleDao().getAll();
                         for (RelationalRule r : rules) {
                             if (r.masjidId == mMasjidId) {
@@ -172,12 +183,39 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
             long newId = db.masjidDao().insert(newMasjid);
 
-            // 2. Copy Rules
+            // 2. Copy MasjidEvents
+            List<MasjidEvent> oldEvents = db.masjidEventDao().getByMasjidId(mMasjidId);
+            Map<Long, Long> eventIdMap = new HashMap<>();
+            for (MasjidEvent oldEvent : oldEvents) {
+                MasjidEvent newEvent = new MasjidEvent();
+                newEvent.masjidId = newId;
+                newEvent.salahType = oldEvent.salahType;
+                newEvent.isSelected = oldEvent.isSelected;
+                newEvent.isManuallyDeselected = oldEvent.isManuallyDeselected;
+                newEvent.definition = new RelationalDefinition(oldEvent.definition);
+
+                long newEventId = db.masjidEventDao().insert(newEvent);
+                eventIdMap.put(oldEvent.id, newEventId);
+            }
+
+            // 3. Copy Rules
             List<RelationalRule> rules = db.relationalRuleDao().getByMasjidId(mMasjidId);
             for (RelationalRule rule : rules) {
                 RelationalRule newRule = new RelationalRule(rule);
                 newRule.id = 0; // New record
                 newRule.masjidId = newId;
+
+                // Update anchors if they point to masjid events of the same masjid
+                if (newRule.definition.anchor.masjidEventId != null && eventIdMap.containsKey(newRule.definition.anchor.masjidEventId)) {
+                    newRule.definition.anchor.masjidEventId = eventIdMap.get(newRule.definition.anchor.masjidEventId);
+                }
+                if (newRule.definition.clip != null && newRule.definition.clip.anchor.masjidEventId != null && eventIdMap.containsKey(newRule.definition.clip.anchor.masjidEventId)) {
+                    newRule.definition.clip.anchor.masjidEventId = eventIdMap.get(newRule.definition.clip.anchor.masjidEventId);
+                }
+                if (newRule.autostopAnchor.masjidEventId != null && eventIdMap.containsKey(newRule.autostopAnchor.masjidEventId)) {
+                    newRule.autostopAnchor.masjidEventId = eventIdMap.get(newRule.autostopAnchor.masjidEventId);
+                }
+
                 db.relationalRuleDao().insert(newRule);
             }
 
