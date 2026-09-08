@@ -296,6 +296,10 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         } else {
             mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
         }
+
+        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
     }
 
     private void populateUi() {
