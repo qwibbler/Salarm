@@ -54,9 +54,9 @@ public class CustomDialog {
         @NonNull SoftInputMode softInputMode
     ) {
         List<DialogButton> buttons = new ArrayList<>();
-        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
-        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
         if (neutralText != null) buttons.add(new DialogButton(neutralText, neutralListener));
+        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
+        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
         return create(context, styleRes, icon, title, message, customView, onDialogReady, softInputMode, buttons.toArray(new DialogButton[0]));
     }
 
@@ -79,9 +79,9 @@ public class CustomDialog {
         @NonNull SoftInputMode softInputMode
     ) {
         List<DialogButton> buttons = new ArrayList<>();
-        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
-        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
         if (neutralText != null) buttons.add(new DialogButton(neutralText, neutralListener));
+        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
+        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
         if (copyText != null) buttons.add(new DialogButton(copyText, (d, w) -> {
             if (copyListener != null) copyListener.onClick(null);
         }));

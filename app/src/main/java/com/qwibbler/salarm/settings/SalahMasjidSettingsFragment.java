@@ -47,7 +47,8 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.salah_masjid_settings);
+        // Don't add preferences from resource here, we'll do it in populateMasjids
+        // to ensure a clean refresh.
 
         getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadMasjids());
 
@@ -109,7 +110,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         setupFixedPreferences();
 
         for (Masjid masjid : masjids) {
-            MasjidPreferenceCategory masjidSection = new MasjidPreferenceCategory(context, masjid, getParentFragmentManager());
+            MasjidPreferenceCategory masjidSection = new MasjidPreferenceCategory(context, masjid, getParentFragmentManager(), this::loadMasjids);
             masjidSection.setTitle(masjid.name);
             screen.addPreference(masjidSection);
 
@@ -283,11 +284,13 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     private static class MasjidPreferenceCategory extends PreferenceCategory {
         private final Masjid masjid;
         private final FragmentManager fragmentManager;
+        private final Runnable updateCallback;
 
-        public MasjidPreferenceCategory(Context context, Masjid masjid, FragmentManager fragmentManager) {
+        public MasjidPreferenceCategory(Context context, Masjid masjid, FragmentManager fragmentManager, Runnable updateCallback) {
             super(context);
             this.masjid = masjid;
             this.fragmentManager = fragmentManager;
+            this.updateCallback = updateCallback;
             setLayoutResource(R.layout.settings_masjid_category);
         }
 
@@ -324,6 +327,9 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
                         }
 
                         SalahAlarmSyncManager.syncSelectedRulesToAlarms(context);
+                        if (updateCallback != null) {
+                            AppExecutors.getMainThread().post(updateCallback);
+                        }
                     });
                 });
             }
