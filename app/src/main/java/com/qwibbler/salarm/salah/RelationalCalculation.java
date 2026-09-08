@@ -17,13 +17,6 @@ public class RelationalCalculation {
     }
 
     @Ignore
-    public RelationalCalculation(int offsetMinutes, RelationalRule.RoundingDirection roundingDirection, int roundingIntervalMinutes) {
-        this.offsetMinutes = offsetMinutes;
-        this.roundingDirection = roundingDirection;
-        this.roundingIntervalMinutes = roundingIntervalMinutes;
-    }
-
-    @Ignore
     public RelationalCalculation(RelationalCalculation other) {
         if (other != null) {
             this.offsetMinutes = other.offsetMinutes;
@@ -38,10 +31,7 @@ public class RelationalCalculation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RelationalCalculation that = (RelationalCalculation) o;
-        return offsetMinutes == that.offsetMinutes &&
-                roundingIntervalMinutes == that.roundingIntervalMinutes &&
-                adjustmentMinutes == that.adjustmentMinutes &&
-                roundingDirection == that.roundingDirection;
+        return offsetMinutes == that.offsetMinutes && roundingIntervalMinutes == that.roundingIntervalMinutes && adjustmentMinutes == that.adjustmentMinutes && roundingDirection == that.roundingDirection;
     }
 
     @Override

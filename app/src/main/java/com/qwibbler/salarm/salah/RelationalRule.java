@@ -12,9 +12,7 @@ import androidx.room.PrimaryKey;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.settings.PreferencesKeys;
-import com.qwibbler.salarm.utils.LogUtils;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -43,21 +41,6 @@ public class RelationalRule {
     @Embedded(prefix = "autostop_")
     public RelationalAnchor autostopAnchor;
 
-    public enum AnchorEvent {
-        FAJR, SUNRISE, DHUHR, ASR_SHAFI, ASR_HANAFI, MAGHRIB, ISHA
-    }
-
-    public enum RoundingDirection {
-        NEAREST, UP, DOWN
-    }
-
-    public enum BoundaryType {
-        NO_LATER_THAN, NO_EARLIER_THAN
-    }
-
-    public record EvaluationResult(long time, int autoSilenceSeconds) {
-    }
-
     public RelationalRule() {
         this.enabled = true;
         this.definition = new RelationalDefinition();
@@ -77,32 +60,6 @@ public class RelationalRule {
         this.autostopAnchor = new RelationalAnchor(other.autostopAnchor);
     }
 
-    public String getRuleDescription(Context context) {
-        if (context == null) return "";
-        String anchorName = getAnchorDescription(context, definition.anchor);
-        if (anchorName.isEmpty()) {
-            if (masjidSalahType != null) {
-                anchorName = SalahUtils.getLocalizedSalahName(context, masjidSalahType);
-            } else {
-                return "";
-            }
-        }
-
-        String summary = definition.getSummary(context, anchorName, false);
-
-        // Autostop: auto dismissed at sunrise
-        if (autostopEnabled) {
-            String autostopEventName = getAnchorDescription(context, autostopAnchor);
-            if (!autostopEventName.isEmpty()) {
-                String autostopOffsetPart = RelationalDefinition.getOffsetPart(context, autostopOffsetMinutes);
-                summary += context.getString(R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName);
-            }
-        }
-
-        if (summary.isEmpty()) return "";
-        return summary.substring(0, 1).toUpperCase(Locale.getDefault()) + summary.substring(1);
-    }
-
     public static String getAnchorDescription(Context context, RelationalAnchor anchor) {
         if (anchor.masjidEventId != null) {
             MasjidEvent masjidEvent = SalahDatabase.getDatabase(context).masjidEventDao().getById(anchor.masjidEventId);
@@ -120,8 +77,7 @@ public class RelationalRule {
 
     public static String getEventName(Context context, AnchorEvent event) {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-            && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false) && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
 
         if (!showBothAsr) {
             if (event == AnchorEvent.ASR_HANAFI || event == AnchorEvent.ASR_SHAFI) {
@@ -168,5 +124,46 @@ public class RelationalRule {
         }
 
         return new EvaluationResult(targetMillis, autoSilenceSeconds);
+    }
+
+    public String getRuleDescription(Context context) {
+        if (context == null) return "";
+        String anchorName = getAnchorDescription(context, definition.anchor);
+        if (anchorName.isEmpty()) {
+            if (masjidSalahType != null) {
+                anchorName = SalahUtils.getLocalizedSalahName(context, masjidSalahType);
+            } else {
+                return "";
+            }
+        }
+
+        String summary = definition.getSummary(context, anchorName, false);
+
+        // Autostop: auto dismissed at sunrise
+        if (autostopEnabled) {
+            String autostopEventName = getAnchorDescription(context, autostopAnchor);
+            if (!autostopEventName.isEmpty()) {
+                String autostopOffsetPart = RelationalDefinition.getOffsetPart(context, autostopOffsetMinutes);
+                summary += context.getString(R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName);
+            }
+        }
+
+        if (summary.isEmpty()) return "";
+        return summary.substring(0, 1).toUpperCase(Locale.getDefault()) + summary.substring(1);
+    }
+
+    public enum AnchorEvent {
+        FAJR, SUNRISE, DHUHR, ASR_SHAFI, ASR_HANAFI, MAGHRIB, ISHA
+    }
+
+    public enum RoundingDirection {
+        NEAREST, UP, DOWN
+    }
+
+    public enum BoundaryType {
+        NO_LATER_THAN, NO_EARLIER_THAN
+    }
+
+    public record EvaluationResult(long time, int autoSilenceSeconds) {
     }
 }
