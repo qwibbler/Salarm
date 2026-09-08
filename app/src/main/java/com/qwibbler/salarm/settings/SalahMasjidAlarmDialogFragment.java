@@ -19,9 +19,10 @@ import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.databinding.DialogMasjidAlarmBinding;
 import com.qwibbler.salarm.salah.Masjid;
+import com.qwibbler.salarm.salah.MasjidEvent;
 import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
+import com.qwibbler.salarm.salah.RelationalClip;
 import com.qwibbler.salarm.salah.RelationalRule;
-import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahUtils;
@@ -39,7 +40,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
     private long mMasjidId;
     private String mSalahType;
-    private RelationalRule mRule;
+    private MasjidEvent mEvent;
 
     private DialogMasjidAlarmBinding mBinding;
 
@@ -73,6 +74,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
         mMasjidId = getArguments().getLong(ARG_MASJID_ID);
         mSalahType = getArguments().getString(ARG_SALAH_TYPE);
+
+        final Context context = requireContext();
 
         mOffsetTypes = getResources().getStringArray(R.array.relational_alarm_offset_type);
         mRoundTypes = getResources().getStringArray(R.array.relational_alarm_round_type);
@@ -116,9 +119,10 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             eventsList.addAll(Arrays.asList(originalEvents));
         } else {
             for (int i = 0; i < originalEvents.length; i++) {
-                if (i == 3) { // ASR_SHAFI
+                RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
+                if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
                     eventsList.add(getString(R.string.asr_label));
-                } else if (i != 4) { // Not ASR_HANAFI
+                } else if (event != RelationalRule.AnchorEvent.ASR_HANAFI) {
                     eventsList.add(originalEvents[i]);
                 }
             }
