@@ -503,7 +503,7 @@ public class PreferencesKeys {
     public static final String KEY_SCREENSAVER_DATE_IN_ITALIC = "key_screensaver_date_in_italic";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_BOLD = "key_screensaver_next_alarm_in_bold";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_ITALIC = "key_screensaver_next_alarm_in_italic";
-    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_ON";
+    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_on";
     public static final String KEY_SCREENSAVER_BACKGROUND_IMAGE = "key_screensaver_background_image";
     public static final String KEY_SCREENSAVER_BLUR_INTENSITY = "key_screensaver_blur_intensity";
     public static final String KEY_SCREENSAVER_PREVIEW = "key_screensaver_preview";
