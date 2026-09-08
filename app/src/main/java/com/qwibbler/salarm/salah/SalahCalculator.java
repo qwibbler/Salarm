@@ -207,7 +207,11 @@ public class SalahCalculator {
     }
 
     public static long evaluateMasjidEvent(Context context, MasjidEvent event, SalahTimes times, Date date) {
-        if ("JUMA".equals(event.salahType)) {
+        return evaluateMasjidEvent(context, event, times, date, false);
+    }
+
+    public static long evaluateMasjidEvent(Context context, MasjidEvent event, SalahTimes times, Date date, boolean ignoreJumaDayCheck) {
+        if (!ignoreJumaDayCheck && "JUMA".equals(event.salahType)) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
@@ -256,7 +260,7 @@ public class SalahCalculator {
         return millis;
     }
 
-    private static Date getEventTime(RelationalRule.AnchorEvent event, SalahTimes times) {
+    public static Date getEventTime(RelationalRule.AnchorEvent event, SalahTimes times) {
         return switch (event) {
             case FAJR -> times.fajr;
             case SUNRISE -> times.sunrise;

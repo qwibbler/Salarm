@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
@@ -31,7 +32,8 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class SalahAlarmDialogFragment extends DialogFragment {
@@ -81,6 +83,7 @@ public class SalahAlarmDialogFragment extends DialogFragment {
 
     private final List<MasjidEvent> mMasjidEvents = new ArrayList<>();
     private final List<Masjid> mMasjids = new ArrayList<>();
+    private final List<SelectableEvent> mSelectableEvents = new ArrayList<>();
 
     public static SalahAlarmDialogFragment newInstance() {
         return new SalahAlarmDialogFragment();
@@ -190,6 +193,56 @@ public class SalahAlarmDialogFragment extends DialogFragment {
             List<MasjidEvent> masjidEvents = db.masjidEventDao().getAll();
             List<Masjid> masjids = db.masjidDao().getAll();
 
+            double[] coords = SalahUtils.getCoordinates(appContext);
+            CalculationMethod method = SalahUtils.getCalculationMethod(appContext);
+            SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], method);
+
+            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
+            boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                    && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+
+            List<SelectableEvent> selectableEvents = new ArrayList<>();
+            String[] originalEvents = appContext.getResources().getStringArray(R.array.relational_alarm_prayer_events);
+
+            // Basic events
+            for (int i = 0; i < originalEvents.length; i++) {
+                RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
+                Date time = SalahCalculator.getEventTime(event, salahTimes);
+                String label;
+                if (!showBothAsr) {
+                    if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
+                        label = appContext.getString(R.string.asr_label);
+                    } else if (event == RelationalRule.AnchorEvent.ASR_HANAFI) {
+                        continue;
+                    } else {
+                        label = originalEvents[i];
+                    }
+                } else {
+                    label = originalEvents[i];
+                }
+                selectableEvents.add(new SelectableEvent(label, time != null ? time.getTime() : 0, true));
+            }
+
+            // Masjid events
+            for (MasjidEvent e : masjidEvents) {
+                if (e.isSelected) {
+                    Masjid masjid = null;
+                    for (Masjid m : masjids) {
+                        if (m.id == e.masjidId) {
+                            masjid = m;
+                            break;
+                        }
+                    }
+                    if (masjid != null) {
+                        String masjidLabel = SalahUtils.getLocalizedSalahName(appContext, e.salahType) + " - " + masjid.name;
+                        long time = SalahCalculator.evaluateMasjidEvent(appContext, e, salahTimes, new Date(), true);
+                        selectableEvents.add(new SelectableEvent(masjidLabel, time, false));
+                    }
+                }
+            }
+
+            Collections.sort(selectableEvents, (a, b) -> Long.compare(a.time, b.time));
+
             AppExecutors.getMainThread().post(() -> {
                 if (!isAdded() || mBinding == null) return;
 
@@ -198,39 +251,12 @@ public class SalahAlarmDialogFragment extends DialogFragment {
                 mMasjidEvents.addAll(masjidEvents);
                 mMasjids.addAll(masjids);
 
-                SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-                boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-                        && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+                mSelectableEvents.clear();
+                mSelectableEvents.addAll(selectableEvents);
 
                 List<String> eventsList = new ArrayList<>();
-                String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
-                if (showBothAsr) {
-                    eventsList.addAll(Arrays.asList(originalEvents));
-                } else {
-                    for (int i = 0; i < originalEvents.length; i++) {
-                        RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
-                        if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
-                            eventsList.add(getString(R.string.asr_label));
-                        } else if (event != RelationalRule.AnchorEvent.ASR_HANAFI) {
-                            eventsList.add(originalEvents[i]);
-                        }
-                    }
-                }
-
-                for (MasjidEvent e : masjidEvents) {
-                    if (e.isSelected) {
-                        Masjid masjid = null;
-                        for (Masjid m : masjids) {
-                            if (m.id == e.masjidId) {
-                                masjid = m;
-                                break;
-                            }
-                        }
-                        if (masjid != null) {
-                            String masjidLabel = SalahUtils.getLocalizedSalahName(requireContext(), e.salahType) + " - " + masjid.name;
-                            eventsList.add(masjidLabel);
-                        }
-                    }
+                for (SelectableEvent se : mSelectableEvents) {
+                    eventsList.add(se.label);
                 }
 
                 ArrayAdapter<String> prayerEventsAdapter = new ArrayAdapter<>(requireContext(),
@@ -239,7 +265,18 @@ public class SalahAlarmDialogFragment extends DialogFragment {
                 mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
                 mBinding.autostopEvent.setAdapter(prayerEventsAdapter);
 
-                mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> updateAutostopEvent(position));
+                mBinding.primaryEvent.setThreshold(100);
+                mBinding.safetyEvent.setThreshold(100);
+                mBinding.autostopEvent.setThreshold(100);
+
+                mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> {
+                    String selected = (String) parent.getItemAtPosition(position);
+                    int actualPos = eventsList.indexOf(selected);
+                    if (actualPos >= 0) {
+                        updateAutostopEvent(actualPos);
+                        mBinding.safetyEvent.setText(mBinding.autostopEvent.getText().toString(), false);
+                    }
+                });
 
                 // Now that adapters are set, initialize UI
                 if (savedInstanceState != null) {
@@ -299,11 +336,11 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
         updateAdjustmentVisibility();
 
-        if (mBinding.primaryEvent.getAdapter().getCount() > 0) {
-            mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
+        if (!mSelectableEvents.isEmpty()) {
+            mBinding.primaryEvent.setText(mSelectableEvents.get(0).label, false);
+            updateAutostopEvent(0);
+            mBinding.safetyEvent.setText(mBinding.autostopEvent.getText().toString(), false);
         }
-        updateAutostopEvent(0);
-        mBinding.safetyEvent.setText(mBinding.safetyEvent.getAdapter().getItem(1).toString(), false);
     }
 
     private void restoreState(@NonNull Bundle savedInstanceState) {
@@ -348,8 +385,23 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     }
 
     private void updateAutostopEvent(int primaryPosition) {
-        int nextPosition = (primaryPosition + 1) % mBinding.primaryEvent.getAdapter().getCount();
-        mBinding.autostopEvent.setText(mBinding.primaryEvent.getAdapter().getItem(nextPosition).toString(), false);
+        if (primaryPosition < 0 || primaryPosition >= mSelectableEvents.size()) return;
+
+        // Find next basic event
+        for (int i = primaryPosition + 1; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.autostopEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
+            }
+        }
+
+        // Fallback to first basic event if none found after (circular)
+        for (int i = 0; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.autostopEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
+            }
+        }
     }
 
     private void updateRoundingVisibility() {
@@ -691,5 +743,17 @@ public class SalahAlarmDialogFragment extends DialogFragment {
 
         anchor.basicEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(label)];
         anchor.masjidEventId = null;
+    }
+
+    private static class SelectableEvent {
+        final String label;
+        final long time;
+        final boolean isBasic;
+
+        SelectableEvent(String label, long time, boolean isBasic) {
+            this.label = label;
+            this.time = time;
+            this.isBasic = isBasic;
+        }
     }
 }

@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.SalarmApplication;
@@ -24,6 +25,7 @@ import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
 import com.qwibbler.salarm.salah.RelationalClip;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.SalahCalculator;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
@@ -31,6 +33,9 @@ import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class SalahMasjidAlarmDialogFragment extends DialogFragment {
@@ -58,6 +63,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     private int mSafetyOffsetIdx = 0; // before
     private boolean mSafetyIsMax = false;
 
+    private final List<SelectableEvent> mSelectableEvents = new ArrayList<>();
+
     public static void show(FragmentManager manager, long masjidId, String salahType) {
         SalahMasjidAlarmDialogFragment fragment = new SalahMasjidAlarmDialogFragment();
         Bundle args = new Bundle();
@@ -83,12 +90,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         mAdjustmentTypes = getResources().getStringArray(R.array.relational_alarm_adjustment_type);
         mExtremeTypes = new String[]{getString(R.string.salah_extreme_min), getString(R.string.salah_extreme_max)};
 
-        setupAdapters();
+        setupInitialization();
         setupListeners();
-
-        initializeUiWithDefaults();
-
-        loadEvent();
 
         return CustomDialog.create(
             context,
@@ -108,42 +111,110 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         );
     }
 
-    private void setupAdapters() {
+    private void setupInitialization() {
         RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue, mBinding.safetyOffsetValue);
 
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-            && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        final Context appContext = requireContext().getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
+            mEvent = db.masjidEventDao().getMasjidEvent(mMasjidId, mSalahType);
 
-        List<String> eventsList = new ArrayList<>();
-        String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
-        if (showBothAsr) {
-            eventsList.addAll(Arrays.asList(originalEvents));
-        } else {
+            double[] coords = SalahUtils.getCoordinates(appContext);
+            CalculationMethod method = SalahUtils.getCalculationMethod(appContext);
+            SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], method);
+
+            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
+            boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                    && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+
+            List<SelectableEvent> selectableEvents = new ArrayList<>();
+            String[] originalEvents = appContext.getResources().getStringArray(R.array.relational_alarm_prayer_events);
+
             for (int i = 0; i < originalEvents.length; i++) {
                 RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
-                if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
-                    eventsList.add(getString(R.string.asr_label));
-                } else if (event != RelationalRule.AnchorEvent.ASR_HANAFI) {
-                    eventsList.add(originalEvents[i]);
+                Date time = SalahCalculator.getEventTime(event, salahTimes);
+                String label;
+                if (!showBothAsr) {
+                    if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
+                        label = appContext.getString(R.string.asr_label);
+                    } else if (event == RelationalRule.AnchorEvent.ASR_HANAFI) {
+                        continue;
+                    } else {
+                        label = originalEvents[i];
+                    }
+                } else {
+                    label = originalEvents[i];
                 }
+                selectableEvents.add(new SelectableEvent(label, time != null ? time.getTime() : 0, true));
+            }
+
+            Collections.sort(selectableEvents, (a, b) -> Long.compare(a.time, b.time));
+
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mBinding == null) return;
+
+                mSelectableEvents.clear();
+                mSelectableEvents.addAll(selectableEvents);
+
+                List<String> eventsList = new ArrayList<>();
+                for (SelectableEvent se : mSelectableEvents) {
+                    eventsList.add(se.label);
+                }
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item_relational, eventsList);
+                mBinding.primaryEvent.setAdapter(adapter);
+                mBinding.primaryEvent.setThreshold(100);
+                mBinding.primaryEvent.setOnClickListener(v -> mBinding.primaryEvent.showDropDown());
+
+                mBinding.safetyEvent.setAdapter(adapter);
+                mBinding.safetyEvent.setThreshold(100);
+                mBinding.safetyEvent.setOnClickListener(v -> mBinding.safetyEvent.showDropDown());
+
+                mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> {
+                    String selected = (String) parent.getItemAtPosition(position);
+                    int actualPos = eventsList.indexOf(selected);
+                    if (actualPos >= 0) {
+                        updateSafetyEventDefault(actualPos);
+                    }
+                });
+
+                if (mEvent != null) {
+                    populateUi();
+                } else {
+                    initializeUiWithDefaults();
+                }
+            });
+        });
+    }
+
+    private void updateSafetyEventDefault(int primaryPosition) {
+        if (primaryPosition < 0 || primaryPosition >= mSelectableEvents.size()) return;
+
+        // Find next basic event
+        for (int i = primaryPosition + 1; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.safetyEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
             }
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.dropdown_item_relational, eventsList);
-        mBinding.primaryEvent.setAdapter(adapter);
-        mBinding.primaryEvent.setThreshold(100);
-        mBinding.primaryEvent.setOnClickListener(v -> mBinding.primaryEvent.showDropDown());
-
-        mBinding.safetyEvent.setAdapter(adapter);
-        mBinding.safetyEvent.setThreshold(100);
-        mBinding.safetyEvent.setOnClickListener(v -> mBinding.safetyEvent.showDropDown());
+        // Fallback to first basic event if none found after (circular)
+        for (int i = 0; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.safetyEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
+            }
+        }
     }
 
     private void setupListeners() {
         mBinding.primaryOffsetToggle.setOnClickListener(v -> {
             mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
             updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+
+            // Auto-adjust safety boundary default: After -> No Later Than, Before -> No Earlier Than
+            mSafetyBoundIdx = (mPrimaryOffsetIdx == 1) ? 1 : 0;
+            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
         });
         mBinding.primaryExtremeToggle.setOnClickListener(v -> {
             mPrimaryIsMax = !mPrimaryIsMax;
@@ -207,18 +278,24 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
         mSafetyIsMax = false;
         updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, 0); // Min
-        mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
-    }
 
-    private void loadEvent() {
-        AppExecutors.getDiskIO().execute(() -> {
-            mEvent = SalahDatabase.getDatabase(requireContext()).masjidEventDao().getMasjidEvent(mMasjidId, mSalahType);
-            AppExecutors.getMainThread().post(() -> {
-                if (isAdded()) {
-                    populateUi();
+        if (!mSelectableEvents.isEmpty()) {
+            String primaryLabel = SalahUtils.getLocalizedSalahName(requireContext(), mSalahType);
+            int primaryPos = -1;
+            for (int i = 0; i < mSelectableEvents.size(); i++) {
+                if (mSelectableEvents.get(i).label.equals(primaryLabel)) {
+                    primaryPos = i;
+                    break;
                 }
-            });
-        });
+            }
+            if (primaryPos >= 0) {
+                updateSafetyEventDefault(primaryPos);
+            } else {
+                mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
+            }
+        } else {
+            mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
+        }
     }
 
     private void populateUi() {
@@ -363,5 +440,17 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         mBinding = null;
+    }
+
+    private static class SelectableEvent {
+        final String label;
+        final long time;
+        final boolean isBasic;
+
+        SelectableEvent(String label, long time, boolean isBasic) {
+            this.label = label;
+            this.time = time;
+            this.isBasic = isBasic;
+        }
     }
 }
