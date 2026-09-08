@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.text.format.DateFormat;
 
 import com.batoulapps.adhan.CalculationMethod;
 
@@ -69,20 +68,25 @@ public class MasjidCardRenderer {
         float colX_isha = 550;
         float headerSize = 30;
 
-        target.drawText("Fajr", colX_fajr, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
-        target.drawText("Asr", colX_asr, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
-        target.drawText("Mgrb", colX_mgrb, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
-        target.drawText("Isha", colX_isha, currentY, headerSize, Paint.Align.CENTER, colorText, false, 0);
+        target.drawText("Fajr", colX_fajr, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Asr", colX_asr, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Mgrb", colX_mgrb, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Isha", colX_isha, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
 
         currentY += 20;
         target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
         currentY += 45;
 
         // Months
+        int maxRows = 0;
+        for (MasjidCardData.MonthGroup month : data.months) {
+            maxRows = Math.max(maxRows, month.rows.size());
+        }
+
         float monthNameX = 50;
         float dayX = 95;
-        float rowHeight = 40;
-        float textSize = 26;
+        float rowHeight = maxRows > 2 ? 38 : 45;
+        float textSize = maxRows > 2 ? 24 : 28;
 
         for (MasjidCardData.MonthGroup month : data.months) {
             float monthStartY = currentY - rowHeight + 10;
@@ -102,14 +106,14 @@ public class MasjidCardRenderer {
 
             // Separator between months
             target.drawLine(padding, currentY - 10, VIRTUAL_WIDTH - padding, currentY - 10, 1, colorLine);
-            currentY += 20;
+            currentY += (maxRows > 2 ? 15 : 20);
         }
 
         // Footer - allow two lines
         String footer = data.getFooterText();
         if (footer != null && !footer.isEmpty()) {
             String[] lines = footer.split("\n");
-            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 50 : 20);
+            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 55 : 25);
             for (String line : lines) {
                 target.drawText(line.trim(), VIRTUAL_WIDTH / 2, footerY, 28, Paint.Align.CENTER, colorText, false, 0);
                 footerY += 35;
@@ -142,8 +146,6 @@ public class MasjidCardRenderer {
         MasjidEvent maghribEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "MAGHRIB");
         MasjidEvent ishaEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "ISHA");
 
-        java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
-
         Calendar cal = Calendar.getInstance();
         for (int m = startMonth; m <= endMonth; m++) {
             cal.set(Calendar.MONTH, m);
@@ -154,10 +156,10 @@ public class MasjidCardRenderer {
                 cal.set(Calendar.DAY_OF_MONTH, interval.startDay);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
 
-                String fajr = (fajrEvent != null) ? formatTime(timeFormat, SalahCalculator.evaluateMasjidEvent(context, fajrEvent, st, cal.getTime())) : "--:--";
-                String asr = (asrEvent != null) ? formatTime(timeFormat, SalahCalculator.evaluateMasjidEvent(context, asrEvent, st, cal.getTime())) : "--:--";
-                String maghrib = (maghribEvent != null) ? formatTime(timeFormat, SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime())) : "--:--";
-                String isha = (ishaEvent != null) ? formatTime(timeFormat, SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime())) : "--:--";
+                String fajr = (fajrEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, fajrEvent, st, cal.getTime())) : "--:--";
+                String asr = (asrEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, asrEvent, st, cal.getTime())) : "--:--";
+                String maghrib = (maghribEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime())) : "--:--";
+                String isha = (ishaEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime())) : "--:--";
 
                 group.rows.add(new MasjidCardData.IntervalRow(interval.startDay, fajr, asr, maghrib, isha));
             }
@@ -165,9 +167,13 @@ public class MasjidCardRenderer {
         }
     }
 
-    private String formatTime(java.text.DateFormat df, long millis) {
+    private String formatTime(long millis) {
         if (millis <= 0) return "--:--";
-        return df.format(new Date(millis));
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(millis);
+        int hour = cal.get(Calendar.HOUR);
+        if (hour == 0) hour = 12;
+        return String.format(Locale.getDefault(), "%d:%02d", hour, cal.get(Calendar.MINUTE));
     }
 
     private String calculateDefaultFooter(Masjid masjid) {
@@ -177,9 +183,8 @@ public class MasjidCardRenderer {
 
         if (dhuhrEvent == null || jumaEvent == null) return "";
 
-        java.text.DateFormat df = DateFormat.getTimeFormat(context);
-        String dhuhrTime = formatTime(df, SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
-        String jumaTime = formatTime(df, SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
+        String dhuhrTime = formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
+        String jumaTime = formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
 
         if (dhuhrTime.equals(jumaTime)) {
             return String.format("Duhr and Juma at %s", dhuhrTime);
