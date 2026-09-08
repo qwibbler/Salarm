@@ -205,9 +205,10 @@ public class SalahAlarmDialogFragment extends DialogFragment {
                     eventsList.addAll(Arrays.asList(originalEvents));
                 } else {
                     for (int i = 0; i < originalEvents.length; i++) {
-                        if (i == 3) { // ASR_SHAFI
+                        RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
+                        if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
                             eventsList.add(getString(R.string.asr_label));
-                        } else if (i != 4) { // Not ASR_HANAFI
+                        } else if (event != RelationalRule.AnchorEvent.ASR_HANAFI) {
                             eventsList.add(originalEvents[i]);
                         }
                     }
@@ -597,7 +598,7 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         if (context == null) return 0;
         if (getString(R.string.asr_label).equals(eventName)) {
             Madhab madhab = SalahUtils.getMadhab(context);
-            return madhab == Madhab.HANAFI ? 4 : 3;
+            return (madhab == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI).ordinal();
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
         for (int i = 0; i < events.length; i++) {

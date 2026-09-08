@@ -1,6 +1,7 @@
 package com.qwibbler.salarm.settings;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 
@@ -13,15 +14,25 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.google.android.material.button.MaterialButton;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.salah.Masjid;
+import com.qwibbler.salarm.salah.MasjidEvent;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
 import com.qwibbler.salarm.salah.SalahUtils;
+import com.qwibbler.salarm.salah.SalahCalculator;
+import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
+import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
+import com.qwibbler.salarm.data.SettingsDAO;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 
 import java.util.List;
+import java.util.Date;
+import java.util.Calendar;
 
 public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
 
@@ -95,7 +106,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         setDivider(null);
         setDividerHeight(0);
 
-        // Re-setup listeners because we reset the screen
         setupFixedPreferences();
 
         for (Masjid masjid : masjids) {
@@ -137,24 +147,17 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
         pref.setLayoutResource(R.layout.settings_preference_layout);
         pref.setIconSpaceReserved(false);
 
-        final Context appContext = context.getApplicationContext();
+        final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            List<RelationalRule> rules = SalahDatabase.getDatabase(appContext).relationalRuleDao().getAll();
-            RelationalRule masjidRule = null;
-            for (RelationalRule r : rules) {
-                if (r.masjidId == masjid.id && type.equals(r.masjidSalahType)) {
-                    masjidRule = r;
-                    break;
-                }
+            MasjidEvent masjidEvent = SalahDatabase.getDatabase(appContext).masjidEventDao().getMasjidEvent(masjid.id, type);
+            String summary = "";
+            if (masjidEvent != null) {
+                summary = getEventDescription(appContext, masjidEvent);
             }
-            final RelationalRule finalRule = masjidRule;
+            final String finalSummary = summary;
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
-                    if (finalRule != null) {
-                        pref.setSummary(finalRule.getRuleDescription(requireContext()));
-                    } else {
-                        pref.setSummary("");
-                    }
+                    pref.setSummary(finalSummary);
                 }
             });
         });
@@ -171,16 +174,8 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private String getEventDescription(Context context, MasjidEvent event) {
-        // We can't use masjidRule.getRuleDescription anymore because it's a MasjidEvent.
-        // I should probably add a getEventDescription to MasjidEvent or SalahUtils.
-        // For now, I'll just use a simplified version or add it to RelationalRule as a static helper.
-        // Actually, RelationalRule.getRuleDescription can be refactored to take RelationalDefinition.
-
-        // I'll assume I can just use a temporary RelationalRule to get the description
-        RelationalRule temp = new RelationalRule();
-        temp.definition = event.definition;
-        // Mock masjid info for description
-        return temp.getRuleDescription(context);
+        String anchorName = RelationalRule.getAnchorDescription(context, event.definition.anchor);
+        return event.definition.getSummary(context, anchorName, true);
     }
 
     private void showFixedTimeDialogue(Masjid masjid, String type) {
@@ -191,9 +186,6 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             LogUtils.w("Attempted to show fixed time dialogue for unsupported type: " + type);
             return;
         }
-
-        // Fetch ringtone on main thread to avoid enforceMainLooper crash
-        final Uri ringtone = DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
 
         AppExecutors.getDiskIO().execute(() -> {
             SalahDatabase db = SalahDatabase.getDatabase(appContext);
@@ -266,9 +258,9 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
             getChildFragmentManager().setFragmentResultListener(MaterialTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
                 int h = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_HOURS);
                 int m = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
-                updateRuleTime(rule, h, m);
+                updateEventTime(event, h, m);
             });
-            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", rule.fixedHour, rule.fixedMinute, prefs);
+            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", event.definition.fixedHour, event.definition.fixedMinute, prefs);
         }
     }
 

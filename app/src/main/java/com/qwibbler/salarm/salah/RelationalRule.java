@@ -4,7 +4,6 @@ import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.format.DateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.room.Embedded;
@@ -80,69 +79,31 @@ public class RelationalRule {
 
     public String getRuleDescription(Context context) {
         if (context == null) return "";
-        if (definition.isFixedTime) {
-            try {
-                Calendar cal = Calendar.getInstance();
-                cal.set(Calendar.HOUR_OF_DAY, definition.fixedHour);
-                cal.set(Calendar.MINUTE, definition.fixedMinute);
-                java.text.DateFormat df = DateFormat.getTimeFormat(context);
-                if (df != null) {
-                    return df.format(cal.getTime());
-                }
-            } catch (Exception e) {
-                LogUtils.e("Error formatting fixed time description", e);
-            }
-            return String.format(Locale.getDefault(), "%02d:%02d", definition.fixedHour, definition.fixedMinute);
-        }
-        StringBuilder sb = new StringBuilder();
-
-        String eventName = getAnchorDescription(context, definition.anchor);
-        if (eventName.isEmpty()) {
+        String anchorName = getAnchorDescription(context, definition.anchor);
+        if (anchorName.isEmpty()) {
             if (masjidSalahType != null) {
-                eventName = SalahUtils.getLocalizedSalahName(context, masjidSalahType);
+                anchorName = SalahUtils.getLocalizedSalahName(context, masjidSalahType);
             } else {
                 return "";
             }
         }
 
-        String offsetPart = getOffsetPart(context, definition.calculation.offsetMinutes);
-        int baseResId;
-        if (definition.anchor.masjidEventId != null) {
-            baseResId = definition.anchor.isMax ? R.string.salah_rule_description_base_max : R.string.salah_rule_description_base_min;
-        } else {
-            baseResId = R.string.salah_rule_description_base;
-        }
-        sb.append(context.getString(baseResId, offsetPart, eventName));
+        String summary = definition.getSummary(context, anchorName, false);
 
-        sb.append(getRoundingPart(context, definition.calculation.roundingDirection, definition.calculation.roundingIntervalMinutes));
-
-        if (definition.calculation.adjustmentMinutes != 0) {
-            String adjPart = getAdjustmentPart(context, definition.calculation.adjustmentMinutes);
-            sb.append(context.getString(R.string.salah_rule_adjusted, adjPart));
-        }
-
-        if (definition.clip != null) {
-            String clipOffsetPart = getOffsetPart(context, definition.clip.offsetMinutes);
-            String clipEventName = getAnchorDescription(context, definition.clip.anchor);
-            int clipResId = getClipResId();
-            sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
-            sb.append(getRoundingPart(context, definition.clip.roundingDirection, definition.clip.roundingIntervalMinutes));
-        }
-
+        // Autostop: auto dismissed at sunrise
         if (autostopEnabled) {
             String autostopEventName = getAnchorDescription(context, autostopAnchor);
             if (!autostopEventName.isEmpty()) {
-                String autostopOffsetPart = getOffsetPart(context, autostopOffsetMinutes);
-                sb.append(context.getString(R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName));
+                String autostopOffsetPart = RelationalDefinition.getOffsetPart(context, autostopOffsetMinutes);
+                summary += context.getString(R.string.salah_rule_autostop, autostopOffsetPart, autostopEventName);
             }
         }
 
-        String description = sb.toString();
-        if (description.isEmpty()) return "";
-        return description.substring(0, 1).toUpperCase(Locale.getDefault()) + description.substring(1);
+        if (summary.isEmpty()) return "";
+        return summary.substring(0, 1).toUpperCase(Locale.getDefault()) + summary.substring(1);
     }
 
-    private String getAnchorDescription(Context context, RelationalAnchor anchor) {
+    public static String getAnchorDescription(Context context, RelationalAnchor anchor) {
         if (anchor.masjidEventId != null) {
             MasjidEvent masjidEvent = SalahDatabase.getDatabase(context).masjidEventDao().getById(anchor.masjidEventId);
             if (masjidEvent != null) {
@@ -155,57 +116,6 @@ public class RelationalRule {
             return getEventName(context, anchor.basicEvent);
         }
         return "";
-    }
-
-    private int getClipResId() {
-        if (definition.clip == null || definition.clip.boundaryType == null) {
-            return R.string.salah_rule_no_later;
-        }
-
-        boolean isMasjid = definition.clip.anchor.masjidEventId != null;
-        int clipResId;
-        if (definition.clip.boundaryType == BoundaryType.NO_LATER_THAN) {
-            if (isMasjid) {
-                clipResId = definition.clip.anchor.isMax ? R.string.salah_rule_no_later_max : R.string.salah_rule_no_later_min;
-            } else {
-                clipResId = R.string.salah_rule_no_later;
-            }
-        } else {
-            if (isMasjid) {
-                clipResId = definition.clip.anchor.isMax ? R.string.salah_rule_no_earlier_max : R.string.salah_rule_no_earlier_min;
-            } else {
-                clipResId = R.string.salah_rule_no_earlier;
-            }
-        }
-        return clipResId;
-    }
-
-    private String getOffsetPart(Context context, int offset) {
-        if (offset == 0) {
-            return context.getString(R.string.salah_rule_at);
-        } else if (offset > 0) {
-            return context.getString(R.string.salah_rule_offset_after, offset);
-        } else {
-            return context.getString(R.string.salah_rule_offset_before, Math.abs(offset));
-        }
-    }
-
-    private String getRoundingPart(Context context, RoundingDirection direction, int interval) {
-        if (interval <= 0 || direction == null) return "";
-        int resId = switch (direction) {
-            case NEAREST -> R.string.salah_rule_rounded_nearest;
-            case UP -> R.string.salah_rule_rounded_up;
-            case DOWN -> R.string.salah_rule_rounded_down;
-        };
-        return context.getString(resId, interval);
-    }
-
-    private String getAdjustmentPart(Context context, int offset) {
-        if (offset >= 0) {
-            return context.getString(R.string.salah_rule_adjustment_later, offset);
-        } else {
-            return context.getString(R.string.salah_rule_adjustment_earlier, Math.abs(offset));
-        }
     }
 
     public static String getEventName(Context context, AnchorEvent event) {
