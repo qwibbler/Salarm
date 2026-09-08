@@ -56,7 +56,6 @@ public class SalarmApplication extends Application implements Application.Activi
         initDebugAndNightlyDefaults();
 
         SalahMigration.migrate(this);
-        SalahUtils.ensureDefaultRulesExist(this);
 
         String theme = SettingsDAO.getTheme(getDefaultSharedPreferences(this));
         applySystemNightMode(theme);
