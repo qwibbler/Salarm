@@ -10,11 +10,14 @@ import android.net.Uri;
 import com.batoulapps.adhan.CalculationMethod;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.utils.WidgetUtils;
+import com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider;
 
 import java.util.Calendar;
 import java.util.List;
@@ -133,7 +136,7 @@ public class SalahAlarmSyncManager {
             if (ringtoneToUse == null) {
                 // Solution B: Fallback to thread-hopping fetcher if not provided
                 ringtoneToUse = AppExecutors.getOnMainThread(() ->
-                    com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
+                    DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
             }
 
             nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse, true);
@@ -348,7 +351,7 @@ public class SalahAlarmSyncManager {
         instance.addInstance(cr);
         AlarmStateManager.registerInstance(context, instance, true);
 
-        com.qwibbler.salarm.utils.WidgetUtils.scheduleWidgetUpdate(context, com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider.class);
+        WidgetUtils.scheduleWidgetUpdate(context, SalahTimelineWidgetProvider.class);
 
         if (wasStyledDaysEnabled && skipTime != null) {
             alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);

@@ -36,7 +36,9 @@ public class SalahDatabaseTest {
 
     @Test
     public void writeAndReadRule() {
-        RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 15, null, 0);
+        RelationalRule rule = new RelationalRule();
+        rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        rule.definition.calculation.offsetMinutes = 15;
         rule.enabled = true;
 
         dao.insert(rule);
@@ -44,7 +46,7 @@ public class SalahDatabaseTest {
         List<RelationalRule> rules = dao.getAll();
         assertNotNull(rules);
         assertEquals(1, rules.size());
-        assertEquals(RelationalRule.AnchorEvent.FAJR, rules.get(0).anchorEvent);
-        assertEquals(15, rules.get(0).offsetMinutes);
+        assertEquals(RelationalRule.AnchorEvent.FAJR, rules.get(0).definition.anchor.basicEvent);
+        assertEquals(15, rules.get(0).definition.calculation.offsetMinutes);
     }
 }

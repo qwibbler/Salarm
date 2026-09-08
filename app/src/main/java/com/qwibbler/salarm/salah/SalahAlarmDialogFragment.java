@@ -367,7 +367,6 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING, false);
 
         boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
-
         boolean shouldShowAdjustmentCheckbox = showRounding && showAdjustment && roundingEnabled;
 
         mBinding.adjustmentEnabledCheckbox.setVisibility(shouldShowAdjustmentCheckbox ? View.VISIBLE : View.GONE);

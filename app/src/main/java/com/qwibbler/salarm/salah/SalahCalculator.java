@@ -1,6 +1,7 @@
 package com.qwibbler.salarm.salah;
 
 import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.CalculationParameters;
 import com.batoulapps.adhan.Coordinates;
 import com.batoulapps.adhan.Madhab;
 import com.batoulapps.adhan.PrayerTimes;
@@ -23,7 +24,7 @@ public class SalahCalculator {
     public static PrayerTimes getPrayerTimes(Date date, double latitude, double longitude, Madhab madhab, CalculationMethod method) {
         Coordinates coordinates = new Coordinates(latitude, longitude);
         DateComponents dateComponents = DateComponents.from(date);
-        com.batoulapps.adhan.CalculationParameters parameters = method.getParameters();
+        CalculationParameters parameters = method.getParameters();
         parameters.madhab = madhab;
         return new PrayerTimes(coordinates, dateComponents, parameters);
     }
@@ -108,9 +109,6 @@ public class SalahCalculator {
                 extremeTime = currentTime;
             } else {
                 if (isMax) {
-                    // Compare only time of day?
-                    // The requirement says "max time of Fajr".
-                    // Usually this means the latest time in the day.
                     if (getTimeOfDay(currentTime) > getTimeOfDay(extremeTime)) {
                         extremeTime = currentTime;
                     }

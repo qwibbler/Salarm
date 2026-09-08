@@ -15,10 +15,12 @@ import com.qwibbler.salarm.settings.PreferencesDefaultValues;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.LogUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONObject;
@@ -86,7 +88,7 @@ public class SalahUtils {
             // 1. Try local cache/JSON first (Priority 1 & 2)
             OfflineCity match = findNearestOfflineCity(appContext, lat, lon);
             if (match != null) {
-                String displayName = match.isNear ? appContext.getString(com.qwibbler.salarm.R.string.salah_near_city, match.name) : match.name;
+                String displayName = match.isNear ? appContext.getString(R.string.salah_near_city, match.name) : match.name;
                 getDefaultSharedPreferences(appContext).edit()
                         .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, displayName)
                         .apply();
@@ -135,7 +137,7 @@ public class SalahUtils {
         if (sBuiltInCoords == null) {
             sBuiltInCoords = new HashMap<>();
             try (InputStream is = context.getAssets().open("city_coordinates.json")) {
-                java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream();
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
                 byte[] buffer = new byte[8192];
                 int length;
                 while ((length = is.read(buffer)) != -1) {
@@ -143,7 +145,7 @@ public class SalahUtils {
                 }
                 String json = result.toString("UTF-8");
                 JSONObject obj = new JSONObject(json);
-                java.util.Iterator<String> keys = obj.keys();
+                Iterator<String> keys = obj.keys();
                 while (keys.hasNext()) {
                     String key = keys.next();
                     try {

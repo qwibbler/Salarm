@@ -18,9 +18,6 @@ public interface RelationalRuleDao {
     @Query("SELECT * FROM relational_rules WHERE id = :id")
     RelationalRule getById(long id);
 
-    @Query("SELECT * FROM relational_rules WHERE masjidId = :masjidId AND masjidSalahType = :type LIMIT 1")
-    RelationalRule getMasjidEventRule(long masjidId, String type);
-
     @Query("SELECT * FROM relational_rules WHERE masjidId = :masjidId")
     List<RelationalRule> getByMasjidId(long masjidId);
 
