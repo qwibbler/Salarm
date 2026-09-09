@@ -65,7 +65,22 @@ public class SalahCalculator {
         return new Date(rounded);
     }
 
+    public interface SalahTimesProvider {
+        SalahTimes getTimes(Date date);
+    }
+
     public static Date getIntervalExtremeTime(Context context, Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax) {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
+        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
+        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
+        double lat = Double.parseDouble(latStr);
+        double lon = Double.parseDouble(lonStr);
+        CalculationMethod method = SalahUtils.getCalculationMethod(context);
+
+        return getIntervalExtremeTime(date, masjid, event, isMax, d -> calculateAllSalahTimes(context, d, lat, lon, method));
+    }
+
+    public static Date getIntervalExtremeTime(Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax, SalahTimesProvider timesProvider) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
@@ -80,19 +95,15 @@ public class SalahCalculator {
 
         if (targetInterval == null) return null;
 
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
-        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
-        double lat = Double.parseDouble(latStr);
-        double lon = Double.parseDouble(lonStr);
-        CalculationMethod method = SalahUtils.getCalculationMethod(context);
-
         Date extremeTime = null;
 
         Calendar loopCal = (Calendar) cal.clone();
-        for (int day = targetInterval.startDay; day <= targetInterval.endDay; day++) {
+        int maxDayInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int endDay = Math.min(targetInterval.endDay, maxDayInMonth);
+
+        for (int day = targetInterval.startDay; day <= endDay; day++) {
             loopCal.set(Calendar.DAY_OF_MONTH, day);
-            SalahTimes times = calculateAllSalahTimes(context, loopCal.getTime(), lat, lon, method);
+            SalahTimes times = timesProvider.getTimes(loopCal.getTime());
             Date currentTime = switch (event) {
                 case FAJR -> times.fajr;
                 case SUNRISE -> times.sunrise;
@@ -280,6 +291,8 @@ public class SalahCalculator {
         public Date asrHanafi;
         public Date maghrib;
         public Date isha;
+
+        public SalahTimes() {}
 
         public SalahTimes(PrayerTimes hanafi, PrayerTimes shafi) {
             this.fajr = hanafi.fajr;
