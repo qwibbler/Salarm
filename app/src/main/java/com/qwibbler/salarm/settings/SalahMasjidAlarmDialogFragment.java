@@ -32,9 +32,7 @@ import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 

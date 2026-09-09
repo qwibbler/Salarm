@@ -52,7 +52,7 @@ public class MasjidCardRenderer {
         target.drawText(data.masjidName != null ? data.masjidName : "", VIRTUAL_WIDTH / 2, currentY, titleSize, Paint.Align.CENTER, colorText, true, 0);
 
         if (hasSubtitle) {
-            currentY += 35;
+            currentY += titleSize;
             target.drawText(data.subtitle, VIRTUAL_WIDTH / 2, currentY, 26, Paint.Align.CENTER, colorSecondaryText, false, 0);
         }
 
@@ -61,8 +61,13 @@ public class MasjidCardRenderer {
         target.drawRect(VIRTUAL_WIDTH - padding - qrSize, padding, VIRTUAL_WIDTH - padding, padding + qrSize, 1, colorSecondaryText, false);
         target.drawText("QR", VIRTUAL_WIDTH - padding - qrSize / 2, padding + qrSize / 2 + 7, 16, Paint.Align.CENTER, colorSecondaryText, false, 0);
 
+        int maxIntervals = 0;
+        for (MasjidCardData.MonthGroup month : data.months) {
+            maxIntervals = Math.max(maxIntervals, month.rows.size());
+        }
+
         // Table Header
-        currentY = hasSubtitle ? 165 : 145;
+        currentY = hasSubtitle ? 180 : 160;
         float headerSize = 30;
         float colX_fajr = 250;
         float colX_asr = 350;
@@ -76,18 +81,13 @@ public class MasjidCardRenderer {
 
         currentY += 15;
         target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
-        currentY += 40;
+        currentY += (maxIntervals > 2 ? 30 : 40);
 
         // 2. Table Area (Middle ~700px)
-        int maxIntervals = 0;
-        for (MasjidCardData.MonthGroup month : data.months) {
-            maxIntervals = Math.max(maxIntervals, month.rows.size());
-        }
-
-        float monthNameX = 65; // Moved right from 50
-        float dayX = 105;     // Adjusted to stay clear of month name
-        float rowHeight = maxIntervals > 2 ? 37 : 44;
-        float textSize = maxIntervals > 2 ? 24 : 28;
+        float monthNameX = 65;
+        float dayX = 105;
+        float rowHeight = maxIntervals > 2 ? 33 : 44; // Reduced from 37
+        float textSize = maxIntervals > 2 ? 22 : 28;  // Reduced from 24
 
         for (MasjidCardData.MonthGroup month : data.months) {
             float monthStartY = currentY - rowHeight + 10;
@@ -106,15 +106,15 @@ public class MasjidCardRenderer {
             }
 
             // Separator between months
-            target.drawLine(padding, currentY - 10, VIRTUAL_WIDTH - padding, currentY - 10, 1, colorLine);
-            currentY += (maxIntervals > 2 ? 15 : 20);
+            target.drawLine(padding, currentY - (rowHeight / 2), VIRTUAL_WIDTH - padding, currentY - (rowHeight / 2), 1, colorLine);
+            currentY += (rowHeight / 2); // Reduced from 15
         }
 
         // 3. Footer Area (Bottom ~120px)
         String footer = data.getFooterText();
         if (footer != null && !footer.isEmpty()) {
             String[] lines = footer.split("\n");
-            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 55 : 25);
+            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 55 : 45);
             for (String line : lines) {
                 target.drawText(line.trim(), VIRTUAL_WIDTH / 2, footerY, 28, Paint.Align.CENTER, colorText, false, 0);
                 footerY += 35;
@@ -197,13 +197,12 @@ public class MasjidCardRenderer {
     public static class CanvasDrawTarget implements DrawTarget {
         private final Canvas canvas;
         private final Paint paint;
-        private final float scale;
 
         public CanvasDrawTarget(Canvas canvas, int width, int height) {
             this.canvas = canvas;
             this.paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             this.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
-            this.scale = Math.min(width / VIRTUAL_WIDTH, height / VIRTUAL_HEIGHT);
+            float scale = Math.min(width / VIRTUAL_WIDTH, height / VIRTUAL_HEIGHT);
             canvas.scale(scale, scale);
         }
 

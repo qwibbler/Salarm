@@ -138,7 +138,7 @@ public class MasjidCardExporter {
         }
 
         public String getSvgString() {
-            return sb.toString() + "</svg>";
+            return sb + "</svg>";
         }
 
         private String colorToHex(int color) {

@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.qwibbler.salarm.salah.MasjidCardData;
@@ -69,7 +70,7 @@ public class MasjidCardView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         if (data != null) {
             MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, getWidth(), getHeight());
