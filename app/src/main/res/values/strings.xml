@@ -1814,7 +1814,6 @@
 
     <!-- Masjid Timings -->
     <string name="salah_masjid_timings_title">Masjid Timings</string>
-    <string name="salah_masjid_timings_summary">Configure prayer timings for local masjids</string>
     <string name="salah_masjid_events_shown_title">Events Shown</string>
     <string name="salah_masjid_events_shown_summary">Choose which Salah events appear in the system</string>
     <string name="salah_masjids_category_title">Masjids</string>

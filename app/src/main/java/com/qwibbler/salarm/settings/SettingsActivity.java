@@ -138,7 +138,6 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
         Preference mStopwatchSettingsPref;
         Preference mSalahSettingsPref;
         Preference mSalahAlarmSettingsPref;
-        Preference mSalahMasjidTimingsPref;
         Preference mScreensaverSettings;
         Preference mWidgetsSettings;
         Preference mPermissionsManagement;
@@ -257,7 +256,6 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mStopwatchSettingsPref = findPreference(KEY_STOPWATCH_SETTINGS);
             mSalahSettingsPref = findPreference(KEY_SALAH_SETTINGS);
             mSalahAlarmSettingsPref = findPreference(KEY_SALAH_ALARM_SETTINGS);
-            mSalahMasjidTimingsPref = findPreference(KEY_SALAH_MASJID_TIMINGS);
             mScreensaverSettings = findPreference(KEY_SCREENSAVER_SETTINGS);
             mWidgetsSettings = findPreference(KEY_WIDGETS_SETTINGS);
             mPermissionsManagement = findPreference(KEY_PERMISSIONS_MANAGEMENT);
@@ -347,8 +345,6 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
                 case KEY_SALAH_ALARM_SETTINGS -> animateAndShowFragment(new SalahAlarmSettingsFragment());
 
-                case KEY_SALAH_MASJID_TIMINGS -> animateAndShowFragment(new SalahMasjidSettingsFragment());
-
                 case KEY_SCREENSAVER_SETTINGS -> animateAndShowFragment(new ScreensaverSettingsActivity.ScreensaverSettingsFragment());
 
                 case KEY_WIDGETS_SETTINGS -> animateAndShowFragment(new WidgetSettingsFragment());
@@ -380,8 +376,6 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mSalahSettingsPref.setOnPreferenceClickListener(this);
 
             mSalahAlarmSettingsPref.setOnPreferenceClickListener(this);
-
-            mSalahMasjidTimingsPref.setOnPreferenceClickListener(this);
 
             mScreensaverSettings.setOnPreferenceClickListener(this);
 
@@ -605,7 +599,6 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
             mStopwatchSettingsPref = null;
             mSalahSettingsPref = null;
             mSalahAlarmSettingsPref = null;
-            mSalahMasjidTimingsPref = null;
             mScreensaverSettings = null;
             mWidgetsSettings = null;
             mPermissionsManagement = null;
