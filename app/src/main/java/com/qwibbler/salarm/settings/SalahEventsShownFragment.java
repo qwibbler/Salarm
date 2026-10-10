@@ -146,7 +146,7 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
         Date today = new Date();
         SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(context, today, coords[0], coords[1], SalahUtils.getCalculationMethod(context));
 
-        long evaluated = SalahCalculator.evaluateMasjidEvent(context, event, times, today);
+        long evaluated = SalahCalculator.evaluateMasjidEvent(context, event, times, today, true);
         if (evaluated > 0) {
             return DateFormat.getTimeFormat(context).format(new Date(evaluated));
         }

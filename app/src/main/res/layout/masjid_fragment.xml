@@ -133,38 +133,30 @@
             android:id="@+id/masjid_title_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="16dp">
 
             <ImageView
                 android:id="@+id/masjid_title_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_masjid_timings"
-                app:tint="?attr/colorPrimary"
-                android:contentDescription="@null" />
+                app:tint="?attr/colorPrimary" />
 
             <TextView
                 android:id="@+id/masjid_title_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginStart="12dp"
+                android:layout_weight="1"
                 android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textStyle="bold"
                 tools:text="Masjid Name" />
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_settings"
-                android:alpha="0.7"
-                app:tint="?attr/colorOnSurfaceVariant"
-                android:contentDescription="@null" />
         </LinearLayout>
 
         <View

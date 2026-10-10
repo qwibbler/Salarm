@@ -229,7 +229,7 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
                 double[] coords = SalahUtils.getCoordinates(appContext);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
 
-                long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date());
+                long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
                 if (evaluated > 0) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(evaluated);

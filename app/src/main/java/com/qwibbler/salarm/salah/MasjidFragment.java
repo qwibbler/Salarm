@@ -186,7 +186,7 @@ public class MasjidFragment extends SalarmFragment {
                 boolean isConfigured = false;
 
                 if (event != null) {
-                    timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date());
+                    timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
                     if (timeMillis > 0) {
                         isConfigured = true;
                         String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
@@ -425,7 +425,7 @@ public class MasjidFragment extends SalarmFragment {
                 double[] coords = SalahUtils.getCoordinates(appContext);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
 
-                long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date());
+                long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
                 if (evaluated > 0) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(evaluated);
