@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Empty State: No Masjid Added -->
+    <LinearLayout
+        android:id="@+id/masjid_empty_state_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone"
+        tools:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_masjid_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/salah_add_new_masjid"
+            app:icon="@drawable/ic_add" />
+    </LinearLayout>
+
+    <!-- Content State: Masjid Added -->
+    <LinearLayout
+        android:id="@+id/masjid_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible"
+        tools:visibility="visible">
+
+        <!-- Multiple Masjids Header (> 1 masjid) -->
+        <LinearLayout
+            android:id="@+id/multiple_masjids_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageButton
+                android:id="@+id/prev_masjid_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="@null"
+                app:tint="?attr/colorOnSurface" />
+
+            <LinearLayout
+                android:id="@+id/masjid_dropdown_trigger"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:paddingVertical="8dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_masjid_timings"
+                    app:tint="?attr/colorOnSurface"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:id="@+id/current_masjid_dropdown_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textStyle="bold"
+                    tools:text="Masjid Al-Noor" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/next_masjid_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_arrow_right"
+                android:contentDescription="@null"
+                app:tint="?attr/colorOnSurface" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/multiple_masjids_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Current Masjid Title Proper -->
+        <LinearLayout
+            android:id="@+id/masjid_title_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/masjid_title_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_masjid_timings"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/masjid_title_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textStyle="bold"
+                tools:text="Masjid Name" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_settings"
+                android:alpha="0.7"
+                app:tint="?attr/colorOnSurfaceVariant"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant" />
+
+        <!-- Prayer Times List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/masjid_prayer_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false" />
+
+    </LinearLayout>
+
+</LinearLayout>

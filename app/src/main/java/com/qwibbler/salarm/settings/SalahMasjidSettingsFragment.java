@@ -89,8 +89,11 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private void loadMasjids() {
+        Context context = getContext();
+        if (context == null) return;
+        final Context appContext = context.getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            List<Masjid> masjids = SalahDatabase.getDatabase(requireContext()).masjidDao().getAll();
+            List<Masjid> masjids = SalahDatabase.getDatabase(appContext).masjidDao().getAll();
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
                     populateMasjids(masjids);
@@ -145,12 +148,14 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private void addSalahPreference(PreferenceCategory category, Masjid masjid, String type) {
-        Preference pref = new Preference(requireContext());
-        pref.setTitle(SalahUtils.getLocalizedSalahName(requireContext(), type));
+        Context context = getContext();
+        if (context == null) return;
+        Preference pref = new Preference(context);
+        pref.setTitle(SalahUtils.getLocalizedSalahName(context, type));
         pref.setLayoutResource(R.layout.settings_preference_layout);
         pref.setIconSpaceReserved(false);
 
-        final Context appContext = requireContext().getApplicationContext();
+        final Context appContext = context.getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
             MasjidEvent masjidEvent = SalahDatabase.getDatabase(appContext).masjidEventDao().getMasjidEvent(masjid.id, type);
             String summary = "";
@@ -182,7 +187,9 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     }
 
     private void showFixedTimeDialogue(Masjid masjid, String type) {
-        final Context appContext = requireContext().getApplicationContext();
+        Context context = getContext();
+        if (context == null) return;
+        final Context appContext = context.getApplicationContext();
 
         // Verify type is supported for fixed time (Dhuhr or Juma only)
         if (!"DHUHR".equals(type) && !"JUMA".equals(type)) {
@@ -270,11 +277,14 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
     private void updateEventTime(MasjidEvent event, int hour, int minute) {
         event.definition.fixedHour = hour;
         event.definition.fixedMinute = minute;
+        Context context = getContext();
+        if (context == null) return;
+        final Context appContext = context.getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
-            SalahDatabase db = SalahDatabase.getDatabase(requireContext());
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
             db.masjidEventDao().update(event);
 
-            SalahAlarmSyncManager.syncSelectedRulesToAlarms(requireContext());
+            SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
                     loadMasjids();
@@ -320,7 +330,8 @@ public class SalahMasjidSettingsFragment extends BaseSettingsScreenFragment {
                     masjid.showMasjidEvents = !masjid.showMasjidEvents;
                     updateVisibilityIcon(visibilityButton);
 
-                    final Context context = getContext().getApplicationContext();
+                    Context ctx = getContext();
+                    final Context context = ctx.getApplicationContext();
                     AppExecutors.getDiskIO().execute(() -> {
                         SalahDatabase db = SalahDatabase.getDatabase(context);
                         db.masjidDao().update(masjid);

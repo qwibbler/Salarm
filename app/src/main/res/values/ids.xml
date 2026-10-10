@@ -9,6 +9,7 @@
     <item name="page_stopwatch" type="id" />
     <item name="page_salah" type="id" />
     <item name="page_qibla" type="id" />
+    <item name="page_masjid" type="id" />
     <item name="page_next" type="id" />
     <item name="page_back" type="id" />
 </resources>

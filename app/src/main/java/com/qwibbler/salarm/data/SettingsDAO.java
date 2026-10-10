@@ -504,6 +504,13 @@ public final class SettingsDAO {
     }
 
     /**
+     * @return {@code true} if the Masjid tab is visible in the bottom navigation menu. {@code false} otherwise.
+     */
+    public static boolean isMasjidTabVisible(SharedPreferences prefs) {
+        return getVisibleTabs(prefs).contains(VISIBLE_TAB_MASJID);
+    }
+
+    /**
      * @return the tab to be displayed once the application has launched.
      */
     public static int getTabToDisplay(SharedPreferences prefs) {

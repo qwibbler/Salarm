@@ -554,6 +554,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             tab = UiDataModel.Tab.SALAH;
         } else if (itemId == R.id.page_qibla) {
             tab = UiDataModel.Tab.QIBLA;
+        } else if (itemId == R.id.page_masjid) {
+            tab = UiDataModel.Tab.MASJID;
         } else if (itemId == R.id.page_next) {
             setBottomNavPage(2);
             return false;
@@ -917,6 +919,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case STOPWATCH -> R.drawable.ic_tab_stopwatch;
             case SALAH -> R.drawable.ic_tab_salah;
             case QIBLA -> R.drawable.ic_tab_qibla;
+            case MASJID -> R.drawable.ic_masjid_timings;
         };
     }
 
@@ -1054,6 +1057,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             case STOPWATCH -> R.id.page_stopwatch;
             case SALAH -> R.id.page_salah;
             case QIBLA -> R.id.page_qibla;
+            case MASJID -> R.id.page_masjid;
         };
 
         MenuItem activeItem = mBinding.salarmActivityBottomMenu.getMenu().findItem(currentItemId);

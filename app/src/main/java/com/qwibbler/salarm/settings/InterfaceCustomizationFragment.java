@@ -471,6 +471,10 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
             labels.add(getString(R.string.menu_qibla));
         }
 
+        if (selectedTabs.contains(VISIBLE_TAB_MASJID)) {
+            labels.add(getString(R.string.salah_masjid_timings_title));
+        }
+
         String summary = String.join(" - ", labels);
 
         mVisibleTabsPref.setSummary(summary);
@@ -495,13 +499,7 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
 
             if (!visibleTabs.isEmpty()) {
                 String singleTab = visibleTabs.iterator().next();
-                String value = DEFAULT_TAB_TO_DISPLAY;
-                switch (singleTab) {
-                    case VISIBLE_TAB_ALARM -> value = TAB_TO_DISPLAY_ALARM;
-                    case VISIBLE_TAB_CLOCK -> value = TAB_TO_DISPLAY_CLOCK;
-                    case VISIBLE_TAB_TIMER -> value = TAB_TO_DISPLAY_TIMER;
-                    case VISIBLE_TAB_STOPWATCH -> value = TAB_TO_DISPLAY_STOPWATCH;
-                }
+                String value = getString(singleTab);
 
                 mTabToDisplayPref.setValue(value);
             }
@@ -518,7 +516,7 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
         entries.add(getString(R.string.last_tab_used_title));
         entryValues.add(DEFAULT_TAB_TO_DISPLAY);
 
-        // Follow the visual order (Alarm -> Clock -> Timer -> Stopwatch)
+        // Follow the visual order
         if (visibleTabs.contains(VISIBLE_TAB_ALARM)) {
             entries.add(getString(R.string.menu_alarm));
             entryValues.add(TAB_TO_DISPLAY_ALARM);
@@ -549,6 +547,11 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
             entryValues.add(TAB_TO_DISPLAY_QIBLA);
         }
 
+        if (visibleTabs.contains(VISIBLE_TAB_MASJID)) {
+            entries.add(getString(R.string.salah_masjid_timings_title));
+            entryValues.add(TAB_TO_DISPLAY_MASJID);
+        }
+
         // Apply the new lists to mTabToDisplayPref
         mTabToDisplayPref.setEntries(entries.toArray(new CharSequence[0]));
         mTabToDisplayPref.setEntryValues(entryValues.toArray(new CharSequence[0]));
@@ -567,6 +570,21 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
         if (index >= 0) {
             mTabToDisplayPref.setSummary(mTabToDisplayPref.getEntries()[index]);
         }
+    }
+
+    @NonNull
+    private static String getString(String singleTab) {
+        String value = DEFAULT_TAB_TO_DISPLAY;
+        switch (singleTab) {
+            case VISIBLE_TAB_ALARM -> value = TAB_TO_DISPLAY_ALARM;
+            case VISIBLE_TAB_CLOCK -> value = TAB_TO_DISPLAY_CLOCK;
+            case VISIBLE_TAB_TIMER -> value = TAB_TO_DISPLAY_TIMER;
+            case VISIBLE_TAB_STOPWATCH -> value = TAB_TO_DISPLAY_STOPWATCH;
+            case VISIBLE_TAB_SALAH -> value = TAB_TO_DISPLAY_SALAH;
+            case VISIBLE_TAB_QIBLA -> value = TAB_TO_DISPLAY_QIBLA;
+            case VISIBLE_TAB_MASJID -> value = TAB_TO_DISPLAY_MASJID;
+        }
+        return value;
     }
 
     private void nullifyAllPrefs() {
