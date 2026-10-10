@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,6 +58,7 @@ public class MasjidFragment extends SalarmFragment {
 
     private List<Masjid> mMasjids = new ArrayList<>();
     private long mSelectedMasjidId = -1;
+    private boolean mShowCheckboxes = false;
 
     public MasjidFragment() {
         super(MASJID);
@@ -86,6 +88,15 @@ public class MasjidFragment extends SalarmFragment {
         mNextMasjidButton.setOnClickListener(v -> shiftMasjid(1));
         mMasjidDropdownTrigger.setOnClickListener(v -> showMasjidPickerDialog());
 
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    exitCheckboxMode();
+                }
+            }
+        });
+
         getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadMasjids());
 
         return view;
@@ -94,7 +105,14 @@ public class MasjidFragment extends SalarmFragment {
     @Override
     public void onResume() {
         super.onResume();
+        mShowCheckboxes = false;
         loadMasjids();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mShowCheckboxes = false;
     }
 
     private void loadMasjids() {
@@ -147,7 +165,10 @@ public class MasjidFragment extends SalarmFragment {
 
         final Masjid masjid = currentMasjid;
         mMasjidTitleText.setText(masjid.name);
-        mMasjidTitleContainer.setOnClickListener(v -> MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id));
+        mMasjidTitleContainer.setOnClickListener(v -> {
+            exitCheckboxMode();
+            MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
+        });
 
         if (mMasjids.size() > 1) {
             mMultipleMasjidsHeader.setVisibility(View.VISIBLE);
@@ -208,7 +229,7 @@ public class MasjidFragment extends SalarmFragment {
                     }
                 }
 
-                items.add(new PrayerItem(type, SalahUtils.getLocalizedSalahName(appContext, type), timeMillis, summary, isConfigured, masjid));
+                items.add(new PrayerItem(type, SalahUtils.getLocalizedSalahName(appContext, type), timeMillis, summary, isConfigured, masjid, event));
             }
 
             AppExecutors.getMainThread().post(() -> {
@@ -219,7 +240,17 @@ public class MasjidFragment extends SalarmFragment {
         });
     }
 
+    private void exitCheckboxMode() {
+        if (mShowCheckboxes) {
+            mShowCheckboxes = false;
+            if (mAdapter != null) {
+                mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
+            }
+        }
+    }
+
     private void shiftMasjid(int delta) {
+        exitCheckboxMode();
         if (mMasjids.isEmpty()) return;
         int currentIndex = 0;
         for (int i = 0; i < mMasjids.size(); i++) {
@@ -234,6 +265,7 @@ public class MasjidFragment extends SalarmFragment {
     }
 
     private void showMasjidPickerDialog() {
+        exitCheckboxMode();
         if (mMasjids.isEmpty()) return;
         CharSequence[] names = new CharSequence[mMasjids.size()];
         for (int i = 0; i < mMasjids.size(); i++) {
@@ -273,6 +305,7 @@ public class MasjidFragment extends SalarmFragment {
 
     @Override
     public void onFabClick() {
+        exitCheckboxMode();
         MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
     }
 
@@ -283,14 +316,16 @@ public class MasjidFragment extends SalarmFragment {
         String summary;
         boolean isConfigured;
         Masjid masjid;
+        MasjidEvent event;
 
-        PrayerItem(String type, String name, long timeMillis, String summary, boolean isConfigured, Masjid masjid) {
+        PrayerItem(String type, String name, long timeMillis, String summary, boolean isConfigured, Masjid masjid, MasjidEvent event) {
             this.type = type;
             this.name = name;
             this.timeMillis = timeMillis;
             this.summary = summary;
             this.isConfigured = isConfigured;
             this.masjid = masjid;
+            this.event = event;
         }
     }
 
@@ -320,10 +355,13 @@ public class MasjidFragment extends SalarmFragment {
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                     PrayerItem oldItem = oldItems.get(oldItemPosition);
                     PrayerItem newItem = mItems.get(newItemPosition);
+                    boolean eventSelectedSame = (oldItem.event == null && newItem.event == null) ||
+                            (oldItem.event != null && newItem.event != null && oldItem.event.isSelected == newItem.event.isSelected);
                     return oldItem.type.equals(newItem.type) &&
                             oldItem.timeMillis == newItem.timeMillis &&
                             Objects.equals(oldItem.summary, newItem.summary) &&
-                            oldItem.isConfigured == newItem.isConfigured;
+                            oldItem.isConfigured == newItem.isConfigured &&
+                            eventSelectedSame;
                 }
             }).dispatchUpdatesTo(this);
         }
@@ -338,6 +376,13 @@ public class MasjidFragment extends SalarmFragment {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             PrayerItem item = mItems.get(position);
             holder.name.setText(item.name);
+
+            if (mShowCheckboxes && item.isConfigured && item.event != null) {
+                holder.checkBox.setVisibility(View.VISIBLE);
+                holder.checkBox.setChecked(item.event.isSelected);
+            } else {
+                holder.checkBox.setVisibility(View.GONE);
+            }
 
             if (item.isConfigured && item.summary != null && !item.summary.isEmpty()) {
                 holder.summary.setText(item.summary);
@@ -358,11 +403,48 @@ public class MasjidFragment extends SalarmFragment {
             }
 
             holder.itemView.setOnClickListener(v -> {
-                if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
-                    showFixedTimeDialogue(item.masjid, item.type);
+                if (mShowCheckboxes) {
+                    if (item.isConfigured && item.event != null) {
+                        toggleEventSelection(holder.getBindingAdapterPosition());
+                    } else {
+                        exitCheckboxMode();
+                    }
                 } else {
-                    SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), item.masjid.id, item.type);
+                    if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
+                        showFixedTimeDialogue(item.masjid, item.type);
+                    } else {
+                        SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), item.masjid.id, item.type);
+                    }
                 }
+            });
+
+            holder.itemView.setOnLongClickListener(v -> {
+                if (item.isConfigured && item.event != null) {
+                    mShowCheckboxes = !mShowCheckboxes;
+                    notifyItemRangeChanged(0, getItemCount());
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        private void toggleEventSelection(int position) {
+            if (position < 0 || position >= mItems.size()) return;
+            PrayerItem item = mItems.get(position);
+            if (item == null || item.event == null) return;
+            Context context = getContext();
+            if (context == null) return;
+            final Context appContext = context.getApplicationContext();
+
+            item.event.isSelected = !item.event.isSelected;
+            item.event.isManuallyDeselected = !item.event.isSelected;
+
+            notifyItemChanged(position);
+
+            final MasjidEvent eventToUpdate = item.event;
+            AppExecutors.getDiskIO().execute(() -> {
+                SalahDatabase.getDatabase(appContext).masjidEventDao().update(eventToUpdate);
+                SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
             });
         }
 
@@ -372,12 +454,14 @@ public class MasjidFragment extends SalarmFragment {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
+            CheckBox checkBox;
             TextView name;
             TextView summary;
             TextView time;
 
             ViewHolder(View view) {
                 super(view);
+                checkBox = view.findViewById(R.id.prayer_checkbox);
                 name = view.findViewById(R.id.prayer_name);
                 summary = view.findViewById(R.id.prayer_calc_summary);
                 time = view.findViewById(R.id.prayer_time);

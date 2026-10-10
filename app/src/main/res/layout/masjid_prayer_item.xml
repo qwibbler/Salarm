@@ -14,6 +14,16 @@
     android:clickable="true"
     android:focusable="true">
 
+    <CheckBox
+        android:id="@+id/prayer_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
