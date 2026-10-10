@@ -78,10 +78,6 @@ public class MasjidFragment extends SalarmFragment {
         mMasjidTitleText = view.findViewById(R.id.masjid_title_text);
         mRecyclerView = view.findViewById(R.id.masjid_prayer_list);
 
-        view.findViewById(R.id.btn_add_masjid_empty).setOnClickListener(v ->
-            MasjidEditDialogFragment.show(getParentFragmentManager(), 0)
-        );
-
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new MasjidPrayerAdapter();
         mRecyclerView.setAdapter(mAdapter);

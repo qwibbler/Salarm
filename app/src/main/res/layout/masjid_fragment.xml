@@ -10,23 +10,47 @@
     android:orientation="vertical">
 
     <!-- Empty State: No Masjid Added -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/masjid_empty_state_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="24dp"
+        android:paddingBottom="@dimen/alarm_empty_view_bottom_padding"
         android:visibility="gone"
+        android:alpha="0.7"
         tools:visibility="gone">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_masjid_empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/salah_add_new_masjid"
-            app:icon="@drawable/ic_add" />
-    </LinearLayout>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/blob"
+            android:contentDescription="@string/salah_add_new_masjid"
+            app:layout_constraintWidth_max="@dimen/max_dimension_empty_view"
+            app:layout_constraintHeight_max="@dimen/max_dimension_empty_view"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="ImageContrastCheck" />
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_empty_masjid_view"
+            android:scaleX="0.4"
+            android:scaleY="0.4"
+            android:alpha="0.5"
+            android:contentDescription="@string/salah_add_new_masjid"
+            app:layout_constraintWidth_max="@dimen/max_dimension_empty_view"
+            app:layout_constraintHeight_max="@dimen/max_dimension_empty_view"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="ImageContrastCheck" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Content State: Masjid Added -->
     <LinearLayout
