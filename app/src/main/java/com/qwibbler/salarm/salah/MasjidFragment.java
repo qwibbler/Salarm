@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.MotionEvent;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +32,8 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
+import com.qwibbler.salarm.uidata.TabListener;
+import com.qwibbler.salarm.uidata.UiDataModel;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import com.google.android.material.color.MaterialColors;
 
@@ -60,6 +63,12 @@ public class MasjidFragment extends SalarmFragment {
     private long mSelectedMasjidId = -1;
     private boolean mShowCheckboxes = false;
 
+    private final TabListener mTabListener = newSelectedTab -> {
+        if (newSelectedTab != MASJID) {
+            exitCheckboxMode();
+        }
+    };
+
     public MasjidFragment() {
         super(MASJID);
     }
@@ -88,6 +97,9 @@ public class MasjidFragment extends SalarmFragment {
         mNextMasjidButton.setOnClickListener(v -> shiftMasjid(1));
         mMasjidDropdownTrigger.setOnClickListener(v -> showMasjidPickerDialog());
 
+        view.setOnClickListener(v -> exitCheckboxMode());
+        mContentLayout.setOnClickListener(v -> exitCheckboxMode());
+
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -97,6 +109,31 @@ public class MasjidFragment extends SalarmFragment {
             }
         });
 
+        mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                if (mShowCheckboxes && e.getAction() == MotionEvent.ACTION_DOWN) {
+                    View child = rv.findChildViewUnder(e.getX(), e.getY());
+                    if (child == null) {
+                        exitCheckboxMode();
+                        return true;
+                    } else {
+                        int pos = rv.getChildAdapterPosition(child);
+                        if (pos != RecyclerView.NO_POSITION) {
+                            PrayerItem item = mAdapter.getItem(pos);
+                            if (item != null && (!item.isConfigured || item.event == null)) {
+                                exitCheckboxMode();
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
+        UiDataModel.getUiDataModel().addTabListener(mTabListener);
+
         getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadMasjids());
 
         return view;
@@ -105,14 +142,36 @@ public class MasjidFragment extends SalarmFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mShowCheckboxes = false;
+        exitCheckboxMode();
         loadMasjids();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mShowCheckboxes = false;
+        exitCheckboxMode();
+    }
+
+    @Override
+    public void onDestroyView() {
+        UiDataModel.getUiDataModel().removeTabListener(mTabListener);
+        super.onDestroyView();
+    }
+
+    @Override
+    public void setMenuVisibility(boolean menuVisible) {
+        super.setMenuVisibility(menuVisible);
+        if (!menuVisible) {
+            exitCheckboxMode();
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (hidden) {
+            exitCheckboxMode();
+        }
     }
 
     private void loadMasjids() {
@@ -446,6 +505,13 @@ public class MasjidFragment extends SalarmFragment {
                 SalahDatabase.getDatabase(appContext).masjidEventDao().update(eventToUpdate);
                 SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
             });
+        }
+
+        PrayerItem getItem(int position) {
+            if (position >= 0 && position < mItems.size()) {
+                return mItems.get(position);
+            }
+            return null;
         }
 
         @Override
