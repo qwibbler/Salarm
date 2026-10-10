@@ -3,6 +3,7 @@ package com.qwibbler.salarm.salah;
 import static com.qwibbler.salarm.uidata.UiDataModel.Tab.MASJID;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
@@ -57,6 +59,7 @@ public class MasjidFragment extends SalarmFragment {
     private View mMasjidTitleContainer;
     private TextView mMasjidTitleText;
     private RecyclerView mRecyclerView;
+    private View mViewTimesheetButton;
     private MasjidPrayerAdapter mAdapter;
 
     private List<Masjid> mMasjids = new ArrayList<>();
@@ -88,6 +91,7 @@ public class MasjidFragment extends SalarmFragment {
         mMasjidTitleContainer = view.findViewById(R.id.masjid_title_container);
         mMasjidTitleText = view.findViewById(R.id.masjid_title_text);
         mRecyclerView = view.findViewById(R.id.masjid_prayer_list);
+        mViewTimesheetButton = view.findViewById(R.id.view_timesheet_button);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new MasjidPrayerAdapter();
@@ -228,6 +232,15 @@ public class MasjidFragment extends SalarmFragment {
             exitCheckboxMode();
             MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
         });
+
+        if (mViewTimesheetButton != null) {
+            mViewTimesheetButton.setOnClickListener(v -> {
+                exitCheckboxMode();
+                Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
+                intent.putExtra("masjid_id", masjid.id);
+                startActivity(intent);
+            });
+        }
 
         if (mMasjids.size() > 1) {
             mMultipleMasjidsHeader.setVisibility(View.VISIBLE);
