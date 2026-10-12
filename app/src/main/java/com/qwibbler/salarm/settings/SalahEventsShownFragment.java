@@ -31,7 +31,7 @@ public class SalahEventsShownFragment extends BaseSettingsScreenFragment {
 
     @Override
     protected String getFragmentTitle() {
-        return getString(R.string.salah_masjid_events_shown_title);
+        return getString(R.string.masjid_events_shown_title);
     }
 
     @Override

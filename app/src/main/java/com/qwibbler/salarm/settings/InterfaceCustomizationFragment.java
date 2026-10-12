@@ -472,7 +472,7 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
         }
 
         if (selectedTabs.contains(VISIBLE_TAB_MASJID)) {
-            labels.add(getString(R.string.salah_masjid_timings_title));
+            labels.add(getString(R.string.menu_masjid));
         }
 
         String summary = String.join(" - ", labels);
@@ -548,7 +548,7 @@ public class InterfaceCustomizationFragment extends BaseSettingsScreenFragment
         }
 
         if (visibleTabs.contains(VISIBLE_TAB_MASJID)) {
-            entries.add(getString(R.string.salah_masjid_timings_title));
+            entries.add(getString(R.string.menu_masjid));
             entryValues.add(TAB_TO_DISPLAY_MASJID);
         }
 

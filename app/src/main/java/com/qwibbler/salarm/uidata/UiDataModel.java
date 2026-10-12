@@ -287,7 +287,7 @@ public final class UiDataModel {
         STOPWATCH(StopwatchFragment.class, R.id.page_stopwatch, R.string.menu_stopwatch),
         SALAH(SalahTimesFragment.class, R.id.page_salah, R.string.menu_salah),
         QIBLA(QiblaFragment.class, R.id.page_qibla, R.string.menu_qibla),
-        MASJID(MasjidFragment.class, R.id.page_masjid, R.string.salah_masjid_timings_title);
+        MASJID(MasjidFragment.class, R.id.page_masjid, R.string.menu_masjid);
 
         private final String mFragmentClassName;
         private final int mPageResId;

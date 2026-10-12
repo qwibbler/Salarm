@@ -23,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:src="@drawable/blob"
-            android:contentDescription="@string/salah_add_new_masjid"
+            android:contentDescription="@string/salarm_add_new_masjid"
             app:layout_constraintWidth_max="@dimen/max_dimension_empty_view"
             app:layout_constraintHeight_max="@dimen/max_dimension_empty_view"
             app:layout_constraintDimensionRatio="1:1"
@@ -40,7 +40,7 @@
             android:scaleX="0.4"
             android:scaleY="0.4"
             android:alpha="0.5"
-            android:contentDescription="@string/salah_add_new_masjid"
+            android:contentDescription="@string/salarm_add_new_masjid"
             app:layout_constraintWidth_max="@dimen/max_dimension_empty_view"
             app:layout_constraintHeight_max="@dimen/max_dimension_empty_view"
             app:layout_constraintDimensionRatio="1:1"
@@ -61,16 +61,15 @@
         android:visibility="visible"
         tools:visibility="visible">
 
-        <!-- Multiple Masjids Header (> 1 masjid) -->
+        <!-- Current Masjid Title Header -->
         <LinearLayout
-            android:id="@+id/multiple_masjids_header"
+            android:id="@+id/masjid_title_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="4dp"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp">
 
             <ImageButton
                 android:id="@+id/prev_masjid_button"
@@ -79,35 +78,38 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_chevron_left"
                 android:contentDescription="@null"
-                app:tint="?attr/colorOnSurface" />
+                android:visibility="gone"
+                app:tint="?attr/colorOnSurface"
+                tools:visibility="visible" />
 
             <LinearLayout
-                android:id="@+id/masjid_dropdown_trigger"
+                android:id="@+id/masjid_title_clickable_area"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="horizontal"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground"
-                android:paddingVertical="8dp">
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingVertical="12dp">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="8dp"
+                    android:id="@+id/masjid_title_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_masjid_timings"
-                    app:tint="?attr/colorOnSurface"
-                    android:contentDescription="@null" />
+                    app:tint="?attr/colorPrimary" />
 
                 <TextView
-                    android:id="@+id/current_masjid_dropdown_text"
+                    android:id="@+id/masjid_title_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:layout_marginStart="12dp"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
                     android:textStyle="bold"
-                    tools:text="Masjid Al-Noor" />
+                    tools:text="Masjid Name" />
             </LinearLayout>
 
             <ImageButton
@@ -117,45 +119,9 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_arrow_right"
                 android:contentDescription="@null"
-                app:tint="?attr/colorOnSurface" />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/multiple_masjids_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?attr/colorOutlineVariant"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <!-- Current Masjid Title Proper -->
-        <LinearLayout
-            android:id="@+id/masjid_title_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageView
-                android:id="@+id/masjid_title_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_masjid_timings"
-                app:tint="?attr/colorPrimary" />
-
-            <TextView
-                android:id="@+id/masjid_title_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:textAppearance="?attr/textAppearanceTitleLarge"
-                android:textStyle="bold"
-                tools:text="Masjid Name" />
+                android:visibility="gone"
+                app:tint="?attr/colorOnSurface"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <View

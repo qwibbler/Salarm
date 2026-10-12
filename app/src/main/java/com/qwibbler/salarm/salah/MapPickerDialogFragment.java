@@ -103,7 +103,7 @@ public class MapPickerDialogFragment extends DialogFragment {
             updateCoordsText(mPickedLat, mPickedLon);
             reverseGeocodePickedLocation(mPickedLat, mPickedLon);
         } else {
-            mCoordsText.setText(R.string.salah_map_tap_to_pick);
+            mCoordsText.setText(R.string.salarm_map_tap_to_pick);
             mAddressText.setVisibility(View.GONE);
         }
 
@@ -112,7 +112,7 @@ public class MapPickerDialogFragment extends DialogFragment {
         view.findViewById(R.id.btn_map_retry).setOnClickListener(v -> reloadMap());
 
         return new AlertDialog.Builder(requireContext())
-            .setTitle(R.string.salah_masjid_location_search_map)
+            .setTitle(R.string.masjid_location_search_map)
             .setView(view)
             .create();
     }
@@ -202,8 +202,8 @@ public class MapPickerDialogFragment extends DialogFragment {
         if (mErrorContainer != null) {
             mErrorContainer.setVisibility(View.VISIBLE);
             if (mErrorText != null && message != null) {
-                mErrorText.setText(getString(R.string.salah_map_error_load_with_message,
-                    getString(R.string.salah_map_error_load),
+                mErrorText.setText(getString(R.string.salarm_map_error_load_with_message,
+                    getString(R.string.salarm_map_error_load),
                     message));
             }
         }
@@ -338,7 +338,7 @@ public class MapPickerDialogFragment extends DialogFragment {
                     mWebView.evaluateJavascript("if (typeof window.setLocation === 'function') { setLocation(" + lat + ", " + lon + "); }", null);
                     reverseGeocodePickedLocation(lat, lon);
                 } else if (isAdded()) {
-                    Toast.makeText(requireContext(), R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.masjid_invalid_coords, Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -415,7 +415,7 @@ public class MapPickerDialogFragment extends DialogFragment {
 
     private void confirmSelection() {
         if (!mHasPickedLocation || !isValidCoordinates(mPickedLat, mPickedLon)) {
-            Toast.makeText(requireContext(), R.string.salah_masjid_location_required_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.masjid_location_required_error, Toast.LENGTH_SHORT).show();
             return;
         }
 

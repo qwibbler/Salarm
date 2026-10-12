@@ -282,7 +282,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             if (deleteBtn != null) deleteBtn.setVisibility(View.GONE);
             if (copyBtn != null) copyBtn.setVisibility(View.GONE);
             mMasjid = new Masjid();
-            mMasjid.name = getString(R.string.salah_masjid_default_name);
+            mMasjid.name = getString(R.string.masjid_default_name);
             mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
             mHasLocation = false;
             mNameText.setText(mMasjid.name);
@@ -503,7 +503,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         if (mMasjid == null) return;
 
         if (!mHasLocation || !MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
-            Toast.makeText(requireContext(), R.string.salah_masjid_location_required_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.masjid_location_required_error, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -538,14 +538,14 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
     private void showLocationOptionsDialog() {
         CharSequence[] options = new CharSequence[]{
-            getString(R.string.salah_masjid_location_use_current),
-            getString(R.string.salah_masjid_location_search_city),
-            getString(R.string.salah_masjid_location_search_map),
-            getString(R.string.salah_masjid_location_enter_manual)
+            getString(R.string.masjid_location_use_current),
+            getString(R.string.masjid_location_search_city),
+            getString(R.string.masjid_location_search_map),
+            getString(R.string.masjid_location_enter_manual)
         };
 
         new AlertDialog.Builder(requireContext())
-            .setTitle(R.string.salah_masjid_select_location_dialog_title)
+            .setTitle(R.string.masjid_select_location_dialog_title)
             .setItems(options, (dialog, which) -> {
                 switch (which) {
                     case 0 -> useCurrentLocation();
@@ -583,7 +583,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         if (mMasjid != null) {
             boolean validLoc = mHasLocation && MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude);
             if (validLoc) {
-                mCoordinatesText.setText(String.format(Locale.getDefault(), getString(R.string.salah_masjid_location_coordinates_format), mMasjid.latitude, mMasjid.longitude));
+                mCoordinatesText.setText(String.format(Locale.getDefault(), getString(R.string.masjid_location_coordinates_format), mMasjid.latitude, mMasjid.longitude));
             } else {
                 mCoordinatesText.setText("");
             }
@@ -649,7 +649,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                     updateLocationUI();
                 }
             } else {
-                Toast.makeText(context, R.string.salah_detecting_location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.salarm_detecting_location, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -674,7 +674,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         layout.setPadding(32, 16, 32, 16);
 
         final EditText latInput = new EditText(context);
-        latInput.setHint(R.string.salah_masjid_latitude);
+        latInput.setHint(R.string.masjid_latitude);
         latInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         if (mMasjid != null && mHasLocation) {
             latInput.setText(String.valueOf(mMasjid.latitude));
@@ -682,7 +682,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         layout.addView(latInput);
 
         final EditText lonInput = new EditText(context);
-        lonInput.setHint(R.string.salah_masjid_longitude);
+        lonInput.setHint(R.string.masjid_longitude);
         lonInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         if (mMasjid != null && mHasLocation) {
             lonInput.setText(String.valueOf(mMasjid.longitude));
@@ -690,14 +690,14 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         layout.addView(lonInput);
 
         new AlertDialog.Builder(context)
-            .setTitle(R.string.salah_masjid_manual_coords_dialog_title)
+            .setTitle(R.string.masjid_manual_coords_dialog_title)
             .setView(layout)
             .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                 try {
                     double lat = Double.parseDouble(latInput.getText().toString().trim());
                     double lon = Double.parseDouble(lonInput.getText().toString().trim());
                     if (!MapPickerDialogFragment.isValidCoordinates(lat, lon)) {
-                        Toast.makeText(context, R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, R.string.masjid_invalid_coords, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (mMasjid != null) {
@@ -708,7 +708,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                         updateLocationUI();
                     }
                 } catch (NumberFormatException e) {
-                    Toast.makeText(context, R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.masjid_invalid_coords, Toast.LENGTH_SHORT).show();
                 }
             })
             .setNegativeButton(android.R.string.cancel, null)
@@ -788,7 +788,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         Arrays.sort(availableIds);
 
         new AlertDialog.Builder(requireContext())
-            .setTitle(R.string.salah_masjid_select_timezone_title)
+            .setTitle(R.string.masjid_select_timezone_title)
             .setItems(availableIds, (dialog, which) -> {
                 String selectedTz = availableIds[which];
                 if (mMasjid != null) {
@@ -809,7 +809,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         if (mMasjid == null) return;
 
         if (!mHasLocation || !MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
-            Toast.makeText(requireContext(), R.string.salah_masjid_location_required_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.masjid_location_required_error, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -850,7 +850,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                 null,
                 null,
                 getString(R.string.delete),
-                getString(R.string.salah_masjid_delete_confirm),
+                getString(R.string.masjid_delete_confirm),
                 null,
                 null,
                 CustomDialog.SoftInputMode.NONE,
@@ -891,7 +891,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
             // 1. Copy Masjid
             Masjid newMasjid = new Masjid();
-            newMasjid.name = mMasjid.name + ' ' + getString(R.string.salah_masjid_copy_suffix);
+            newMasjid.name = mMasjid.name + ' ' + getString(R.string.masjid_copy_suffix);
             newMasjid.showMasjidEvents = mMasjid.showMasjidEvents;
             newMasjid.intervalsCount = mMasjid.intervalsCount;
             newMasjid.boundary1 = mMasjid.boundary1;

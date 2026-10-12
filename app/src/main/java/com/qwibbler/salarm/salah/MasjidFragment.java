@@ -52,13 +52,9 @@ public class MasjidFragment extends SalarmFragment {
 
     private View mEmptyStateLayout;
     private View mContentLayout;
-    private View mMultipleMasjidsHeader;
-    private View mMultipleMasjidsDivider;
-    private TextView mCurrentMasjidDropdownText;
-    private View mMasjidDropdownTrigger;
     private View mPrevMasjidButton;
     private View mNextMasjidButton;
-    private View mMasjidTitleContainer;
+    private View mMasjidTitleClickableArea;
     private TextView mMasjidTitleText;
     private RecyclerView mRecyclerView;
     private View mViewTimesheetButton;
@@ -84,13 +80,9 @@ public class MasjidFragment extends SalarmFragment {
         View view = inflater.inflate(R.layout.masjid_fragment, container, false);
         mEmptyStateLayout = view.findViewById(R.id.masjid_empty_state_layout);
         mContentLayout = view.findViewById(R.id.masjid_content_layout);
-        mMultipleMasjidsHeader = view.findViewById(R.id.multiple_masjids_header);
-        mMultipleMasjidsDivider = view.findViewById(R.id.multiple_masjids_divider);
-        mCurrentMasjidDropdownText = view.findViewById(R.id.current_masjid_dropdown_text);
-        mMasjidDropdownTrigger = view.findViewById(R.id.masjid_dropdown_trigger);
         mPrevMasjidButton = view.findViewById(R.id.prev_masjid_button);
         mNextMasjidButton = view.findViewById(R.id.next_masjid_button);
-        mMasjidTitleContainer = view.findViewById(R.id.masjid_title_container);
+        mMasjidTitleClickableArea = view.findViewById(R.id.masjid_title_clickable_area);
         mMasjidTitleText = view.findViewById(R.id.masjid_title_text);
         mRecyclerView = view.findViewById(R.id.masjid_prayer_list);
         mViewTimesheetButton = view.findViewById(R.id.view_timesheet_button);
@@ -100,8 +92,16 @@ public class MasjidFragment extends SalarmFragment {
         mRecyclerView.setAdapter(mAdapter);
 
         mPrevMasjidButton.setOnClickListener(v -> shiftMasjid(-1));
+        mPrevMasjidButton.setOnLongClickListener(v -> {
+            showMasjidPickerDialog();
+            return true;
+        });
+
         mNextMasjidButton.setOnClickListener(v -> shiftMasjid(1));
-        mMasjidDropdownTrigger.setOnClickListener(v -> showMasjidPickerDialog());
+        mNextMasjidButton.setOnLongClickListener(v -> {
+            showMasjidPickerDialog();
+            return true;
+        });
 
         view.setOnClickListener(v -> exitCheckboxMode());
         mContentLayout.setOnClickListener(v -> exitCheckboxMode());
@@ -246,7 +246,7 @@ public class MasjidFragment extends SalarmFragment {
             }
         }
 
-        mMasjidTitleContainer.setOnClickListener(v -> {
+        mMasjidTitleClickableArea.setOnClickListener(v -> {
             exitCheckboxMode();
             MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
         });
@@ -261,12 +261,11 @@ public class MasjidFragment extends SalarmFragment {
         }
 
         if (mMasjids.size() > 1) {
-            mMultipleMasjidsHeader.setVisibility(View.VISIBLE);
-            mMultipleMasjidsDivider.setVisibility(View.VISIBLE);
-            mCurrentMasjidDropdownText.setText(masjid.name);
+            mPrevMasjidButton.setVisibility(View.VISIBLE);
+            mNextMasjidButton.setVisibility(View.VISIBLE);
         } else {
-            mMultipleMasjidsHeader.setVisibility(View.GONE);
-            mMultipleMasjidsDivider.setVisibility(View.GONE);
+            mPrevMasjidButton.setVisibility(View.GONE);
+            mNextMasjidButton.setVisibility(View.GONE);
         }
 
         final Context appContext = context.getApplicationContext();
@@ -376,7 +375,7 @@ public class MasjidFragment extends SalarmFragment {
         }
 
         new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.salah_masjids_category_title)
+                .setTitle(R.string.masjids_category_title)
                 .setSingleChoiceItems(names, checkedItem, (dialog, which) -> {
                     mSelectedMasjidId = mMasjids.get(which).id;
                     updateUI();

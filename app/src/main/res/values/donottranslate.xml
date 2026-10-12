@@ -489,7 +489,7 @@
         <item>@string/menu_stopwatch</item>
         <item>@string/menu_salah</item>
         <item>@string/menu_qibla</item>
-        <item>@string/salah_masjid_timings_title</item>
+        <item>@string/menu_masjid</item>
     </string-array>
     <!-- Values that are retrieved from the MultiSelectListPreference. These must match the visible_tab_entries above. -->
     <string-array name="visible_tab_values" translatable="false">
@@ -520,7 +520,7 @@
         <item>@string/menu_stopwatch</item>
         <item>@string/menu_salah</item>
         <item>@string/menu_qibla</item>
-        <item>@string/salah_masjid_timings_title</item>
+        <item>@string/menu_masjid</item>
     </string-array>
     <!-- Values that are retrieved from the ListPreference. These must match the tab entries above
          and respect the order of the bottom navigation menu. -->

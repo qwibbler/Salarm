@@ -231,7 +231,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         });
 
         return new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.salah_city_search_title)
+                .setTitle(R.string.salarm_city_search_title)
                 .setView(view)
                 .create();
     }

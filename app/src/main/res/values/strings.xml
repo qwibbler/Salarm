@@ -1572,13 +1572,13 @@
     <!-- Toast message when restore fails -->
     <string name="toast_message_restore_error">Restore failed</string>
     <!-- Salah City Search -->
-    <string name="salah_city_search_title">Select City</string>
+    <string name="salarm_city_search_title">Select City</string>
     <!-- Salah Settings -->
     <string name="salah_settings_title">Salah Settings</string>
     <!-- Salah Location Not Set Title -->
-    <string name="salah_location_not_set_title">Location Not Set</string>
+    <string name="salarm_location_not_set_title">Location Not Set</string>
     <!-- Salah Location Not Set Message -->
-    <string name="salah_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
+    <string name="salarm_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
     <!-- Label Set Location -->
     <string name="label_set_location">Set Location</string>
     <!-- Salah Error Saving -->
@@ -1603,17 +1603,17 @@
     <!-- Tooltip for the all alarms toggle -->
     <string name="all_alarms_toggle_tooltip">Toggle all visible alarms</string>
     <!-- Salah Error Background Sync -->
-    <string name="salah_error_background_sync">Salah sync issue</string>
+    <string name="salarm_error_background_sync">Salah sync issue</string>
     <!-- Salah Error Background Sync Details -->
-    <string name="salah_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
+    <string name="salarm_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
     <!-- Salah Detecting Location -->
-    <string name="salah_detecting_location">Detecting location…</string>
+    <string name="salarm_detecting_location">Detecting location…</string>
     <!-- Location category title for Salah settings -->
-    <string name="salah_location_category_title">Location</string>
+    <string name="salarm_location_category_title">Location</string>
     <!-- Prayer settings category title for Salah settings -->
-    <string name="salah_prayer_settings_category_title">Prayer Settings</string>
+    <string name="salarm_prayer_settings_category_title">Salah Settings</string>
     <!-- Advanced settings category title for Salah settings -->
-    <string name="salah_advanced_settings_category_title">Advanced Settings</string>
+    <string name="salarm_advanced_settings_category_title">Advanced Settings</string>
     <!-- Salah time rounding setting title -->
     <string name="salah_time_rounding_title">Salah time rounding</string>
     <!-- Rounding options -->
@@ -1798,7 +1798,7 @@
     <string name="salarm_display_timezone_label">Display Timezone</string>
     <string name="salarm_select_timezone_hint">Select Timezone</string>
     <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
-    <string name="salah_near_city">Near %s</string>
+    <string name="salarm_near_city">Near %s</string>
 
     <!-- Widget Previews -->
     <string name="salarm_preview_countdown_time">1h:24m</string>
@@ -1812,73 +1812,73 @@
     <string name="salarm_preview_asr_time">04:15 PM</string>
     <string name="salarm_preview_maghrib_time">07:20 PM</string>
 
-    <!-- Masjid Timings -->
-    <string name="salah_masjid_timings_title">Masjid Timings</string>
-    <string name="salah_masjid_events_shown_title">Events Shown</string>
-    <string name="salah_masjid_events_shown_summary">Choose which Salah events appear in the system</string>
-    <string name="salah_masjids_category_title">Masjids</string>
-    <string name="salah_add_new_masjid">Add a New Masjid</string>
-    <string name="salah_masjid_name_title">Masjid Name*</string>
-    <string name="salah_masjid_icon_title">Masjid Icon</string>
-    <string name="salah_masjid_select_icon">Select Icon</string>
-    <string name="salah_masjid_remove_icon">Remove Icon</string>
-    <string name="salah_masjid_location_title">Masjid Location*</string>
-    <string name="salah_masjid_select_location">Location*</string>
-    <string name="salah_masjid_select_location_dialog_title">Select Location Method</string>
-    <string name="salah_masjid_open_map_window">Open Map in Window</string>
-    <string name="salah_masjid_interactive_map">Interactive Map Window</string>
-    <string name="salah_masjid_location_use_current">Use my current location</string>
-    <string name="salah_masjid_location_search_city">Search city</string>
-    <string name="salah_masjid_location_search_map">Search precise location on map</string>
-    <string name="salah_masjid_location_enter_manual">Enter manual coordinates</string>
-    <string name="salah_masjid_location_coordinates_format">Lat: %.4f, Lon: %.4f</string>
-    <string name="salah_masjid_location_required_error">Masjid location coordinates are mandatory</string>
-    <string name="salah_masjid_full_address_title">Masjid Address</string>
-    <string name="salah_masjid_address_title">Address</string>
-    <string name="salah_masjid_city_title">City</string>
-    <string name="salah_masjid_country_title">Country</string>
-    <string name="salah_masjid_timezone_title">Timezone*</string>
-    <string name="salah_masjid_select_timezone_title">Select Timezone</string>
-    <string name="salah_masjid_manual_coords_dialog_title">Enter Manual Coordinates</string>
-    <string name="salah_masjid_latitude">Latitude (-90 to 90)</string>
-    <string name="salah_masjid_longitude">Longitude (-180 to 180)</string>
-    <string name="salah_masjid_invalid_coords">Invalid coordinates entered</string>
-    <string name="salah_map_error_load">Unable to load map. Please check your internet connection.</string>
-    <string name="salah_map_error_load_with_message">%1$s\n(%2$s)</string>
-    <string name="salah_map_retry">Retry</string>
-    <string name="salah_map_select_location">Select Location</string>
-    <string name="salah_map_tap_to_pick">Tap map to pick location</string>
-    <string name="salah_masjid_intervals_title">Masjid Intervals*</string>
-    <string name="salah_masjid_intervals_dialog_title">Configure Intervals</string>
-    <string name="salah_masjid_show_events_title">Show Masjid Events</string>
-    <string name="salah_masjid_save">Save</string>
-    <string name="salah_masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
+    <!-- Masjid -->
+    <string name="menu_masjid">Masjid</string>
+    <string name="masjid_events_shown_title">Events Shown</string>
+    <string name="masjid_events_shown_summary">Choose which Salah events appear in the system</string>
+    <string name="masjids_category_title">Masjids</string>
+    <string name="salarm_add_new_masjid">Add a New Masjid</string>
+    <string name="masjid_name_title">Masjid Name*</string>
+    <string name="masjid_icon_title">Masjid Icon</string>
+    <string name="masjid_select_icon">Select Icon</string>
+    <string name="masjid_remove_icon">Remove Icon</string>
+    <string name="masjid_location_title">Masjid Location*</string>
+    <string name="masjid_select_location">Location*</string>
+    <string name="masjid_select_location_dialog_title">Select Location Method</string>
+    <string name="masjid_open_map_window">Open Map in Window</string>
+    <string name="masjid_interactive_map">Interactive Map Window</string>
+    <string name="masjid_location_use_current">Use my current location</string>
+    <string name="masjid_location_search_city">Search city</string>
+    <string name="masjid_location_search_map">Search precise location on map</string>
+    <string name="masjid_location_enter_manual">Enter manual coordinates</string>
+    <string name="masjid_location_coordinates_format">Lat: %.4f, Lon: %.4f</string>
+    <string name="masjid_location_required_error">Masjid location coordinates are mandatory</string>
+    <string name="masjid_full_address_title">Masjid Address</string>
+    <string name="masjid_address_title">Address</string>
+    <string name="masjid_city_title">City</string>
+    <string name="masjid_country_title">Country</string>
+    <string name="masjid_timezone_title">Timezone*</string>
+    <string name="masjid_select_timezone_title">Select Timezone</string>
+    <string name="masjid_manual_coords_dialog_title">Enter Manual Coordinates</string>
+    <string name="masjid_latitude">Latitude (-90 to 90)</string>
+    <string name="masjid_longitude">Longitude (-180 to 180)</string>
+    <string name="masjid_invalid_coords">Invalid coordinates entered</string>
+    <string name="salarm_map_error_load">Unable to load map. Please check your internet connection.</string>
+    <string name="salarm_map_error_load_with_message">%1$s\n(%2$s)</string>
+    <string name="salarm_map_retry">Retry</string>
+    <string name="salarm_map_select_location">Select Location</string>
+    <string name="salarm_map_tap_to_pick">Tap map to pick location</string>
+    <string name="masjid_intervals_title">Masjid Intervals*</string>
+    <string name="masjid_intervals_dialog_title">Configure Intervals</string>
+    <string name="masjid_show_events_title">Show Masjid Events</string>
+    <string name="masjid_save">Save</string>
+    <string name="masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
 
-    <string name="salah_extreme_min">min</string>
-    <string name="salah_extreme_max">max</string>
-    <string name="salah_intervals_2">2 Intervals</string>
-    <string name="salah_intervals_3">3 Intervals</string>
-    <string name="salah_intervals_adjust_hint">Adjust the boundaries to set interval ranges (1 to 31)</string>
-    <string name="salah_masjid_edit_title">Edit Masjid</string>
-    <string name="salah_masjid_default_name">Masjid 1</string>
-    <string name="salah_masjid_event_time_set_at">Event time set at</string>
-    <string name="salah_masjid_minutes">minutes</string>
-    <string name="salah_masjid_time_of">time of</string>
-    <string name="salah_masjid_round_event_time">Round event time</string>
-    <string name="salah_masjid_adjust_event_time_by">Adjust event time by</string>
-    <string name="salah_masjid_cap_event_time_to">Cap event time to</string>
-    <string name="salah_masjid_than">than</string>
-    <string name="salah_masjid_before">before</string>
-    <string name="salah_masjid_events_default">Default</string>
-    <string name="salah_masjid_not_configured">Not configured</string>
-    <string name="salah_masjid_timing_title_format">%1$s Timing</string>
-    <string name="salah_masjid_copy">Copy</string>
-    <string name="salah_masjid_copy_suffix">- COPY</string>
+    <string name="masjid_salah_extreme_min">min</string>
+    <string name="masjid_salah_extreme_max">max</string>
+    <string name="masjid_intervals_2">2 Intervals</string>
+    <string name="masjid_intervals_3">3 Intervals</string>
+    <string name="masjid_intervals_adjust_hint">Adjust the boundaries to set interval ranges (1 to 31)</string>
+    <string name="masjid_edit_title">Edit Masjid</string>
+    <string name="masjid_default_name">Masjid 1</string>
+    <string name="masjid_event_time_set_at">Event time set at</string>
+    <string name="masjid_minutes">minutes</string>
+    <string name="masjid_time_of">time of</string>
+    <string name="masjid_round_event_time">Round event time</string>
+    <string name="masjid_adjust_event_time_by">Adjust event time by</string>
+    <string name="masjid_cap_event_time_to">Cap event time to</string>
+    <string name="masjid_than">than</string>
+    <string name="masjid_before">before</string>
+    <string name="masjid_events_default">Default</string>
+    <string name="masjid_not_configured">Not configured</string>
+    <string name="masjid_timing_title_format">%1$s Timing</string>
+    <string name="masjid_copy">Copy</string>
+    <string name="masjid_copy_suffix">- COPY</string>
     <string name="ordinal_1st">%1$dst</string>
     <string name="ordinal_2nd">%1$dnd</string>
     <string name="ordinal_3rd">%1$drd</string>
     <string name="ordinal_th">%1$dth</string>
-    <string name="salah_masjid_interval_range">%1$s to %2$s</string>
+    <string name="masjid_interval_range">%1$s to %2$s</string>
 
     <string name="salah_rule_description_base_max">alarm %1$s max time of %2$s</string>
     <string name="salah_rule_description_base_min">alarm %1$s min time of %2$s</string>

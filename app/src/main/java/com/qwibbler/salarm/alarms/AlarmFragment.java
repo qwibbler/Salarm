@@ -730,8 +730,8 @@ public final class AlarmFragment extends SalarmFragment
                         requireContext(),
                         R.style.AppAlertDialogTheme,
                         null,
-                        getString(R.string.salah_location_not_set_title),
-                        getString(R.string.salah_location_not_set_message),
+                        getString(R.string.salarm_location_not_set_title),
+                        getString(R.string.salarm_location_not_set_message),
                         null,
                         getString(R.string.label_set_location),
                         (dialog, which) -> {

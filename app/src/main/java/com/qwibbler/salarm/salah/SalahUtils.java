@@ -88,7 +88,7 @@ public class SalahUtils {
             // 1. Try local cache/JSON first (Priority 1 & 2)
             OfflineCity match = findNearestOfflineCity(appContext, lat, lon);
             if (match != null) {
-                String displayName = match.isNear ? appContext.getString(R.string.salah_near_city, match.name) : match.name;
+                String displayName = match.isNear ? appContext.getString(R.string.salarm_near_city, match.name) : match.name;
                 getDefaultSharedPreferences(appContext).edit()
                         .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, displayName)
                         .apply();

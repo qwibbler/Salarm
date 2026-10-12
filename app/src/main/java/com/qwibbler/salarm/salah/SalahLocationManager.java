@@ -41,7 +41,7 @@ public class SalahLocationManager {
                     .remove(KEY_SALAH_CITY_NAME)
                     .remove(KEY_SALAH_DISPLAY_TIMEZONE)
                     .apply();
-            prefs.edit().putString(KEY_SALAH_CITY_NAME, context.getString(R.string.salah_detecting_location)).apply();
+            prefs.edit().putString(KEY_SALAH_CITY_NAME, context.getString(R.string.salarm_detecting_location)).apply();
             requestGpsUpdate(context);
         }
 
@@ -98,7 +98,7 @@ public class SalahLocationManager {
             } else {
                 // If we're still stuck in "Detecting...", revert to a neutral state
                 SharedPreferences prefs = getDefaultSharedPreferences(appContext);
-                if (appContext.getString(R.string.salah_detecting_location).equals(prefs.getString(KEY_SALAH_CITY_NAME, ""))) {
+                if (appContext.getString(R.string.salarm_detecting_location).equals(prefs.getString(KEY_SALAH_CITY_NAME, ""))) {
                     prefs.edit().putString(KEY_SALAH_CITY_NAME, "Not detected").apply();
                 }
             }
@@ -124,7 +124,7 @@ public class SalahLocationManager {
         // Also resolve if city name is missing or "Detecting..."
         String currentCity = prefs.getString(KEY_SALAH_CITY_NAME, "");
         boolean needsResolution = significantDistance || currentCity.isEmpty() ||
-                currentCity.equals(context.getString(R.string.salah_detecting_location));
+                currentCity.equals(context.getString(R.string.salarm_detecting_location));
 
         prefs.edit()
                 .putString(KEY_SALAH_LATITUDE, String.valueOf(lat))

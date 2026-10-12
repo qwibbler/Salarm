@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/salah_masjid_event_time_set_at"
+                android:text="@string/masjid_event_time_set_at"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="?attr/colorPrimary"
                 android:layout_marginBottom="8dp"/>
@@ -59,11 +59,11 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/primary_extreme_toggle"
                     style="@style/RelationalAlarm.TextButton"
-                    tools:text="@string/salah_extreme_max" />
+                    tools:text="@string/masjid_salah_extreme_max" />
 
                 <TextView
                     style="@style/RelationalAlarm.Text"
-                    android:text="@string/salah_masjid_time_of" />
+                    android:text="@string/masjid_time_of" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/RelationalAlarm.DropdownLayout">
@@ -220,11 +220,11 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/safety_extreme_toggle"
                         style="@style/RelationalAlarm.TextButton"
-                        tools:text="@string/salah_extreme_min" />
+                        tools:text="@string/masjid_salah_extreme_min" />
 
                     <TextView
                         style="@style/RelationalAlarm.Text"
-                        android:text="@string/salah_masjid_time_of" />
+                        android:text="@string/masjid_time_of" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/RelationalAlarm.DropdownLayout">

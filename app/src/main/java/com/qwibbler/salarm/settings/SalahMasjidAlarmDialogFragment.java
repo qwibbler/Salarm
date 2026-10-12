@@ -86,7 +86,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         mRoundTypes = getResources().getStringArray(R.array.relational_alarm_round_type);
         mBoundaryTypes = getResources().getStringArray(R.array.relational_alarm_boundary_type);
         mAdjustmentTypes = getResources().getStringArray(R.array.relational_alarm_adjustment_type);
-        mExtremeTypes = new String[]{getString(R.string.salah_extreme_min), getString(R.string.salah_extreme_max)};
+        mExtremeTypes = new String[]{getString(R.string.masjid_salah_extreme_min), getString(R.string.masjid_salah_extreme_max)};
 
         setupInitialization();
         setupListeners();
@@ -95,10 +95,10 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             context,
             R.style.RelationalAlarmDialogTheme,
             null,
-            getString(R.string.salah_masjid_timing_title_format, SalahUtils.getLocalizedSalahName(context, mSalahType)),
+            getString(R.string.masjid_timing_title_format, SalahUtils.getLocalizedSalahName(context, mSalahType)),
             null,
             mBinding.getRoot(),
-            getString(R.string.salah_masjid_save),
+            getString(R.string.masjid_save),
             (dialog, which) -> saveEvent(),
             getString(android.R.string.cancel),
             null,

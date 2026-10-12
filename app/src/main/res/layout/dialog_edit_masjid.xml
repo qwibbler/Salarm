@@ -49,7 +49,7 @@
                         android:layout_height="56dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
-                        android:contentDescription="@string/salah_masjid_icon_title"
+                        android:contentDescription="@string/masjid_icon_title"
                         android:focusable="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_masjid_timings"
@@ -62,7 +62,7 @@
                         android:layout_gravity="top|end"
                         android:background="?attr/colorErrorContainer"
                         android:clickable="true"
-                        android:contentDescription="@string/salah_masjid_remove_icon"
+                        android:contentDescription="@string/masjid_remove_icon"
                         android:focusable="true"
                         android:padding="3dp"
                         android:src="@drawable/ic_close"
@@ -98,7 +98,7 @@
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/salah_masjid_name_title"
+                        android:hint="@string/masjid_name_title"
                         android:visibility="gone">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -142,7 +142,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="@string/salah_intervals_2" />
+                        android:text="@string/masjid_intervals_2" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_3_intervals"
@@ -150,7 +150,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="@string/salah_intervals_3" />
+                        android:text="@string/masjid_intervals_3" />
 
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -200,7 +200,7 @@
                     android:drawablePadding="10dp"
                     app:drawableTint="?attr/colorOnSurfaceVariant"
                     android:gravity="center_vertical"
-                    android:text="@string/salah_masjid_select_location"
+                    android:text="@string/masjid_select_location"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -237,7 +237,7 @@
                     android:drawablePadding="10dp"
                     app:drawableTint="?attr/colorOnSurfaceVariant"
                     android:gravity="center_vertical"
-                    android:text="@string/salah_masjid_timezone_title"
+                    android:text="@string/masjid_timezone_title"
                     android:textAppearance="?attr/textAppearanceBodyMedium" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -259,7 +259,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="8dp"
-                android:hint="@string/salah_masjid_address_title">
+                android:hint="@string/masjid_address_title">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/masjid_address_edit"
@@ -286,7 +286,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
-                    android:hint="@string/salah_masjid_city_title">
+                    android:hint="@string/masjid_city_title">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/masjid_city_edit"
@@ -303,7 +303,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
-                    android:hint="@string/salah_masjid_country_title">
+                    android:hint="@string/masjid_country_title">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/masjid_country_edit"

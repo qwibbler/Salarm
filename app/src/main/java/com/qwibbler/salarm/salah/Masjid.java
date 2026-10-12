@@ -82,7 +82,7 @@ public class Masjid {
         }
 
         public String getOrdinalSummary(Context context) {
-            return context.getString(R.string.salah_masjid_interval_range, getOrdinal(context, startDay), getOrdinal(context, endDay));
+            return context.getString(R.string.masjid_interval_range, getOrdinal(context, startDay), getOrdinal(context, endDay));
         }
 
         private String getOrdinal(Context context, int i) {

@@ -41,8 +41,8 @@ public class SalahErrorHandler {
         // Critically important errors (DB corruption, invalid location data)
         if (isCriticalError(t)) {
             sendErrorNotification(appContext,
-                appContext.getString(R.string.salah_error_background_sync),
-                appContext.getString(R.string.salah_error_background_sync_details));
+                appContext.getString(R.string.salarm_error_background_sync),
+                appContext.getString(R.string.salarm_error_background_sync_details));
         }
     }
 
