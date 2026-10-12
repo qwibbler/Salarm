@@ -16,7 +16,9 @@ public class MasjidCardRenderer {
 
     public interface DrawTarget {
         void drawLine(float x1, float y1, float x2, float y2, float width, int color);
+
         void drawText(String text, float x, float y, float size, Paint.Align align, int color, boolean bold, float rotateDegrees);
+
         void drawRect(float left, float top, float right, float bottom, float strokeWidth, int color, boolean fill);
     }
 
@@ -147,6 +149,7 @@ public class MasjidCardRenderer {
         }
         CalculationMethod method = SalahUtils.getCalculationMethod(context);
         SalahDatabase db = SalahDatabase.getDatabase(context);
+        assert masjid != null;
         MasjidEvent fajrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "FAJR");
         MasjidEvent asrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "ASR");
         MasjidEvent maghribEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "MAGHRIB");

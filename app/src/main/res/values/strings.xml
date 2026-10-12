@@ -4,7 +4,7 @@
     modified
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" xmlns:tools="http://schemas.android.com/tools"
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
     tools:ignore="MissingTranslation">
 
     <!-- ******************** -->
@@ -1431,7 +1431,7 @@
     <!-- Version for about screen -->
     <string name="version">Version</string>
     <!-- Version text [CHAR LIMIT=30] -->
-    <string name="version_text">Version <xliff:g id="VERSION_NUMBER" example="1.0">%1$s</xliff:g></string>
+    <string name="version_text">Version <xliff:g example="1.0" id="VERSION_NUMBER">%1$s</xliff:g></string>
     <!-- What's new features title -->
     <string name="whats_new_title">What\'s new</string>
     <!-- What's new dialog message in about screen -->
@@ -1844,6 +1844,7 @@
     <string name="salah_masjid_longitude">Longitude (-180 to 180)</string>
     <string name="salah_masjid_invalid_coords">Invalid coordinates entered</string>
     <string name="salah_map_error_load">Unable to load map. Please check your internet connection.</string>
+    <string name="salah_map_error_load_with_message">%1$s\n(%2$s)</string>
     <string name="salah_map_retry">Retry</string>
     <string name="salah_map_select_location">Select Location</string>
     <string name="salah_map_tap_to_pick">Tap map to pick location</string>

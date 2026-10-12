@@ -38,8 +38,8 @@ import com.qwibbler.salarm.salah.MasjidEvent;
 import com.qwibbler.salarm.salah.NominatimClient;
 import com.qwibbler.salarm.salah.RelationalDefinition;
 import com.qwibbler.salarm.salah.RelationalRule;
-import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
+import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahTimezoneUtils;
 import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
@@ -183,7 +183,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 AppExecutors.getMainThread().post(() -> {
                     if (isAdded() && mMasjid != null) {
                         mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
-                                && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
+                            && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
                         mNameEdit.setText(mMasjid.name);
                         if (mMasjid.address != null) mAddressEdit.setText(mMasjid.address);
                         if (mMasjid.cityName != null) mCityEdit.setText(mMasjid.cityName);
@@ -235,37 +235,37 @@ public class MasjidEditDialogFragment extends DialogFragment {
         buttons.add(new CustomDialog.DialogButton(getString(R.string.salah_masjid_save), (dialog, which) -> saveMasjid()));
 
         return CustomDialog.create(
-                requireContext(),
-                R.style.RelationalAlarmDialogTheme,
-                null,
-                getString(mMasjidId > 0 ? R.string.salah_masjid_edit_title : R.string.salah_add_new_masjid),
-                null,
-                view,
-                null,
-                CustomDialog.SoftInputMode.NONE,
-                buttons.toArray(new CustomDialog.DialogButton[0])
+            requireContext(),
+            R.style.RelationalAlarmDialogTheme,
+            null,
+            getString(mMasjidId > 0 ? R.string.salah_masjid_edit_title : R.string.salah_add_new_masjid),
+            null,
+            view,
+            null,
+            CustomDialog.SoftInputMode.NONE,
+            buttons.toArray(new CustomDialog.DialogButton[0])
         );
     }
 
     private void showLocationOptionsDialog() {
         CharSequence[] options = new CharSequence[]{
-                getString(R.string.salah_masjid_location_use_current),
-                getString(R.string.salah_masjid_location_search_city),
-                getString(R.string.salah_masjid_location_search_map),
-                getString(R.string.salah_masjid_location_enter_manual)
+            getString(R.string.salah_masjid_location_use_current),
+            getString(R.string.salah_masjid_location_search_city),
+            getString(R.string.salah_masjid_location_search_map),
+            getString(R.string.salah_masjid_location_enter_manual)
         };
 
         new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.salah_masjid_select_location_dialog_title)
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0 -> useCurrentLocation();
-                        case 1 -> searchCity();
-                        case 2 -> searchLocationOnMap();
-                        case 3 -> enterManualCoordinates();
-                    }
-                })
-                .show();
+            .setTitle(R.string.salah_masjid_select_location_dialog_title)
+            .setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0 -> useCurrentLocation();
+                    case 1 -> searchCity();
+                    case 2 -> searchLocationOnMap();
+                    case 3 -> enterManualCoordinates();
+                }
+            })
+            .show();
     }
 
     private void updateIconUI() {
@@ -379,29 +379,29 @@ public class MasjidEditDialogFragment extends DialogFragment {
         layout.addView(lonInput);
 
         new AlertDialog.Builder(context)
-                .setTitle(R.string.salah_masjid_manual_coords_dialog_title)
-                .setView(layout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    try {
-                        double lat = Double.parseDouble(latInput.getText().toString().trim());
-                        double lon = Double.parseDouble(lonInput.getText().toString().trim());
-                        if (!MapPickerDialogFragment.isValidCoordinates(lat, lon)) {
-                            Toast.makeText(context, R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        if (mMasjid != null) {
-                            mMasjid.latitude = lat;
-                            mMasjid.longitude = lon;
-                            mHasLocation = true;
-                            resolveLocationDetails(lat, lon);
-                            updateLocationUI();
-                        }
-                    } catch (NumberFormatException e) {
+            .setTitle(R.string.salah_masjid_manual_coords_dialog_title)
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                try {
+                    double lat = Double.parseDouble(latInput.getText().toString().trim());
+                    double lon = Double.parseDouble(lonInput.getText().toString().trim());
+                    if (!MapPickerDialogFragment.isValidCoordinates(lat, lon)) {
                         Toast.makeText(context, R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                    if (mMasjid != null) {
+                        mMasjid.latitude = lat;
+                        mMasjid.longitude = lon;
+                        mHasLocation = true;
+                        resolveLocationDetails(lat, lon);
+                        updateLocationUI();
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(context, R.string.salah_masjid_invalid_coords, Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 
     private void resolveLocationDetails(double lat, double lon) {
@@ -457,10 +457,10 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
-                    if (finalCity != null && mCityEdit.getText().toString().trim().isEmpty()) {
+                    if (finalCity != null) {
                         mCityEdit.setText(finalCity);
                     }
-                    if (finalCountry != null && mCountryEdit.getText().toString().trim().isEmpty()) {
+                    if (finalCountry != null) {
                         mCountryEdit.setText(finalCountry);
                     }
                     if (finalTz != null) {
@@ -477,15 +477,15 @@ public class MasjidEditDialogFragment extends DialogFragment {
         Arrays.sort(availableIds);
 
         new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.salah_masjid_select_timezone_title)
-                .setItems(availableIds, (dialog, which) -> {
-                    String selectedTz = availableIds[which];
-                    if (mMasjid != null) {
-                        mMasjid.timezoneId = selectedTz;
-                        mTimezoneText.setText(selectedTz);
-                    }
-                })
-                .show();
+            .setTitle(R.string.salah_masjid_select_timezone_title)
+            .setItems(availableIds, (dialog, which) -> {
+                String selectedTz = availableIds[which];
+                if (mMasjid != null) {
+                    mMasjid.timezoneId = selectedTz;
+                    mTimezoneText.setText(selectedTz);
+                }
+            })
+            .show();
     }
 
     private void updateIntervalsSummary() {
@@ -502,10 +502,13 @@ public class MasjidEditDialogFragment extends DialogFragment {
             return;
         }
 
+        if (mNameEdit.getText() == null) return;
         mMasjid.name = mNameEdit.getText().toString().trim();
-        mMasjid.address = mAddressEdit.getText().toString().trim();
-        mMasjid.cityName = mCityEdit.getText().toString().trim();
-        mMasjid.countryName = mCountryEdit.getText().toString().trim();
+
+        if (mAddressEdit.getText() != null) mMasjid.address = mAddressEdit.getText().toString().trim();
+        if (mCityEdit.getText() != null) mMasjid.cityName = mCityEdit.getText().toString().trim();
+        if (mCountryEdit.getText() != null) mMasjid.countryName = mCountryEdit.getText().toString().trim();
+
         if (mMasjid.timezoneId == null || mMasjid.timezoneId.isEmpty()) {
             mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
         }

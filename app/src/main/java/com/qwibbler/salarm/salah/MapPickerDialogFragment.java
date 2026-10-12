@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -59,8 +58,8 @@ public class MapPickerDialogFragment extends DialogFragment {
 
     public static boolean isValidCoordinates(double lat, double lon) {
         return !Double.isNaN(lat) && !Double.isNaN(lon)
-                && lat >= -90.0 && lat <= 90.0
-                && lon >= -180.0 && lon <= 180.0;
+            && lat >= -90.0 && lat <= 90.0
+            && lon >= -180.0 && lon <= 180.0;
     }
 
     public static MapPickerDialogFragment newInstance(double initLat, double initLon, boolean hasInitLoc) {
@@ -113,9 +112,9 @@ public class MapPickerDialogFragment extends DialogFragment {
         view.findViewById(R.id.btn_map_retry).setOnClickListener(v -> reloadMap());
 
         return new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.salah_masjid_location_search_map)
-                .setView(view)
-                .create();
+            .setTitle(R.string.salah_masjid_location_search_map)
+            .setView(view)
+            .create();
     }
 
     @Override
@@ -131,9 +130,7 @@ public class MapPickerDialogFragment extends DialogFragment {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, dialogHeight);
         }
         if (mWebView != null) {
-            mWebView.postDelayed(() -> {
-                mWebView.evaluateJavascript("if (typeof window.invalidateMapSize === 'function') { window.invalidateMapSize(); }", null);
-            }, 300);
+            mWebView.postDelayed(() -> mWebView.evaluateJavascript("if (typeof window.invalidateMapSize === 'function') { window.invalidateMapSize(); }", null), 300);
         }
     }
 
@@ -148,9 +145,9 @@ public class MapPickerDialogFragment extends DialogFragment {
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
                 LogUtils.d("MapWebView JS (" + consoleMessage.messageLevel() + "): "
-                        + consoleMessage.message() + " -- Line "
-                        + consoleMessage.lineNumber() + " of "
-                        + consoleMessage.sourceId());
+                    + consoleMessage.message() + " -- Line "
+                    + consoleMessage.lineNumber() + " of "
+                    + consoleMessage.sourceId());
                 return true;
             }
         });
@@ -182,35 +179,6 @@ public class MapPickerDialogFragment extends DialogFragment {
             }
         });
 
-        mWebView.addJavascriptInterface(new Object() {
-            @JavascriptInterface
-            public void onLocationPicked(double lat, double lng) {
-                AppExecutors.getMainThread().post(() -> {
-                    mPickedLat = lat;
-                    mPickedLon = lng;
-                    mHasPickedLocation = true;
-                    updateCoordsText(lat, lng);
-                    reverseGeocodePickedLocation(lat, lng);
-                });
-            }
-
-            @JavascriptInterface
-            public void onMapLoaded() {
-                AppExecutors.getMainThread().post(() -> {
-                    if (mProgressBar != null) mProgressBar.setVisibility(View.GONE);
-                    if (mErrorContainer != null) mErrorContainer.setVisibility(View.GONE);
-                });
-            }
-
-            @JavascriptInterface
-            public void onMapError(String errorMsg) {
-                AppExecutors.getMainThread().post(() -> {
-                    LogUtils.e("Map JS reported error: " + errorMsg);
-                    showError(errorMsg);
-                });
-            }
-        }, "Android");
-
         loadMapHtml();
     }
 
@@ -234,80 +202,82 @@ public class MapPickerDialogFragment extends DialogFragment {
         if (mErrorContainer != null) {
             mErrorContainer.setVisibility(View.VISIBLE);
             if (mErrorText != null && message != null) {
-                mErrorText.setText(getString(R.string.salah_map_error_load) + "\n(" + message + ")");
+                mErrorText.setText(getString(R.string.salah_map_error_load_with_message,
+                    getString(R.string.salah_map_error_load),
+                    message));
             }
         }
     }
 
     private String buildLeafletHtml(double initLat, double initLon, boolean hasInitLoc) {
         return "<!DOCTYPE html><html><head>" +
-                "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>" +
-                "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'/>" +
-                "<script src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'></script>" +
-                "<style>" +
-                "html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: #f8f8f8; }" +
-                "#map { height: 100%; width: 100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; }" +
-                "</style>" +
-                "</head><body><div id='map'></div><script>" +
-                "window.onerror = function(msg, url, line) {" +
-                "   if (window.Android && window.Android.onMapError) {" +
-                "       window.Android.onMapError('JS Error: ' + msg);" +
-                "   }" +
-                "   return false;" +
-                "};" +
-                "document.addEventListener('DOMContentLoaded', function() {" +
-                "   try {" +
-                "       if (typeof L === 'undefined') {" +
-                "           if (window.Android && window.Android.onMapError) {" +
-                "               window.Android.onMapError('Leaflet library failed to load.');" +
-                "           }" +
-                "           return;" +
-                "       }" +
-                "       var map = L.map('map', {" +
-                "           zoomControl: true," +
-                "           attributionControl: true" +
-                "       }).setView([" + initLat + ", " + initLon + "], " + (hasInitLoc ? 15 : 12) + ");" +
-                "       var primaryUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';" +
-                "       var tileLayer = L.tileLayer(primaryUrl, {" +
-                "           maxZoom: 19," +
-                "           attribution: '&copy; OpenStreetMap contributors'" +
-                "       }).addTo(map);" +
-                "       tileLayer.on('tileerror', function(e) {" +
-                "           console.warn('Primary tile load error, falling back to Esri');" +
-                "           if (tileLayer.getUrl() !== fallbackUrl) {" +
-                "               tileLayer.setUrl(fallbackUrl);" +
-                "           }" +
-                "       });" +
-                "       var marker = " + (hasInitLoc ? "L.marker([" + initLat + ", " + initLon + "]).addTo(map);" : "null;") +
-                "       window.setLocation = function(lat, lng) {" +
-                "           if (marker) { marker.setLatLng([lat, lng]); } else { marker = L.marker([lat, lng]).addTo(map); }" +
-                "           map.setView([lat, lng], 15);" +
-                "           setTimeout(function() { map.invalidateSize(); }, 100);" +
-                "       };" +
-                "       window.invalidateMapSize = function() {" +
-                "           if (map) { map.invalidateSize(); }" +
-                "       };" +
-                "       map.on('click', function(e) {" +
-                "           var lat = e.latlng.lat;" +
-                "           var lng = e.latlng.lng;" +
-                "           setLocation(lat, lng);" +
-                "           if (window.Android && window.Android.onLocationPicked) {" +
-                "               window.Android.onLocationPicked(lat, lng);" +
-                "           }" +
-                "       });" +
-                "       setTimeout(function() {" +
-                "           map.invalidateSize();" +
-                "           if (window.Android && window.Android.onMapLoaded) {" +
-                "               window.Android.onMapLoaded();" +
-                "           }" +
-                "       }, 250);" +
-                "   } catch (e) {" +
-                "       if (window.Android && window.Android.onMapError) {" +
-                "           window.Android.onMapError('Map init error: ' + e.message);" +
-                "       }" +
-                "   }" +
-                "});" +
-                "</script></body></html>";
+            "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>" +
+            "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'/>" +
+            "<script src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'></script>" +
+            "<style>" +
+            "html, body { height: 100%; width: 100%; margin: 0; padding: 0; background: #f8f8f8; }" +
+            "#map { height: 100%; width: 100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0; }" +
+            "</style>" +
+            "</head><body><div id='map'></div><script>" +
+            "window.onerror = function(msg, url, line) {" +
+            "   if (window.Android && window.Android.onMapError) {" +
+            "       window.Android.onMapError('JS Error: ' + msg);" +
+            "   }" +
+            "   return false;" +
+            "};" +
+            "document.addEventListener('DOMContentLoaded', function() {" +
+            "   try {" +
+            "       if (typeof L === 'undefined') {" +
+            "           if (window.Android && window.Android.onMapError) {" +
+            "               window.Android.onMapError('Leaflet library failed to load.');" +
+            "           }" +
+            "           return;" +
+            "       }" +
+            "       var map = L.map('map', {" +
+            "           zoomControl: true," +
+            "           attributionControl: true" +
+            "       }).setView([" + initLat + ", " + initLon + "], " + (hasInitLoc ? 15 : 12) + ");" +
+            "       var primaryUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';" +
+            "       var tileLayer = L.tileLayer(primaryUrl, {" +
+            "           maxZoom: 19," +
+            "           attribution: '&copy; OpenStreetMap contributors'" +
+            "       }).addTo(map);" +
+            "       tileLayer.on('tileerror', function(e) {" +
+            "           console.warn('Primary tile load error, falling back to Esri');" +
+            "           if (tileLayer.getUrl() !== fallbackUrl) {" +
+            "               tileLayer.setUrl(fallbackUrl);" +
+            "           }" +
+            "       });" +
+            "       var marker = " + (hasInitLoc ? "L.marker([" + initLat + ", " + initLon + "]).addTo(map);" : "null;") +
+            "       window.setLocation = function(lat, lng) {" +
+            "           if (marker) { marker.setLatLng([lat, lng]); } else { marker = L.marker([lat, lng]).addTo(map); }" +
+            "           map.setView([lat, lng], 15);" +
+            "           setTimeout(function() { map.invalidateSize(); }, 100);" +
+            "       };" +
+            "       window.invalidateMapSize = function() {" +
+            "           if (map) { map.invalidateSize(); }" +
+            "       };" +
+            "       map.on('click', function(e) {" +
+            "           var lat = e.latlng.lat;" +
+            "           var lng = e.latlng.lng;" +
+            "           setLocation(lat, lng);" +
+            "           if (window.Android && window.Android.onLocationPicked) {" +
+            "               window.Android.onLocationPicked(lat, lng);" +
+            "           }" +
+            "       });" +
+            "       setTimeout(function() {" +
+            "           map.invalidateSize();" +
+            "           if (window.Android && window.Android.onMapLoaded) {" +
+            "               window.Android.onMapLoaded();" +
+            "           }" +
+            "       }, 250);" +
+            "   } catch (e) {" +
+            "       if (window.Android && window.Android.onMapError) {" +
+            "           window.Android.onMapError('Map init error: ' + e.message);" +
+            "       }" +
+            "   }" +
+            "});" +
+            "</script></body></html>";
     }
 
     private void setupSearchView(SearchView searchView) {
