@@ -1,17 +1,29 @@
 package com.qwibbler.salarm.settings;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_INTERNET_ACCESS_ALLOWED;
 import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_ALLOWED;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,10 +35,18 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.graphics.Insets;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.textfield.TextInputEditText;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
@@ -42,15 +62,17 @@ import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.SalahTimezoneUtils;
 import com.qwibbler.salarm.salah.SalahUtils;
+import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
+import com.qwibbler.salarm.utils.InsetsUtils;
 import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +80,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class MasjidEditDialogFragment extends DialogFragment {
+public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
     private static final String ARG_MASJID_ID = "arg_masjid_id";
     private long mMasjidId;
@@ -67,6 +89,8 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
     private ImageView mIconPreview;
     private View mBtnRemoveIcon;
+    private TextView mNameText;
+    private View mNameLayout;
     private TextInputEditText mNameEdit;
     private TextView mCoordinatesText;
     private TextInputEditText mAddressEdit;
@@ -74,6 +98,9 @@ public class MasjidEditDialogFragment extends DialogFragment {
     private TextInputEditText mCountryEdit;
     private TextView mTimezoneText;
     private TextView mIntervalsSummary;
+    private MaterialButtonToggleGroup mIntervalToggleGroup;
+    private RangeSlider mIntervalSlider;
+    private View mSaveBtn;
 
     private ActivityResultLauncher<String> mPickIconLauncher;
 
@@ -159,7 +186,35 @@ public class MasjidEditDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        View view = getLayoutInflater().inflate(R.layout.dialog_edit_masjid, null);
+        BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            ThemeUtils.allowDisplayCutout(window);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+            Utils.setupTapToDismissKeyboard(window);
+        }
+
+        ViewGroup container = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        View view = getLayoutInflater().inflate(R.layout.dialog_edit_masjid, container, false);
+        dialog.setContentView(view);
+
+        BottomSheetBehavior<?> behavior = dialog.getBehavior();
+        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        behavior.setSkipCollapsed(true);
+
+        int screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+        int visualPadding = (int) dpToPx(8, getResources().getDisplayMetrics());
+
+        InsetsUtils.doOnApplyWindowInsets(view, (v, insets) -> {
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            int statusBarHeight = statusBars.top;
+            behavior.setMaxHeight(screenHeight - statusBarHeight - visualPadding);
+        });
+
+        mNameText = view.findViewById(R.id.masjid_name_text);
+        mNameLayout = view.findViewById(R.id.masjid_name_layout);
         mNameEdit = view.findViewById(R.id.masjid_name_edit);
         mIconPreview = view.findViewById(R.id.masjid_icon_preview);
         mBtnRemoveIcon = view.findViewById(R.id.btn_remove_masjid_icon);
@@ -169,38 +224,72 @@ public class MasjidEditDialogFragment extends DialogFragment {
         mCountryEdit = view.findViewById(R.id.masjid_country_edit);
         mTimezoneText = view.findViewById(R.id.masjid_timezone_text);
         mIntervalsSummary = view.findViewById(R.id.masjid_intervals_summary);
+        mIntervalToggleGroup = view.findViewById(R.id.interval_toggle_group);
+        mIntervalSlider = view.findViewById(R.id.interval_slider);
 
-        View intervalsRow = view.findViewById(R.id.masjid_intervals_row);
+        View deleteBtn = view.findViewById(R.id.delete_button);
+        View copyBtn = view.findViewById(R.id.copy_button);
+        View previewBtn = view.findViewById(R.id.preview_button);
+        mSaveBtn = view.findViewById(R.id.save_button);
+
+        View selectLocationBtn = view.findViewById(R.id.btn_select_location);
         View timezoneRow = view.findViewById(R.id.masjid_timezone_row);
+
+        SharedPreferences prefs = getDefaultSharedPreferences(requireContext());
+
+        ThemeUtils.applyExpressiveBackgroundsToGroup(
+            requireContext(),
+            prefs,
+            selectLocationBtn,
+            timezoneRow
+        );
+
+        setupNameEditToggle(view);
 
         mMasjidId = getArguments() != null ? getArguments().getLong(ARG_MASJID_ID) : 0;
 
+        if (previewBtn instanceof MaterialButton pBtn) {
+            if (mMasjidId > 0) {
+                pBtn.setIcon(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_preview));
+                pBtn.setOnClickListener(v -> openPreview());
+            } else {
+                pBtn.setIcon(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_cancel));
+                pBtn.setOnClickListener(v -> dismiss());
+            }
+        }
+
         if (mMasjidId > 0) {
+            if (deleteBtn != null) deleteBtn.setVisibility(View.VISIBLE);
+            if (copyBtn != null) copyBtn.setVisibility(View.VISIBLE);
             AppExecutors.getDiskIO().execute(() -> {
                 mMasjid = SalahDatabase.getDatabase(requireContext()).masjidDao().getById(mMasjidId);
                 AppExecutors.getMainThread().post(() -> {
                     if (isAdded() && mMasjid != null) {
                         mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
                             && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
+                        mNameText.setText(mMasjid.name);
                         mNameEdit.setText(mMasjid.name);
                         if (mMasjid.address != null) mAddressEdit.setText(mMasjid.address);
                         if (mMasjid.cityName != null) mCityEdit.setText(mMasjid.cityName);
                         if (mMasjid.countryName != null) mCountryEdit.setText(mMasjid.countryName);
                         updateIconUI();
                         updateLocationUI();
-                        updateIntervalsSummary();
+                        setupIntervalsUI(view);
                     }
                 });
             });
         } else {
+            if (deleteBtn != null) deleteBtn.setVisibility(View.GONE);
+            if (copyBtn != null) copyBtn.setVisibility(View.GONE);
             mMasjid = new Masjid();
             mMasjid.name = getString(R.string.salah_masjid_default_name);
             mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
             mHasLocation = false;
+            mNameText.setText(mMasjid.name);
             mNameEdit.setText(mMasjid.name);
             updateIconUI();
             updateLocationUI();
-            updateIntervalsSummary();
+            setupIntervalsUI(view);
         }
 
         View iconContainer = view.findViewById(R.id.masjid_icon_container);
@@ -219,38 +308,232 @@ public class MasjidEditDialogFragment extends DialogFragment {
             });
         }
 
-        view.findViewById(R.id.btn_select_location).setOnClickListener(v -> showLocationOptionsDialog());
+        if (selectLocationBtn != null) {
+            selectLocationBtn.setOnClickListener(v -> showLocationOptionsDialog());
+        }
 
-        timezoneRow.setOnClickListener(v -> showTimezonePicker());
+        if (timezoneRow != null) {
+            timezoneRow.setOnClickListener(v -> showTimezonePicker());
+        }
 
-        intervalsRow.setOnClickListener(v ->
-            MasjidIntervalsDialogFragment.show(getChildFragmentManager(), mMasjid, (updatedMasjid) -> {
-                mMasjid = updatedMasjid;
+        if (deleteBtn != null) deleteBtn.setOnClickListener(v -> deleteMasjid());
+        if (copyBtn != null) copyBtn.setOnClickListener(v -> copyMasjid());
+        if (mSaveBtn != null) mSaveBtn.setOnClickListener(v -> saveMasjid());
+
+        return dialog;
+    }
+
+    private void setupNameEditToggle(View rootView) {
+        if (mNameText == null || mNameLayout == null || mNameEdit == null) return;
+
+        mNameText.setOnClickListener(v -> showNameEdit());
+
+        mNameEdit.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideNameEdit();
+                return true;
+            }
+            return false;
+        });
+
+        mNameEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                hideNameEdit();
+            }
+        });
+
+        View scrollView = rootView.findViewById(R.id.edit_bottom_sheet_scroll_view);
+        if (scrollView != null) {
+            scrollView.setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_DOWN && mNameLayout != null && mNameLayout.getVisibility() == View.VISIBLE) {
+                    int[] loc = new int[2];
+                    mNameLayout.getLocationOnScreen(loc);
+                    float x = event.getRawX();
+                    float y = event.getRawY();
+                    if (x < loc[0] || x > loc[0] + mNameLayout.getWidth() ||
+                        y < loc[1] || y > loc[1] + mNameLayout.getHeight()) {
+                        hideNameEdit();
+                    }
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    v.performClick();
+                }
+                return false;
+            });
+        }
+    }
+
+    private void showNameEdit() {
+        if (mNameText == null || mNameLayout == null || mNameEdit == null) return;
+        mNameText.setVisibility(View.GONE);
+        mNameLayout.setVisibility(View.VISIBLE);
+        mNameEdit.requestFocus();
+        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    private void hideNameEdit() {
+        if (mNameLayout == null || mNameText == null) return;
+        if (mNameLayout.getVisibility() == View.VISIBLE) {
+            updateNameFromEdit();
+            mNameLayout.setVisibility(View.GONE);
+            mNameText.setVisibility(View.VISIBLE);
+            if (isAdded()) {
+                InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null && mNameEdit != null) {
+                    imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
+                }
+            }
+        }
+    }
+
+    private void updateNameFromEdit() {
+        if (mNameEdit != null && mNameEdit.getText() != null) {
+            String newName = mNameEdit.getText().toString().trim();
+            if (!newName.isEmpty() && mMasjid != null) {
+                mMasjid.name = newName;
+                if (mNameText != null) {
+                    mNameText.setText(newName);
+                }
+            }
+        }
+    }
+
+    private void setupIntervalsUI(View rootView) {
+        if (mMasjid == null || mIntervalToggleGroup == null || mIntervalSlider == null) return;
+
+        if (mMasjid.intervalsCount != 2 && mMasjid.intervalsCount != 3) {
+            mMasjid.intervalsCount = 2;
+        }
+        if (mMasjid.intervalsCount == 2) {
+            if (mMasjid.boundary1 <= 0 || mMasjid.boundary1 >= 30) {
+                mMasjid.boundary1 = 16;
+            }
+            mMasjid.boundary2 = 31;
+        } else {
+            if (mMasjid.boundary1 <= 0) mMasjid.boundary1 = 10;
+            if (mMasjid.boundary2 <= mMasjid.boundary1 || mMasjid.boundary2 >= 31) mMasjid.boundary2 = 20;
+        }
+
+        MaterialButton btn2 = rootView.findViewById(R.id.button_2_intervals);
+        MaterialButton btn3 = rootView.findViewById(R.id.button_3_intervals);
+
+        int checkedId = (mMasjid.intervalsCount == 3) ? R.id.button_3_intervals : R.id.button_2_intervals;
+        mIntervalToggleGroup.check(checkedId);
+        updateIntervalButtonVisuals(btn2, checkedId == R.id.button_2_intervals);
+        updateIntervalButtonVisuals(btn3, checkedId == R.id.button_3_intervals);
+
+        mIntervalToggleGroup.clearOnButtonCheckedListeners();
+        mIntervalToggleGroup.addOnButtonCheckedListener((group, checkedButtonId, isChecked) -> {
+            if (isChecked) {
+                boolean is2 = (checkedButtonId == R.id.button_2_intervals);
+                mMasjid.intervalsCount = is2 ? 2 : 3;
+                if (is2) {
+                    mMasjid.boundary1 = 16;
+                    mMasjid.boundary2 = 31;
+                } else {
+                    mMasjid.boundary1 = 10;
+                    mMasjid.boundary2 = 20;
+                }
+                updateIntervalButtonVisuals(btn2, is2);
+                updateIntervalButtonVisuals(btn3, !is2);
+                updateSliderFromMasjid();
                 updateIntervalsSummary();
-            })
+            }
+        });
+
+        mIntervalSlider.clearOnChangeListeners();
+        mIntervalSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser && mMasjid != null) {
+                List<Float> values = slider.getValues();
+                if (mMasjid.intervalsCount == 2) {
+                    if (!values.isEmpty()) {
+                        mMasjid.boundary1 = values.get(0).intValue();
+                    }
+                } else {
+                    if (values.size() >= 2) {
+                        mMasjid.boundary1 = values.get(0).intValue();
+                        mMasjid.boundary2 = values.get(1).intValue();
+                    }
+                }
+                updateIntervalsSummary();
+            }
+        });
+
+        updateSliderFromMasjid();
+        updateIntervalsSummary();
+    }
+
+    private void updateIntervalButtonVisuals(MaterialButton button, boolean isSelected) {
+        if (button == null || !isAdded()) return;
+
+        final int backgroundColor = isSelected
+            ? MaterialColors.getColor(requireContext(), com.google.android.material.R.attr.colorTertiary, Color.BLACK)
+            : Color.TRANSPARENT;
+
+        final ColorStateList strokeColor = ColorStateList.valueOf(MaterialColors.getColor(requireContext(), isSelected
+            ? com.google.android.material.R.attr.colorTertiary
+            : com.google.android.material.R.attr.colorOnSurfaceVariant, Color.BLACK)
         );
 
-        List<CustomDialog.DialogButton> buttons = new ArrayList<>();
-        if (mMasjidId > 0) {
-            buttons.add(new CustomDialog.DialogButton(getString(R.string.delete), (dialog, which) -> deleteMasjid()));
-        }
-        buttons.add(new CustomDialog.DialogButton(getString(android.R.string.cancel), null));
-        if (mMasjidId > 0) {
-            buttons.add(new CustomDialog.DialogButton(getString(R.string.salah_masjid_copy), (dialog, which) -> copyMasjid()));
-        }
-        buttons.add(new CustomDialog.DialogButton(getString(R.string.salah_masjid_save), (dialog, which) -> saveMasjid()));
+        final int textColor = MaterialColors.getColor(requireContext(), isSelected
+            ? com.google.android.material.R.attr.colorSurfaceContainerLowest
+            : com.google.android.material.R.attr.colorOnSurfaceVariant, Color.BLACK);
 
-        return CustomDialog.create(
-            requireContext(),
-            R.style.RelationalAlarmDialogTheme,
-            null,
-            getString(mMasjidId > 0 ? R.string.salah_masjid_edit_title : R.string.salah_add_new_masjid),
-            null,
-            view,
-            null,
-            CustomDialog.SoftInputMode.NONE,
-            buttons.toArray(new CustomDialog.DialogButton[0])
-        );
+        button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        button.setStrokeColor(strokeColor);
+        button.setTextColor(textColor);
+    }
+
+    private void updateSliderFromMasjid() {
+        if (mIntervalSlider == null || mMasjid == null) return;
+        if (mMasjid.intervalsCount == 2) {
+            float b1 = Math.max(1f, Math.min(30f, (float) mMasjid.boundary1));
+            mIntervalSlider.setValues(b1);
+        } else {
+            float b1 = Math.max(1f, Math.min(29f, (float) mMasjid.boundary1));
+            float b2 = Math.max(b1 + 1f, Math.min(30f, (float) mMasjid.boundary2));
+            mIntervalSlider.setValues(b1, b2);
+        }
+    }
+
+    private void openPreview() {
+        if (mMasjid == null) return;
+
+        if (!mHasLocation || !MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
+            Toast.makeText(requireContext(), R.string.salah_masjid_location_required_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        updateNameFromEdit();
+
+        if (mAddressEdit.getText() != null) mMasjid.address = mAddressEdit.getText().toString().trim();
+        if (mCityEdit.getText() != null) mMasjid.cityName = mCityEdit.getText().toString().trim();
+        if (mCountryEdit.getText() != null) mMasjid.countryName = mCountryEdit.getText().toString().trim();
+
+        if (mMasjid.timezoneId == null || mMasjid.timezoneId.isEmpty()) {
+            mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
+        }
+
+        final Context appContext = requireContext().getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            if (mMasjid.id == 0) {
+                long newId = SalahDatabase.getDatabase(appContext).masjidDao().insert(mMasjid);
+                mMasjid.id = newId;
+                mMasjidId = newId;
+            } else {
+                SalahDatabase.getDatabase(appContext).masjidDao().update(mMasjid);
+            }
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
+                    intent.putExtra("masjid_id", mMasjid.id);
+                    startActivity(intent);
+                }
+            });
+        });
     }
 
     private void showLocationOptionsDialog() {
@@ -298,16 +581,22 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
     private void updateLocationUI() {
         if (mMasjid != null) {
-            if (mHasLocation && MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
+            boolean validLoc = mHasLocation && MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude);
+            if (validLoc) {
                 mCoordinatesText.setText(String.format(Locale.getDefault(), getString(R.string.salah_masjid_location_coordinates_format), mMasjid.latitude, mMasjid.longitude));
             } else {
-                mCoordinatesText.setText(R.string.salah_masjid_location_required_error);
+                mCoordinatesText.setText("");
             }
 
             if (mMasjid.timezoneId != null && !mMasjid.timezoneId.isEmpty()) {
                 mTimezoneText.setText(mMasjid.timezoneId);
             } else {
                 mTimezoneText.setText(SalahTimezoneUtils.getPhoneTimeZoneId());
+            }
+
+            if (mSaveBtn != null) {
+                mSaveBtn.setEnabled(validLoc);
+                mSaveBtn.setAlpha(validLoc ? 1.0f : 0.4f);
             }
         }
     }
@@ -317,15 +606,19 @@ public class MasjidEditDialogFragment extends DialogFragment {
             try {
                 Context context = requireContext();
                 File iconDir = new File(context.getFilesDir(), "masjid_icons");
-                if (!iconDir.exists()) iconDir.mkdirs();
+                if (!iconDir.exists() && !iconDir.mkdirs()) {
+                    LogUtils.e("Failed to create icon directory");
+                }
 
                 File iconFile = new File(iconDir, "masjid_icon_" + System.currentTimeMillis() + ".png");
                 try (InputStream is = context.getContentResolver().openInputStream(sourceUri);
                      OutputStream os = new FileOutputStream(iconFile)) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = is.read(buffer)) != -1) {
-                        os.write(buffer, 0, len);
+                    if (is != null) {
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = is.read(buffer)) != -1) {
+                            os.write(buffer, 0, len);
+                        }
                     }
                 }
 
@@ -507,7 +800,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
     }
 
     private void updateIntervalsSummary() {
-        if (mMasjid != null) {
+        if (mMasjid != null && mIntervalsSummary != null) {
             mIntervalsSummary.setText(mMasjid.getIntervalsSummary(requireContext()));
         }
     }
@@ -520,8 +813,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
             return;
         }
 
-        if (mNameEdit.getText() == null) return;
-        mMasjid.name = mNameEdit.getText().toString().trim();
+        updateNameFromEdit();
 
         if (mAddressEdit.getText() != null) mMasjid.address = mAddressEdit.getText().toString().trim();
         if (mCityEdit.getText() != null) mMasjid.cityName = mCityEdit.getText().toString().trim();
@@ -540,6 +832,11 @@ public class MasjidEditDialogFragment extends DialogFragment {
                 SalahDatabase.getDatabase(appContext).masjidDao().update(mMasjid);
             }
             fragmentManager.setFragmentResult("masjid_updated", new Bundle());
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    dismiss();
+                }
+            });
         });
     }
 

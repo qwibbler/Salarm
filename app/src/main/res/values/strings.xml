@@ -1823,7 +1823,7 @@
     <string name="salah_masjid_select_icon">Select Icon</string>
     <string name="salah_masjid_remove_icon">Remove Icon</string>
     <string name="salah_masjid_location_title">Masjid Location*</string>
-    <string name="salah_masjid_select_location">Select Location</string>
+    <string name="salah_masjid_select_location">Location*</string>
     <string name="salah_masjid_select_location_dialog_title">Select Location Method</string>
     <string name="salah_masjid_open_map_window">Open Map in Window</string>
     <string name="salah_masjid_interactive_map">Interactive Map Window</string>

@@ -6,10 +6,19 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view"
+    <!-- Bottom Sheet Drag Handle -->
+    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+        android:id="@+id/drag_handle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="32dp"
+        android:paddingTop="16dp" />
+
+    <!-- Scrollable content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/edit_bottom_sheet_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -17,12 +26,12 @@
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
-            <!-- 1. Top Header: Masjid Icon (Left) + Masjid Name (Clock position) -->
+            <!-- 1. Top Header: Masjid Icon (Left) + Full Heading Masjid Name Text / Editable Field -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="14dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="6dp"
                 android:baselineAligned="false"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
@@ -63,87 +72,110 @@
 
                 </FrameLayout>
 
-                <!-- Masjid Name Input -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/masjid_name_layout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:hint="@string/salah_masjid_name_title">
+                    android:layout_weight="1">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/masjid_name_edit"
+                    <!-- Full Heading Text View (default display, no max length) -->
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/masjid_name_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:layout_gravity="center_vertical"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="4dp"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="Default Masjid" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                    <!-- Editable Input Layout (shown on click, no max length) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/masjid_name_layout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/salah_masjid_name_title"
+                        android:visibility="gone">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/masjid_name_edit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:imeOptions="actionDone"
+                            android:inputType="textCapWords|textMultiLine"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </FrameLayout>
 
             </LinearLayout>
 
-            <!-- 2. Interval Picker Section (replacing repeat_days_group) -->
+            <!-- 2. Inline Interval Picker Section -->
             <LinearLayout
-                android:id="@+id/masjid_intervals_row"
+                android:id="@+id/interval_section_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="12dp"
                 android:paddingHorizontal="10dp"
-                android:paddingVertical="8dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:paddingVertical="10dp"
+                android:orientation="vertical">
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/masjid_intervals_title"
-                    android:layout_width="0dp"
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/interval_toggle_group"
+                    style="@style/Widget.Material3.MaterialButtonGroup.Connected"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_2_intervals"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/salah_intervals_2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_3_intervals"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/salah_intervals_3" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <com.google.android.material.slider.RangeSlider
+                    android:id="@+id/interval_slider"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawableStart="@drawable/ic_repeat"
-                    android:drawablePadding="10dp"
-                    app:drawableTint="?attr/colorOnSurfaceVariant"
-                    android:gravity="center_vertical"
-                    android:text="@string/salah_masjid_intervals_title"
-                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+                    android:layout_marginTop="4dp"
+                    android:stepSize="1"
+                    android:valueFrom="1"
+                    android:valueTo="30" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/masjid_intervals_summary"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     tools:text="2 intervals: &lt;=16 min &amp; &gt;16 min" />
 
             </LinearLayout>
 
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:dividerColor="?attr/colorOutlineVariant" />
-
-            <!-- 3. Settings Section: Location / Address / Timezone -->
-
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:paddingHorizontal="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:text="@string/settings"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="?attr/colorPrimary" />
+            <!-- 3. Settings Section: Location / Timezone / Address / City / Country -->
 
             <!-- Location Setting Row -->
             <LinearLayout
@@ -152,10 +184,9 @@
                 android:layout_height="wrap_content"
                 android:minHeight="48dp"
                 android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="8dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="8dp"
-                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
@@ -193,7 +224,6 @@
                 android:layout_marginTop="2dp"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="8dp"
-                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
@@ -221,7 +251,7 @@
 
             </LinearLayout>
 
-            <!-- Address, City, Country Fields -->
+            <!-- Address Layout (no expressive card background) -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/masjid_address_layout"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -239,7 +269,9 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- City and Country Container (no expressive card background) -->
             <LinearLayout
+                android:id="@+id/masjid_city_country_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
@@ -286,5 +318,71 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Button Group -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="10dp">
+
+        <com.google.android.material.button.MaterialButtonGroup
+            android:id="@+id/bottom_button_group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorAlert"
+                app:icon="@drawable/ic_delete"
+                app:iconTint="?attr/colorOnError"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialButtonOutlinedStyle"
+                android:id="@+id/copy_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:icon="@drawable/ic_duplicate"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:strokeColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialButtonOutlinedStyle"
+                android:id="@+id/preview_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:icon="@drawable/ic_preview"
+                app:iconTint="?attr/colorOnSurfaceVariant"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:strokeColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@color/colorGranted"
+                app:icon="@drawable/ic_save"
+                app:iconTint="?attr/colorSurfaceContainerLowest"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+
+        </com.google.android.material.button.MaterialButtonGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
