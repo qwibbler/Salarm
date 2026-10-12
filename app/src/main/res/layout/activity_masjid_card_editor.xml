@@ -8,26 +8,26 @@
     <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:alignItems="stretch"
         app:flexDirection="row"
         app:flexWrap="wrap"
-        app:justifyContent="center"
-        app:alignItems="stretch"
-        android:padding="16dp">
+        app:justifyContent="center">
 
         <!-- Editor Section -->
         <LinearLayout
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_flexGrow="1"
-            android:padding="8dp">
+            android:padding="8dp"
+            app:layout_flexGrow="1">
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/masjid_card_name_label"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="12dp"
+                android:hint="@string/masjid_card_name_label">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_masjid_name"
@@ -37,11 +37,11 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/masjid_card_subtitle_label"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="12dp"
+                android:hint="@string/masjid_card_subtitle_label">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_masjid_subtitle"
@@ -51,11 +51,11 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/masjid_card_footer_label"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                android:hint="@string/masjid_card_footer_label">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_footer_text"
@@ -64,14 +64,41 @@
                     android:inputType="textMultiLine"
                     android:minLines="2" />
             </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Preview Section -->
+        <FrameLayout
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:background="#F0F0F0"
+            android:padding="16dp"
+            app:layout_flexGrow="1">
+
+            <com.qwibbler.salarm.salah.ui.MasjidCardView
+                android:id="@+id/card_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/white"
+                android:elevation="4dp" />
+
+        </FrameLayout>
+
+        <!-- Editor Section -->
+        <LinearLayout
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            app:layout_flexGrow="1">
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggle_side"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
+                android:layout_marginBottom="24dp"
                 app:selectionRequired="true"
-                android:layout_marginBottom="24dp">
+                app:singleSelection="true">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_front"
@@ -90,45 +117,36 @@
                     android:text="@string/masjid_card_back" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_export_png"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/masjid_card_export_png"
-                android:layout_marginBottom="8dp" />
+                android:orientation="horizontal"
+                android:padding="8dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_export_pdf"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/masjid_card_export_pdf"
-                android:layout_marginBottom="8dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_export_svg"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/masjid_card_export_svg" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_export_svg"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/masjid_card_export_svg" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_export_png"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/masjid_card_export_png" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_export_pdf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/masjid_card_export_pdf" />
+            </LinearLayout>
         </LinearLayout>
-
-        <!-- Preview Section -->
-        <FrameLayout
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            app:layout_flexGrow="1"
-            android:padding="16dp"
-            android:background="#F0F0F0">
-
-            <com.qwibbler.salarm.salah.ui.MasjidCardView
-                android:id="@+id/card_preview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@android:color/white"
-                android:elevation="4dp" />
-
-        </FrameLayout>
 
     </com.google.android.flexbox.FlexboxLayout>
 </androidx.core.widget.NestedScrollView>

@@ -1,7 +1,11 @@
 package com.qwibbler.salarm.salah;
 
+import android.content.Context;
+
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+
+import com.qwibbler.salarm.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,14 @@ public class Masjid {
     // Interval 3: boundary2 + 1 to 31 (if 3 intervals)
     public int boundary1;
     public int boundary2;
+
+    public String iconUri;
+    public double latitude;
+    public double longitude;
+    public String address;
+    public String cityName;
+    public String countryName;
+    public String timezoneId;
 
     public Masjid() {
         this.showMasjidEvents = true;
@@ -42,17 +54,17 @@ public class Masjid {
             return startDay + " to " + endDay;
         }
 
-        public String getOrdinalSummary(android.content.Context context) {
-            return context.getString(com.qwibbler.salarm.R.string.salah_masjid_interval_range, getOrdinal(context, startDay), getOrdinal(context, endDay));
+        public String getOrdinalSummary(Context context) {
+            return context.getString(R.string.salah_masjid_interval_range, getOrdinal(context, startDay), getOrdinal(context, endDay));
         }
 
-        private String getOrdinal(android.content.Context context, int i) {
+        private String getOrdinal(Context context, int i) {
             int j = i % 10, k = i % 100;
             int resId;
-            if (j == 1 && k != 11) resId = com.qwibbler.salarm.R.string.ordinal_1st;
-            else if (j == 2 && k != 12) resId = com.qwibbler.salarm.R.string.ordinal_2nd;
-            else if (j == 3 && k != 13) resId = com.qwibbler.salarm.R.string.ordinal_3rd;
-            else resId = com.qwibbler.salarm.R.string.ordinal_th;
+            if (j == 1 && k != 11) resId = R.string.ordinal_1st;
+            else if (j == 2 && k != 12) resId = R.string.ordinal_2nd;
+            else if (j == 3 && k != 13) resId = R.string.ordinal_3rd;
+            else resId = R.string.ordinal_th;
             return context.getString(resId, i);
         }
     }
@@ -70,7 +82,7 @@ public class Masjid {
         return intervals;
     }
 
-    public String getIntervalsSummary(android.content.Context context) {
+    public String getIntervalsSummary(Context context) {
         List<Interval> intervals = getIntervals();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < intervals.size(); i++) {

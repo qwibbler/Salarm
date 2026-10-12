@@ -70,11 +70,18 @@ public class SalahCalculator {
     }
 
     public static Date getIntervalExtremeTime(Context context, Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax) {
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-        String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
-        String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
-        double lat = Double.parseDouble(latStr);
-        double lon = Double.parseDouble(lonStr);
+        double lat;
+        double lon;
+        if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
+            lat = masjid.latitude;
+            lon = masjid.longitude;
+        } else {
+            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
+            String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
+            String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
+            lat = Double.parseDouble(latStr);
+            lon = Double.parseDouble(lonStr);
+        }
         CalculationMethod method = SalahUtils.getCalculationMethod(context);
 
         return getIntervalExtremeTime(date, masjid, event, isMax, d -> calculateAllSalahTimes(context, d, lat, lon, method));

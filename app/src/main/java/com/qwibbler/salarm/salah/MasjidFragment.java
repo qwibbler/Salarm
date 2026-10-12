@@ -5,7 +5,9 @@ import static com.qwibbler.salarm.uidata.UiDataModel.Tab.MASJID;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -228,6 +230,22 @@ public class MasjidFragment extends SalarmFragment {
 
         final Masjid masjid = currentMasjid;
         mMasjidTitleText.setText(masjid.name);
+
+        View rootView = getView();
+        if (rootView != null) {
+            ImageView masjidTitleIcon = rootView.findViewById(R.id.masjid_title_icon);
+            if (masjidTitleIcon != null) {
+                if (masjid.iconUri != null && !masjid.iconUri.isEmpty()) {
+                    masjidTitleIcon.setImageURI(Uri.parse(masjid.iconUri));
+                    masjidTitleIcon.setImageTintList(null);
+                } else {
+                    masjidTitleIcon.setImageResource(R.drawable.ic_masjid_timings);
+                    masjidTitleIcon.setImageTintList(ColorStateList.valueOf(
+                            MaterialColors.getColor(masjidTitleIcon, androidx.appcompat.R.attr.colorPrimary)));
+                }
+            }
+        }
+
         mMasjidTitleContainer.setOnClickListener(v -> {
             exitCheckboxMode();
             MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
@@ -258,13 +276,18 @@ public class MasjidFragment extends SalarmFragment {
             String[] types = {"FAJR", "DHUHR", "JUMA", "ASR", "MAGHRIB", "ISHA"};
 
             SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
-            String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
-            String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
             double lat = 0, lon = 0;
-            try {
-                lat = Double.parseDouble(latStr);
-                lon = Double.parseDouble(lonStr);
-            } catch (NumberFormatException ignored) {}
+            if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
+                lat = masjid.latitude;
+                lon = masjid.longitude;
+            } else {
+                String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
+                String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
+                try {
+                    lat = Double.parseDouble(latStr);
+                    lon = Double.parseDouble(lonStr);
+                } catch (NumberFormatException ignored) {}
+            }
 
             String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
             CalculationMethod method = CalculationMethod.valueOf(methodStr);

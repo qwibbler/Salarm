@@ -139,7 +139,12 @@ public class MasjidCardRenderer {
         int startMonth = front ? 0 : 6;
         int endMonth = front ? 5 : 11;
 
-        double[] coords = SalahUtils.getCoordinates(context);
+        double[] coords;
+        if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
+            coords = new double[]{masjid.latitude, masjid.longitude};
+        } else {
+            coords = SalahUtils.getCoordinates(context);
+        }
         CalculationMethod method = SalahUtils.getCalculationMethod(context);
         SalahDatabase db = SalahDatabase.getDatabase(context);
         MasjidEvent fajrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "FAJR");
