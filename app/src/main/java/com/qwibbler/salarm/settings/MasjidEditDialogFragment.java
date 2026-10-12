@@ -66,8 +66,7 @@ public class MasjidEditDialogFragment extends DialogFragment {
     private boolean mHasLocation = false;
 
     private ImageView mIconPreview;
-    private MaterialButton mBtnSelectIcon;
-    private MaterialButton mBtnRemoveIcon;
+    private View mBtnRemoveIcon;
     private TextInputEditText mNameEdit;
     private TextView mCoordinatesText;
     private TextInputEditText mAddressEdit;
@@ -163,7 +162,6 @@ public class MasjidEditDialogFragment extends DialogFragment {
         View view = getLayoutInflater().inflate(R.layout.dialog_edit_masjid, null);
         mNameEdit = view.findViewById(R.id.masjid_name_edit);
         mIconPreview = view.findViewById(R.id.masjid_icon_preview);
-        mBtnSelectIcon = view.findViewById(R.id.btn_select_masjid_icon);
         mBtnRemoveIcon = view.findViewById(R.id.btn_remove_masjid_icon);
         mCoordinatesText = view.findViewById(R.id.masjid_coordinates_text);
         mAddressEdit = view.findViewById(R.id.masjid_address_edit);
@@ -205,13 +203,21 @@ public class MasjidEditDialogFragment extends DialogFragment {
             updateIntervalsSummary();
         }
 
-        mBtnSelectIcon.setOnClickListener(v -> mPickIconLauncher.launch("image/*"));
-        mBtnRemoveIcon.setOnClickListener(v -> {
-            if (mMasjid != null) {
-                mMasjid.iconUri = null;
-                updateIconUI();
-            }
-        });
+        View iconContainer = view.findViewById(R.id.masjid_icon_container);
+        if (iconContainer != null) {
+            iconContainer.setOnClickListener(v -> mPickIconLauncher.launch("image/*"));
+        }
+        if (mIconPreview != null) {
+            mIconPreview.setOnClickListener(v -> mPickIconLauncher.launch("image/*"));
+        }
+        if (mBtnRemoveIcon != null) {
+            mBtnRemoveIcon.setOnClickListener(v -> {
+                if (mMasjid != null) {
+                    mMasjid.iconUri = null;
+                    updateIconUI();
+                }
+            });
+        }
 
         view.findViewById(R.id.btn_select_location).setOnClickListener(v -> showLocationOptionsDialog());
 
@@ -270,11 +276,23 @@ public class MasjidEditDialogFragment extends DialogFragment {
 
     private void updateIconUI() {
         if (mMasjid != null && mMasjid.iconUri != null && !mMasjid.iconUri.isEmpty()) {
-            mIconPreview.setImageURI(Uri.parse(mMasjid.iconUri));
-            mBtnRemoveIcon.setVisibility(View.VISIBLE);
+            try {
+                mIconPreview.setImageURI(Uri.parse(mMasjid.iconUri));
+                if (mIconPreview.getDrawable() == null) {
+                    mIconPreview.setImageResource(R.drawable.ic_masjid_timings);
+                    if (mBtnRemoveIcon != null) mBtnRemoveIcon.setVisibility(View.GONE);
+                } else if (mBtnRemoveIcon != null) {
+                    mBtnRemoveIcon.setVisibility(View.VISIBLE);
+                }
+            } catch (Exception e) {
+                mIconPreview.setImageResource(R.drawable.ic_masjid_timings);
+                if (mBtnRemoveIcon != null) mBtnRemoveIcon.setVisibility(View.GONE);
+            }
         } else {
             mIconPreview.setImageResource(R.drawable.ic_masjid_timings);
-            mBtnRemoveIcon.setVisibility(View.GONE);
+            if (mBtnRemoveIcon != null) {
+                mBtnRemoveIcon.setVisibility(View.GONE);
+            }
         }
     }
 
