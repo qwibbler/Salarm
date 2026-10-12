@@ -1,11 +1,16 @@
 package com.qwibbler.salarm.salah;
 
+import android.graphics.Bitmap;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MasjidCardData {
     public String masjidName;
     public String subtitle;
+    public String iconUri;
+    public Bitmap iconBitmap;
+    public String qrContent;
     public String footerTextFront;
     public String footerTextBack;
     public boolean isFront;

@@ -1,15 +1,26 @@
 package com.qwibbler.salarm.salah;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+
+import androidx.core.content.ContextCompat;
 
 import com.batoulapps.adhan.CalculationMethod;
+import com.qwibbler.salarm.R;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MasjidCardRenderer {
@@ -20,6 +31,8 @@ public class MasjidCardRenderer {
         void drawText(String text, float x, float y, float size, Paint.Align align, int color, boolean bold, float rotateDegrees);
 
         void drawRect(float left, float top, float right, float bottom, float strokeWidth, int color, boolean fill);
+
+        void drawBitmap(Bitmap bitmap, float left, float top, float right, float bottom);
     }
 
     public static final float VIRTUAL_HEIGHT = 1000f;
@@ -45,23 +58,66 @@ public class MasjidCardRenderer {
         // Draw outer border
         target.drawRect(5, 5, VIRTUAL_WIDTH - 5, VIRTUAL_HEIGHT - 5, 2, colorBorder, false);
 
-        float padding = 40;
-        boolean hasSubtitle = data.subtitle != null && !data.subtitle.isEmpty();
+        float padding = 30f;
+        float headerTopY = padding;
 
-        // 1. Header Area (Top ~180px)
-        float currentY = padding + 45;
-        float titleSize = hasSubtitle ? 40 : 45;
-        target.drawText(data.masjidName != null ? data.masjidName : "", VIRTUAL_WIDTH / 2, currentY, titleSize, Paint.Align.CENTER, colorText, true, 0);
+        // 1. Icon (Top Left)
+        float iconSize = 70f;
+        float iconLeft = padding;
+        float iconTop = headerTopY;
+        float iconRight = iconLeft + iconSize;
+        float iconBottom = iconTop + iconSize;
 
-        if (hasSubtitle) {
-            currentY += titleSize;
-            target.drawText(data.subtitle, VIRTUAL_WIDTH / 2, currentY, 26, Paint.Align.CENTER, colorSecondaryText, false, 0);
+        Bitmap iconBitmap = getIconBitmap(data);
+        if (iconBitmap != null) {
+            target.drawBitmap(iconBitmap, iconLeft, iconTop, iconRight, iconBottom);
         }
 
-        // QR Placeholder (Top Right)
-        float qrSize = 75;
-        target.drawRect(VIRTUAL_WIDTH - padding - qrSize, padding, VIRTUAL_WIDTH - padding, padding + qrSize, 1, colorSecondaryText, false);
-        target.drawText("QR", VIRTUAL_WIDTH - padding - qrSize / 2, padding + qrSize / 2 + 7, 16, Paint.Align.CENTER, colorSecondaryText, false, 0);
+        // 2. QR Code (Top Right)
+        float qrSize = 70f;
+        float qrLeft = VIRTUAL_WIDTH - padding - qrSize;
+        float qrTop = headerTopY;
+
+        String qrText = (data.qrContent != null && !data.qrContent.trim().isEmpty())
+                ? data.qrContent
+                : (data.masjidName != null ? data.masjidName : "Salarm");
+
+        drawQrCode(target, qrText, qrLeft, qrTop, qrSize, colorText);
+
+        // 3. Title and Subtitle (Middle between Icon and QR Code)
+        float gap = 15f;
+        float titleLeftBound = iconRight + gap;
+        float titleRightBound = qrLeft - gap;
+        float availableWidth = titleRightBound - titleLeftBound;
+        float centerX = (titleLeftBound + titleRightBound) / 2f;
+
+        boolean hasSubtitle = data.subtitle != null && !data.subtitle.trim().isEmpty();
+
+        float maxTitleHeight = hasSubtitle ? 85f : 110f;
+        TextLayout titleLayout = measureAndWrapText(data.masjidName != null ? data.masjidName : "",
+                availableWidth, maxTitleHeight, 3, 42f, 16f, true);
+
+        TextLayout subtitleLayout = null;
+        if (hasSubtitle) {
+            subtitleLayout = measureAndWrapText(data.subtitle.trim(),
+                    availableWidth, 40f, 2, 22f, 14f, false);
+        }
+
+        float totalHeaderContentHeight = titleLayout.totalHeight + (hasSubtitle ? (6f + subtitleLayout.totalHeight) : 0f);
+        float currentY = headerTopY + Math.max(0, (iconSize - totalHeaderContentHeight) / 2f) + titleLayout.fontSize;
+
+        for (String line : titleLayout.lines) {
+            target.drawText(line, centerX, currentY, titleLayout.fontSize, Paint.Align.CENTER, colorText, true, 0);
+            currentY += titleLayout.lineSpacing;
+        }
+
+        if (hasSubtitle && subtitleLayout != null) {
+            currentY += 2f;
+            for (String line : subtitleLayout.lines) {
+                target.drawText(line, centerX, currentY, subtitleLayout.fontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
+                currentY += subtitleLayout.lineSpacing;
+            }
+        }
 
         int maxIntervals = 0;
         for (MasjidCardData.MonthGroup month : data.months) {
@@ -69,34 +125,34 @@ public class MasjidCardRenderer {
         }
 
         // Table Header
-        currentY = hasSubtitle ? 180 : 160;
-        float headerSize = 30;
-        float colX_fajr = 250;
-        float colX_asr = 350;
-        float colX_mgrb = 450;
-        float colX_isha = 550;
+        currentY = 170f;
+        float headerSize = 30f;
+        float colX_fajr = 250f;
+        float colX_asr = 350f;
+        float colX_mgrb = 450f;
+        float colX_isha = 550f;
 
         target.drawText("Fajr", colX_fajr, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
         target.drawText("Asr", colX_asr, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
         target.drawText("Mgrb", colX_mgrb, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
         target.drawText("Isha", colX_isha, currentY, headerSize, Paint.Align.CENTER, colorText, true, 0);
 
-        currentY += 15;
+        currentY += 15f;
         target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
-        currentY += (maxIntervals > 2 ? 30 : 40);
+        currentY += (maxIntervals > 2 ? 30f : 40f);
 
         // 2. Table Area (Middle ~700px)
-        float monthNameX = 65;
-        float dayX = 105;
-        float rowHeight = maxIntervals > 2 ? 33 : 44; // Reduced from 37
-        float textSize = maxIntervals > 2 ? 22 : 28;  // Reduced from 24
+        float monthNameX = 65f;
+        float dayX = 105f;
+        float rowHeight = maxIntervals > 2 ? 33f : 44f;
+        float textSize = maxIntervals > 2 ? 22f : 28f;
 
         for (MasjidCardData.MonthGroup month : data.months) {
-            float monthStartY = currentY - rowHeight + 10;
+            float monthStartY = currentY - rowHeight + 10f;
             float monthEndY = monthStartY + month.rows.size() * rowHeight;
 
             // Draw month name rotated
-            target.drawText(month.monthName, monthNameX, (monthStartY + monthEndY) / 2, textSize, Paint.Align.CENTER, colorText, true, -90);
+            target.drawText(month.monthName, monthNameX, (monthStartY + monthEndY) / 2f, textSize, Paint.Align.CENTER, colorText, true, -90);
 
             for (MasjidCardData.IntervalRow row : month.rows) {
                 target.drawText(String.valueOf(row.day), dayX, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
@@ -108,26 +164,222 @@ public class MasjidCardRenderer {
             }
 
             // Separator between months
-            target.drawLine(padding, currentY - (rowHeight / 2), VIRTUAL_WIDTH - padding, currentY - (rowHeight / 2), 1, colorLine);
-            currentY += (rowHeight / 2); // Reduced from 15
+            target.drawLine(padding, currentY - (rowHeight / 2f), VIRTUAL_WIDTH - padding, currentY - (rowHeight / 2f), 1, colorLine);
+            currentY += (rowHeight / 2f);
         }
 
         // 3. Footer Area (Bottom ~120px)
         String footer = data.getFooterText();
         if (footer != null && !footer.isEmpty()) {
             String[] lines = footer.split("\n");
-            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 55 : 45);
+            float footerY = VIRTUAL_HEIGHT - padding - (lines.length > 1 ? 55f : 45f);
             for (String line : lines) {
-                target.drawText(line.trim(), VIRTUAL_WIDTH / 2, footerY, 28, Paint.Align.CENTER, colorText, false, 0);
-                footerY += 35;
+                target.drawText(line.trim(), VIRTUAL_WIDTH / 2f, footerY, 28f, Paint.Align.CENTER, colorText, false, 0);
+                footerY += 35f;
             }
         }
+    }
+
+    private Bitmap getIconBitmap(MasjidCardData data) {
+        if (data.iconBitmap != null) {
+            return data.iconBitmap;
+        }
+        if (data.iconUri != null && !data.iconUri.isEmpty()) {
+            try {
+                Uri uri = Uri.parse(data.iconUri);
+                InputStream is = context.getContentResolver().openInputStream(uri);
+                if (is != null) {
+                    Bitmap bm = BitmapFactory.decodeStream(is);
+                    is.close();
+                    if (bm != null) {
+                        data.iconBitmap = bm;
+                        return bm;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Bitmap defaultBm = getBitmapFromDrawable(context, R.drawable.ic_masjid_timings, 256);
+        data.iconBitmap = defaultBm;
+        return defaultBm;
+    }
+
+    private static Bitmap getBitmapFromDrawable(Context context, int drawableId, int sizePx) {
+        try {
+            Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+            if (drawable == null) return null;
+            Bitmap bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, sizePx, sizePx);
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void drawQrCode(DrawTarget target, String text, float left, float top, float size, int color) {
+        try {
+            boolean[][] matrix = QrCodeGenerator.encode(text);
+            int matrixSize = matrix.length;
+            float moduleSize = size / matrixSize;
+
+            for (int r = 0; r < matrixSize; r++) {
+                for (int c = 0; c < matrixSize; c++) {
+                    if (matrix[r][c]) {
+                        float mLeft = left + c * moduleSize;
+                        float mTop = top + r * moduleSize;
+                        float mRight = (c == matrixSize - 1) ? (left + size) : (mLeft + moduleSize);
+                        float mBottom = (r == matrixSize - 1) ? (top + size) : (mTop + moduleSize);
+                        target.drawRect(mLeft, mTop, mRight, mBottom, 0, color, true);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            target.drawRect(left, top, left + size, top + size, 1, color, false);
+            target.drawText("QR", left + size / 2f, top + size / 2f + 5f, 16f, Paint.Align.CENTER, color, false, 0);
+        }
+    }
+
+    private static class TextLayout {
+        final List<String> lines;
+        final float fontSize;
+        final float lineSpacing;
+        final float totalHeight;
+
+        TextLayout(List<String> lines, float fontSize, float lineSpacing, float totalHeight) {
+            this.lines = lines;
+            this.fontSize = fontSize;
+            this.lineSpacing = lineSpacing;
+            this.totalHeight = totalHeight;
+        }
+    }
+
+    private TextLayout measureAndWrapText(String text, float maxWidth, float maxHeight, int maxLines,
+                                          float initialSize, float minSize, boolean bold) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, bold ? Typeface.BOLD : Typeface.NORMAL));
+
+        float currentSize = initialSize;
+        while (currentSize >= minSize) {
+            paint.setTextSize(currentSize);
+            float lineSpacing = currentSize * 1.15f;
+            List<String> lines = wrapText(text, paint, maxWidth);
+
+            float totalHeight = lines.size() * lineSpacing;
+            if (lines.size() <= maxLines && totalHeight <= maxHeight) {
+                return new TextLayout(lines, currentSize, lineSpacing, totalHeight);
+            }
+            currentSize -= 1.0f;
+        }
+
+        paint.setTextSize(minSize);
+        float lineSpacing = minSize * 1.15f;
+        List<String> lines = wrapText(text, paint, maxWidth);
+
+        if (lines.size() > maxLines) {
+            List<String> truncated = new ArrayList<>(lines.subList(0, maxLines));
+            String lastLine = truncated.get(maxLines - 1);
+            while (!lastLine.isEmpty() && paint.measureText(lastLine + "...") > maxWidth) {
+                lastLine = lastLine.substring(0, lastLine.length() - 1);
+            }
+            truncated.set(maxLines - 1, lastLine + "...");
+            lines = truncated;
+        }
+
+        float totalHeight = lines.size() * lineSpacing;
+        return new TextLayout(lines, minSize, lineSpacing, totalHeight);
+    }
+
+    private List<String> wrapText(String text, Paint paint, float maxWidth) {
+        List<String> result = new ArrayList<>();
+        if (text == null || text.trim().isEmpty()) {
+            result.add("");
+            return result;
+        }
+
+        String[] words = text.trim().split("\\s+");
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : words) {
+            if (currentLine.length() == 0) {
+                if (paint.measureText(word) <= maxWidth) {
+                    currentLine.append(word);
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    for (char c : word.toCharArray()) {
+                        if (paint.measureText(sb.toString() + c) <= maxWidth) {
+                            sb.append(c);
+                        } else {
+                            if (sb.length() > 0) result.add(sb.toString());
+                            sb = new StringBuilder();
+                            sb.append(c);
+                        }
+                    }
+                    if (sb.length() > 0) currentLine.append(sb.toString());
+                }
+            } else {
+                String candidate = currentLine.toString() + " " + word;
+                if (paint.measureText(candidate) <= maxWidth) {
+                    currentLine.append(" ").append(word);
+                } else {
+                    result.add(currentLine.toString());
+                    currentLine = new StringBuilder();
+                    if (paint.measureText(word) <= maxWidth) {
+                        currentLine.append(word);
+                    } else {
+                        StringBuilder sb = new StringBuilder();
+                        for (char c : word.toCharArray()) {
+                            if (paint.measureText(sb.toString() + c) <= maxWidth) {
+                                sb.append(c);
+                            } else {
+                                if (sb.length() > 0) result.add(sb.toString());
+                                sb = new StringBuilder();
+                                sb.append(c);
+                            }
+                        }
+                        if (sb.length() > 0) currentLine.append(sb.toString());
+                    }
+                }
+            }
+        }
+        if (currentLine.length() > 0) {
+            result.add(currentLine.toString());
+        }
+        return result;
     }
 
     public MasjidCardData generateData(Masjid masjid) {
         MasjidCardData data = new MasjidCardData();
         data.masjidName = masjid.name;
-        data.subtitle = "";
+
+        if (masjid.address != null && !masjid.address.trim().isEmpty()) {
+            data.subtitle = masjid.address.trim();
+        } else if (masjid.cityName != null && !masjid.cityName.trim().isEmpty()) {
+            if (masjid.countryName != null && !masjid.countryName.trim().isEmpty()) {
+                data.subtitle = masjid.cityName.trim() + ", " + masjid.countryName.trim();
+            } else {
+                data.subtitle = masjid.cityName.trim();
+            }
+        } else {
+            data.subtitle = "";
+        }
+
+        data.iconUri = masjid.iconUri;
+
+        if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
+            data.qrContent = String.format(Locale.US, "https://maps.google.com/?q=%.6f,%.6f", masjid.latitude, masjid.longitude);
+        } else if (masjid.address != null && !masjid.address.trim().isEmpty()) {
+            data.qrContent = "geo:0,0?q=" + Uri.encode(masjid.address.trim());
+        } else if (masjid.name != null && !masjid.name.trim().isEmpty()) {
+            data.qrContent = masjid.name.trim();
+        } else {
+            data.qrContent = "Salarm";
+        }
+
         data.isFront = true;
         data.footerTextFront = calculateDefaultFooter(masjid);
         data.footerTextBack = "";
@@ -247,6 +499,13 @@ public class MasjidCardRenderer {
             paint.setStrokeWidth(strokeWidth);
             paint.setStyle(fill ? Paint.Style.FILL : Paint.Style.STROKE);
             canvas.drawRect(left, top, right, bottom, paint);
+        }
+
+        @Override
+        public void drawBitmap(Bitmap bitmap, float left, float top, float right, float bottom) {
+            if (bitmap == null) return;
+            RectF dst = new RectF(left, top, right, bottom);
+            canvas.drawBitmap(bitmap, null, dst, paint);
         }
     }
 }

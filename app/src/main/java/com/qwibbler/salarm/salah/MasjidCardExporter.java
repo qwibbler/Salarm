@@ -7,10 +7,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
+import android.util.Base64;
 import android.widget.Toast;
 
 import com.qwibbler.salarm.base.AppExecutors;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Locale;
@@ -135,6 +137,20 @@ public class MasjidCardExporter {
                               : String.format(Locale.US, "fill=\"none\" stroke=\"%s\" stroke-width=\"%.2f\"", colorToHex(color), strokeWidth);
             sb.append(String.format(Locale.US, "<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" %s />\n",
                     left, top, right - left, bottom - top, style));
+        }
+
+        @Override
+        public void drawBitmap(Bitmap bitmap, float left, float top, float right, float bottom) {
+            if (bitmap == null) return;
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                String base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
+                sb.append(String.format(Locale.US, "<image x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" href=\"data:image/png;base64,%s\" />\n",
+                        left, top, right - left, bottom - top, base64));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         public String getSvgString() {
