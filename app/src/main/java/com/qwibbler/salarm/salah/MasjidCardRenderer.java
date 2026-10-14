@@ -95,34 +95,33 @@ public class MasjidCardRenderer {
         float availableWidth = titleRightBound - titleLeftBound;
         float centerX = (titleLeftBound + titleRightBound) / 2f;
 
-        boolean hasSubtitle = data.subtitle != null && !data.subtitle.trim().isEmpty();
+        float headerHeight = 110f; // Fixed header height (from Y = 30f to Y = 170f)
+        HeaderLayout headerLayout = measureAndFitHeader(
+            data.masjidName != null ? data.masjidName : "",
+            data.subtitle != null ? data.subtitle : "",
+            availableWidth,
+            headerHeight
+        );
 
-        float maxHeaderHeight = 110f;
-        TextLayout titleLayout = measureAndWrapText(data.masjidName != null ? data.masjidName : "",
-            availableWidth, hasSubtitle ? 65f : 90f, 2, 36f, 14f, true);
-
-        TextLayout subtitleLayout = null;
-        if (hasSubtitle) {
-            float remainingHeaderHeight = maxHeaderHeight - titleLayout.totalHeight - 4f;
-            subtitleLayout = measureAndWrapText(data.subtitle.trim(),
-                availableWidth, Math.max(30f, remainingHeaderHeight), 2, 20f, 12f, false);
+        float currentY;
+        if (headerLayout.totalHeight <= iconSize) {
+            currentY = headerTopY + (iconSize - headerLayout.totalHeight) / 2f;
+        } else {
+            currentY = headerTopY + (headerHeight - headerLayout.totalHeight) / 2f;
         }
 
-        float totalHeaderContentHeight = titleLayout.totalHeight + (hasSubtitle ? (4f + subtitleLayout.totalHeight) : 0f);
-        float currentY = headerTopY + Math.max(0f, (iconSize - totalHeaderContentHeight) / 2f);
-
-        for (String line : titleLayout.lines) {
-            currentY += titleLayout.fontSize;
-            target.drawText(line, centerX, currentY, titleLayout.fontSize, Paint.Align.CENTER, colorText, true, 0);
-            currentY += (titleLayout.lineSpacing - titleLayout.fontSize);
+        for (String line : headerLayout.titleLines) {
+            currentY += headerLayout.titleFontSize;
+            target.drawText(line, centerX, currentY, headerLayout.titleFontSize, Paint.Align.CENTER, colorText, true, 0);
+            currentY += (headerLayout.titleLineSpacing - headerLayout.titleFontSize);
         }
 
-        if (hasSubtitle && subtitleLayout != null) {
-            currentY += 4f;
-            for (String line : subtitleLayout.lines) {
-                currentY += subtitleLayout.fontSize;
-                target.drawText(line, centerX, currentY, subtitleLayout.fontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
-                currentY += (subtitleLayout.lineSpacing - subtitleLayout.fontSize);
+        if (headerLayout.subtitleLines != null && !headerLayout.subtitleLines.isEmpty()) {
+            currentY += 4f * (headerLayout.titleFontSize / 36f);
+            for (String line : headerLayout.subtitleLines) {
+                currentY += headerLayout.subtitleFontSize;
+                target.drawText(line, centerX, currentY, headerLayout.subtitleFontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
+                currentY += (headerLayout.subtitleLineSpacing - headerLayout.subtitleFontSize);
             }
         }
 
@@ -132,7 +131,7 @@ public class MasjidCardRenderer {
         }
 
         // Table Header
-        float tableHeaderY = Math.max(headerTopY + iconSize + 70f, currentY + 20f);
+        float tableHeaderY = 180f;
         float headerSize = 30f;
         float colX_fajr = 250f;
         float colX_asr = 350f;
@@ -177,16 +176,20 @@ public class MasjidCardRenderer {
         String footer = data.getFooterText();
         if (footer != null && !footer.trim().isEmpty()) {
             float footerMaxWidth = VIRTUAL_WIDTH - (padding * 2f);
-            TextLayout footerLayout = measureAndWrapFooter(footer.trim(), footerMaxWidth, 90f, 3, 24f, 12f);
+            float footerBottomY = VIRTUAL_HEIGHT - padding; // 970f
+            float footerTopY = Math.max(180f, currentY); // currentY after table
+            float maxFooterHeight = Math.max(30f, footerBottomY - footerTopY);
 
-            float footerBottomY = VIRTUAL_HEIGHT - padding;
-            float footerY = footerBottomY - footerLayout.totalHeight + footerLayout.fontSize;
+            TextLayout footerLayout = measureAndFitFooter(footer.trim(), footerMaxWidth, maxFooterHeight);
+
+            float footerY = footerTopY + (maxFooterHeight - footerLayout.totalHeight) / 2f;
 
             for (String line : footerLayout.lines) {
+                footerY += footerLayout.fontSize;
                 if (!line.isEmpty()) {
                     target.drawText(line, VIRTUAL_WIDTH / 2f, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
                 }
-                footerY += footerLayout.lineSpacing;
+                footerY += (footerLayout.lineSpacing - footerLayout.fontSize);
             }
         }
     }
@@ -240,49 +243,81 @@ public class MasjidCardRenderer {
         }
     }
 
-    private TextLayout measureAndWrapText(String text, float maxWidth, float maxHeight, int maxLines,
-                                          float initialSize, float minSize, boolean bold) {
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, bold ? Typeface.BOLD : Typeface.NORMAL));
+    private HeaderLayout measureAndFitHeader(String titleText, String subtitleText, float maxWidth, float maxHeight) {
+        boolean hasSubtitle = subtitleText != null && !subtitleText.trim().isEmpty();
 
-        float currentSize = initialSize;
-        while (currentSize >= minSize) {
-            paint.setTextSize(currentSize);
-            float lineSpacing = currentSize * 1.15f;
-            List<String> lines = wrapText(text, paint, maxWidth);
+        Paint titlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        titlePaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
 
-            float totalHeight = lines.size() * lineSpacing;
-            if (lines.size() <= maxLines && totalHeight <= maxHeight) {
-                return new TextLayout(lines, currentSize, lineSpacing, totalHeight);
+        Paint subPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        subPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
+
+        float initialTitleSize = 36f;
+        float initialSubSize = 20f;
+        float minTitleSize = 6f;
+
+        for (float tSize = initialTitleSize; tSize >= minTitleSize; tSize -= 0.5f) {
+            float scale = tSize / initialTitleSize;
+            float sSize = hasSubtitle ? Math.max(5f, initialSubSize * scale) : 0f;
+
+            titlePaint.setTextSize(tSize);
+            float titleLineSpacing = tSize * 1.15f;
+            List<String> tLines = wrapText(titleText, titlePaint, maxWidth);
+            float titleHeight = tLines.size() * titleLineSpacing;
+
+            List<String> sLines = new ArrayList<>();
+            float subLineSpacing = 0f;
+            float subHeight = 0f;
+            float gap = 0f;
+
+            if (hasSubtitle) {
+                subPaint.setTextSize(sSize);
+                subLineSpacing = sSize * 1.15f;
+                sLines = wrapText(subtitleText.trim(), subPaint, maxWidth);
+                subHeight = sLines.size() * subLineSpacing;
+                gap = 4f * scale;
             }
-            currentSize -= 1.0f;
+
+            float totalHeight = titleHeight + gap + subHeight;
+            if (totalHeight <= maxHeight) {
+                return new HeaderLayout(tLines, tSize, titleLineSpacing, sLines, sSize, subLineSpacing, totalHeight);
+            }
         }
 
-        paint.setTextSize(minSize);
-        float lineSpacing = minSize * 1.15f;
-        List<String> lines = wrapText(text, paint, maxWidth);
+        float tSize = minTitleSize;
+        float scale = tSize / initialTitleSize;
+        float sSize = hasSubtitle ? Math.max(5f, initialSubSize * scale) : 0f;
 
-        if (lines.size() > maxLines) {
-            List<String> truncated = new ArrayList<>(lines.subList(0, maxLines));
-            String lastLine = truncated.get(maxLines - 1);
-            while (!lastLine.isEmpty() && paint.measureText(lastLine + "...") > maxWidth) {
-                lastLine = lastLine.substring(0, lastLine.length() - 1);
-            }
-            truncated.set(maxLines - 1, lastLine + "...");
-            lines = truncated;
+        titlePaint.setTextSize(tSize);
+        float titleLineSpacing = tSize * 1.15f;
+        List<String> tLines = wrapText(titleText, titlePaint, maxWidth);
+        float titleHeight = tLines.size() * titleLineSpacing;
+
+        List<String> sLines = new ArrayList<>();
+        float subLineSpacing = 0f;
+        float subHeight = 0f;
+        float gap = 0f;
+
+        if (hasSubtitle) {
+            subPaint.setTextSize(sSize);
+            subLineSpacing = sSize * 1.15f;
+            sLines = wrapText(subtitleText.trim(), subPaint, maxWidth);
+            subHeight = sLines.size() * subLineSpacing;
+            gap = 4f * scale;
         }
 
-        float totalHeight = lines.size() * lineSpacing;
-        return new TextLayout(lines, minSize, lineSpacing, totalHeight);
+        float totalHeight = titleHeight + gap + subHeight;
+        return new HeaderLayout(tLines, tSize, titleLineSpacing, sLines, sSize, subLineSpacing, totalHeight);
     }
 
-    private TextLayout measureAndWrapFooter(String footer, float maxWidth, float maxHeight, int maxLines,
-                                            float initialSize, float minSize) {
+    private TextLayout measureAndFitFooter(String footer, float maxWidth, float maxHeight) {
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
 
-        float currentSize = initialSize;
-        while (currentSize >= minSize) {
+        float initialSize = 24f;
+        float minSize = 6f;
+
+        for (float currentSize = initialSize; currentSize >= minSize; currentSize -= 0.5f) {
             paint.setTextSize(currentSize);
             float lineSpacing = currentSize * 1.2f;
 
@@ -297,10 +332,9 @@ public class MasjidCardRenderer {
             }
 
             float totalHeight = allWrappedLines.size() * lineSpacing;
-            if (allWrappedLines.size() <= maxLines && totalHeight <= maxHeight) {
+            if (totalHeight <= maxHeight) {
                 return new TextLayout(allWrappedLines, currentSize, lineSpacing, totalHeight);
             }
-            currentSize -= 1.0f;
         }
 
         paint.setTextSize(minSize);
@@ -314,17 +348,6 @@ public class MasjidCardRenderer {
                 allWrappedLines.addAll(wrapText(para.trim(), paint, maxWidth));
             }
         }
-
-        if (allWrappedLines.size() > maxLines) {
-            List<String> truncated = new ArrayList<>(allWrappedLines.subList(0, maxLines));
-            String lastLine = truncated.get(maxLines - 1);
-            while (!lastLine.isEmpty() && paint.measureText(lastLine + "...") > maxWidth) {
-                lastLine = lastLine.substring(0, lastLine.length() - 1);
-            }
-            truncated.set(maxLines - 1, lastLine + "...");
-            allWrappedLines = truncated;
-        }
-
         float totalHeight = allWrappedLines.size() * lineSpacing;
         return new TextLayout(allWrappedLines, minSize, lineSpacing, totalHeight);
     }
@@ -497,6 +520,28 @@ public class MasjidCardRenderer {
         void drawRect(float left, float top, float right, float bottom, float strokeWidth, int color, boolean fill);
 
         void drawBitmap(Bitmap bitmap, float left, float top, float right, float bottom);
+    }
+
+    private static class HeaderLayout {
+        final List<String> titleLines;
+        final float titleFontSize;
+        final float titleLineSpacing;
+        final List<String> subtitleLines;
+        final float subtitleFontSize;
+        final float subtitleLineSpacing;
+        final float totalHeight;
+
+        HeaderLayout(List<String> titleLines, float titleFontSize, float titleLineSpacing,
+                     List<String> subtitleLines, float subtitleFontSize, float subtitleLineSpacing,
+                     float totalHeight) {
+            this.titleLines = titleLines;
+            this.titleFontSize = titleFontSize;
+            this.titleLineSpacing = titleLineSpacing;
+            this.subtitleLines = subtitleLines;
+            this.subtitleFontSize = subtitleFontSize;
+            this.subtitleLineSpacing = subtitleLineSpacing;
+            this.totalHeight = totalHeight;
+        }
     }
 
     private static class TextLayout {
