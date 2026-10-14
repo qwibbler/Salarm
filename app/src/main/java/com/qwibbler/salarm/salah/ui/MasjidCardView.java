@@ -15,6 +15,7 @@ public class MasjidCardView extends View {
 
     private MasjidCardData data;
     private MasjidCardRenderer renderer;
+    private MasjidCardRenderer.CanvasDrawTarget drawTarget;
 
     public MasjidCardView(Context context) {
         super(context);
@@ -33,6 +34,7 @@ public class MasjidCardView extends View {
 
     private void init() {
         renderer = new MasjidCardRenderer(getContext());
+        drawTarget = new MasjidCardRenderer.CanvasDrawTarget();
     }
 
     public void setData(MasjidCardData data) {
@@ -77,8 +79,10 @@ public class MasjidCardView extends View {
         if (data != null) {
             float vWidth = renderer.getVirtualWidth(data);
             float vHeight = renderer.getVirtualHeight(data);
-            MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, getWidth(), getHeight(), vWidth, vHeight);
-            renderer.render(target, data);
+            canvas.save();
+            drawTarget.setCanvas(canvas, getWidth(), getHeight(), vWidth, vHeight);
+            renderer.render(drawTarget, data);
+            canvas.restore();
         }
     }
 }

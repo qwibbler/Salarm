@@ -93,24 +93,36 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
                     editSubtitle.setText(cardData.subtitle);
                     editFooter.setText(cardData.getFooterText());
                     toggleFormat.check(R.id.btn_format_card);
-                    updateFooterLabelAndVisibility();
+                    updateFloatingButtonAndFooterLabel();
                     cardPreview.setData(cardData);
                 });
             }
         });
     }
 
-    private void updateFooterLabelAndVisibility() {
+    private void updateFloatingButtonAndFooterLabel() {
         if (cardData == null) return;
+        btnFlipCard.setVisibility(View.VISIBLE);
         if (cardData.format == MasjidCardData.PaperFormat.CARD) {
-            btnFlipCard.setVisibility(View.VISIBLE);
+            btnFlipCard.setImageResource(R.drawable.ic_turn);
+            btnFlipCard.setContentDescription(getString(R.string.masjid_card_flip));
+            btnFlipCard.setRotation(0f);
             if (cardData.isFront) {
+                btnFlipCard.setScaleY(-1f);
                 inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label_front));
             } else {
+                btnFlipCard.setScaleY(1f);
                 inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label_back));
             }
         } else {
-            btnFlipCard.setVisibility(View.GONE);
+            btnFlipCard.setImageResource(R.drawable.ic_orientation);
+            btnFlipCard.setContentDescription(getString(R.string.masjid_card_orientation_toggle));
+            btnFlipCard.setScaleX(1f);
+            if (cardData.format == MasjidCardData.PaperFormat.A4_PORTRAIT) {
+                btnFlipCard.setRotation(-90f);
+            } else {
+                btnFlipCard.setRotation(0f);
+            }
             inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label));
         }
     }
@@ -154,16 +166,22 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
         });
 
         btnFlipCard.setOnClickListener(v -> {
-            if (masjid != null && cardData != null && cardData.format == MasjidCardData.PaperFormat.CARD) {
+            if (masjid == null || cardData == null) return;
+            if (cardData.format == MasjidCardData.PaperFormat.CARD) {
                 boolean newFront = !cardData.isFront;
                 AppExecutors.getDiskIO().execute(() -> {
                     renderer.populatePrayerTimes(cardData, masjid, newFront);
                     AppExecutors.getMainThread().post(() -> {
                         editFooter.setText(cardData.getFooterText());
-                        updateFooterLabelAndVisibility();
+                        updateFloatingButtonAndFooterLabel();
                         cardPreview.setData(cardData);
                     });
                 });
+            } else {
+                boolean isCurrentlyPortrait = (cardData.format == MasjidCardData.PaperFormat.A4_PORTRAIT);
+                cardData.format = isCurrentlyPortrait ? MasjidCardData.PaperFormat.A4_LANDSCAPE : MasjidCardData.PaperFormat.A4_PORTRAIT;
+                updateFloatingButtonAndFooterLabel();
+                cardPreview.setData(cardData);
             }
         });
 
@@ -175,27 +193,17 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
                         renderer.populatePrayerTimes(cardData, masjid, cardData.isFront);
                         AppExecutors.getMainThread().post(() -> {
                             editFooter.setText(cardData.getFooterText());
-                            updateFooterLabelAndVisibility();
+                            updateFloatingButtonAndFooterLabel();
                             cardPreview.setData(cardData);
                         });
                     });
-                } else if (checkedId == R.id.btn_format_a4_portrait) {
+                } else if (checkedId == R.id.btn_format_a4) {
                     cardData.format = MasjidCardData.PaperFormat.A4_PORTRAIT;
                     AppExecutors.getDiskIO().execute(() -> {
                         renderer.populatePrayerTimes(cardData, masjid);
                         AppExecutors.getMainThread().post(() -> {
                             editFooter.setText(cardData.getFooterText());
-                            updateFooterLabelAndVisibility();
-                            cardPreview.setData(cardData);
-                        });
-                    });
-                } else if (checkedId == R.id.btn_format_a4_landscape) {
-                    cardData.format = MasjidCardData.PaperFormat.A4_LANDSCAPE;
-                    AppExecutors.getDiskIO().execute(() -> {
-                        renderer.populatePrayerTimes(cardData, masjid);
-                        AppExecutors.getMainThread().post(() -> {
-                            editFooter.setText(cardData.getFooterText());
-                            updateFooterLabelAndVisibility();
+                            updateFloatingButtonAndFooterLabel();
                             cardPreview.setData(cardData);
                         });
                     });

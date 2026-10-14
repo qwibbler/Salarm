@@ -1899,8 +1899,8 @@
     <string name="masjid_card_footer_label_back">Footer Text (Back)</string>
     <string name="masjid_card_format_label">Format</string>
     <string name="masjid_card_format_card">Card</string>
-    <string name="masjid_card_format_a4_portrait">A4 (Portrait)</string>
-    <string name="masjid_card_format_a4_landscape">A4 (Landscape)</string>
+    <string name="masjid_card_format_a4">A4</string>
     <string name="masjid_card_export_label">Export</string>
     <string name="masjid_card_flip">Flip Card Side</string>
+    <string name="masjid_card_orientation_toggle">Toggle Orientation</string>
 </resources>

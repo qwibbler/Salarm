@@ -736,10 +736,10 @@ public class MasjidCardRenderer {
                             sb.append(c);
                         }
                     }
-                    if (sb.length() > 0) currentLine.append(sb.toString());
+                    if (sb.length() > 0) currentLine.append(sb);
                 }
             } else {
-                String candidate = currentLine.toString() + " " + word;
+                String candidate = currentLine + " " + word;
                 if (paint.measureText(candidate) <= maxWidth) {
                     currentLine.append(" ").append(word);
                 } else {
@@ -758,7 +758,7 @@ public class MasjidCardRenderer {
                                 sb.append(c);
                             }
                         }
-                        if (sb.length() > 0) currentLine.append(sb.toString());
+                        if (sb.length() > 0) currentLine.append(sb);
                     }
                 }
             }
@@ -931,13 +931,22 @@ public class MasjidCardRenderer {
     }
 
     public static class CanvasDrawTarget implements DrawTarget {
-        private final Canvas canvas;
+        private Canvas canvas;
         private final Paint paint;
+        private final RectF dstRect = new RectF();
 
-        public CanvasDrawTarget(Canvas canvas, int width, int height, float virtualWidth, float virtualHeight) {
-            this.canvas = canvas;
+        public CanvasDrawTarget() {
             this.paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             this.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
+        }
+
+        public CanvasDrawTarget(Canvas canvas, int width, int height, float virtualWidth, float virtualHeight) {
+            this();
+            setCanvas(canvas, width, height, virtualWidth, virtualHeight);
+        }
+
+        public void setCanvas(Canvas canvas, int width, int height, float virtualWidth, float virtualHeight) {
+            this.canvas = canvas;
             float scale = Math.min(width / virtualWidth, height / virtualHeight);
             canvas.scale(scale, scale);
         }
@@ -980,8 +989,8 @@ public class MasjidCardRenderer {
         @Override
         public void drawBitmap(Bitmap bitmap, float left, float top, float right, float bottom) {
             if (bitmap == null) return;
-            RectF dst = new RectF(left, top, right, bottom);
-            canvas.drawBitmap(bitmap, null, dst, paint);
+            dstRect.set(left, top, right, bottom);
+            canvas.drawBitmap(bitmap, null, dstRect, paint);
         }
     }
 }
