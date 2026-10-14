@@ -97,29 +97,32 @@ public class MasjidCardRenderer {
 
         boolean hasSubtitle = data.subtitle != null && !data.subtitle.trim().isEmpty();
 
-        float maxTitleHeight = hasSubtitle ? 85f : 110f;
+        float maxHeaderHeight = 110f;
         TextLayout titleLayout = measureAndWrapText(data.masjidName != null ? data.masjidName : "",
-            availableWidth, maxTitleHeight, 3, 42f, 16f, true);
+            availableWidth, hasSubtitle ? 65f : 90f, 2, 36f, 14f, true);
 
         TextLayout subtitleLayout = null;
         if (hasSubtitle) {
+            float remainingHeaderHeight = maxHeaderHeight - titleLayout.totalHeight - 4f;
             subtitleLayout = measureAndWrapText(data.subtitle.trim(),
-                availableWidth, 40f, 2, 22f, 14f, false);
+                availableWidth, Math.max(30f, remainingHeaderHeight), 2, 20f, 12f, false);
         }
 
-        float totalHeaderContentHeight = titleLayout.totalHeight + (hasSubtitle ? (6f + subtitleLayout.totalHeight) : 0f);
-        float currentY = headerTopY + Math.max(0, (iconSize - totalHeaderContentHeight) / 2f) + titleLayout.fontSize;
+        float totalHeaderContentHeight = titleLayout.totalHeight + (hasSubtitle ? (4f + subtitleLayout.totalHeight) : 0f);
+        float currentY = headerTopY + Math.max(0f, (iconSize - totalHeaderContentHeight) / 2f);
 
         for (String line : titleLayout.lines) {
+            currentY += titleLayout.fontSize;
             target.drawText(line, centerX, currentY, titleLayout.fontSize, Paint.Align.CENTER, colorText, true, 0);
-            currentY += titleLayout.lineSpacing;
+            currentY += (titleLayout.lineSpacing - titleLayout.fontSize);
         }
 
         if (hasSubtitle && subtitleLayout != null) {
-            currentY += 2f;
+            currentY += 4f;
             for (String line : subtitleLayout.lines) {
+                currentY += subtitleLayout.fontSize;
                 target.drawText(line, centerX, currentY, subtitleLayout.fontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
-                currentY += subtitleLayout.lineSpacing;
+                currentY += (subtitleLayout.lineSpacing - subtitleLayout.fontSize);
             }
         }
 
@@ -128,8 +131,8 @@ public class MasjidCardRenderer {
             maxIntervals = Math.max(maxIntervals, month.rows.size());
         }
 
-        // Table Header (Dynamic Y to avoid overlap with header content or icon)
-        float tableHeaderY = Math.max(150f, Math.max(iconBottom + 15f, currentY + 12f));
+        // Table Header
+        float tableHeaderY = Math.max(headerTopY + iconSize + 70f, currentY + 20f);
         float headerSize = 30f;
         float colX_fajr = 250f;
         float colX_asr = 350f;
@@ -145,7 +148,7 @@ public class MasjidCardRenderer {
         target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
         currentY += (maxIntervals > 2 ? 30f : 40f);
 
-        // 2. Table Area (Middle ~700px)
+        // Table Area
         float monthNameX = 65f;
         float dayX = 105f;
         float rowHeight = maxIntervals > 2 ? 33f : 44f;
@@ -155,7 +158,6 @@ public class MasjidCardRenderer {
             float monthStartY = currentY - rowHeight + 10f;
             float monthEndY = monthStartY + month.rows.size() * rowHeight;
 
-            // Draw month name rotated
             target.drawText(month.monthName, monthNameX, (monthStartY + monthEndY) / 2f, textSize, Paint.Align.CENTER, colorText, true, -90);
 
             for (MasjidCardData.IntervalRow row : month.rows) {
@@ -167,18 +169,19 @@ public class MasjidCardRenderer {
                 currentY += rowHeight;
             }
 
-            // Separator between months
             target.drawLine(padding, currentY - (rowHeight / 2f), VIRTUAL_WIDTH - padding, currentY - (rowHeight / 2f), 1, colorLine);
             currentY += (rowHeight / 2f);
         }
 
-        // 3. Footer Area (Bottom ~120px)
+        // Footer Area
         String footer = data.getFooterText();
         if (footer != null && !footer.trim().isEmpty()) {
             float footerMaxWidth = VIRTUAL_WIDTH - (padding * 2f);
-            TextLayout footerLayout = measureAndWrapFooter(footer.trim(), footerMaxWidth, 85f, 4, 28f, 14f);
+            TextLayout footerLayout = measureAndWrapFooter(footer.trim(), footerMaxWidth, 90f, 3, 24f, 12f);
 
-            float footerY = VIRTUAL_HEIGHT - padding - footerLayout.totalHeight + footerLayout.fontSize;
+            float footerBottomY = VIRTUAL_HEIGHT - padding;
+            float footerY = footerBottomY - footerLayout.totalHeight + footerLayout.fontSize;
+
             for (String line : footerLayout.lines) {
                 if (!line.isEmpty()) {
                     target.drawText(line, VIRTUAL_WIDTH / 2f, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
