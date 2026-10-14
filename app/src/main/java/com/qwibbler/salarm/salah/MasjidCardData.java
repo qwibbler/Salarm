@@ -6,6 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MasjidCardData {
+
+    public enum PaperFormat {
+        CARD,
+        A4_PORTRAIT,
+        A4_LANDSCAPE
+    }
+
     public String masjidName;
     public String subtitle;
     public String iconUri;
@@ -13,11 +20,15 @@ public class MasjidCardData {
     public String qrContent;
     public String footerTextFront;
     public String footerTextBack;
-    public boolean isFront;
+    public boolean isFront = true;
+    public PaperFormat format = PaperFormat.CARD;
     public List<MonthGroup> months = new ArrayList<>();
 
     public String getFooterText() {
-        return isFront ? footerTextFront : footerTextBack;
+        if (format == PaperFormat.CARD) {
+            return isFront ? footerTextFront : footerTextBack;
+        }
+        return footerTextFront != null ? footerTextFront : "";
     }
 
     public static class MonthGroup {

@@ -1887,12 +1887,20 @@
     <string name="salah_rule_no_earlier_min">, no earlier than %1$s min time of %2$s</string>
     <string name="view_timesheet">View Timesheet</string>
     <string name="masjid_card_editor_title">Masjid Card Editor</string>
-    <string name="masjid_card_export_png">Export PNG</string>
-    <string name="masjid_card_export_pdf">Export PDF</string>
-    <string name="masjid_card_export_svg">Export SVG</string>
+    <string name="masjid_card_export_png">PNG</string>
+    <string name="masjid_card_export_pdf">PDF</string>
+    <string name="masjid_card_export_svg">SVG</string>
     <string name="masjid_card_front">Front</string>
     <string name="masjid_card_back">Back</string>
     <string name="masjid_card_name_label">Masjid Name</string>
-    <string name="masjid_card_subtitle_label">Subtitle (Optional)</string>
-    <string name="masjid_card_footer_label">Footer Text (Multi-line)</string>
+    <string name="masjid_card_subtitle_label">Subtitle</string>
+    <string name="masjid_card_footer_label">Footer Text</string>
+    <string name="masjid_card_footer_label_front">Footer Text (Front)</string>
+    <string name="masjid_card_footer_label_back">Footer Text (Back)</string>
+    <string name="masjid_card_format_label">Format</string>
+    <string name="masjid_card_format_card">Card</string>
+    <string name="masjid_card_format_a4_portrait">A4 (Portrait)</string>
+    <string name="masjid_card_format_a4_landscape">A4 (Landscape)</string>
+    <string name="masjid_card_export_label">Export</string>
+    <string name="masjid_card_flip">Flip Card Side</string>
 </resources>

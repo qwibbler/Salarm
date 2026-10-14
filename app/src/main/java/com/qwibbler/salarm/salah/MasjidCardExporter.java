@@ -28,13 +28,17 @@ public class MasjidCardExporter {
     }
 
     public void exportPng(MasjidCardData data, Uri uri) {
-        int width = 1200; // High res
-        int height = (int) (width * (MasjidCardRenderer.VIRTUAL_HEIGHT / MasjidCardRenderer.VIRTUAL_WIDTH));
+        float vWidth = renderer.getVirtualWidth(data);
+        float vHeight = renderer.getVirtualHeight(data);
+
+        int width = (data.format == MasjidCardData.PaperFormat.A4_LANDSCAPE) ? 1600 : 1200;
+        int height = (int) (width * (vHeight / vWidth));
+
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.WHITE);
 
-        MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, width, height);
+        MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, width, height, vWidth, vHeight);
         renderer.render(target, data);
 
         try (OutputStream out = context.getContentResolver().openOutputStream(uri)) {
@@ -52,22 +56,34 @@ public class MasjidCardExporter {
 
     public void exportPdf(Masjid masjid, MasjidCardData data, Uri uri) {
         PdfDocument document = new PdfDocument();
+        float vWidth = renderer.getVirtualWidth(data);
+        float vHeight = renderer.getVirtualHeight(data);
 
-        // Front
-        renderer.populatePrayerTimes(data, masjid, true);
-        PdfDocument.PageInfo frontInfo = new PdfDocument.PageInfo.Builder((int) MasjidCardRenderer.VIRTUAL_WIDTH, (int) MasjidCardRenderer.VIRTUAL_HEIGHT, 1).create();
-        PdfDocument.Page frontPage = document.startPage(frontInfo);
-        MasjidCardRenderer.CanvasDrawTarget frontTarget = new MasjidCardRenderer.CanvasDrawTarget(frontPage.getCanvas(), (int) MasjidCardRenderer.VIRTUAL_WIDTH, (int) MasjidCardRenderer.VIRTUAL_HEIGHT);
-        renderer.render(frontTarget, data);
-        document.finishPage(frontPage);
+        if (data.format == MasjidCardData.PaperFormat.CARD) {
+            // Front (Page 1)
+            renderer.populatePrayerTimes(data, masjid, true);
+            PdfDocument.PageInfo frontInfo = new PdfDocument.PageInfo.Builder((int) vWidth, (int) vHeight, 1).create();
+            PdfDocument.Page frontPage = document.startPage(frontInfo);
+            MasjidCardRenderer.CanvasDrawTarget frontTarget = new MasjidCardRenderer.CanvasDrawTarget(frontPage.getCanvas(), (int) vWidth, (int) vHeight, vWidth, vHeight);
+            renderer.render(frontTarget, data);
+            document.finishPage(frontPage);
 
-        // Back
-        renderer.populatePrayerTimes(data, masjid, false);
-        PdfDocument.PageInfo backInfo = new PdfDocument.PageInfo.Builder((int) MasjidCardRenderer.VIRTUAL_WIDTH, (int) MasjidCardRenderer.VIRTUAL_HEIGHT, 2).create();
-        PdfDocument.Page backPage = document.startPage(backInfo);
-        MasjidCardRenderer.CanvasDrawTarget backTarget = new MasjidCardRenderer.CanvasDrawTarget(backPage.getCanvas(), (int) MasjidCardRenderer.VIRTUAL_WIDTH, (int) MasjidCardRenderer.VIRTUAL_HEIGHT);
-        renderer.render(backTarget, data);
-        document.finishPage(backPage);
+            // Back (Page 2)
+            renderer.populatePrayerTimes(data, masjid, false);
+            PdfDocument.PageInfo backInfo = new PdfDocument.PageInfo.Builder((int) vWidth, (int) vHeight, 2).create();
+            PdfDocument.Page backPage = document.startPage(backInfo);
+            MasjidCardRenderer.CanvasDrawTarget backTarget = new MasjidCardRenderer.CanvasDrawTarget(backPage.getCanvas(), (int) vWidth, (int) vHeight, vWidth, vHeight);
+            renderer.render(backTarget, data);
+            document.finishPage(backPage);
+        } else {
+            // Single page A4
+            renderer.populatePrayerTimes(data, masjid);
+            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder((int) vWidth, (int) vHeight, 1).create();
+            PdfDocument.Page page = document.startPage(pageInfo);
+            MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(page.getCanvas(), (int) vWidth, (int) vHeight, vWidth, vHeight);
+            renderer.render(target, data);
+            document.finishPage(page);
+        }
 
         try (OutputStream out = context.getContentResolver().openOutputStream(uri)) {
             if (out != null) {
@@ -85,7 +101,9 @@ public class MasjidCardExporter {
     }
 
     public void exportSvg(MasjidCardData data, Uri uri) {
-        SvgDrawTarget target = new SvgDrawTarget();
+        float vWidth = renderer.getVirtualWidth(data);
+        float vHeight = renderer.getVirtualHeight(data);
+        SvgDrawTarget target = new SvgDrawTarget(vWidth, vHeight);
         renderer.render(target, data);
         String svg = target.getSvgString();
 
@@ -105,9 +123,9 @@ public class MasjidCardExporter {
     private static class SvgDrawTarget implements MasjidCardRenderer.DrawTarget {
         private final StringBuilder sb = new StringBuilder();
 
-        public SvgDrawTarget() {
+        public SvgDrawTarget(float virtualWidth, float virtualHeight) {
             sb.append(String.format(Locale.US, "<svg width=\"%.2f\" height=\"%.2f\" xmlns=\"http://www.w3.org/2000/svg\">\n",
-                    MasjidCardRenderer.VIRTUAL_WIDTH, MasjidCardRenderer.VIRTUAL_HEIGHT));
+                    virtualWidth, virtualHeight));
             sb.append("<rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n");
         }
 

@@ -34,10 +34,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionNext"
-                    android:inputType="textCapWords"
+                    android:inputType="textMultiLine|textCapWords"
                     android:maxLines="2"
-                    android:minLines="1"
-                    android:scrollHorizontally="true" />
+                    android:minLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -60,6 +59,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_layout_footer"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,6 +85,17 @@
             android:padding="16dp"
             app:layout_flexGrow="1">
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_flip_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="0dp"
+                android:contentDescription="@string/masjid_card_flip"
+                app:elevation="6dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_turn" />
+
             <com.qwibbler.salarm.salah.ui.MasjidCardView
                 android:id="@+id/card_preview"
                 android:layout_width="match_parent"
@@ -95,7 +106,7 @@
 
         </FrameLayout>
 
-        <!-- Editor Section -->
+        <!-- Options / Export Section -->
         <LinearLayout
             android:layout_width="320dp"
             android:layout_height="wrap_content"
@@ -103,36 +114,58 @@
             android:padding="8dp"
             app:layout_flexGrow="1">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/masjid_card_format_label"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+
             <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggle_side"
+                android:id="@+id/toggle_format"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 app:selectionRequired="true"
                 app:singleSelection="true">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_front"
+                    android:id="@+id/btn_format_card"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/masjid_card_front" />
+                    android:text="@string/masjid_card_format_card" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_back"
+                    android:id="@+id/btn_format_a4_portrait"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/masjid_card_back" />
+                    android:text="@string/masjid_card_format_a4_portrait" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_format_a4_landscape"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/masjid_card_format_a4_landscape" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/masjid_card_export_label"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:orientation="horizontal"
-                android:padding="8dp">
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_export_svg"

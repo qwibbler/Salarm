@@ -37,6 +37,7 @@ public class MasjidCardView extends View {
 
     public void setData(MasjidCardData data) {
         this.data = data;
+        requestLayout();
         invalidate();
     }
 
@@ -47,7 +48,9 @@ public class MasjidCardView extends View {
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        float targetRatio = MasjidCardRenderer.VIRTUAL_WIDTH / MasjidCardRenderer.VIRTUAL_HEIGHT;
+        float vWidth = renderer.getVirtualWidth(data);
+        float vHeight = renderer.getVirtualHeight(data);
+        float targetRatio = vWidth / vHeight;
 
         int width, height;
 
@@ -61,7 +64,6 @@ public class MasjidCardView extends View {
             height = heightSize;
             width = (int) (height * targetRatio);
         } else {
-            // If neither is exact, try to fit in widthSize if provided, else default
             width = widthSize > 0 ? widthSize : 600;
             height = (int) (width / targetRatio);
         }
@@ -73,7 +75,9 @@ public class MasjidCardView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         if (data != null) {
-            MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, getWidth(), getHeight());
+            float vWidth = renderer.getVirtualWidth(data);
+            float vHeight = renderer.getVirtualHeight(data);
+            MasjidCardRenderer.CanvasDrawTarget target = new MasjidCardRenderer.CanvasDrawTarget(canvas, getWidth(), getHeight(), vWidth, vHeight);
             renderer.render(target, data);
         }
     }

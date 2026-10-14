@@ -25,12 +25,34 @@ import java.util.Locale;
 
 public class MasjidCardRenderer {
 
-    public static final float VIRTUAL_HEIGHT = 1000f;
-    public static final float VIRTUAL_WIDTH = 630.6f; // CR80 portrait aspect ratio
+    public static final float CARD_HEIGHT = 1000f;
+    public static final float A4_HEIGHT = 1414.2f;
+    public static final float CARD_WIDTH = 630.6f; // CR80 portrait aspect ratio
+    public static final float A4_WIDTH = 1000f;
     private final Context context;
 
     public MasjidCardRenderer(Context context) {
         this.context = context;
+    }
+
+    public float getVirtualWidth(MasjidCardData data) {
+        if (data == null || data.format == MasjidCardData.PaperFormat.CARD) {
+            return CARD_WIDTH;
+        } else if (data.format == MasjidCardData.PaperFormat.A4_PORTRAIT) {
+            return A4_WIDTH;
+        } else {
+            return A4_HEIGHT;
+        }
+    }
+
+    public float getVirtualHeight(MasjidCardData data) {
+        if (data == null || data.format == MasjidCardData.PaperFormat.CARD) {
+            return CARD_HEIGHT;
+        } else if (data.format == MasjidCardData.PaperFormat.A4_PORTRAIT) {
+            return A4_HEIGHT;
+        } else {
+            return A4_WIDTH;
+        }
     }
 
     private static Bitmap getBitmapFromDrawable(Context context, int drawableId, int sizePx) {
@@ -49,6 +71,17 @@ public class MasjidCardRenderer {
     }
 
     public void render(DrawTarget target, MasjidCardData data) {
+        if (data == null) return;
+        if (data.format == MasjidCardData.PaperFormat.A4_PORTRAIT) {
+            renderA4Portrait(target, data);
+        } else if (data.format == MasjidCardData.PaperFormat.A4_LANDSCAPE) {
+            renderA4Landscape(target, data);
+        } else {
+            renderCard(target, data);
+        }
+    }
+
+    private void renderCard(DrawTarget target, MasjidCardData data) {
         // Colors - Black and White
         int colorText = Color.BLACK;
         int colorSecondaryText = 0xFF555555; // Dark gray
@@ -57,10 +90,10 @@ public class MasjidCardRenderer {
         int colorBackground = Color.WHITE;
 
         // Draw background
-        target.drawRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 0, colorBackground, true);
+        target.drawRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 0, colorBackground, true);
 
         // Draw outer border
-        target.drawRect(5, 5, VIRTUAL_WIDTH - 5, VIRTUAL_HEIGHT - 5, 2, colorBorder, false);
+        target.drawRect(5, 5, CARD_WIDTH - 5, CARD_HEIGHT - 5, 2, colorBorder, false);
 
         float padding = 30f;
         float headerTopY = padding;
@@ -79,7 +112,7 @@ public class MasjidCardRenderer {
 
         // 2. QR Code (Top Right)
         float qrSize = 70f;
-        float qrLeft = VIRTUAL_WIDTH - padding - qrSize;
+        float qrLeft = CARD_WIDTH - padding - qrSize;
         float qrTop = headerTopY;
 
         String qrText = (data.qrContent != null && !data.qrContent.trim().isEmpty())
@@ -144,7 +177,7 @@ public class MasjidCardRenderer {
         target.drawText("Isha", colX_isha, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
 
         currentY = tableHeaderY + 15f;
-        target.drawLine(padding, currentY, VIRTUAL_WIDTH - padding, currentY, 1.5f, colorLine);
+        target.drawLine(padding, currentY, CARD_WIDTH - padding, currentY, 1.5f, colorLine);
         currentY += (maxIntervals > 2 ? 30f : 40f);
 
         // Table Area
@@ -168,15 +201,15 @@ public class MasjidCardRenderer {
                 currentY += rowHeight;
             }
 
-            target.drawLine(padding, currentY - (rowHeight / 2f), VIRTUAL_WIDTH - padding, currentY - (rowHeight / 2f), 1, colorLine);
+            target.drawLine(padding, currentY - (rowHeight / 2f), CARD_WIDTH - padding, currentY - (rowHeight / 2f), 1, colorLine);
             currentY += (rowHeight / 2f);
         }
 
         // Footer Area
         String footer = data.getFooterText();
         if (footer != null && !footer.trim().isEmpty()) {
-            float footerMaxWidth = VIRTUAL_WIDTH - (padding * 2f);
-            float footerBottomY = VIRTUAL_HEIGHT - padding; // 970f
+            float footerMaxWidth = CARD_WIDTH - (padding * 2f);
+            float footerBottomY = CARD_HEIGHT - padding; // 970f
             float footerTopY = Math.max(180f, currentY); // currentY after table
             float maxFooterHeight = Math.max(30f, footerBottomY - footerTopY);
 
@@ -187,7 +220,333 @@ public class MasjidCardRenderer {
             for (String line : footerLayout.lines) {
                 footerY += footerLayout.fontSize;
                 if (!line.isEmpty()) {
-                    target.drawText(line, VIRTUAL_WIDTH / 2f, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
+                    target.drawText(line, CARD_WIDTH / 2f, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
+                }
+                footerY += (footerLayout.lineSpacing - footerLayout.fontSize);
+            }
+        }
+    }
+
+    private void renderA4Portrait(DrawTarget target, MasjidCardData data) {
+        float width = 1000f;
+        float height = 1414.2f;
+
+        int colorText = Color.BLACK;
+        int colorSecondaryText = 0xFF555555;
+        int colorLine = Color.BLACK;
+        int colorBorder = Color.BLACK;
+        int colorBackground = Color.WHITE;
+
+        target.drawRect(0, 0, width, height, 0, colorBackground, true);
+        target.drawRect(15, 15, width - 15, height - 15, 2, colorBorder, false);
+
+        float padding = 75f;
+        float headerTopY = padding;
+
+        // 1. Icon (Top Left)
+        float iconSize = 90f;
+        float iconLeft = padding;
+        float iconTop = headerTopY;
+        Bitmap iconBitmap = getIconBitmap(data);
+        if (iconBitmap != null) {
+            target.drawBitmap(iconBitmap, iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize);
+        }
+
+        // 2. QR Code (Top Right)
+        float qrSize = 90f;
+        float qrLeft = width - padding - qrSize;
+        float qrTop = headerTopY;
+
+        String qrText = (data.qrContent != null && !data.qrContent.trim().isEmpty())
+            ? data.qrContent : (data.masjidName != null ? data.masjidName : "Salarm");
+
+        drawQrCode(target, qrText, qrLeft, qrTop, qrSize, colorText);
+
+        // 3. Header Title & Subtitle
+        float gap = 20f;
+        float titleLeftBound = iconLeft + iconSize + gap;
+        float titleRightBound = qrLeft - gap;
+        float availableWidth = titleRightBound - titleLeftBound;
+        float centerX = width / 2f;
+
+        float headerHeight = 130f;
+        HeaderLayout headerLayout = measureAndFitHeader(
+            data.masjidName != null ? data.masjidName : "",
+            data.subtitle != null ? data.subtitle : "",
+            availableWidth,
+            headerHeight
+        );
+
+        float currentY = headerTopY + (headerHeight - headerLayout.totalHeight) / 2f;
+        for (String line : headerLayout.titleLines) {
+            currentY += headerLayout.titleFontSize;
+            target.drawText(line, centerX, currentY, headerLayout.titleFontSize, Paint.Align.CENTER, colorText, true, 0);
+            currentY += (headerLayout.titleLineSpacing - headerLayout.titleFontSize);
+        }
+
+        if (headerLayout.subtitleLines != null && !headerLayout.subtitleLines.isEmpty()) {
+            currentY += 4f * (headerLayout.titleFontSize / 36f);
+            for (String line : headerLayout.subtitleLines) {
+                currentY += headerLayout.subtitleFontSize;
+                target.drawText(line, centerX, currentY, headerLayout.subtitleFontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
+                currentY += (headerLayout.subtitleLineSpacing - headerLayout.subtitleFontSize);
+            }
+        }
+
+        // Table Header
+        float tableHeaderY = headerTopY + headerHeight + 25f;
+        float headerSize = 32f;
+        float monthNameX = padding + 35f;
+        float dayX = padding + 110f;
+        float colX_fajr = padding + 265f;
+        float colX_asr = padding + 425f;
+        float colX_mgrb = padding + 585f;
+        float colX_isha = padding + 745f;
+
+        target.drawText("Fajr", colX_fajr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Asr", colX_asr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Mgrb", colX_mgrb, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Isha", colX_isha, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+
+        currentY = tableHeaderY + 18f;
+        target.drawLine(padding, currentY, width - padding, currentY, 1.5f, colorLine);
+
+        int totalRows = 0;
+        for (MasjidCardData.MonthGroup month : data.months) {
+            totalRows += month.rows.size();
+        }
+        float footerReservedHeight = 110f;
+        float availableTableHeight = height - padding - footerReservedHeight - currentY;
+        float numMonthDividers = Math.max(1, data.months.size());
+        float rowHeight = Math.min(36f, Math.max(22f, (availableTableHeight - numMonthDividers * 10f) / Math.max(1, totalRows)));
+        float textSize = Math.min(28f, Math.max(18f, rowHeight * 0.78f));
+
+        currentY += rowHeight;
+
+        for (MasjidCardData.MonthGroup month : data.months) {
+            float monthStartY = currentY - rowHeight + 10f;
+            float monthEndY = monthStartY + month.rows.size() * rowHeight;
+
+            target.drawText(month.monthName, monthNameX, (monthStartY + monthEndY) / 2f, textSize, Paint.Align.CENTER, colorText, true, -90);
+
+            for (MasjidCardData.IntervalRow row : month.rows) {
+                target.drawText(String.valueOf(row.day), dayX, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.fajr, colX_fajr, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.asr, colX_asr, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.maghrib, colX_mgrb, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.isha, colX_isha, currentY, textSize, Paint.Align.CENTER, colorText, false, 0);
+                currentY += rowHeight;
+            }
+
+            target.drawLine(padding, currentY - (rowHeight / 2f), width - padding, currentY - (rowHeight / 2f), 1f, colorLine);
+            currentY += (rowHeight / 2f);
+        }
+
+        // Footer Area
+        String footer = data.getFooterText();
+        if (footer != null && !footer.trim().isEmpty()) {
+            float footerMaxWidth = width - (padding * 2f);
+            float footerBottomY = height - padding;
+            float footerTopY = Math.max(height - footerReservedHeight - padding, currentY);
+            float maxFooterHeight = Math.max(30f, footerBottomY - footerTopY);
+
+            TextLayout footerLayout = measureAndFitFooter(footer.trim(), footerMaxWidth, maxFooterHeight);
+            float footerY = footerTopY + (maxFooterHeight - footerLayout.totalHeight) / 2f;
+
+            for (String line : footerLayout.lines) {
+                footerY += footerLayout.fontSize;
+                if (!line.isEmpty()) {
+                    target.drawText(line, width / 2f, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
+                }
+                footerY += (footerLayout.lineSpacing - footerLayout.fontSize);
+            }
+        }
+    }
+
+    private void renderA4Landscape(DrawTarget target, MasjidCardData data) {
+        float width = 1414.2f;
+        float height = 1000f;
+
+        int colorText = Color.BLACK;
+        int colorSecondaryText = 0xFF555555;
+        int colorLine = Color.BLACK;
+        int colorBorder = Color.BLACK;
+        int colorBackground = Color.WHITE;
+
+        target.drawRect(0, 0, width, height, 0, colorBackground, true);
+        target.drawRect(15, 15, width - 15, height - 15, 2, colorBorder, false);
+
+        float paddingX = 75f;
+        float paddingY = 60f;
+        float headerTopY = paddingY;
+
+        // 1. Icon (Top Left)
+        float iconSize = 80f;
+        float iconLeft = paddingX;
+        float iconTop = headerTopY;
+        Bitmap iconBitmap = getIconBitmap(data);
+        if (iconBitmap != null) {
+            target.drawBitmap(iconBitmap, iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize);
+        }
+
+        // 2. QR Code (Top Right)
+        float qrSize = 80f;
+        float qrLeft = width - paddingX - qrSize;
+        float qrTop = headerTopY;
+
+        String qrText = (data.qrContent != null && !data.qrContent.trim().isEmpty())
+            ? data.qrContent : (data.masjidName != null ? data.masjidName : "Salarm");
+
+        drawQrCode(target, qrText, qrLeft, qrTop, qrSize, colorText);
+
+        // 3. Header Title & Subtitle
+        float gap = 20f;
+        float titleLeftBound = iconLeft + iconSize + gap;
+        float titleRightBound = qrLeft - gap;
+        float availableWidth = titleRightBound - titleLeftBound;
+        float centerX = width / 2f;
+
+        float headerHeight = 110f;
+        HeaderLayout headerLayout = measureAndFitHeader(
+            data.masjidName != null ? data.masjidName : "",
+            data.subtitle != null ? data.subtitle : "",
+            availableWidth,
+            headerHeight
+        );
+
+        float currentY = headerTopY + (headerHeight - headerLayout.totalHeight) / 2f;
+        for (String line : headerLayout.titleLines) {
+            currentY += headerLayout.titleFontSize;
+            target.drawText(line, centerX, currentY, headerLayout.titleFontSize, Paint.Align.CENTER, colorText, true, 0);
+            currentY += (headerLayout.titleLineSpacing - headerLayout.titleFontSize);
+        }
+
+        if (headerLayout.subtitleLines != null && !headerLayout.subtitleLines.isEmpty()) {
+            currentY += 4f * (headerLayout.titleFontSize / 36f);
+            for (String line : headerLayout.subtitleLines) {
+                currentY += headerLayout.subtitleFontSize;
+                target.drawText(line, centerX, currentY, headerLayout.subtitleFontSize, Paint.Align.CENTER, colorSecondaryText, false, 0);
+                currentY += (headerLayout.subtitleLineSpacing - headerLayout.subtitleFontSize);
+            }
+        }
+
+        // Side-by-side Tables: Left (Jan-Jun) and Right (Jul-Dec)
+        float tableHeaderY = headerTopY + headerHeight + 20f;
+        float headerSize = 28f;
+
+        float tableGap = 25f;
+        float leftTableStart = paddingX;
+        float leftTableEnd = centerX - tableGap;
+        float rightTableStart = centerX + tableGap;
+        float rightTableEnd = width - paddingX;
+
+        float L_monthNameX = leftTableStart + 35f;
+        float L_dayX = leftTableStart + 105f;
+        float L_fajr = leftTableStart + 215f;
+        float L_asr = leftTableStart + 315f;
+        float L_mgrb = leftTableStart + 415f;
+        float L_isha = leftTableStart + 515f;
+
+        float R_monthNameX = rightTableStart + 35f;
+        float R_dayX = rightTableStart + 105f;
+        float R_fajr = rightTableStart + 215f;
+        float R_asr = rightTableStart + 315f;
+        float R_mgrb = rightTableStart + 415f;
+        float R_isha = rightTableStart + 515f;
+
+        // Left Table Header
+        target.drawText("Fajr", L_fajr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Asr", L_asr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Mgrb", L_mgrb, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Isha", L_isha, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+
+        // Right Table Header
+        target.drawText("Fajr", R_fajr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Asr", R_asr, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Mgrb", R_mgrb, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+        target.drawText("Isha", R_isha, tableHeaderY, headerSize, Paint.Align.CENTER, colorText, true, 0);
+
+        float headerLineY = tableHeaderY + 15f;
+        target.drawLine(leftTableStart, headerLineY, leftTableEnd, headerLineY, 1.5f, colorLine);
+        target.drawLine(rightTableStart, headerLineY, rightTableEnd, headerLineY, 1.5f, colorLine);
+
+        int maxIntervals = 0;
+        for (MasjidCardData.MonthGroup month : data.months) {
+            maxIntervals = Math.max(maxIntervals, month.rows.size());
+        }
+        float rowHeight = maxIntervals > 2 ? 32f : 40f;
+        float textSize = maxIntervals > 2 ? 25f : 31f;
+
+        float tableStartY = headerLineY + (maxIntervals > 2 ? 28f : 36f);
+
+        // Render Left Table (Months 0..5, e.g. Jan-Jun)
+        float currentY_L = tableStartY;
+        int leftLimit = Math.min(6, data.months.size());
+        for (int i = 0; i < leftLimit; i++) {
+            MasjidCardData.MonthGroup month = data.months.get(i);
+            float monthStartY = currentY_L - rowHeight + 10f;
+            float monthEndY = monthStartY + month.rows.size() * rowHeight;
+
+            target.drawText(month.monthName, L_monthNameX, (monthStartY + monthEndY) / 2f, textSize, Paint.Align.CENTER, colorText, true, -90);
+
+            for (MasjidCardData.IntervalRow row : month.rows) {
+                target.drawText(String.valueOf(row.day), L_dayX, currentY_L, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.fajr, L_fajr, currentY_L, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.asr, L_asr, currentY_L, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.maghrib, L_mgrb, currentY_L, textSize, Paint.Align.CENTER, colorText, false, 0);
+                target.drawText(row.isha, L_isha, currentY_L, textSize, Paint.Align.CENTER, colorText, false, 0);
+                currentY_L += rowHeight;
+            }
+
+            target.drawLine(leftTableStart, currentY_L - (rowHeight / 2f), leftTableEnd, currentY_L - (rowHeight / 2f), 1f, colorLine);
+            currentY_L += (rowHeight / 2f);
+        }
+
+        // Render Right Table (Months 6..11, e.g. Jul-Dec)
+        float currentY_R = tableStartY;
+        int totalMonths = data.months.size();
+        if (totalMonths > 6) {
+            for (int i = 6; i < Math.min(12, totalMonths); i++) {
+                MasjidCardData.MonthGroup month = data.months.get(i);
+                float monthStartY = currentY_R - rowHeight + 10f;
+                float monthEndY = monthStartY + month.rows.size() * rowHeight;
+
+                target.drawText(month.monthName, R_monthNameX, (monthStartY + monthEndY) / 2f, textSize, Paint.Align.CENTER, colorText, true, -90);
+
+                for (MasjidCardData.IntervalRow row : month.rows) {
+                    target.drawText(String.valueOf(row.day), R_dayX, currentY_R, textSize, Paint.Align.CENTER, colorText, false, 0);
+                    target.drawText(row.fajr, R_fajr, currentY_R, textSize, Paint.Align.CENTER, colorText, false, 0);
+                    target.drawText(row.asr, R_asr, currentY_R, textSize, Paint.Align.CENTER, colorText, false, 0);
+                    target.drawText(row.maghrib, R_mgrb, currentY_R, textSize, Paint.Align.CENTER, colorText, false, 0);
+                    target.drawText(row.isha, R_isha, currentY_R, textSize, Paint.Align.CENTER, colorText, false, 0);
+                    currentY_R += rowHeight;
+                }
+
+                target.drawLine(rightTableStart, currentY_R - (rowHeight / 2f), rightTableEnd, currentY_R - (rowHeight / 2f), 1f, colorLine);
+                currentY_R += (rowHeight / 2f);
+            }
+        }
+
+        float tableMaxY = Math.max(currentY_L, currentY_R);
+
+        // Draw vertical divider between left and right tables
+        target.drawLine(centerX, tableHeaderY - 10f, centerX, tableMaxY - 10f, 1f, colorLine);
+
+        // Footer Area
+        String footer = data.getFooterText();
+        if (footer != null && !footer.trim().isEmpty()) {
+            float footerMaxWidth = width - (paddingX * 2f);
+            float footerBottomY = height - paddingY;
+            float footerTopY = Math.max(tableMaxY + 10f, height - 85f);
+            float maxFooterHeight = Math.max(30f, footerBottomY - footerTopY);
+
+            TextLayout footerLayout = measureAndFitFooter(footer.trim(), footerMaxWidth, maxFooterHeight);
+            float footerY = footerTopY + (maxFooterHeight - footerLayout.totalHeight) / 2f;
+
+            for (String line : footerLayout.lines) {
+                footerY += footerLayout.fontSize;
+                if (!line.isEmpty()) {
+                    target.drawText(line, centerX, footerY, footerLayout.fontSize, Paint.Align.CENTER, colorText, false, 0);
                 }
                 footerY += (footerLayout.lineSpacing - footerLayout.fontSize);
             }
@@ -439,17 +798,30 @@ public class MasjidCardRenderer {
         }
 
         data.isFront = true;
+        data.format = MasjidCardData.PaperFormat.CARD;
         data.footerTextFront = calculateDefaultFooter(masjid);
         data.footerTextBack = "";
         return data;
     }
 
+    public void populatePrayerTimes(MasjidCardData data, Masjid masjid) {
+        if (data == null) return;
+        if (data.format == MasjidCardData.PaperFormat.CARD) {
+            populatePrayerTimes(data, masjid, data.isFront);
+        } else {
+            populatePrayerTimesForMonths(data, masjid, 0, 11);
+        }
+    }
+
     public void populatePrayerTimes(MasjidCardData data, Masjid masjid, boolean front) {
         data.isFront = front;
-        data.months.clear();
-
         int startMonth = front ? 0 : 6;
         int endMonth = front ? 5 : 11;
+        populatePrayerTimesForMonths(data, masjid, startMonth, endMonth);
+    }
+
+    private void populatePrayerTimesForMonths(MasjidCardData data, Masjid masjid, int startMonth, int endMonth) {
+        data.months.clear();
 
         double[] coords;
         if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
@@ -562,11 +934,11 @@ public class MasjidCardRenderer {
         private final Canvas canvas;
         private final Paint paint;
 
-        public CanvasDrawTarget(Canvas canvas, int width, int height) {
+        public CanvasDrawTarget(Canvas canvas, int width, int height, float virtualWidth, float virtualHeight) {
             this.canvas = canvas;
             this.paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
             this.paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
-            float scale = Math.min(width / VIRTUAL_WIDTH, height / VIRTUAL_HEIGHT);
+            float scale = Math.min(width / virtualWidth, height / virtualHeight);
             canvas.scale(scale, scale);
         }
 

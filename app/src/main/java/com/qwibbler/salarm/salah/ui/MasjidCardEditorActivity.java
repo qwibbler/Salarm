@@ -6,13 +6,16 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.salah.Masjid;
@@ -29,10 +32,12 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
     private MasjidCardRenderer renderer;
 
     private MasjidCardView cardPreview;
+    private FloatingActionButton btnFlipCard;
     private TextInputEditText editName;
     private TextInputEditText editSubtitle;
     private TextInputEditText editFooter;
-    private MaterialButtonToggleGroup toggleSide;
+    private TextInputLayout inputLayoutFooter;
+    private MaterialButtonToggleGroup toggleFormat;
 
     private String currentExportType;
     private ActivityResultLauncher<Intent> createDocumentLauncher;
@@ -57,10 +62,12 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
         });
 
         cardPreview = findViewById(R.id.card_preview);
+        btnFlipCard = findViewById(R.id.btn_flip_card);
         editName = findViewById(R.id.edit_masjid_name);
         editSubtitle = findViewById(R.id.edit_masjid_subtitle);
         editFooter = findViewById(R.id.edit_footer_text);
-        toggleSide = findViewById(R.id.toggle_side);
+        inputLayoutFooter = findViewById(R.id.input_layout_footer);
+        toggleFormat = findViewById(R.id.toggle_format);
 
         renderer = new MasjidCardRenderer(this);
 
@@ -77,17 +84,35 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
             masjid = SalahDatabase.getDatabase(this).masjidDao().getById(id);
             if (masjid != null) {
                 cardData = renderer.generateData(masjid);
+                cardData.format = MasjidCardData.PaperFormat.CARD;
+                cardData.isFront = true;
                 renderer.populatePrayerTimes(cardData, masjid, true);
 
                 AppExecutors.getMainThread().post(() -> {
                     editName.setText(cardData.masjidName);
                     editSubtitle.setText(cardData.subtitle);
                     editFooter.setText(cardData.getFooterText());
-                    toggleSide.check(R.id.btn_front);
+                    toggleFormat.check(R.id.btn_format_card);
+                    updateFooterLabelAndVisibility();
                     cardPreview.setData(cardData);
                 });
             }
         });
+    }
+
+    private void updateFooterLabelAndVisibility() {
+        if (cardData == null) return;
+        if (cardData.format == MasjidCardData.PaperFormat.CARD) {
+            btnFlipCard.setVisibility(View.VISIBLE);
+            if (cardData.isFront) {
+                inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label_front));
+            } else {
+                inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label_back));
+            }
+        } else {
+            btnFlipCard.setVisibility(View.GONE);
+            inputLayoutFooter.setHint(getString(R.string.masjid_card_footer_label));
+        }
     }
 
     private void setupListeners() {
@@ -118,26 +143,63 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) {
                 if (cardData != null) {
-                    if (cardData.isFront) {
-                        cardData.footerTextFront = s.toString();
-                    } else {
+                    if (cardData.format == MasjidCardData.PaperFormat.CARD && !cardData.isFront) {
                         cardData.footerTextBack = s.toString();
+                    } else {
+                        cardData.footerTextFront = s.toString();
                     }
                     cardPreview.invalidate();
                 }
             }
         });
 
-        toggleSide.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (isChecked && masjid != null && cardData != null) {
-                boolean isFront = checkedId == R.id.btn_front;
+        btnFlipCard.setOnClickListener(v -> {
+            if (masjid != null && cardData != null && cardData.format == MasjidCardData.PaperFormat.CARD) {
+                boolean newFront = !cardData.isFront;
                 AppExecutors.getDiskIO().execute(() -> {
-                    renderer.populatePrayerTimes(cardData, masjid, isFront);
+                    renderer.populatePrayerTimes(cardData, masjid, newFront);
                     AppExecutors.getMainThread().post(() -> {
                         editFooter.setText(cardData.getFooterText());
+                        updateFooterLabelAndVisibility();
                         cardPreview.setData(cardData);
                     });
                 });
+            }
+        });
+
+        toggleFormat.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked && masjid != null && cardData != null) {
+                if (checkedId == R.id.btn_format_card) {
+                    cardData.format = MasjidCardData.PaperFormat.CARD;
+                    AppExecutors.getDiskIO().execute(() -> {
+                        renderer.populatePrayerTimes(cardData, masjid, cardData.isFront);
+                        AppExecutors.getMainThread().post(() -> {
+                            editFooter.setText(cardData.getFooterText());
+                            updateFooterLabelAndVisibility();
+                            cardPreview.setData(cardData);
+                        });
+                    });
+                } else if (checkedId == R.id.btn_format_a4_portrait) {
+                    cardData.format = MasjidCardData.PaperFormat.A4_PORTRAIT;
+                    AppExecutors.getDiskIO().execute(() -> {
+                        renderer.populatePrayerTimes(cardData, masjid);
+                        AppExecutors.getMainThread().post(() -> {
+                            editFooter.setText(cardData.getFooterText());
+                            updateFooterLabelAndVisibility();
+                            cardPreview.setData(cardData);
+                        });
+                    });
+                } else if (checkedId == R.id.btn_format_a4_landscape) {
+                    cardData.format = MasjidCardData.PaperFormat.A4_LANDSCAPE;
+                    AppExecutors.getDiskIO().execute(() -> {
+                        renderer.populatePrayerTimes(cardData, masjid);
+                        AppExecutors.getMainThread().post(() -> {
+                            editFooter.setText(cardData.getFooterText());
+                            updateFooterLabelAndVisibility();
+                            cardPreview.setData(cardData);
+                        });
+                    });
+                }
             }
         });
 
@@ -149,7 +211,15 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
     private void export(String mimeType, String extension) {
         if (masjid == null || cardData == null) return;
         currentExportType = mimeType;
-        String fileName = masjid.name.replaceAll("[^a-zA-Z0-9]", "_") + "_card" + extension;
+        String formatSuffix;
+        if (cardData.format == MasjidCardData.PaperFormat.CARD) {
+            formatSuffix = "_card";
+        } else if (cardData.format == MasjidCardData.PaperFormat.A4_PORTRAIT) {
+            formatSuffix = "_a4_portrait";
+        } else {
+            formatSuffix = "_a4_landscape";
+        }
+        String fileName = masjid.name.replaceAll("[^a-zA-Z0-9]", "_") + formatSuffix + extension;
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
