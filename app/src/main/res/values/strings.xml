@@ -1838,6 +1838,10 @@
     <string name="masjid_country_title">Country</string>
     <string name="masjid_timezone_title">Timezone*</string>
     <string name="masjid_select_timezone_title">Select Timezone</string>
+    <string name="masjid_calc_method_title">Calculation Method</string>
+    <string name="masjid_select_calc_method_title">Select Calculation Method</string>
+    <string name="masjid_madhab_title">Madhab</string>
+    <string name="masjid_select_madhab_title">Select Madhab</string>
     <string name="masjid_manual_coords_dialog_title">Enter Manual Coordinates</string>
     <string name="masjid_latitude">Latitude (-90 to 90)</string>
     <string name="masjid_longitude">Longitude (-180 to 180)</string>

@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 
 import java.util.ArrayList;
@@ -33,12 +35,32 @@ public class Masjid {
     public String cityName;
     public String countryName;
     public String timezoneId;
+    public String calcMethod;
+    public String madhab;
 
     public Masjid() {
         this.showMasjidEvents = true;
         this.intervalsCount = 2;
         this.boundary1 = 16;
         this.boundary2 = 31;
+    }
+
+    public CalculationMethod getCalculationMethod(Context context) {
+        if (calcMethod != null && !calcMethod.isEmpty()) {
+            try {
+                return CalculationMethod.valueOf(calcMethod);
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return SalahUtils.getCalculationMethod(context);
+    }
+
+    public Madhab getMadhab(Context context) {
+        if (madhab != null && !madhab.isEmpty()) {
+            try {
+                return Madhab.valueOf(madhab);
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return SalahUtils.getMadhab(context);
     }
 
     public List<Interval> getIntervals() {

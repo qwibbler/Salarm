@@ -40,6 +40,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.Madhab;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -97,6 +99,10 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
     private TextInputEditText mCityEdit;
     private TextInputEditText mCountryEdit;
     private TextView mTimezoneText;
+    private View mCalcMethodRow;
+    private TextView mCalcMethodText;
+    private View mMadhabRow;
+    private TextView mMadhabText;
     private TextView mIntervalsSummary;
     private MaterialButtonToggleGroup mIntervalToggleGroup;
     private RangeSlider mIntervalSlider;
@@ -223,6 +229,10 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         mCityEdit = view.findViewById(R.id.masjid_city_edit);
         mCountryEdit = view.findViewById(R.id.masjid_country_edit);
         mTimezoneText = view.findViewById(R.id.masjid_timezone_text);
+        mCalcMethodRow = view.findViewById(R.id.masjid_calc_method_row);
+        mCalcMethodText = view.findViewById(R.id.masjid_calc_method_text);
+        mMadhabRow = view.findViewById(R.id.masjid_madhab_row);
+        mMadhabText = view.findViewById(R.id.masjid_madhab_text);
         mIntervalsSummary = view.findViewById(R.id.masjid_intervals_summary);
         mIntervalToggleGroup = view.findViewById(R.id.interval_toggle_group);
         mIntervalSlider = view.findViewById(R.id.interval_slider);
@@ -241,7 +251,9 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             requireContext(),
             prefs,
             selectLocationBtn,
-            timezoneRow
+            timezoneRow,
+            mCalcMethodRow,
+            mMadhabRow
         );
 
         setupNameEditToggle();
@@ -272,8 +284,16 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                         if (mMasjid.address != null) mAddressEdit.setText(mMasjid.address);
                         if (mMasjid.cityName != null) mCityEdit.setText(mMasjid.cityName);
                         if (mMasjid.countryName != null) mCountryEdit.setText(mMasjid.countryName);
+                        if (mMasjid.calcMethod == null || mMasjid.calcMethod.isEmpty()) {
+                            mMasjid.calcMethod = SalahUtils.getCalculationMethod(requireContext()).name();
+                        }
+                        if (mMasjid.madhab == null || mMasjid.madhab.isEmpty()) {
+                            mMasjid.madhab = SalahUtils.getMadhab(requireContext()).name();
+                        }
                         updateIconUI();
                         updateLocationUI();
+                        updateCalcMethodUI();
+                        updateMadhabUI();
                         setupIntervalsUI(view);
                     }
                 });
@@ -284,11 +304,15 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             mMasjid = new Masjid();
             mMasjid.name = getString(R.string.masjid_default_name);
             mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
+            mMasjid.calcMethod = SalahUtils.getCalculationMethod(requireContext()).name();
+            mMasjid.madhab = SalahUtils.getMadhab(requireContext()).name();
             mHasLocation = false;
             mNameText.setText(mMasjid.name);
             mNameEdit.setText(mMasjid.name);
             updateIconUI();
             updateLocationUI();
+            updateCalcMethodUI();
+            updateMadhabUI();
             setupIntervalsUI(view);
         }
 
@@ -314,6 +338,14 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
         if (timezoneRow != null) {
             timezoneRow.setOnClickListener(v -> showTimezonePicker());
+        }
+
+        if (mCalcMethodRow != null) {
+            mCalcMethodRow.setOnClickListener(v -> showCalcMethodPicker());
+        }
+
+        if (mMadhabRow != null) {
+            mMadhabRow.setOnClickListener(v -> showMadhabPicker());
         }
 
         if (deleteBtn != null) deleteBtn.setOnClickListener(v -> deleteMasjid());
@@ -877,6 +909,8 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             newMasjid.cityName = mMasjid.cityName;
             newMasjid.countryName = mMasjid.countryName;
             newMasjid.timezoneId = mMasjid.timezoneId;
+            newMasjid.calcMethod = mMasjid.calcMethod;
+            newMasjid.madhab = mMasjid.madhab;
 
             long newId = db.masjidDao().insert(newMasjid);
 
@@ -923,5 +957,95 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                 }
             });
         });
+    }
+
+    private void updateCalcMethodUI() {
+        if (mMasjid != null && mCalcMethodText != null && isAdded()) {
+            CalculationMethod currentMethod = mMasjid.getCalculationMethod(requireContext());
+            mCalcMethodText.setText(getCalcMethodDisplayName(requireContext(), currentMethod));
+        }
+    }
+
+    private void updateMadhabUI() {
+        if (mMasjid != null && mMadhabText != null && isAdded()) {
+            Madhab currentMadhab = mMasjid.getMadhab(requireContext());
+            mMadhabText.setText(getMadhabDisplayName(requireContext(), currentMadhab));
+        }
+    }
+
+    private String getCalcMethodDisplayName(Context context, CalculationMethod method) {
+        String[] entries = context.getResources().getStringArray(R.array.salah_calc_method_entries);
+        String[] values = context.getResources().getStringArray(R.array.salah_calc_method_values);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(method.name())) {
+                return entries[i];
+            }
+        }
+        return method.name();
+    }
+
+    private String getMadhabDisplayName(Context context, Madhab madhab) {
+        String[] entries = context.getResources().getStringArray(R.array.salarm_madhab_entries);
+        String[] values = context.getResources().getStringArray(R.array.salarm_madhab_values);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(madhab.name())) {
+                return entries[i];
+            }
+        }
+        return madhab.name();
+    }
+
+    private void showCalcMethodPicker() {
+        String[] entries = getResources().getStringArray(R.array.salah_calc_method_entries);
+        String[] values = getResources().getStringArray(R.array.salah_calc_method_values);
+
+        CalculationMethod currentMethod = mMasjid != null ? mMasjid.getCalculationMethod(requireContext()) : SalahUtils.getCalculationMethod(requireContext());
+
+        int currentSelection = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(currentMethod.name())) {
+                currentSelection = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.masjid_select_calc_method_title)
+            .setSingleChoiceItems(entries, currentSelection, (dialog, which) -> {
+                if (mMasjid != null) {
+                    mMasjid.calcMethod = values[which];
+                    updateCalcMethodUI();
+                }
+                dialog.dismiss();
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
+    }
+
+    private void showMadhabPicker() {
+        String[] entries = getResources().getStringArray(R.array.salarm_madhab_entries);
+        String[] values = getResources().getStringArray(R.array.salarm_madhab_values);
+
+        Madhab currentMadhab = mMasjid != null ? mMasjid.getMadhab(requireContext()) : SalahUtils.getMadhab(requireContext());
+
+        int currentSelection = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(currentMadhab.name())) {
+                currentSelection = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.masjid_select_madhab_title)
+            .setSingleChoiceItems(entries, currentSelection, (dialog, which) -> {
+                if (mMasjid != null) {
+                    mMasjid.madhab = values[which];
+                    updateMadhabUI();
+                }
+                dialog.dismiss();
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 }

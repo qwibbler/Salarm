@@ -1,0 +1,530 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 15,
+    "identityHash": "eff3f21577af343d953585c99a940dd1",
+    "entities": [
+      {
+        "tableName": "relational_rules",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `enabled` INTEGER NOT NULL, `masjidId` INTEGER NOT NULL, `masjidSalahType` TEXT, `isSelected` INTEGER NOT NULL, `isManuallyDeselected` INTEGER NOT NULL, `autostopEnabled` INTEGER NOT NULL, `autostopOffsetMinutes` INTEGER NOT NULL, `isFixedTime` INTEGER, `fixedHour` INTEGER, `fixedMinute` INTEGER, `anchor_basicEvent` TEXT, `anchor_masjidEventId` INTEGER, `anchor_isMax` INTEGER, `calc_offsetMinutes` INTEGER, `calc_roundingDirection` TEXT, `calc_roundingIntervalMinutes` INTEGER, `calc_adjustmentMinutes` INTEGER, `clip_offsetMinutes` INTEGER, `clip_roundingDirection` TEXT, `clip_roundingIntervalMinutes` INTEGER, `clip_boundaryType` TEXT, `clip_anchor_basicEvent` TEXT, `clip_anchor_masjidEventId` INTEGER, `clip_anchor_isMax` INTEGER, `autostop_basicEvent` TEXT, `autostop_masjidEventId` INTEGER, `autostop_isMax` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "masjidId",
+            "columnName": "masjidId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "masjidSalahType",
+            "columnName": "masjidSalahType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isSelected",
+            "columnName": "isSelected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isManuallyDeselected",
+            "columnName": "isManuallyDeselected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autostopEnabled",
+            "columnName": "autostopEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autostopOffsetMinutes",
+            "columnName": "autostopOffsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definition.isFixedTime",
+            "columnName": "isFixedTime",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.fixedHour",
+            "columnName": "fixedHour",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.fixedMinute",
+            "columnName": "fixedMinute",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.basicEvent",
+            "columnName": "anchor_basicEvent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.masjidEventId",
+            "columnName": "anchor_masjidEventId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.isMax",
+            "columnName": "anchor_isMax",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.offsetMinutes",
+            "columnName": "calc_offsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.roundingDirection",
+            "columnName": "calc_roundingDirection",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.roundingIntervalMinutes",
+            "columnName": "calc_roundingIntervalMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.adjustmentMinutes",
+            "columnName": "calc_adjustmentMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.offsetMinutes",
+            "columnName": "clip_offsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.roundingDirection",
+            "columnName": "clip_roundingDirection",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.roundingIntervalMinutes",
+            "columnName": "clip_roundingIntervalMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.boundaryType",
+            "columnName": "clip_boundaryType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.basicEvent",
+            "columnName": "clip_anchor_basicEvent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.masjidEventId",
+            "columnName": "clip_anchor_masjidEventId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.isMax",
+            "columnName": "clip_anchor_isMax",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "autostopAnchor.basicEvent",
+            "columnName": "autostop_basicEvent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "autostopAnchor.masjidEventId",
+            "columnName": "autostop_masjidEventId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "autostopAnchor.isMax",
+            "columnName": "autostop_isMax",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "city_coordinates",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nameKey` TEXT, `cityName` TEXT, `province` TEXT, `country` TEXT, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `countryCode` TEXT, `timeZoneId` TEXT, `lastUsed` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameKey",
+            "columnName": "nameKey",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cityName",
+            "columnName": "cityName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "province",
+            "columnName": "province",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "country",
+            "columnName": "country",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "countryCode",
+            "columnName": "countryCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timeZoneId",
+            "columnName": "timeZoneId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastUsed",
+            "columnName": "lastUsed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_city_coordinates_nameKey",
+            "unique": true,
+            "columnNames": [
+              "nameKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_city_coordinates_nameKey` ON `${TABLE_NAME}` (`nameKey`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "masjids",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `showMasjidEvents` INTEGER NOT NULL, `intervalsCount` INTEGER NOT NULL, `boundary1` INTEGER NOT NULL, `boundary2` INTEGER NOT NULL, `iconUri` TEXT, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `address` TEXT, `cityName` TEXT, `countryName` TEXT, `timezoneId` TEXT, `calcMethod` TEXT, `madhab` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "showMasjidEvents",
+            "columnName": "showMasjidEvents",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "intervalsCount",
+            "columnName": "intervalsCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boundary1",
+            "columnName": "boundary1",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boundary2",
+            "columnName": "boundary2",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconUri",
+            "columnName": "iconUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cityName",
+            "columnName": "cityName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "countryName",
+            "columnName": "countryName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timezoneId",
+            "columnName": "timezoneId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "calcMethod",
+            "columnName": "calcMethod",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "madhab",
+            "columnName": "madhab",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "masjid_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `masjidId` INTEGER NOT NULL, `salahType` TEXT, `isSelected` INTEGER NOT NULL, `isManuallyDeselected` INTEGER NOT NULL, `isFixedTime` INTEGER, `fixedHour` INTEGER, `fixedMinute` INTEGER, `anchor_basicEvent` TEXT, `anchor_masjidEventId` INTEGER, `anchor_isMax` INTEGER, `calc_offsetMinutes` INTEGER, `calc_roundingDirection` TEXT, `calc_roundingIntervalMinutes` INTEGER, `calc_adjustmentMinutes` INTEGER, `clip_offsetMinutes` INTEGER, `clip_roundingDirection` TEXT, `clip_roundingIntervalMinutes` INTEGER, `clip_boundaryType` TEXT, `clip_anchor_basicEvent` TEXT, `clip_anchor_masjidEventId` INTEGER, `clip_anchor_isMax` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "masjidId",
+            "columnName": "masjidId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salahType",
+            "columnName": "salahType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isSelected",
+            "columnName": "isSelected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isManuallyDeselected",
+            "columnName": "isManuallyDeselected",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "definition.isFixedTime",
+            "columnName": "isFixedTime",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.fixedHour",
+            "columnName": "fixedHour",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.fixedMinute",
+            "columnName": "fixedMinute",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.basicEvent",
+            "columnName": "anchor_basicEvent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.masjidEventId",
+            "columnName": "anchor_masjidEventId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.anchor.isMax",
+            "columnName": "anchor_isMax",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.offsetMinutes",
+            "columnName": "calc_offsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.roundingDirection",
+            "columnName": "calc_roundingDirection",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.roundingIntervalMinutes",
+            "columnName": "calc_roundingIntervalMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.calculation.adjustmentMinutes",
+            "columnName": "calc_adjustmentMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.offsetMinutes",
+            "columnName": "clip_offsetMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.roundingDirection",
+            "columnName": "clip_roundingDirection",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.roundingIntervalMinutes",
+            "columnName": "clip_roundingIntervalMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.boundaryType",
+            "columnName": "clip_boundaryType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.basicEvent",
+            "columnName": "clip_anchor_basicEvent",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.masjidEventId",
+            "columnName": "clip_anchor_masjidEventId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "definition.clip.anchor.isMax",
+            "columnName": "clip_anchor_isMax",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eff3f21577af343d953585c99a940dd1')"
+    ]
+  }
+}

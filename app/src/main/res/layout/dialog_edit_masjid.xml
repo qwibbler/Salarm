@@ -126,15 +126,15 @@
                 android:id="@+id/btn_select_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="8dp"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="8dp">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
@@ -142,10 +142,10 @@
                     android:layout_weight="1"
                     android:drawableStart="@drawable/ic_fab_public"
                     android:drawablePadding="10dp"
-                    app:drawableTint="?attr/colorOnSurfaceVariant"
                     android:gravity="center_vertical"
                     android:text="@string/masjid_select_location"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    app:drawableTint="?attr/colorOnSurfaceVariant" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/masjid_coordinates_text"
@@ -163,15 +163,15 @@
                 android:id="@+id/masjid_timezone_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="48dp"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="2dp"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="8dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="8dp">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:layout_width="0dp"
@@ -179,10 +179,10 @@
                     android:layout_weight="1"
                     android:drawableStart="@drawable/ic_calendar_clock"
                     android:drawablePadding="10dp"
-                    app:drawableTint="?attr/colorOnSurfaceVariant"
                     android:gravity="center_vertical"
                     android:text="@string/masjid_timezone_title"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    app:drawableTint="?attr/colorOnSurfaceVariant" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/masjid_timezone_text"
@@ -210,7 +210,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapWords"
-                    android:scrollHorizontally="true"/>
+                    android:scrollHorizontally="true" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -229,8 +229,8 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
                     android:hint="@string/masjid_city_title">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -249,8 +249,8 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="4dp"
+                    android:layout_weight="1"
                     android:hint="@string/masjid_country_title">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -266,6 +266,88 @@
 
             </LinearLayout>
 
+            <!-- Calculation Method Setting Row -->
+            <LinearLayout
+                android:id="@+id/masjid_calc_method_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:drawableStart="@drawable/ic_salah_settings"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/masjid_calc_method_title"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/masjid_calc_method_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="end|center_vertical"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="University of Islamic Sciences, Karachi" />
+
+            </LinearLayout>
+
+            <!-- Madhab Setting Row -->
+            <LinearLayout
+                android:id="@+id/masjid_madhab_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="48dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:drawableStart="@drawable/ic_salah_settings"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/masjid_madhab_title"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/masjid_madhab_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="end|center_vertical"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Hanafi" />
+
+            </LinearLayout>
+
             <!-- 2. Inline Interval Picker Section -->
             <LinearLayout
                 android:id="@+id/interval_section_container"
@@ -273,9 +355,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="12dp"
+                android:orientation="vertical"
                 android:paddingHorizontal="10dp"
-                android:paddingVertical="10dp"
-                android:orientation="vertical">
+                android:paddingVertical="10dp">
 
                 <com.google.android.material.button.MaterialButtonToggleGroup
                     android:id="@+id/interval_toggle_group"
@@ -340,10 +422,10 @@
             android:id="@+id/bottom_button_group"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/delete_button"
@@ -352,32 +434,32 @@
                 android:layout_weight="1"
                 android:backgroundTint="@color/colorAlert"
                 app:icon="@drawable/ic_delete"
-                app:iconTint="?attr/colorOnError"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp" />
+                app:iconPadding="0dp"
+                app:iconTint="?attr/colorOnError" />
 
             <com.google.android.material.button.MaterialButton
-                style="?attr/materialButtonOutlinedStyle"
                 android:id="@+id/copy_button"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 app:icon="@drawable/ic_duplicate"
-                app:iconTint="?attr/colorOnSurfaceVariant"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
                 app:strokeColor="?attr/colorOnSurfaceVariant" />
 
             <com.google.android.material.button.MaterialButton
-                style="?attr/materialButtonOutlinedStyle"
                 android:id="@+id/preview_button"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 app:icon="@drawable/ic_preview"
-                app:iconTint="?attr/colorOnSurfaceVariant"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
+                app:iconTint="?attr/colorOnSurfaceVariant"
                 app:strokeColor="?attr/colorOnSurfaceVariant" />
 
             <com.google.android.material.button.MaterialButton
@@ -387,9 +469,9 @@
                 android:layout_weight="1"
                 android:backgroundTint="@color/colorGranted"
                 app:icon="@drawable/ic_save"
-                app:iconTint="?attr/colorSurfaceContainerLowest"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp" />
+                app:iconPadding="0dp"
+                app:iconTint="?attr/colorSurfaceContainerLowest" />
 
         </com.google.android.material.button.MaterialButtonGroup>
 

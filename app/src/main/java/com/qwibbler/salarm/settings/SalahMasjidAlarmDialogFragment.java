@@ -117,8 +117,11 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             SalahDatabase db = SalahDatabase.getDatabase(appContext);
             mEvent = db.masjidEventDao().getMasjidEvent(mMasjidId, mSalahType);
 
-            double[] coords = SalahUtils.getCoordinates(appContext);
-            CalculationMethod method = SalahUtils.getCalculationMethod(appContext);
+            Masjid masjid = db.masjidDao().getById(mMasjidId);
+            double[] coords = (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0))
+                    ? new double[]{masjid.latitude, masjid.longitude}
+                    : SalahUtils.getCoordinates(appContext);
+            CalculationMethod method = (masjid != null) ? masjid.getCalculationMethod(appContext) : SalahUtils.getCalculationMethod(appContext);
             SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], method);
 
             SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
@@ -417,7 +420,13 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
     private RelationalRule.AnchorEvent getAnchorEvent(String name) {
         if (getString(R.string.asr_label).equals(name)) {
-            Madhab madhab = SalahUtils.getMadhab(requireContext());
+            Madhab madhab;
+            if (mMasjidId > 0) {
+                Masjid masjid = SalahDatabase.getDatabase(requireContext()).masjidDao().getById(mMasjidId);
+                madhab = (masjid != null) ? masjid.getMadhab(requireContext()) : SalahUtils.getMadhab(requireContext());
+            } else {
+                madhab = SalahUtils.getMadhab(requireContext());
+            }
             return madhab == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI;
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);

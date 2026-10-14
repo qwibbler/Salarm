@@ -13,7 +13,7 @@
         app:iconSpaceReserved="false">
 
         <ListPreference
-            android:key="key_salarm_location_mode"
+            android:key="key_salah_location_mode"
             android:layout="@layout/settings_preference_layout"
             android:title="Location Mode"
             android:summary="%s"
@@ -24,7 +24,7 @@
             app:singleLineTitle="false" />
 
         <Preference
-            android:key="key_salarm_city_name"
+            android:key="key_salah_city_name"
             android:layout="@layout/settings_preference_layout"
             android:title="City"
             android:summary="not detected"
@@ -50,7 +50,7 @@
             app:singleLineTitle="false" />
 
         <ListPreference
-            android:key="key_salarm_madhab"
+            android:key="key_salah_madhab"
             android:layout="@layout/settings_preference_layout"
             android:title="Madhab"
             android:summary="%s"
@@ -68,7 +68,7 @@
         app:iconSpaceReserved="false">
 
         <androidx.preference.SwitchPreferenceCompat
-            android:key="key_salarm_show_both_asr"
+            android:key="key_salah_show_both_asr"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/show_both_asr_title"
             android:summary="@string/show_both_asr_summary"
@@ -77,20 +77,20 @@
             app:singleLineTitle="false" />
 
         <androidx.preference.SwitchPreferenceCompat
-            android:key="key_salarm_show_both_asr_in_alarm_events"
+            android:key="key_salah_show_both_asr_in_alarm_events"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/show_both_asr_in_alarm_events_title"
             android:defaultValue="false"
-            android:dependency="key_salarm_show_both_asr"
+            android:dependency="key_salah_show_both_asr"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 
         <androidx.preference.SwitchPreferenceCompat
-            android:key="key_salarm_show_both_asr_in_salarm_times"
+            android:key="key_salah_show_both_asr_in_salah_times"
             android:layout="@layout/settings_preference_layout"
             android:title="@string/show_both_asr_in_salah_times_title"
             android:defaultValue="false"
-            android:dependency="key_salarm_show_both_asr"
+            android:dependency="key_salah_show_both_asr"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
 

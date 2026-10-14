@@ -72,7 +72,7 @@ public class SalahCalculator {
     public static Date getIntervalExtremeTime(Context context, Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax) {
         double lat;
         double lon;
-        if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
+        if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
             lat = masjid.latitude;
             lon = masjid.longitude;
         } else {

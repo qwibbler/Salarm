@@ -288,9 +288,8 @@ public class MasjidFragment extends SalarmFragment {
                 } catch (NumberFormatException ignored) {}
             }
 
-            String methodStr = prefs.getString(PreferencesKeys.KEY_SALAH_CALC_METHOD, CalculationMethod.MUSLIM_WORLD_LEAGUE.name());
-            CalculationMethod method = CalculationMethod.valueOf(methodStr);
-            String madhab = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, "HANAFI");
+            CalculationMethod method = masjid.getCalculationMethod(appContext);
+            String madhab = masjid.getMadhab(appContext).name();
 
             SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), lat, lon, method);
 
@@ -589,8 +588,10 @@ public class MasjidFragment extends SalarmFragment {
                 event.definition.isFixedTime = true;
                 event.isSelected = masjid.showMasjidEvents;
 
-                double[] coords = SalahUtils.getCoordinates(appContext);
-                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
+                double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                        ? new double[]{masjid.latitude, masjid.longitude}
+                        : SalahUtils.getCoordinates(appContext);
+                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
                 Date prayerTime = switch (type) {
                     case "DHUHR", "JUMA" -> st.dhuhr;
                     default -> null;
@@ -607,8 +608,10 @@ public class MasjidFragment extends SalarmFragment {
                 }
                 event.id = db.masjidEventDao().insert(event);
             } else if (!event.definition.isFixedTime) {
-                double[] coords = SalahUtils.getCoordinates(appContext);
-                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], SalahUtils.getCalculationMethod(appContext));
+                double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                        ? new double[]{masjid.latitude, masjid.longitude}
+                        : SalahUtils.getCoordinates(appContext);
+                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
 
                 long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
                 if (evaluated > 0) {

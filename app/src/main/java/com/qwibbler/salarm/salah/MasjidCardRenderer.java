@@ -824,14 +824,13 @@ public class MasjidCardRenderer {
         data.months.clear();
 
         double[] coords;
-        if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
+        if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
             coords = new double[]{masjid.latitude, masjid.longitude};
         } else {
             coords = SalahUtils.getCoordinates(context);
         }
-        CalculationMethod method = SalahUtils.getCalculationMethod(context);
+        CalculationMethod method = masjid.getCalculationMethod(context);
         SalahDatabase db = SalahDatabase.getDatabase(context);
-        assert masjid != null;
         MasjidEvent fajrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "FAJR");
         MasjidEvent asrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "ASR");
         MasjidEvent maghribEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "MAGHRIB");

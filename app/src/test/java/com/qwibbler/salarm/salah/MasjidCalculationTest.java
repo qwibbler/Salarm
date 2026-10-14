@@ -2,6 +2,10 @@ package com.qwibbler.salarm.salah;
 
 import static org.junit.Assert.assertEquals;
 
+import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.Madhab;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -102,6 +106,21 @@ public class MasjidCalculationTest {
 
         assertEquals("Should pick sunrise from Feb 28 (6:31)", 6, resultCal.get(Calendar.HOUR_OF_DAY));
         assertEquals("Should pick sunrise from Feb 28 (6:31)", 31, resultCal.get(Calendar.MINUTE));
+    }
+
+    @Test
+    public void testMasjidCalcMethodAndMadhabDefaultAndOverride() {
+        Masjid masjid = new Masjid();
+        // Initially null/unset
+        Assert.assertNull(masjid.calcMethod);
+        Assert.assertNull(masjid.madhab);
+
+        // Explicit override
+        masjid.calcMethod = "NORTH_AMERICA";
+        masjid.madhab = "SHAFI";
+
+        assertEquals(CalculationMethod.NORTH_AMERICA, masjid.getCalculationMethod(null));
+        assertEquals(Madhab.SHAFI, masjid.getMadhab(null));
     }
 
     private Date createTime(Calendar base, int minutesSinceMidnight) {

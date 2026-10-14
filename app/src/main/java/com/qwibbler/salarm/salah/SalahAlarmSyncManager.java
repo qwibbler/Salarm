@@ -238,20 +238,26 @@ public class SalahAlarmSyncManager {
         final boolean wasStyledDaysEnabled = alarm.isRepeatDayStyleEnabled(prefs);
 
         double[] coords = null;
+        CalculationMethod method = null;
         if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
             SalahDatabase db = SalahDatabase.getDatabase(context);
             MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
             if (event != null) {
                 Masjid masjid = db.masjidDao().getById(event.masjidId);
-                if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
-                    coords = new double[]{masjid.latitude, masjid.longitude};
+                if (masjid != null) {
+                    method = masjid.getCalculationMethod(context);
+                    if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
+                        coords = new double[]{masjid.latitude, masjid.longitude};
+                    }
                 }
             }
         }
         if (coords == null) {
             coords = SalahUtils.getCoordinates(context);
         }
-        CalculationMethod method = SalahUtils.getCalculationMethod(context);
+        if (method == null) {
+            method = SalahUtils.getCalculationMethod(context);
+        }
 
         Calendar now = Calendar.getInstance();
         // Use minute precision for all comparisons to match AOSP Alarm behavior
