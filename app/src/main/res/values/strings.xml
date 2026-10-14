@@ -1833,8 +1833,7 @@
     <string name="masjid_location_enter_manual">Enter manual coordinates</string>
     <string name="masjid_location_coordinates_format">Lat: %.4f, Lon: %.4f</string>
     <string name="masjid_location_required_error">Masjid location coordinates are mandatory</string>
-    <string name="masjid_full_address_title">Masjid Address</string>
-    <string name="masjid_address_title">Address</string>
+    <string name="masjid_street_address_title">Street Address</string>
     <string name="masjid_city_title">City</string>
     <string name="masjid_country_title">Country</string>
     <string name="masjid_timezone_title">Timezone*</string>

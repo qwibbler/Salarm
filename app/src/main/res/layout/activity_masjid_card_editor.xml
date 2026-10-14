@@ -33,7 +33,11 @@
                     android:id="@+id/edit_masjid_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords" />
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapWords"
+                    android:maxLines="2"
+                    android:minLines="1"
+                    android:scrollHorizontally="true" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -47,7 +51,12 @@
                     android:id="@+id/edit_masjid_subtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords" />
+                    android:imeOptions="actionNext"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="5"
+                    android:minLines="1"
+                    android:scrollbars="vertical"
+                    android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -61,8 +70,10 @@
                     android:id="@+id/edit_footer_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:minLines="2" />
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="5"
+                    android:minLines="1"
+                    android:scrollbars="vertical" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -96,7 +107,6 @@
                 android:id="@+id/toggle_side"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
                 app:selectionRequired="true"
                 app:singleSelection="true">
 
@@ -120,6 +130,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:orientation="horizontal"
                 android:padding="8dp">
 

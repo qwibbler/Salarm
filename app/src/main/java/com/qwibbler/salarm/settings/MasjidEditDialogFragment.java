@@ -244,7 +244,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             timezoneRow
         );
 
-        setupNameEditToggle(view);
+        setupNameEditToggle();
 
         mMasjidId = getArguments() != null ? getArguments().getLong(ARG_MASJID_ID) : 0;
 
@@ -323,44 +323,18 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         return dialog;
     }
 
-    private void setupNameEditToggle(View rootView) {
+    private void setupNameEditToggle() {
         if (mNameText == null || mNameLayout == null || mNameEdit == null) return;
 
         mNameText.setOnClickListener(v -> showNameEdit());
 
         mNameEdit.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                 hideNameEdit();
                 return true;
             }
             return false;
         });
-
-        mNameEdit.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                hideNameEdit();
-            }
-        });
-
-        View scrollView = rootView.findViewById(R.id.edit_bottom_sheet_scroll_view);
-        if (scrollView != null) {
-            scrollView.setOnTouchListener((v, event) -> {
-                if (event.getAction() == MotionEvent.ACTION_DOWN && mNameLayout != null && mNameLayout.getVisibility() == View.VISIBLE) {
-                    int[] loc = new int[2];
-                    mNameLayout.getLocationOnScreen(loc);
-                    float x = event.getRawX();
-                    float y = event.getRawY();
-                    if (x < loc[0] || x > loc[0] + mNameLayout.getWidth() ||
-                        y < loc[1] || y > loc[1] + mNameLayout.getHeight()) {
-                        hideNameEdit();
-                    }
-                }
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    v.performClick();
-                }
-                return false;
-            });
-        }
     }
 
     private void showNameEdit() {

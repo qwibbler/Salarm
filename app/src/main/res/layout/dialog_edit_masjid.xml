@@ -106,72 +106,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:imeOptions="actionDone"
-                            android:inputType="textCapWords|textMultiLine"
+                            android:inputType="textCapWords"
+                            android:maxLines="1"
+                            android:scrollHorizontally="true"
+                            android:singleLine="true"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </FrameLayout>
-
-            </LinearLayout>
-
-            <!-- 2. Inline Interval Picker Section -->
-            <LinearLayout
-                android:id="@+id/interval_section_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="12dp"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="10dp"
-                android:orientation="vertical">
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/interval_toggle_group"
-                    style="@style/Widget.Material3.MaterialButtonGroup.Connected"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_2_intervals"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="@string/masjid_intervals_2" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/button_3_intervals"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="@string/masjid_intervals_3" />
-
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                <com.google.android.material.slider.RangeSlider
-                    android:id="@+id/interval_slider"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:stepSize="1"
-                    android:valueFrom="1"
-                    android:valueTo="30" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/masjid_intervals_summary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    tools:text="2 intervals: &lt;=16 min &amp; &gt;16 min" />
 
             </LinearLayout>
 
@@ -259,13 +203,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="8dp"
-                android:hint="@string/masjid_address_title">
+                android:hint="@string/masjid_street_address_title">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/masjid_address_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords" />
+                    android:inputType="textCapWords"
+                    android:scrollHorizontally="true"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -292,7 +237,10 @@
                         android:id="@+id/masjid_city_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords" />
+                        android:inputType="textCapWords"
+                        android:maxLines="1"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -309,9 +257,71 @@
                         android:id="@+id/masjid_country_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords" />
+                        android:inputType="textCapWords"
+                        android:maxLines="1"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <!-- 2. Inline Interval Picker Section -->
+            <LinearLayout
+                android:id="@+id/interval_section_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="10dp"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/interval_toggle_group"
+                    style="@style/Widget.Material3.MaterialButtonGroup.Connected"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_2_intervals"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/masjid_intervals_2" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_3_intervals"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="@string/masjid_intervals_3" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <com.google.android.material.slider.RangeSlider
+                    android:id="@+id/interval_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:stepSize="1"
+                    android:valueFrom="1"
+                    android:valueTo="30" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/masjid_intervals_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="2 intervals: &lt;=16 days &amp; &gt;16 days" />
 
             </LinearLayout>
 
