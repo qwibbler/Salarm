@@ -906,11 +906,17 @@ public class MasjidCardRenderer {
     private String calculateDefaultFooterBack(Masjid masjid) {
         SalahDatabase db = SalahDatabase.getDatabase(context);
         MasjidEvent maghribEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "MAGHRIB");
+        if (maghribEvent != null && maghribEvent.definition.isFixedTime) {
+            String maghribTime = formatTime(SalahCalculator.evaluateDefinition(context, maghribEvent.definition, null, new Date()));
+            return String.format("Mgrb at %s", maghribTime);
+        }
         int offset = 8;
-        if (maghribEvent != null && !maghribEvent.definition.isFixedTime) {
+        if (maghribEvent != null) {
             offset = maghribEvent.definition.calculation.offsetMinutes;
         }
-        if (offset >= 0) {
+        if (offset == 0) {
+            return "Mgrb at time, changes daily";
+        } else if (offset > 0) {
             return String.format(Locale.US, "Mgrb at +%dm, changes daily", offset);
         } else {
             return String.format(Locale.US, "Mgrb at -%dm, changes daily", Math.abs(offset));

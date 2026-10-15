@@ -48,11 +48,18 @@ public class RelationalDefinition {
         String offsetPart = getOffsetPart(context, calculation.offsetMinutes);
 
         int baseResId;
-        if (isMasjidDefinition && anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
-            // Masjid events anchored to basic ones care about min/max (except Maghrib)
-            baseResId = anchor.isMax ? R.string.salah_rule_description_base_max : R.string.salah_rule_description_base_min;
+        if (isMasjidDefinition) {
+            if (anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
+                baseResId = anchor.isMax ? R.string.masjid_rule_description_base_max : R.string.masjid_rule_description_base_min;
+            } else {
+                baseResId = R.string.masjid_rule_description_base;
+            }
         } else {
-            baseResId = R.string.salah_rule_description_base;
+            if (anchor.basicEvent != null) {
+                baseResId = anchor.isMax ? R.string.salah_alarm_rule_description_base_max : R.string.salah_alarm_rule_description_base_min;
+            } else {
+                baseResId = R.string.salah_rule_description_base;
+            }
         }
         sb.append(context.getString(baseResId, offsetPart, anchorName));
 

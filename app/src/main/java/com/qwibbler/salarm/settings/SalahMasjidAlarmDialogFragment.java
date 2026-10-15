@@ -22,7 +22,6 @@ import com.qwibbler.salarm.databinding.DialogMasjidAlarmBinding;
 import com.qwibbler.salarm.salah.Masjid;
 import com.qwibbler.salarm.salah.MasjidEvent;
 import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
-import com.qwibbler.salarm.salah.RelationalClip;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.salah.SalahAlarmSyncManager;
 import com.qwibbler.salarm.salah.SalahCalculator;
@@ -49,7 +48,6 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
     private String[] mOffsetTypes;
     private String[] mRoundTypes;
-    private String[] mBoundaryTypes;
     private String[] mAdjustmentTypes;
     private String[] mExtremeTypes;
 
@@ -57,9 +55,6 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     private boolean mPrimaryIsMax = true;
     private int mRoundIdx = 0;
     private int mAdjustmentIdx = 0;
-    private int mSafetyBoundIdx = 1; // later than
-    private int mSafetyOffsetIdx = 0; // before
-    private boolean mSafetyIsMax = false;
 
     private final List<SelectableEvent> mSelectableEvents = new ArrayList<>();
 
@@ -84,7 +79,6 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
         mOffsetTypes = getResources().getStringArray(R.array.relational_alarm_offset_type);
         mRoundTypes = getResources().getStringArray(R.array.relational_alarm_round_type);
-        mBoundaryTypes = getResources().getStringArray(R.array.relational_alarm_boundary_type);
         mAdjustmentTypes = getResources().getStringArray(R.array.relational_alarm_adjustment_type);
         mExtremeTypes = new String[]{getString(R.string.masjid_salah_extreme_min), getString(R.string.masjid_salah_extreme_max)};
 
@@ -110,7 +104,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void setupInitialization() {
-        RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue, mBinding.safetyOffsetValue);
+        RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue);
 
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
@@ -167,16 +161,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
                 mBinding.primaryEvent.setThreshold(100);
                 mBinding.primaryEvent.setOnClickListener(v -> mBinding.primaryEvent.showDropDown());
 
-                mBinding.safetyEvent.setAdapter(adapter);
-                mBinding.safetyEvent.setThreshold(100);
-                mBinding.safetyEvent.setOnClickListener(v -> mBinding.safetyEvent.showDropDown());
-
                 mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> {
                     String selected = (String) parent.getItemAtPosition(position);
-                    int actualPos = eventsList.indexOf(selected);
-                    if (actualPos >= 0) {
-                        updateSafetyEventDefault(actualPos);
-                    }
                     if (getAnchorEvent(selected) == RelationalRule.AnchorEvent.MAGHRIB) {
                         mBinding.primaryExtremeToggle.setVisibility(View.GONE);
                     } else {
@@ -193,34 +179,10 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         });
     }
 
-    private void updateSafetyEventDefault(int primaryPosition) {
-        if (primaryPosition < 0 || primaryPosition >= mSelectableEvents.size()) return;
-
-        // Find next basic event
-        for (int i = primaryPosition + 1; i < mSelectableEvents.size(); i++) {
-            if (mSelectableEvents.get(i).isBasic) {
-                mBinding.safetyEvent.setText(mSelectableEvents.get(i).label, false);
-                return;
-            }
-        }
-
-        // Fallback to first basic event if none found after (circular)
-        for (int i = 0; i < mSelectableEvents.size(); i++) {
-            if (mSelectableEvents.get(i).isBasic) {
-                mBinding.safetyEvent.setText(mSelectableEvents.get(i).label, false);
-                return;
-            }
-        }
-    }
-
     private void setupListeners() {
         mBinding.primaryOffsetToggle.setOnClickListener(v -> {
             mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
             updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
-
-            // Auto-adjust safety boundary default: After -> No Later Than, Before -> No Earlier Than
-            mSafetyBoundIdx = (mPrimaryOffsetIdx == 1) ? 1 : 0;
-            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
         });
         mBinding.primaryExtremeToggle.setOnClickListener(v -> {
             mPrimaryIsMax = !mPrimaryIsMax;
@@ -237,20 +199,6 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         mBinding.adjustmentToggle.setOnClickListener(v -> {
             mAdjustmentIdx = (mAdjustmentIdx + 1) % mAdjustmentTypes.length;
             updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
-        });
-
-        mBinding.safetyEnabledCheckbox.setOnCheckedChangeListener((b, checked) -> updateBlockState(checked, mBinding.safetyContent));
-        mBinding.safetyBoundaryToggle.setOnClickListener(v -> {
-            mSafetyBoundIdx = (mSafetyBoundIdx + 1) % mBoundaryTypes.length;
-            updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
-        });
-        mBinding.safetyOffsetToggle.setOnClickListener(v -> {
-            mSafetyOffsetIdx = (mSafetyOffsetIdx + 1) % mOffsetTypes.length;
-            updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
-        });
-        mBinding.safetyExtremeToggle.setOnClickListener(v -> {
-            mSafetyIsMax = !mSafetyIsMax;
-            updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, mSafetyIsMax ? 1 : 0);
         });
     }
 
@@ -282,36 +230,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         mBinding.adjustmentValue.setText("0");
         updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
 
-        mBinding.safetyEnabledCheckbox.setChecked(false);
-        mSafetyBoundIdx = 1; // Later
-        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
-        mBinding.safetyOffsetValue.setText("5");
-        mSafetyOffsetIdx = 0; // Before
-        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
-        mSafetyIsMax = false;
-        updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, 0); // Min
-
-        if (!mSelectableEvents.isEmpty()) {
-            String primaryLabel = SalahUtils.getLocalizedSalahName(requireContext(), mSalahType);
-            int primaryPos = -1;
-            for (int i = 0; i < mSelectableEvents.size(); i++) {
-                if (mSelectableEvents.get(i).label.equals(primaryLabel)) {
-                    primaryPos = i;
-                    break;
-                }
-            }
-            if (primaryPos >= 0) {
-                updateSafetyEventDefault(primaryPos);
-            } else {
-                mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
-            }
-        } else {
-            mBinding.safetyEvent.setText(getDefaultNextEvent(mSalahType), false);
-        }
-
         updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
-        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
     }
 
     private void populateUi() {
@@ -340,35 +260,9 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             mBinding.adjustmentValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.adjustmentMinutes)));
             mAdjustmentIdx = mEvent.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
             updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
-
-            if (mEvent.definition.clip != null) {
-                mBinding.safetyEnabledCheckbox.setChecked(true);
-                mSafetyBoundIdx = mEvent.definition.clip.boundaryType == RelationalRule.BoundaryType.NO_LATER_THAN ? 1 : 0;
-                updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
-                mBinding.safetyOffsetValue.setText(String.valueOf(Math.abs(mEvent.definition.clip.offsetMinutes)));
-                mSafetyOffsetIdx = mEvent.definition.clip.offsetMinutes >= 0 ? 1 : 0;
-                updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
-                mSafetyIsMax = mEvent.definition.clip.anchor.isMax;
-                updateToggle(mBinding.safetyExtremeToggle, mExtremeTypes, mSafetyIsMax ? 1 : 0);
-                mBinding.safetyEvent.setText(RelationalRule.getEventName(requireContext(), mEvent.definition.clip.anchor.basicEvent), false);
-            }
         }
         updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
-        updateBlockState(mBinding.safetyEnabledCheckbox.isChecked(), mBinding.safetyContent);
-    }
-
-    private String getDefaultNextEvent(String current) {
-        Context context = getContext();
-        if (context == null) return "Sunrise";
-        return switch (current) {
-            case "FAJR" -> SalahUtils.getLocalizedSalahName(context, "SUNRISE");
-            case "DHUHR" -> SalahUtils.getLocalizedSalahName(context, "ASR");
-            case "ASR" -> SalahUtils.getLocalizedSalahName(context, "MAGHRIB");
-            case "MAGHRIB" -> SalahUtils.getLocalizedSalahName(context, "ISHA");
-            case "ISHA" -> SalahUtils.getLocalizedSalahName(context, "FAJR");
-            default -> SalahUtils.getLocalizedSalahName(context, "SUNRISE");
-        };
     }
 
     private void saveEvent() {
@@ -395,17 +289,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             event.definition.calculation.adjustmentMinutes = 0;
         }
 
-        if (mBinding.safetyEnabledCheckbox.isChecked()) {
-            RelationalClip clip = new RelationalClip();
-            clip.boundaryType = mSafetyBoundIdx == 1 ? RelationalRule.BoundaryType.NO_LATER_THAN : RelationalRule.BoundaryType.NO_EARLIER_THAN;
-            clip.anchor.basicEvent = getAnchorEvent(mBinding.safetyEvent.getText().toString());
-            int sOffset = Integer.parseInt(mBinding.safetyOffsetValue.getText().toString());
-            clip.offsetMinutes = mSafetyOffsetIdx == 1 ? sOffset : -sOffset;
-            clip.anchor.isMax = mSafetyIsMax;
-            event.definition.clip = clip;
-        } else {
-            event.definition.clip = null;
-        }
+        event.definition.clip = null;
 
         AppExecutors.getDiskIO().execute(() -> {
             SalahDatabase db = SalahDatabase.getDatabase(requireContext());
