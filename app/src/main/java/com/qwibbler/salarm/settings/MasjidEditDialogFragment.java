@@ -16,7 +16,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -277,6 +279,13 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                 mMasjid = SalahDatabase.getDatabase(requireContext()).masjidDao().getById(mMasjidId);
                 AppExecutors.getMainThread().post(() -> {
                     if (isAdded() && mMasjid != null) {
+                        boolean defaulted = mMasjid.fillMissingValuesWithDefaults(requireContext());
+                        if (defaulted) {
+                            Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
+                            AppExecutors.getDiskIO().execute(() -> {
+                                SalahDatabase.getDatabase(requireContext().getApplicationContext()).masjidDao().update(mMasjid);
+                            });
+                        }
                         mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
                             && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
                         mNameText.setText(mMasjid.name);
@@ -284,12 +293,6 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                         if (mMasjid.address != null) mAddressEdit.setText(mMasjid.address);
                         if (mMasjid.cityName != null) mCityEdit.setText(mMasjid.cityName);
                         if (mMasjid.countryName != null) mCountryEdit.setText(mMasjid.countryName);
-                        if (mMasjid.calcMethod == null || mMasjid.calcMethod.isEmpty()) {
-                            mMasjid.calcMethod = SalahUtils.getCalculationMethod(requireContext()).name();
-                        }
-                        if (mMasjid.madhab == null || mMasjid.madhab.isEmpty()) {
-                            mMasjid.madhab = SalahUtils.getMadhab(requireContext()).name();
-                        }
                         updateIconUI();
                         updateLocationUI();
                         updateCalcMethodUI();
@@ -302,11 +305,9 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             if (deleteBtn != null) deleteBtn.setVisibility(View.GONE);
             if (copyBtn != null) copyBtn.setVisibility(View.GONE);
             mMasjid = new Masjid();
-            mMasjid.name = getString(R.string.masjid_default_name);
-            mMasjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
-            mMasjid.calcMethod = SalahUtils.getCalculationMethod(requireContext()).name();
-            mMasjid.madhab = SalahUtils.getMadhab(requireContext()).name();
-            mHasLocation = false;
+            mMasjid.fillMissingValuesWithDefaults(requireContext());
+            mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
+                && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
             mNameText.setText(mMasjid.name);
             mNameEdit.setText(mMasjid.name);
             updateIconUI();
@@ -360,6 +361,15 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
         mNameText.setOnClickListener(v -> showNameEdit());
 
+        mNameEdit.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                updateNameFromEdit();
+                updateLocationUI();
+            }
+        });
+
         mNameEdit.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
                 hideNameEdit();
@@ -398,10 +408,10 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
     private void updateNameFromEdit() {
         if (mNameEdit != null && mNameEdit.getText() != null) {
             String newName = mNameEdit.getText().toString().trim();
-            if (!newName.isEmpty() && mMasjid != null) {
+            if (mMasjid != null) {
                 mMasjid.name = newName;
                 if (mNameText != null) {
-                    mNameText.setText(newName);
+                    mNameText.setText(newName.isEmpty() ? getString(R.string.masjid_name_title) : newName);
                 }
             }
         }
@@ -508,12 +518,15 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
     private void openPreview() {
         if (mMasjid == null) return;
 
-        if (!mHasLocation || !MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
-            Toast.makeText(requireContext(), R.string.masjid_location_required_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         updateNameFromEdit();
+
+        boolean defaulted = mMasjid.fillMissingValuesWithDefaults(requireContext());
+        if (defaulted) {
+            Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
+            mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
+                && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
+            updateLocationUI();
+        }
 
         if (mAddressEdit.getText() != null) mMasjid.address = mAddressEdit.getText().toString().trim();
         if (mCityEdit.getText() != null) mMasjid.cityName = mCityEdit.getText().toString().trim();
@@ -601,8 +614,8 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             }
 
             if (mSaveBtn != null) {
-                mSaveBtn.setEnabled(validLoc);
-                mSaveBtn.setAlpha(validLoc ? 1.0f : 0.4f);
+                mSaveBtn.setEnabled(true);
+                mSaveBtn.setAlpha(1.0f);
             }
         }
     }
@@ -814,12 +827,15 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
     private void saveMasjid() {
         if (mMasjid == null) return;
 
-        if (!mHasLocation || !MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)) {
-            Toast.makeText(requireContext(), R.string.masjid_location_required_error, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         updateNameFromEdit();
+
+        boolean defaulted = mMasjid.fillMissingValuesWithDefaults(requireContext());
+        if (defaulted) {
+            Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
+            mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
+                && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
+            updateLocationUI();
+        }
 
         if (mAddressEdit.getText() != null) mMasjid.address = mAddressEdit.getText().toString().trim();
         if (mCityEdit.getText() != null) mMasjid.cityName = mCityEdit.getText().toString().trim();

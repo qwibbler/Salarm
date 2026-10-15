@@ -45,22 +45,68 @@ public class Masjid {
         this.boundary2 = 31;
     }
 
+
+
+    public boolean fillMissingValuesWithDefaults(Context context) {
+        boolean modified = false;
+
+        if (name == null || name.trim().isEmpty()) {
+            name = (context != null) ? context.getString(R.string.masjid_default_name) : "Masjid";
+            modified = true;
+        }
+
+        if ((latitude == 0.0 && longitude == 0.0) || !MapPickerDialogFragment.isValidCoordinates(latitude, longitude)) {
+            if (context != null) {
+                double[] coords = SalahUtils.getCoordinates(context);
+                latitude = coords[0];
+                longitude = coords[1];
+            }
+            modified = true;
+        }
+
+        if (timezoneId == null || timezoneId.trim().isEmpty()) {
+            timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
+            modified = true;
+        }
+
+        if (calcMethod == null || calcMethod.trim().isEmpty()) {
+            calcMethod = (context != null) ? SalahUtils.getCalculationMethod(context).name() : CalculationMethod.MUSLIM_WORLD_LEAGUE.name();
+            modified = true;
+        }
+
+        if (madhab == null || madhab.trim().isEmpty()) {
+            madhab = (context != null) ? SalahUtils.getMadhab(context).name() : Madhab.SHAFI.name();
+            modified = true;
+        }
+
+        if (intervalsCount != 2 && intervalsCount != 3) {
+            intervalsCount = 2;
+            boundary1 = 16;
+            boundary2 = 31;
+            modified = true;
+        }
+
+        return modified;
+    }
+
     public CalculationMethod getCalculationMethod(Context context) {
-        if (calcMethod != null && !calcMethod.isEmpty()) {
+        if (calcMethod != null && !calcMethod.trim().isEmpty()) {
             try {
-                return CalculationMethod.valueOf(calcMethod);
+                return CalculationMethod.valueOf(calcMethod.trim());
             } catch (IllegalArgumentException ignored) {}
         }
-        return SalahUtils.getCalculationMethod(context);
+        CalculationMethod method = (context != null) ? SalahUtils.getCalculationMethod(context) : null;
+        return method != null ? method : CalculationMethod.MUSLIM_WORLD_LEAGUE;
     }
 
     public Madhab getMadhab(Context context) {
-        if (madhab != null && !madhab.isEmpty()) {
+        if (madhab != null && !madhab.trim().isEmpty()) {
             try {
-                return Madhab.valueOf(madhab);
+                return Madhab.valueOf(madhab.trim());
             } catch (IllegalArgumentException ignored) {}
         }
-        return SalahUtils.getMadhab(context);
+        Madhab m = (context != null) ? SalahUtils.getMadhab(context) : null;
+        return m != null ? m : Madhab.SHAFI;
     }
 
     public List<Interval> getIntervals() {

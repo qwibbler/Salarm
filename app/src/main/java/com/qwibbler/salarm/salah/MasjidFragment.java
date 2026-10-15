@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
@@ -34,7 +36,6 @@ import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
-import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
 import com.qwibbler.salarm.uidata.TabListener;
 import com.qwibbler.salarm.uidata.UiDataModel;
@@ -229,6 +230,16 @@ public class MasjidFragment extends SalarmFragment {
         if (currentMasjid == null) currentMasjid = mMasjids.get(0);
 
         final Masjid masjid = currentMasjid;
+        final Context appContext = context.getApplicationContext();
+
+        boolean filled = masjid.fillMissingValuesWithDefaults(appContext);
+        if (filled) {
+            Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
+            AppExecutors.getDiskIO().execute(() -> {
+                SalahDatabase.getDatabase(appContext).masjidDao().update(masjid);
+            });
+        }
+
         mMasjidTitleText.setText(masjid.name);
 
         View rootView = getView();
@@ -268,28 +279,16 @@ public class MasjidFragment extends SalarmFragment {
             mNextMasjidButton.setVisibility(View.GONE);
         }
 
-        final Context appContext = context.getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
             SalahDatabase db = SalahDatabase.getDatabase(appContext);
             List<PrayerItem> items = new ArrayList<>();
             String[] types = {"FAJR", "DHUHR", "JUMA", "ASR", "MAGHRIB", "ISHA"};
 
-            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
-            double lat = 0, lon = 0;
-            if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
-                lat = masjid.latitude;
-                lon = masjid.longitude;
-            } else {
-                String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
-                String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
-                try {
-                    lat = Double.parseDouble(latStr);
-                    lon = Double.parseDouble(lonStr);
-                } catch (NumberFormatException ignored) {}
-            }
-
+            double lat = masjid.latitude;
+            double lon = masjid.longitude;
             CalculationMethod method = masjid.getCalculationMethod(appContext);
-            String madhab = masjid.getMadhab(appContext).name();
+            Madhab madhabEnum = masjid.getMadhab(appContext);
+            String madhab = madhabEnum != null ? madhabEnum.name() : "SHAFI";
 
             SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), lat, lon, method);
 
@@ -299,16 +298,21 @@ public class MasjidFragment extends SalarmFragment {
                 String summary = "";
                 boolean isConfigured = false;
 
-                if (event != null) {
-                    timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
-                    if (timeMillis > 0) {
-                        isConfigured = true;
-                        String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
-                        summary = event.definition.getSummary(appContext, anchorName, true);
+                if (event != null && st != null) {
+                    try {
+                        timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
+                        if (timeMillis > 0 && event.definition != null && event.definition.anchor != null) {
+                            isConfigured = true;
+                            String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
+                            summary = event.definition.getSummary(appContext, anchorName, true);
+                        }
+                    } catch (Exception ignored) {
+                        timeMillis = 0;
+                        isConfigured = false;
                     }
                 }
 
-                if (!isConfigured) {
+                if (!isConfigured && st != null) {
                     Date baseDate = switch (type) {
                         case "FAJR" -> st.fajr;
                         case "DHUHR", "JUMA" -> st.dhuhr;
@@ -503,6 +507,7 @@ public class MasjidFragment extends SalarmFragment {
                         exitCheckboxMode();
                     }
                 } else {
+                    if (item.masjid == null) return;
                     if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
                         showFixedTimeDialogue(item.masjid, item.type);
                     } else {

@@ -12,6 +12,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
+import android.widget.Toast;
+
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -83,12 +85,20 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
         AppExecutors.getDiskIO().execute(() -> {
             masjid = SalahDatabase.getDatabase(this).masjidDao().getById(id);
             if (masjid != null) {
+                boolean filled = masjid.fillMissingValuesWithDefaults(this);
+                if (filled) {
+                    SalahDatabase.getDatabase(this).masjidDao().update(masjid);
+                }
                 cardData = renderer.generateData(masjid);
                 cardData.format = MasjidCardData.PaperFormat.CARD;
                 cardData.isFront = true;
                 renderer.populatePrayerTimes(cardData, masjid, true);
 
                 AppExecutors.getMainThread().post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (filled) {
+                        Toast.makeText(this, R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
+                    }
                     editName.setText(cardData.masjidName);
                     editSubtitle.setText(cardData.subtitle);
                     editFooter.setText(cardData.getFooterText());

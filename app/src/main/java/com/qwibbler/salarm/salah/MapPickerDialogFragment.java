@@ -249,8 +249,16 @@ public class MapPickerDialogFragment extends DialogFragment {
         if (mErrorContainer != null) mErrorContainer.setVisibility(View.GONE);
         if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
 
-        double initLat = (mHasPickedLocation && isValidCoordinates(mPickedLat, mPickedLon)) ? mPickedLat : 21.4225;
-        double initLon = (mHasPickedLocation && isValidCoordinates(mPickedLat, mPickedLon)) ? mPickedLon : 39.8262;
+        double initLat;
+        double initLon;
+        if (mHasPickedLocation && isValidCoordinates(mPickedLat, mPickedLon)) {
+            initLat = mPickedLat;
+            initLon = mPickedLon;
+        } else {
+            double[] coords = (getContext() != null) ? SalahUtils.getCoordinates(getContext()) : new double[]{0.0, 0.0};
+            initLat = coords[0];
+            initLon = coords[1];
+        }
 
         String html = buildLeafletHtml(initLat, initLon, mHasPickedLocation);
         mWebView.loadDataWithBaseURL("https://basemaps.cartocdn.com", html, "text/html", "UTF-8", null);

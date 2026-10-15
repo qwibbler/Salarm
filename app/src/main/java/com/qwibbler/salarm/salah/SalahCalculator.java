@@ -15,6 +15,7 @@ import com.qwibbler.salarm.settings.PreferencesKeys;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Helper class to calculate prayer times using the Adhan library.
@@ -22,11 +23,19 @@ import java.util.Date;
 public class SalahCalculator {
 
     public static PrayerTimes getPrayerTimes(Date date, double latitude, double longitude, Madhab madhab, CalculationMethod method) {
-        Coordinates coordinates = new Coordinates(latitude, longitude);
-        DateComponents dateComponents = DateComponents.from(date);
-        CalculationParameters parameters = method.getParameters();
-        parameters.madhab = madhab;
-        return new PrayerTimes(coordinates, dateComponents, parameters);
+        if (date == null) date = new Date();
+        if (method == null) method = CalculationMethod.MUSLIM_WORLD_LEAGUE;
+        if (madhab == null) madhab = Madhab.SHAFI;
+
+        try {
+            Coordinates coordinates = new Coordinates(latitude, longitude);
+            DateComponents dateComponents = DateComponents.from(date);
+            CalculationParameters parameters = method.getParameters();
+            parameters.madhab = madhab;
+            return new PrayerTimes(coordinates, dateComponents, parameters);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static SalahTimes calculateAllSalahTimes(Date date, double latitude, double longitude, CalculationMethod method) {
@@ -36,12 +45,23 @@ public class SalahCalculator {
     }
 
     public static SalahTimes calculateAllSalahTimes(Context context, Date date, double latitude, double longitude, CalculationMethod method) {
+        if (context != null && ((latitude == 0.0 && longitude == 0.0) || !MapPickerDialogFragment.isValidCoordinates(latitude, longitude))) {
+            double[] coords = SalahUtils.getCoordinates(context);
+            latitude = coords[0];
+            longitude = coords[1];
+        }
+        if (context != null && method == null) {
+            method = SalahUtils.getCalculationMethod(context);
+        }
         SalahTimes times = calculateAllSalahTimes(date, latitude, longitude, method);
-        applyRounding(context, times);
+        if (context != null) {
+            applyRounding(context, times);
+        }
         return times;
     }
 
     private static void applyRounding(Context context, SalahTimes times) {
+        if (times == null || context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
         times.fajr = round(times.fajr, prefs.getString(PreferencesKeys.KEY_SALAH_ROUNDING_FAJR, PreferencesDefaultValues.DEFAULT_SALAH_ROUNDING_FAJR));
@@ -56,7 +76,7 @@ public class SalahCalculator {
     private static Date round(Date date, String method) {
         if (date == null) return null;
         long time = date.getTime();
-        long rounded = switch (method) {
+        long rounded = switch (method != null ? method : "") {
             case PreferencesDefaultValues.ROUNDING_UP -> (long) (Math.ceil(time / 60000.0) * 60000);
             case PreferencesDefaultValues.ROUNDING_DOWN -> (long) (Math.floor(time / 60000.0) * 60000);
             case PreferencesDefaultValues.ROUNDING_TO -> Math.round(time / 60000.0) * 60000;
@@ -70,37 +90,56 @@ public class SalahCalculator {
     }
 
     public static Date getIntervalExtremeTime(Context context, Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax) {
+        if (masjid == null) return null;
         double lat;
         double lon;
-        if (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0)) {
+        if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
             lat = masjid.latitude;
             lon = masjid.longitude;
         } else {
-            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-            String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0");
-            String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0");
-            lat = Double.parseDouble(latStr);
-            lon = Double.parseDouble(lonStr);
+            SharedPreferences prefs = (context != null) ? SalarmApplication.getDefaultSharedPreferences(context) : null;
+            String latStr = prefs != null ? prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0") : "0.0";
+            String lonStr = prefs != null ? prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0") : "0.0";
+            try {
+                lat = Double.parseDouble(latStr);
+                lon = Double.parseDouble(lonStr);
+            } catch (Exception e) {
+                lat = 0.0;
+                lon = 0.0;
+            }
         }
-        CalculationMethod method = (masjid != null) ? masjid.getCalculationMethod(context) : SalahUtils.getCalculationMethod(context);
+        if ((lat == 0.0 && lon == 0.0) && context != null) {
+            double[] fallback = SalahUtils.getCoordinates(context);
+            lat = fallback[0];
+            lon = fallback[1];
+        }
+        CalculationMethod method = masjid.getCalculationMethod(context);
 
-        return getIntervalExtremeTime(date, masjid, event, isMax, d -> calculateAllSalahTimes(context, d, lat, lon, method));
+        final double finalLat = lat;
+        final double finalLon = lon;
+        return getIntervalExtremeTime(date, masjid, event, isMax, d -> calculateAllSalahTimes(context, d, finalLat, finalLon, method));
     }
 
     public static Date getIntervalExtremeTime(Date date, Masjid masjid, RelationalRule.AnchorEvent event, boolean isMax, SalahTimesProvider timesProvider) {
+        if (date == null || masjid == null || event == null || timesProvider == null) return null;
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
         Masjid.Interval targetInterval = null;
-        for (Masjid.Interval interval : masjid.getIntervals()) {
-            if (dayOfMonth >= interval.startDay && dayOfMonth <= interval.endDay) {
-                targetInterval = interval;
-                break;
+        List<Masjid.Interval> intervals = masjid.getIntervals();
+        if (intervals != null) {
+            for (Masjid.Interval interval : intervals) {
+                if (interval != null && dayOfMonth >= interval.startDay && dayOfMonth <= interval.endDay) {
+                    targetInterval = interval;
+                    break;
+                }
             }
         }
 
-        if (targetInterval == null) return null;
+        if (targetInterval == null) {
+            targetInterval = new Masjid.Interval(1, 31);
+        }
 
         Date extremeTime = null;
 
@@ -109,23 +148,17 @@ public class SalahCalculator {
         int endDay = Math.min(targetInterval.endDay, maxDayInMonth);
 
         RelationalRule.AnchorEvent targetEvent = event;
-        if (masjid != null && (event == RelationalRule.AnchorEvent.ASR_HANAFI || event == RelationalRule.AnchorEvent.ASR_SHAFI)) {
-            targetEvent = (masjid.getMadhab(null) == Madhab.SHAFI) ? RelationalRule.AnchorEvent.ASR_SHAFI : RelationalRule.AnchorEvent.ASR_HANAFI;
+        if (event == RelationalRule.AnchorEvent.ASR_HANAFI || event == RelationalRule.AnchorEvent.ASR_SHAFI) {
+            Madhab m = masjid.getMadhab(null);
+            targetEvent = (m == Madhab.SHAFI) ? RelationalRule.AnchorEvent.ASR_SHAFI : RelationalRule.AnchorEvent.ASR_HANAFI;
         }
 
-        for (int day = targetInterval.startDay; day <= endDay; day++) {
+        for (int day = Math.max(1, targetInterval.startDay); day <= endDay; day++) {
             loopCal.set(Calendar.DAY_OF_MONTH, day);
             SalahTimes times = timesProvider.getTimes(loopCal.getTime());
-            Date currentTime = switch (targetEvent) {
-                case FAJR -> times.fajr;
-                case SUNRISE -> times.sunrise;
-                case DHUHR -> times.dhuhr;
-                case ASR_SHAFI -> times.asrShafi;
-                case ASR_HANAFI -> times.asrHanafi;
-                case MAGHRIB -> times.maghrib;
-                case ISHA -> times.isha;
-            };
+            if (times == null) continue;
 
+            Date currentTime = getEventTime(targetEvent, times);
             if (currentTime == null) continue;
 
             if (extremeTime == null) {
@@ -222,6 +255,7 @@ public class SalahCalculator {
     }
 
     public static long evaluateAnchor(Context context, RelationalAnchor anchor, SalahTimes times, Date date, Masjid masjid) {
+        if (anchor == null) return 0;
         if (anchor.masjidEventId != null && context != null) {
             MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(anchor.masjidEventId);
             if (event != null) {
@@ -246,22 +280,24 @@ public class SalahCalculator {
     }
 
     public static long evaluateMasjidEvent(Context context, MasjidEvent event, SalahTimes times, Date date, boolean ignoreJumaDayCheck) {
+        if (event == null || event.definition == null) return 0;
+        Date evalDate = (date != null) ? date : new Date();
         if (!ignoreJumaDayCheck && "JUMA".equals(event.salahType)) {
             Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
+            cal.setTime(evalDate);
             if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
                 return 0;
             }
         }
 
-        Masjid masjid = (context != null && event != null) ? SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId) : null;
+        Masjid masjid = (context != null) ? SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId) : null;
 
-        if (!event.definition.isFixedTime && event.definition.anchor.basicEvent != null) {
+        if (!event.definition.isFixedTime && event.definition.anchor != null && event.definition.anchor.basicEvent != null) {
             if (masjid != null) {
                 if (event.definition.anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB
                         && !"MAGHRIB".equals(event.salahType)) {
-                    Date extreme = getIntervalExtremeTime(context, date, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
-                    if (extreme != null) {
+                    Date extreme = getIntervalExtremeTime(context, evalDate, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
+                    if (extreme != null && event.definition.calculation != null) {
                         return applyCalculation(extreme.getTime(),
                                 event.definition.calculation.offsetMinutes,
                                 event.definition.calculation.roundingDirection,
@@ -272,7 +308,7 @@ public class SalahCalculator {
             }
         }
 
-        return evaluateDefinition(context, event.definition, times, date, masjid);
+        return evaluateDefinition(context, event.definition, times, evalDate, masjid);
     }
 
     public static long applyCalculation(long baseMillis, int offsetMinutes, RelationalRule.RoundingDirection direction, int intervalMinutes, int adjustmentMinutes) {
