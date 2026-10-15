@@ -206,6 +206,7 @@ public class SalahCalculator {
     }
 
     public static long evaluateDefinition(Context context, RelationalDefinition definition, SalahTimes times, Date date, Masjid masjid) {
+        if (definition == null) return 0;
         if (definition.isFixedTime) {
             Calendar cal = Calendar.getInstance();
             if (date != null) {
@@ -218,6 +219,8 @@ public class SalahCalculator {
             return cal.getTimeInMillis();
         }
 
+        if (definition.anchor == null || definition.calculation == null) return 0;
+
         long anchorTime = evaluateAnchor(context, definition.anchor, times, date, masjid);
         if (anchorTime <= 0) return 0;
 
@@ -227,7 +230,7 @@ public class SalahCalculator {
                 definition.calculation.roundingIntervalMinutes,
                 definition.calculation.adjustmentMinutes);
 
-        if (definition.clip != null) {
+        if (definition.clip != null && definition.clip.anchor != null) {
             long clipAnchorTime = evaluateAnchor(context, definition.clip.anchor, times, date, masjid);
             if (clipAnchorTime > 0) {
                 long clipMillis = applyCalculation(clipAnchorTime,
@@ -236,12 +239,14 @@ public class SalahCalculator {
                         definition.clip.roundingIntervalMinutes,
                         0);
 
-                switch (definition.clip.boundaryType) {
-                    case NO_LATER_THAN -> {
-                        if (targetMillis > clipMillis) targetMillis = clipMillis;
-                    }
-                    case NO_EARLIER_THAN -> {
-                        if (targetMillis < clipMillis) targetMillis = clipMillis;
+                if (definition.clip.boundaryType != null) {
+                    switch (definition.clip.boundaryType) {
+                        case NO_LATER_THAN -> {
+                            if (targetMillis > clipMillis) targetMillis = clipMillis;
+                        }
+                        case NO_EARLIER_THAN -> {
+                            if (targetMillis < clipMillis) targetMillis = clipMillis;
+                        }
                     }
                 }
             }
@@ -261,6 +266,7 @@ public class SalahCalculator {
             if (event != null) {
                 return evaluateMasjidEvent(context, event, times, date);
             }
+            return 0;
         }
 
         if (anchor.basicEvent != null) {
@@ -281,34 +287,38 @@ public class SalahCalculator {
 
     public static long evaluateMasjidEvent(Context context, MasjidEvent event, SalahTimes times, Date date, boolean ignoreJumaDayCheck) {
         if (event == null || event.definition == null) return 0;
-        Date evalDate = (date != null) ? date : new Date();
-        if (!ignoreJumaDayCheck && "JUMA".equals(event.salahType)) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(evalDate);
-            if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-                return 0;
+        try {
+            Date evalDate = (date != null) ? date : new Date();
+            if (!ignoreJumaDayCheck && "JUMA".equals(event.salahType)) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(evalDate);
+                if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+                    return 0;
+                }
             }
-        }
 
-        Masjid masjid = (context != null) ? SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId) : null;
+            Masjid masjid = (context != null && event.masjidId > 0) ? SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId) : null;
 
-        if (!event.definition.isFixedTime && event.definition.anchor != null && event.definition.anchor.basicEvent != null) {
-            if (masjid != null) {
-                if (event.definition.anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB
-                        && !"MAGHRIB".equals(event.salahType)) {
-                    Date extreme = getIntervalExtremeTime(context, evalDate, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
-                    if (extreme != null && event.definition.calculation != null) {
-                        return applyCalculation(extreme.getTime(),
-                                event.definition.calculation.offsetMinutes,
-                                event.definition.calculation.roundingDirection,
-                                event.definition.calculation.roundingIntervalMinutes,
-                                event.definition.calculation.adjustmentMinutes);
+            if (!event.definition.isFixedTime && event.definition.anchor != null && event.definition.anchor.basicEvent != null) {
+                if (masjid != null) {
+                    if (event.definition.anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB
+                            && !"MAGHRIB".equals(event.salahType)) {
+                        Date extreme = getIntervalExtremeTime(context, evalDate, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
+                        if (extreme != null && event.definition.calculation != null) {
+                            return applyCalculation(extreme.getTime(),
+                                    event.definition.calculation.offsetMinutes,
+                                    event.definition.calculation.roundingDirection,
+                                    event.definition.calculation.roundingIntervalMinutes,
+                                    event.definition.calculation.adjustmentMinutes);
+                        }
                     }
                 }
             }
-        }
 
-        return evaluateDefinition(context, event.definition, times, evalDate, masjid);
+            return evaluateDefinition(context, event.definition, times, evalDate, masjid);
+        } catch (Exception ignored) {
+            return 0;
+        }
     }
 
     public static long applyCalculation(long baseMillis, int offsetMinutes, RelationalRule.RoundingDirection direction, int intervalMinutes, int adjustmentMinutes) {

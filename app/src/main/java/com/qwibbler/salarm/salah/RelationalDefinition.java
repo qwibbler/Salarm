@@ -43,6 +43,7 @@ public class RelationalDefinition {
         }
 
         if (anchorName == null || anchorName.isEmpty()) return "";
+        if (calculation == null || anchor == null) return "";
 
         StringBuilder sb = new StringBuilder();
         String offsetPart = getOffsetPart(context, calculation.offsetMinutes);

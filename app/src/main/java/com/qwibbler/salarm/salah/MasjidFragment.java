@@ -303,8 +303,6 @@ public class MasjidFragment extends SalarmFragment {
             double lat = masjid.latitude;
             double lon = masjid.longitude;
             CalculationMethod method = masjid.getCalculationMethod(appContext);
-            Madhab madhabEnum = masjid.getMadhab(appContext);
-            String madhab = madhabEnum != null ? madhabEnum.name() : "SHAFI";
 
             SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), lat, lon, method);
 
@@ -314,31 +312,19 @@ public class MasjidFragment extends SalarmFragment {
                 String summary = "";
                 boolean isConfigured = false;
 
-                if (event != null && st != null) {
+                if (event != null && event.definition != null) {
                     try {
                         timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
-                        if (timeMillis > 0 && event.definition != null && event.definition.anchor != null) {
+                        if (timeMillis > 0) {
                             isConfigured = true;
-                            String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
-                            summary = event.definition.getSummary(appContext, anchorName, true);
+                            if (!"DHUHR".equals(type) && !"JUMA".equals(type) && event.definition.anchor != null) {
+                                String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
+                                summary = event.definition.getSummary(appContext, anchorName, true);
+                            }
                         }
                     } catch (Exception ignored) {
                         timeMillis = 0;
                         isConfigured = false;
-                    }
-                }
-
-                if (!isConfigured && st != null) {
-                    Date baseDate = switch (type) {
-                        case "FAJR" -> st.fajr;
-                        case "DHUHR", "JUMA" -> st.dhuhr;
-                        case "ASR" -> "HANAFI".equals(madhab) ? st.asrHanafi : st.asrShafi;
-                        case "MAGHRIB" -> st.maghrib;
-                        case "ISHA" -> st.isha;
-                        default -> null;
-                    };
-                    if (baseDate != null) {
-                        timeMillis = baseDate.getTime();
                     }
                 }
 

@@ -70,4 +70,25 @@ public class SalahCalculatorTest {
         long resultIgnoreCheck = SalahCalculator.evaluateMasjidEvent(null, event, times, date, true);
         Assert.assertTrue(resultIgnoreCheck > 0);
     }
+
+    @Test
+    public void testEvaluateUndefinedMasjidEventReturnsZeroWithoutCrashing() {
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(date, 24.8607, 67.0011, CalculationMethod.KARACHI);
+
+        // Null event
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, null, times, date, true));
+
+        // Event with null definition
+        MasjidEvent eventWithNullDef = new MasjidEvent();
+        eventWithNullDef.definition = null;
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, eventWithNullDef, times, date, true));
+
+        // Event with empty definition
+        MasjidEvent eventWithEmptyDef = new MasjidEvent();
+        eventWithEmptyDef.definition = new RelationalDefinition();
+        eventWithEmptyDef.definition.anchor = null;
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, eventWithEmptyDef, times, date, true));
+    }
 }

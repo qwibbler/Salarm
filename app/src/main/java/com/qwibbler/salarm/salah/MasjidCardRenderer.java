@@ -14,7 +14,6 @@ import android.net.Uri;
 import androidx.core.content.ContextCompat;
 
 import com.batoulapps.adhan.CalculationMethod;
-import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 
 import java.io.InputStream;
@@ -847,20 +846,18 @@ public class MasjidCardRenderer {
                 cal.set(Calendar.DAY_OF_MONTH, interval.startDay);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
 
-                Date defaultAsrTime = (masjid.getMadhab(context) == Madhab.SHAFI) ? st.asrShafi : st.asrHanafi;
-
                 String fajr = (fajrEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, fajrEvent, st, cal.getTime()))
-                        : formatTime(st.fajr != null ? st.fajr.getTime() : 0);
+                        : formatTime(0);
                 String asr = (asrEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, asrEvent, st, cal.getTime()))
-                        : formatTime(defaultAsrTime != null ? defaultAsrTime.getTime() : 0);
+                        : formatTime(0);
                 String maghrib = (maghribEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime()))
-                        : formatTime(st.maghrib != null ? st.maghrib.getTime() + 8 * 60 * 1000L : 0);
+                        : formatTime(0);
                 String isha = (ishaEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime()))
-                        : formatTime(st.isha != null ? st.isha.getTime() : 0);
+                        : formatTime(0);
 
                 group.rows.add(new MasjidCardData.IntervalRow(interval.startDay, fajr, asr, maghrib, isha));
             }
@@ -882,21 +879,26 @@ public class MasjidCardRenderer {
         MasjidEvent dhuhrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "DHUHR");
         MasjidEvent jumaEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "JUMA");
 
-        if (dhuhrEvent == null || jumaEvent == null) {
-            if (dhuhrEvent != null) {
-                String dhuhrTime = formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
-                return String.format("Duhr at %s", dhuhrTime);
-            } else if (jumaEvent != null) {
-                String jumaTime = formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
-                return String.format("Juma at %s", jumaTime);
-            }
+        String dhuhrTime = (dhuhrEvent != null && dhuhrEvent.definition != null)
+                ? formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()))
+                : formatTime(0);
+        String jumaTime = (jumaEvent != null && jumaEvent.definition != null)
+                ? formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()))
+                : formatTime(0);
+
+        String empty = formatTime(0);
+
+        boolean isDhuhrEmpty = empty.equals(dhuhrTime);
+        boolean isJumaEmpty = empty.equals(jumaTime);
+
+
+        if (isDhuhrEmpty && isJumaEmpty) {
             return "";
-        }
-
-        String dhuhrTime = formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
-        String jumaTime = formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
-
-        if (dhuhrTime.equals(jumaTime)) {
+        } else if (isJumaEmpty) {
+            return String.format("Duhr at %s", dhuhrTime);
+        } else if (isDhuhrEmpty) {
+            return String.format("Juma at %s", jumaTime);
+        } else if (dhuhrTime.equals(jumaTime)) {
             return String.format("Duhr and Juma at %s", dhuhrTime);
         } else {
             return String.format("Duhr at %s, Juma at %s", dhuhrTime, jumaTime);
