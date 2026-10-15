@@ -787,15 +787,15 @@ public class MasjidCardRenderer {
 
         data.iconUri = masjid.iconUri;
 
-        if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
-            data.qrContent = String.format(Locale.US, "https://maps.google.com/?q=%.6f,%.6f", masjid.latitude, masjid.longitude);
-        } else if (masjid.address != null && !masjid.address.trim().isEmpty()) {
-            data.qrContent = "geo:0,0?q=" + Uri.encode(masjid.address.trim());
-        } else if (masjid.name != null && !masjid.name.trim().isEmpty()) {
-            data.qrContent = masjid.name.trim();
-        } else {
-            data.qrContent = "Salarm";
+        List<MasjidEvent> events = null;
+        if (context != null && masjid.id != 0) {
+            try {
+                events = SalahDatabase.getDatabase(context).masjidEventDao().getByMasjidId(masjid.id);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        data.qrContent = MasjidQrCodec.encode(context, masjid, events);
 
         data.isFront = true;
         data.format = MasjidCardData.PaperFormat.CARD;

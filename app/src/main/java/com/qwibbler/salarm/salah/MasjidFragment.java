@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.batoulapps.adhan.CalculationMethod;
-import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
@@ -88,6 +87,10 @@ public class MasjidFragment extends SalarmFragment {
         mRecyclerView = view.findViewById(R.id.masjid_prayer_list);
         mViewTimesheetButton = view.findViewById(R.id.view_timesheet_button);
 
+        if (mEmptyStateLayout != null) {
+            mEmptyStateLayout.setOnClickListener(v -> showAddOrImportDialog());
+        }
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new MasjidPrayerAdapter();
         mRecyclerView.setAdapter(mAdapter);
@@ -146,6 +149,14 @@ public class MasjidFragment extends SalarmFragment {
         UiDataModel.getUiDataModel().addTabListener(mTabListener);
 
         getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> {
+            long selectedId = result.getLong("selected_masjid_id", -1);
+            if (selectedId != -1) {
+                mSelectedMasjidId = selectedId;
+            }
+            loadMasjids();
+        });
+
+        getParentFragmentManager().setFragmentResultListener("masjid_imported", this, (requestKey, result) -> {
             long selectedId = result.getLong("selected_masjid_id", -1);
             if (selectedId != -1) {
                 mSelectedMasjidId = selectedId;
@@ -389,11 +400,32 @@ public class MasjidFragment extends SalarmFragment {
                 .show();
     }
 
+    private void showAddOrImportDialog() {
+        exitCheckboxMode();
+        CharSequence[] options = new CharSequence[]{
+                getString(R.string.salarm_add_new_masjid),
+                getString(R.string.masjid_import_qr_title)
+        };
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.masjids_category_title)
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
+                    } else if (which == 1) {
+                        MasjidQrImportDialogFragment.show(getParentFragmentManager());
+                    }
+                })
+                .show();
+    }
+
     @Override
     public void onUpdateFab(@NonNull ImageView fab) {
         fab.setImageResource(R.drawable.ic_add);
         fab.setVisibility(View.VISIBLE);
-        fab.setOnLongClickListener(v -> true);
+        fab.setOnLongClickListener(v -> {
+            showAddOrImportDialog();
+            return true;
+        });
     }
 
     @Override
@@ -404,8 +436,7 @@ public class MasjidFragment extends SalarmFragment {
 
     @Override
     public void onFabClick() {
-        exitCheckboxMode();
-        MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
+        showAddOrImportDialog();
     }
 
     private static class PrayerItem {
