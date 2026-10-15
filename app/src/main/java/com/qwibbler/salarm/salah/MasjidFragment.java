@@ -139,9 +139,19 @@ public class MasjidFragment extends SalarmFragment {
             }
         });
 
+        if (savedInstanceState != null) {
+            mSelectedMasjidId = savedInstanceState.getLong("selected_masjid_id", -1);
+        }
+
         UiDataModel.getUiDataModel().addTabListener(mTabListener);
 
-        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> loadMasjids());
+        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> {
+            long selectedId = result.getLong("selected_masjid_id", -1);
+            if (selectedId != -1) {
+                mSelectedMasjidId = selectedId;
+            }
+            loadMasjids();
+        });
 
         return view;
     }
@@ -163,6 +173,12 @@ public class MasjidFragment extends SalarmFragment {
     public void onDestroyView() {
         UiDataModel.getUiDataModel().removeTabListener(mTabListener);
         super.onDestroyView();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("selected_masjid_id", mSelectedMasjidId);
     }
 
     @Override

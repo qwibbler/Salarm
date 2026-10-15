@@ -534,6 +534,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         }
 
         final Context appContext = requireContext().getApplicationContext();
+        final FragmentManager fragmentManager = getParentFragmentManager();
         AppExecutors.getDiskIO().execute(() -> {
             if (mMasjid.id == 0) {
                 long newId = SalahDatabase.getDatabase(appContext).masjidDao().insert(mMasjid);
@@ -544,6 +545,9 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             }
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
+                    Bundle result = new Bundle();
+                    result.putLong("selected_masjid_id", mMasjid.id);
+                    fragmentManager.setFragmentResult("masjid_updated", result);
                     Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
                     intent.putExtra("masjid_id", mMasjid.id);
                     startActivity(intent);
@@ -877,9 +881,11 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                 }
                 SalahAlarmSyncManager.recalculateAllActiveRules(appContext);
             }
-            fragmentManager.setFragmentResult("masjid_updated", new Bundle());
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
+                    Bundle result = new Bundle();
+                    result.putLong("selected_masjid_id", mMasjid.id);
+                    fragmentManager.setFragmentResult("masjid_updated", result);
                     dismiss();
                 }
             });
@@ -919,7 +925,11 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                             }
                         }
                         SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
-                        fragmentManager.setFragmentResult("masjid_updated", new Bundle());
+                        AppExecutors.getMainThread().post(() -> {
+                            if (isAdded()) {
+                                fragmentManager.setFragmentResult("masjid_updated", new Bundle());
+                            }
+                        });
                     });
                     dismiss();
                 })
@@ -992,7 +1002,9 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
 
             AppExecutors.getMainThread().post(() -> {
                 if (isAdded()) {
-                    fragmentManager.setFragmentResult("masjid_updated", new Bundle());
+                    Bundle result = new Bundle();
+                    result.putLong("selected_masjid_id", newId);
+                    fragmentManager.setFragmentResult("masjid_updated", result);
                     dismiss();
                 }
             });
