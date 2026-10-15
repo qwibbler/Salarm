@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -282,9 +281,7 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
                         boolean defaulted = mMasjid.fillMissingValuesWithDefaults(requireContext());
                         if (defaulted) {
                             Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
-                            AppExecutors.getDiskIO().execute(() -> {
-                                SalahDatabase.getDatabase(requireContext().getApplicationContext()).masjidDao().update(mMasjid);
-                            });
+                            AppExecutors.getDiskIO().execute(() -> SalahDatabase.getDatabase(requireContext().getApplicationContext()).masjidDao().update(mMasjid));
                         }
                         mHasLocation = MapPickerDialogFragment.isValidCoordinates(mMasjid.latitude, mMasjid.longitude)
                             && (mMasjid.latitude != 0.0 || mMasjid.longitude != 0.0);
