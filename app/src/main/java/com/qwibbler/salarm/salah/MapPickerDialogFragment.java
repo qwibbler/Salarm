@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -90,7 +91,14 @@ public class MapPickerDialogFragment extends DialogFragment {
         mCoordsText = view.findViewById(R.id.map_picked_coords_text);
         mAddressText = view.findViewById(R.id.map_picked_address_text);
 
-        if (getArguments() != null) {
+        if (savedInstanceState != null) {
+            mPickedLat = savedInstanceState.getDouble("state_picked_lat", 0.0);
+            mPickedLon = savedInstanceState.getDouble("state_picked_lon", 0.0);
+            mHasPickedLocation = savedInstanceState.getBoolean("state_has_picked_loc", false);
+            mPickedAddress = savedInstanceState.getString("state_picked_address", null);
+            mPickedCity = savedInstanceState.getString("state_picked_city", null);
+            mPickedCountry = savedInstanceState.getString("state_picked_country", null);
+        } else if (getArguments() != null) {
             mPickedLat = getArguments().getDouble(ARG_INIT_LAT, 0.0);
             mPickedLon = getArguments().getDouble(ARG_INIT_LON, 0.0);
             mHasPickedLocation = getArguments().getBoolean(ARG_HAS_INIT_LOC, false);
@@ -101,7 +109,12 @@ public class MapPickerDialogFragment extends DialogFragment {
 
         if (mHasPickedLocation && isValidCoordinates(mPickedLat, mPickedLon)) {
             updateCoordsText(mPickedLat, mPickedLon);
-            reverseGeocodePickedLocation(mPickedLat, mPickedLon);
+            if (mPickedAddress != null && !mPickedAddress.isEmpty()) {
+                mAddressText.setText(mPickedAddress);
+                mAddressText.setVisibility(View.VISIBLE);
+            } else {
+                reverseGeocodePickedLocation(mPickedLat, mPickedLon);
+            }
         } else {
             mCoordsText.setText(R.string.salarm_map_tap_to_pick);
             mAddressText.setVisibility(View.GONE);
@@ -115,6 +128,17 @@ public class MapPickerDialogFragment extends DialogFragment {
             .setTitle(R.string.masjid_location_search_map)
             .setView(view)
             .create();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putDouble("state_picked_lat", mPickedLat);
+        outState.putDouble("state_picked_lon", mPickedLon);
+        outState.putBoolean("state_has_picked_loc", mHasPickedLocation);
+        outState.putString("state_picked_address", mPickedAddress);
+        outState.putString("state_picked_city", mPickedCity);
+        outState.putString("state_picked_country", mPickedCountry);
     }
 
     @Override
@@ -134,12 +158,51 @@ public class MapPickerDialogFragment extends DialogFragment {
         }
     }
 
+    private class MapJavascriptInterface {
+        @JavascriptInterface
+        public void onLocationPicked(double lat, double lng) {
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    mPickedLat = lat;
+                    mPickedLon = lng;
+                    mHasPickedLocation = true;
+                    mPickedAddress = null;
+                    mPickedCity = null;
+                    mPickedCountry = null;
+                    mAddressText.setVisibility(View.GONE);
+                    updateCoordsText(lat, lng);
+                    reverseGeocodePickedLocation(lat, lng);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void onMapError(String error) {
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded()) {
+                    showError(error);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void onMapLoaded() {
+            AppExecutors.getMainThread().post(() -> {
+                if (isAdded() && mProgressBar != null) {
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
     private void setupWebView() {
         WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
 
         settings.setUserAgentString("Salarm-Android-App/1.0 (com.qwibbler.salarm)");
+
+        mWebView.addJavascriptInterface(new MapJavascriptInterface(), "Android");
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -238,6 +301,7 @@ public class MapPickerDialogFragment extends DialogFragment {
             "           attributionControl: true" +
             "       }).setView([" + initLat + ", " + initLon + "], " + (hasInitLoc ? 15 : 12) + ");" +
             "       var primaryUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';" +
+            "       var fallbackUrl = 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';" +
             "       var tileLayer = L.tileLayer(primaryUrl, {" +
             "           maxZoom: 19," +
             "           attribution: '&copy; OpenStreetMap contributors'" +
