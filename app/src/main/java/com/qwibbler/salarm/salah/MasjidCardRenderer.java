@@ -14,6 +14,7 @@ import android.net.Uri;
 import androidx.core.content.ContextCompat;
 
 import com.batoulapps.adhan.CalculationMethod;
+import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 
 import java.io.InputStream;
@@ -846,10 +847,20 @@ public class MasjidCardRenderer {
                 cal.set(Calendar.DAY_OF_MONTH, interval.startDay);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
 
-                String fajr = (fajrEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, fajrEvent, st, cal.getTime())) : "--:--";
-                String asr = (asrEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, asrEvent, st, cal.getTime())) : "--:--";
-                String maghrib = (maghribEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime())) : "--:--";
-                String isha = (ishaEvent != null) ? formatTime(SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime())) : "--:--";
+                Date defaultAsrTime = (masjid.getMadhab(context) == Madhab.SHAFI) ? st.asrShafi : st.asrHanafi;
+
+                String fajr = (fajrEvent != null)
+                        ? formatTime(SalahCalculator.evaluateMasjidEvent(context, fajrEvent, st, cal.getTime()))
+                        : formatTime(st.fajr != null ? st.fajr.getTime() : 0);
+                String asr = (asrEvent != null)
+                        ? formatTime(SalahCalculator.evaluateMasjidEvent(context, asrEvent, st, cal.getTime()))
+                        : formatTime(defaultAsrTime != null ? defaultAsrTime.getTime() : 0);
+                String maghrib = (maghribEvent != null)
+                        ? formatTime(SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime()))
+                        : formatTime(st.maghrib != null ? st.maghrib.getTime() : 0);
+                String isha = (ishaEvent != null)
+                        ? formatTime(SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime()))
+                        : formatTime(st.isha != null ? st.isha.getTime() : 0);
 
                 group.rows.add(new MasjidCardData.IntervalRow(interval.startDay, fajr, asr, maghrib, isha));
             }

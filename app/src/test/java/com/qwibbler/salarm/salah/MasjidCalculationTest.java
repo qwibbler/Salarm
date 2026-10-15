@@ -123,6 +123,42 @@ public class MasjidCalculationTest {
         assertEquals(Madhab.SHAFI, masjid.getMadhab(null));
     }
 
+    @Test
+    public void testMasjidAsrMadhabEvaluation() {
+        Masjid masjid = new Masjid();
+        masjid.intervalsCount = 2;
+        masjid.boundary1 = 15;
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(2024, Calendar.JUNE, 10);
+        Date date = cal.getTime();
+
+        SalahCalculator.SalahTimesProvider provider = d -> {
+            Calendar c = Calendar.getInstance();
+            c.setTime(d);
+            SalahCalculator.SalahTimes times = new SalahCalculator.SalahTimes();
+            times.asrShafi = createTime(c, 900); // 15:00
+            times.asrHanafi = createTime(c, 960); // 16:00
+            return times;
+        };
+
+        // Case 1: Masjid madhab = HANAFI
+        masjid.madhab = "HANAFI";
+        Date hanafiExtreme = SalahCalculator.getIntervalExtremeTime(date, masjid, RelationalRule.AnchorEvent.ASR_HANAFI, false, provider);
+        Assert.assertNotNull(hanafiExtreme);
+        Calendar hanafiCal = Calendar.getInstance();
+        hanafiCal.setTime(hanafiExtreme);
+        assertEquals(16, hanafiCal.get(Calendar.HOUR_OF_DAY));
+
+        // Case 2: Masjid madhab = SHAFI
+        masjid.madhab = "SHAFI";
+        Date shafiExtreme = SalahCalculator.getIntervalExtremeTime(date, masjid, RelationalRule.AnchorEvent.ASR_HANAFI, false, provider);
+        Assert.assertNotNull(shafiExtreme);
+        Calendar shafiCal = Calendar.getInstance();
+        shafiCal.setTime(shafiExtreme);
+        assertEquals(15, shafiCal.get(Calendar.HOUR_OF_DAY));
+    }
+
     private Date createTime(Calendar base, int minutesSinceMidnight) {
         Calendar c = (Calendar) base.clone();
         c.set(Calendar.HOUR_OF_DAY, minutesSinceMidnight / 60);

@@ -832,10 +832,37 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
         final Context appContext = requireContext().getApplicationContext();
         final FragmentManager fragmentManager = getParentFragmentManager();
         AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
             if (mMasjid.id == 0) {
-                SalahDatabase.getDatabase(appContext).masjidDao().insert(mMasjid);
+                mMasjid.id = db.masjidDao().insert(mMasjid);
             } else {
-                SalahDatabase.getDatabase(appContext).masjidDao().update(mMasjid);
+                db.masjidDao().update(mMasjid);
+
+                List<MasjidEvent> events = db.masjidEventDao().getByMasjidId(mMasjid.id);
+                Madhab madhab = mMasjid.getMadhab(appContext);
+                RelationalRule.AnchorEvent targetAsr = (madhab == Madhab.SHAFI) ? RelationalRule.AnchorEvent.ASR_SHAFI : RelationalRule.AnchorEvent.ASR_HANAFI;
+
+                for (MasjidEvent event : events) {
+                    if ("ASR".equals(event.salahType)) {
+                        boolean changed = false;
+                        if (event.definition.anchor.basicEvent == RelationalRule.AnchorEvent.ASR_HANAFI || event.definition.anchor.basicEvent == RelationalRule.AnchorEvent.ASR_SHAFI) {
+                            if (event.definition.anchor.basicEvent != targetAsr) {
+                                event.definition.anchor.basicEvent = targetAsr;
+                                changed = true;
+                            }
+                        }
+                        if (event.definition.clip != null && (event.definition.clip.anchor.basicEvent == RelationalRule.AnchorEvent.ASR_HANAFI || event.definition.clip.anchor.basicEvent == RelationalRule.AnchorEvent.ASR_SHAFI)) {
+                            if (event.definition.clip.anchor.basicEvent != targetAsr) {
+                                event.definition.clip.anchor.basicEvent = targetAsr;
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            db.masjidEventDao().update(event);
+                        }
+                    }
+                }
+                SalahAlarmSyncManager.recalculateAllActiveRules(appContext);
             }
             fragmentManager.setFragmentResult("masjid_updated", new Bundle());
             AppExecutors.getMainThread().post(() -> {
