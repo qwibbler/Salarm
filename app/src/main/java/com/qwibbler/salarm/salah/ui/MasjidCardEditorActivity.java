@@ -155,10 +155,22 @@ public class MasjidCardEditorActivity extends CollapsingToolbarBaseActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) {
                 if (cardData != null) {
-                    if (cardData.format == MasjidCardData.PaperFormat.CARD && !cardData.isFront) {
-                        cardData.footerTextBack = s.toString();
+                    if (cardData.format == MasjidCardData.PaperFormat.CARD) {
+                        if (cardData.isFront) {
+                            cardData.footerTextFront = s.toString();
+                        } else {
+                            cardData.footerTextBack = s.toString();
+                        }
                     } else {
-                        cardData.footerTextFront = s.toString();
+                        String val = s.toString();
+                        int newlineIndex = val.indexOf('\n');
+                        if (newlineIndex >= 0) {
+                            cardData.footerTextFront = val.substring(0, newlineIndex);
+                            cardData.footerTextBack = val.substring(newlineIndex + 1);
+                        } else {
+                            cardData.footerTextFront = val;
+                            cardData.footerTextBack = "";
+                        }
                     }
                     cardPreview.invalidate();
                 }

@@ -1857,8 +1857,8 @@
     <string name="masjid_save">Save</string>
     <string name="masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
 
-    <string name="masjid_salah_extreme_min">min</string>
-    <string name="masjid_salah_extreme_max">max</string>
+    <string name="masjid_salah_extreme_min">Earliest</string>
+    <string name="masjid_salah_extreme_max">Latest</string>
     <string name="masjid_intervals_2">2 Intervals</string>
     <string name="masjid_intervals_3">3 Intervals</string>
     <string name="masjid_intervals_adjust_hint">Adjust the boundaries to set interval ranges (1 to 31)</string>
@@ -1883,12 +1883,12 @@
     <string name="ordinal_th">%1$dth</string>
     <string name="masjid_interval_range">%1$s to %2$s</string>
 
-    <string name="salah_rule_description_base_max">alarm %1$s max time of %2$s</string>
-    <string name="salah_rule_description_base_min">alarm %1$s min time of %2$s</string>
-    <string name="salah_rule_no_later_max">, no later than %1$s max time of %2$s</string>
-    <string name="salah_rule_no_later_min">, no later than %1$s min time of %2$s</string>
-    <string name="salah_rule_no_earlier_max">, no earlier than %1$s max time of %2$s</string>
-    <string name="salah_rule_no_earlier_min">, no earlier than %1$s min time of %2$s</string>
+    <string name="salah_rule_description_base_max">alarm %1$s latest time of %2$s</string>
+    <string name="salah_rule_description_base_min">alarm %1$s earliest time of %2$s</string>
+    <string name="salah_rule_no_later_max">, no later than %1$s latest time of %2$s</string>
+    <string name="salah_rule_no_later_min">, no later than %1$s earliest time of %2$s</string>
+    <string name="salah_rule_no_earlier_max">, no earlier than %1$s latest time of %2$s</string>
+    <string name="salah_rule_no_earlier_min">, no earlier than %1$s earliest time of %2$s</string>
     <string name="view_timesheet">View Timesheet</string>
     <string name="masjid_card_editor_title">Masjid Card Editor</string>
     <string name="masjid_card_export_png">PNG</string>

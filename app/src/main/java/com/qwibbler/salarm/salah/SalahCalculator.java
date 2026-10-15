@@ -258,13 +258,16 @@ public class SalahCalculator {
 
         if (!event.definition.isFixedTime && event.definition.anchor.basicEvent != null) {
             if (masjid != null) {
-                Date extreme = getIntervalExtremeTime(context, date, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
-                if (extreme != null) {
-                    return applyCalculation(extreme.getTime(),
-                            event.definition.calculation.offsetMinutes,
-                            event.definition.calculation.roundingDirection,
-                            event.definition.calculation.roundingIntervalMinutes,
-                            event.definition.calculation.adjustmentMinutes);
+                if (event.definition.anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB
+                        && !"MAGHRIB".equals(event.salahType)) {
+                    Date extreme = getIntervalExtremeTime(context, date, masjid, event.definition.anchor.basicEvent, event.definition.anchor.isMax);
+                    if (extreme != null) {
+                        return applyCalculation(extreme.getTime(),
+                                event.definition.calculation.offsetMinutes,
+                                event.definition.calculation.roundingDirection,
+                                event.definition.calculation.roundingIntervalMinutes,
+                                event.definition.calculation.adjustmentMinutes);
+                    }
                 }
             }
         }

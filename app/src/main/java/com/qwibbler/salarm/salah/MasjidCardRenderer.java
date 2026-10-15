@@ -800,8 +800,8 @@ public class MasjidCardRenderer {
 
         data.isFront = true;
         data.format = MasjidCardData.PaperFormat.CARD;
-        data.footerTextFront = calculateDefaultFooter(masjid);
-        data.footerTextBack = "";
+        data.footerTextFront = calculateDefaultFooterFront(masjid);
+        data.footerTextBack = calculateDefaultFooterBack(masjid);
         return data;
     }
 
@@ -857,7 +857,7 @@ public class MasjidCardRenderer {
                         : formatTime(defaultAsrTime != null ? defaultAsrTime.getTime() : 0);
                 String maghrib = (maghribEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, maghribEvent, st, cal.getTime()))
-                        : formatTime(st.maghrib != null ? st.maghrib.getTime() : 0);
+                        : formatTime(st.maghrib != null ? st.maghrib.getTime() + 8 * 60 * 1000L : 0);
                 String isha = (ishaEvent != null)
                         ? formatTime(SalahCalculator.evaluateMasjidEvent(context, ishaEvent, st, cal.getTime()))
                         : formatTime(st.isha != null ? st.isha.getTime() : 0);
@@ -877,12 +877,21 @@ public class MasjidCardRenderer {
         return String.format(Locale.getDefault(), "%d:%02d", hour, cal.get(Calendar.MINUTE));
     }
 
-    private String calculateDefaultFooter(Masjid masjid) {
+    private String calculateDefaultFooterFront(Masjid masjid) {
         SalahDatabase db = SalahDatabase.getDatabase(context);
         MasjidEvent dhuhrEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "DHUHR");
         MasjidEvent jumaEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "JUMA");
 
-        if (dhuhrEvent == null || jumaEvent == null) return "";
+        if (dhuhrEvent == null || jumaEvent == null) {
+            if (dhuhrEvent != null) {
+                String dhuhrTime = formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
+                return String.format("Duhr at %s", dhuhrTime);
+            } else if (jumaEvent != null) {
+                String jumaTime = formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
+                return String.format("Juma at %s", jumaTime);
+            }
+            return "";
+        }
 
         String dhuhrTime = formatTime(SalahCalculator.evaluateDefinition(context, dhuhrEvent.definition, null, new Date()));
         String jumaTime = formatTime(SalahCalculator.evaluateDefinition(context, jumaEvent.definition, null, new Date()));
@@ -891,6 +900,20 @@ public class MasjidCardRenderer {
             return String.format("Duhr and Juma at %s", dhuhrTime);
         } else {
             return String.format("Duhr at %s, Juma at %s", dhuhrTime, jumaTime);
+        }
+    }
+
+    private String calculateDefaultFooterBack(Masjid masjid) {
+        SalahDatabase db = SalahDatabase.getDatabase(context);
+        MasjidEvent maghribEvent = db.masjidEventDao().getMasjidEvent(masjid.id, "MAGHRIB");
+        int offset = 8;
+        if (maghribEvent != null && !maghribEvent.definition.isFixedTime) {
+            offset = maghribEvent.definition.calculation.offsetMinutes;
+        }
+        if (offset >= 0) {
+            return String.format(Locale.US, "Mgrb at +%dm, changes daily", offset);
+        } else {
+            return String.format(Locale.US, "Mgrb at -%dm, changes daily", Math.abs(offset));
         }
     }
 

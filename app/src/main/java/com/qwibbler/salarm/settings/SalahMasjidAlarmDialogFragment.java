@@ -177,6 +177,11 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
                     if (actualPos >= 0) {
                         updateSafetyEventDefault(actualPos);
                     }
+                    if (getAnchorEvent(selected) == RelationalRule.AnchorEvent.MAGHRIB) {
+                        mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+                    } else {
+                        mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+                    }
                 });
 
                 if (mEvent != null) {
@@ -258,7 +263,13 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void initializeUiWithDefaults() {
-        mBinding.primaryOffsetValue.setText("0");
+        if ("MAGHRIB".equals(mSalahType)) {
+            mBinding.primaryOffsetValue.setText("8");
+            mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+        } else {
+            mBinding.primaryOffsetValue.setText("0");
+            mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+        }
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, 1);
         updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, 1);
         mBinding.primaryEvent.setText(SalahUtils.getLocalizedSalahName(requireContext(), mSalahType), false);
@@ -313,6 +324,12 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             mPrimaryIsMax = mEvent.definition.anchor.isMax;
             updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, mPrimaryIsMax ? 1 : 0);
             mBinding.primaryEvent.setText(RelationalRule.getEventName(requireContext(), mEvent.definition.anchor.basicEvent), false);
+
+            if ("MAGHRIB".equals(mSalahType) || mEvent.definition.anchor.basicEvent == RelationalRule.AnchorEvent.MAGHRIB) {
+                mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+            } else {
+                mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+            }
 
             mBinding.primaryRoundEnabledCheckbox.setChecked(mEvent.definition.calculation.roundingIntervalMinutes > 0);
             mRoundIdx = mEvent.definition.calculation.roundingDirection != null ? mEvent.definition.calculation.roundingDirection.ordinal() : 0;

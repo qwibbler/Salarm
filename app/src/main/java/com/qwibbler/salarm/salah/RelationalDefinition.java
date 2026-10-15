@@ -48,8 +48,8 @@ public class RelationalDefinition {
         String offsetPart = getOffsetPart(context, calculation.offsetMinutes);
 
         int baseResId;
-        if (isMasjidDefinition && anchor.basicEvent != null) {
-            // Masjid events anchored to basic ones care about min/max
+        if (isMasjidDefinition && anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
+            // Masjid events anchored to basic ones care about min/max (except Maghrib)
             baseResId = anchor.isMax ? R.string.salah_rule_description_base_max : R.string.salah_rule_description_base_min;
         } else {
             baseResId = R.string.salah_rule_description_base;

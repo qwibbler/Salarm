@@ -28,7 +28,15 @@ public class MasjidCardData {
         if (format == PaperFormat.CARD) {
             return isFront ? footerTextFront : footerTextBack;
         }
-        return footerTextFront != null ? footerTextFront : "";
+        String front = footerTextFront != null ? footerTextFront.trim() : "";
+        String back = footerTextBack != null ? footerTextBack.trim() : "";
+        if (!front.isEmpty() && !back.isEmpty()) {
+            return front + "\n" + back;
+        } else if (!front.isEmpty()) {
+            return front;
+        } else {
+            return back;
+        }
     }
 
     public static class MonthGroup {
