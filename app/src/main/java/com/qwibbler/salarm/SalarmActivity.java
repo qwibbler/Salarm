@@ -13,7 +13,6 @@ import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_IDLE;
 import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_SETTLING;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_TAB_TITLE_VISIBILITY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATION_CUBE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATION_DEPTH;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TAB_ANIMATION_FLIP;
@@ -33,6 +32,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -42,7 +42,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -58,12 +57,15 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 import com.qwibbler.salarm.alarms.AlarmFragment;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.base.BaseActivity;
-import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.base.KeepAliveService;
 import com.qwibbler.salarm.base.RunnableFragment;
+import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.DataModel.SilentSetting;
 import com.qwibbler.salarm.data.OnSilentSettingsListener;
@@ -95,9 +97,6 @@ import com.qwibbler.salarm.utils.PermissionUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
-import com.google.android.material.color.MaterialColors;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 import java.util.Map;
@@ -108,72 +107,7 @@ import java.util.Map;
  */
 public class SalarmActivity extends BaseActivity implements FabContainer {
 
-    private SalarmActivityBinding mBinding;
-
-    private SharedPreferences mPrefs;
-    private Typeface mRegularTypeface;
-    private String mFontPath;
-    private boolean mIsToolBarDisplayed;
-    private long mLastFabClickTime = 0;
     private static final long MIN_CLICK_INTERVAL = 500;
-
-    private AlertDialog mKeepAndroidOpenDialog = null;
-
-    /**
-     * Shrinks the FAB, left FAB and right FAB to nothing.
-     */
-    private final AnimatorSet mHideAnimation = new AnimatorSet();
-
-    /**
-     * Grows the FAB, left FAB and right FAB to natural sizes.
-     */
-    private final AnimatorSet mShowAnimation = new AnimatorSet();
-
-    /**
-     * Hides, updates, and shows only the FAB; the buttons are untouched.
-     */
-    private final AnimatorSet mUpdateFabOnlyAnimation = new AnimatorSet();
-
-    /**
-     * Hides, updates, and shows only the left FAB and right FAB.
-     */
-    private final AnimatorSet mUpdateButtonsOnlyAnimation = new AnimatorSet();
-
-    /**
-     * Automatically starts the {@link #mShowAnimation} after {@link #mHideAnimation} ends.
-     */
-    private final AnimatorListenerAdapter mAutoStartShowListener = new AutoStartShowListener();
-
-    /**
-     * Updates the user interface to reflect the selected tab from the backing model.
-     */
-    private final TabListener mTabChangeWatcher = new TabChangeWatcher();
-
-    /**
-     * Shows/hides a snackbar explaining which setting is suppressing alarms from firing.
-     */
-    private final OnSilentSettingsListener mSilentSettingChangeWatcher = new SilentSettingChangeWatcher();
-
-    /**
-     * Displays a snackbar explaining why alarms may not fire or may fire silently.
-     */
-    private Runnable mShowSilentSettingSnackbarRunnable;
-
-    /**
-     * The current display state of the FAB.
-     */
-    private FabState mFabState = FabState.SHOWING;
-
-    /**
-     * Generates the fragments that are displayed by the FragmentTabPager.
-     */
-    private FragmentTabPagerAdapter mFragmentTabPagerAdapter;
-
-    /**
-     * {@code true} when a settings change necessitates recreating this activity.
-     */
-    private boolean mShouldRecreate = false;
-
     /**
      * List of supported preference keys used to monitor UI and behavior changes within
      * {@link #registerPrefListener()}.
@@ -188,7 +122,57 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         // Permission
         KEY_ESSENTIAL_PERMISSIONS_GRANTED
     );
-
+    /**
+     * Shrinks the FAB, left FAB and right FAB to nothing.
+     */
+    private final AnimatorSet mHideAnimation = new AnimatorSet();
+    /**
+     * Grows the FAB, left FAB and right FAB to natural sizes.
+     */
+    private final AnimatorSet mShowAnimation = new AnimatorSet();
+    /**
+     * Hides, updates, and shows only the FAB; the buttons are untouched.
+     */
+    private final AnimatorSet mUpdateFabOnlyAnimation = new AnimatorSet();
+    /**
+     * Hides, updates, and shows only the left FAB and right FAB.
+     */
+    private final AnimatorSet mUpdateButtonsOnlyAnimation = new AnimatorSet();
+    /**
+     * Automatically starts the {@link #mShowAnimation} after {@link #mHideAnimation} ends.
+     */
+    private final AnimatorListenerAdapter mAutoStartShowListener = new AutoStartShowListener();
+    /**
+     * Updates the user interface to reflect the selected tab from the backing model.
+     */
+    private final TabListener mTabChangeWatcher = new TabChangeWatcher();
+    /**
+     * Shows/hides a snackbar explaining which setting is suppressing alarms from firing.
+     */
+    private final OnSilentSettingsListener mSilentSettingChangeWatcher = new SilentSettingChangeWatcher();
+    private SalarmActivityBinding mBinding;
+    private SharedPreferences mPrefs;
+    private Typeface mRegularTypeface;
+    private String mFontPath;
+    private boolean mIsToolBarDisplayed;
+    private long mLastFabClickTime = 0;
+    private AlertDialog mKeepAndroidOpenDialog = null;
+    /**
+     * Displays a snackbar explaining why alarms may not fire or may fire silently.
+     */
+    private Runnable mShowSilentSettingSnackbarRunnable;
+    /**
+     * The current display state of the FAB.
+     */
+    private FabState mFabState = FabState.SHOWING;
+    /**
+     * Generates the fragments that are displayed by the FragmentTabPager.
+     */
+    private FragmentTabPagerAdapter mFragmentTabPagerAdapter;
+    /**
+     * {@code true} when a settings change necessitates recreating this activity.
+     */
+    private boolean mShouldRecreate = false;
     /**
      * Listener registered to observe changes in relevant app settings.
      * Used to trigger activity recreation only when relevant values actually change.
@@ -246,9 +230,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
         configureBottomNavigationView();
 
-        UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
-        int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
-
         displayKeepAndroidOpenDialogIfUnread();
 
         registerPrefListener();
@@ -301,10 +282,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         if (tabsChanged) {
             mFragmentTabPagerAdapter.clearCache();
             mFragmentTabPagerAdapter.notifyDataSetChanged();
-
-            // Re-calculate the current page based on the new visible tabs count
-            UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
-            int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
 
             mBinding.salarmActivityPager.setPageTransformer(false, null);
             updatePageTransformer();
@@ -537,7 +514,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     }
 
 
-
     /**
      * This method adjusts the space occupied by system elements (such as the status bar,
      * navigation bar or screen notch) and adjust the display of the application interface
@@ -724,18 +700,18 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
         int totalTabs = UiDataModel.getUiDataModel().getTabCount();
         LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
         );
         mBinding.salarmActivityBottomScrollView.setLayoutParams(scrollParams);
-        mBinding.salarmActivityBottomScrollView.setFillViewport(totalTabs <= 4);
+        mBinding.salarmActivityBottomScrollView.setFillViewport(true);
 
-        if (totalTabs <= 4) {
+        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        mBinding.salarmActivityBottomMenu.setTabGravity(TabLayout.GRAVITY_FILL);
+        if (totalTabs <= 4 || isLandscape) {
             mBinding.salarmActivityBottomMenu.setTabMode(TabLayout.MODE_FIXED);
-            mBinding.salarmActivityBottomMenu.setTabGravity(TabLayout.GRAVITY_FILL);
         } else {
-            mBinding.salarmActivityBottomMenu.setTabMode(TabLayout.MODE_SCROLLABLE);
-            mBinding.salarmActivityBottomMenu.setTabGravity(TabLayout.GRAVITY_START);
+            mBinding.salarmActivityBottomMenu.setTabMode(TabLayout.MODE_AUTO);
         }
 
         for (int i = 0; i < totalTabs; i++) {
@@ -744,6 +720,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             tlTab.setText(uiTabItem.getLabelResId());
             tlTab.setIcon(getTabIcon(uiTabItem));
             tlTab.setTag(uiTabItem);
+            tlTab.setId(uiTabItem.getPageResId());
             mBinding.salarmActivityBottomMenu.addTab(tlTab);
         }
 
@@ -757,18 +734,21 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             new int[]{primaryColor, primaryColor, onBackgroundColor}));
         mBinding.salarmActivityBottomMenu.setSelectedTabIndicatorColor(primaryColor);
 
+        final int backgroundColor;
         if (ThemeUtils.isNight(getResources()) && SettingsDAO.getDarkMode(mPrefs).equals(AMOLED_DARK_MODE)) {
-            mBinding.salarmActivityBottomMenu.setBackgroundColor(Color.BLACK);
+            backgroundColor = Color.BLACK;
             mBinding.salarmActivityBottomMenu.setTabTextColors(Color.WHITE, primaryColor);
         } else {
             final boolean isCardBackgroundDisplayed = SettingsDAO.isCardBackgroundDisplayed(mPrefs);
 
             if (isCardBackgroundDisplayed) {
-                mBinding.salarmActivityBottomMenu.setBackgroundColor(surfaceColor);
+                backgroundColor = surfaceColor;
             } else {
-                mBinding.salarmActivityBottomMenu.setBackgroundColor(Color.TRANSPARENT);
+                backgroundColor = Color.TRANSPARENT;
             }
         }
+        mBinding.salarmActivityBottomMenu.setBackgroundColor(backgroundColor);
+        mBinding.salarmActivityBottomScrollView.setBackgroundColor(backgroundColor);
 
         mBinding.salarmActivityBottomMenu.clearOnTabSelectedListeners();
         mBinding.salarmActivityBottomMenu.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -823,7 +803,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
         for (int i = 0; i < mBinding.salarmActivityBottomMenu.getTabCount(); i++) {
             TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(i);
-            if (tab != null && tab.view != null) {
+            if (tab != null) {
                 ThemeUtils.applyTypeface(tab.view, mRegularTypeface);
             }
         }
@@ -836,7 +816,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
         for (int i = 0; i < mBinding.salarmActivityBottomMenu.getTabCount(); i++) {
             TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(i);
-            if (tab != null && tab.view != null) {
+            if (tab != null) {
                 View itemView = tab.view;
 
                 // Disable the system tooltip
@@ -960,11 +940,11 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         if (targetIndex != -1) {
             final int finalTargetIndex = targetIndex;
             mBinding.salarmActivityBottomMenu.post(() -> {
-                if (mBinding == null || mBinding.salarmActivityBottomScrollView == null) {
+                if (mBinding == null) {
                     return;
                 }
                 TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(finalTargetIndex);
-                if (tab != null && tab.view != null) {
+                if (tab != null) {
                     View itemView = tab.view;
                     int scrollX = itemView.getLeft() - (mBinding.salarmActivityBottomScrollView.getWidth() - itemView.getWidth()) / 2;
                     mBinding.salarmActivityBottomScrollView.smoothScrollTo(Math.max(0, scrollX), 0);
@@ -1138,14 +1118,15 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 alarmFragment.hideSideButtonsOnlyAnimated();
             }
 
-            final UiDataModel.Tab finalTab = UiDataModel.getUiDataModel().getTabAt(position);
-            if (mBinding != null && mBinding.salarmActivityBottomScrollView != null) {
+            if (mBinding != null) {
+                final int finalPosition = position;
                 mBinding.salarmActivityBottomMenu.post(() -> {
-                    if (mBinding == null || mBinding.salarmActivityBottomScrollView == null) {
+                    if (mBinding == null) {
                         return;
                     }
-                    View itemView = mBinding.salarmActivityBottomMenu.findViewById(finalTab.getPageResId());
-                    if (itemView != null) {
+                    TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(finalPosition);
+                    if (tab != null) {
+                        View itemView = tab.view;
                         int scrollX = itemView.getLeft() - (mBinding.salarmActivityBottomScrollView.getWidth() - itemView.getWidth()) / 2;
                         mBinding.salarmActivityBottomScrollView.smoothScrollTo(Math.max(0, scrollX), 0);
                     }
