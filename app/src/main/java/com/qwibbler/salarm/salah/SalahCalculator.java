@@ -327,7 +327,8 @@ public class SalahCalculator {
         cal.add(Calendar.MINUTE, offsetMinutes);
 
         long millis = cal.getTimeInMillis();
-        if (intervalMinutes > 0 && direction != null) {
+        boolean hasRounding = (intervalMinutes > 0 && direction != null);
+        if (hasRounding) {
             long intervalMillis = intervalMinutes * 60 * 1000L;
             if (direction == RelationalRule.RoundingDirection.NEAREST) {
                 millis = Math.round((double) millis / intervalMillis) * intervalMillis;
@@ -336,10 +337,10 @@ public class SalahCalculator {
             } else if (direction == RelationalRule.RoundingDirection.DOWN) {
                 millis = (long) Math.floor((double) millis / intervalMillis) * intervalMillis;
             }
-        }
 
-        if (adjustmentMinutes != 0) {
-            millis += adjustmentMinutes * 60 * 1000L;
+            if (adjustmentMinutes != 0) {
+                millis += adjustmentMinutes * 60 * 1000L;
+            }
         }
 
         return millis;

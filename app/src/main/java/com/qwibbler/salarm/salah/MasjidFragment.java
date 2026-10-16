@@ -292,9 +292,7 @@ public class MasjidFragment extends SalarmFragment {
         boolean filled = masjid.fillMissingValuesWithDefaults(appContext);
         if (filled) {
             Toast.makeText(requireContext(), R.string.masjid_missing_values_defaults_toast, Toast.LENGTH_LONG).show();
-            AppExecutors.getDiskIO().execute(() -> {
-                SalahDatabase.getDatabase(appContext).masjidDao().update(masjid);
-            });
+            AppExecutors.getDiskIO().execute(() -> SalahDatabase.getDatabase(appContext).masjidDao().update(masjid));
         }
 
         mMasjidTitleText.setText(masjid.name);

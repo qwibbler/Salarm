@@ -64,9 +64,10 @@ public class RelationalDefinition {
         }
         sb.append(context.getString(baseResId, offsetPart, anchorName));
 
+        boolean hasRounding = (calculation.roundingIntervalMinutes > 0 && calculation.roundingDirection != null);
         sb.append(getRoundingPart(context, calculation.roundingDirection, calculation.roundingIntervalMinutes));
 
-        if (calculation.adjustmentMinutes != 0) {
+        if (hasRounding && calculation.adjustmentMinutes != 0) {
             String adjPart = getAdjustmentPart(context, calculation.adjustmentMinutes);
             sb.append(context.getString(R.string.salah_rule_adjusted, adjPart));
         }

@@ -192,7 +192,10 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, mPrimaryIsMax ? 1 : 0);
         });
 
-        mBinding.primaryRoundEnabledCheckbox.setOnCheckedChangeListener((b, checked) -> updateBlockState(checked, mBinding.primaryRoundContainer));
+        mBinding.primaryRoundEnabledCheckbox.setOnCheckedChangeListener((b, checked) -> {
+            updateBlockState(checked, mBinding.primaryRoundContainer);
+            updateAdjustmentVisibility();
+        });
         mBinding.primaryRoundToggle.setOnClickListener(v -> {
             mRoundIdx = (mRoundIdx + 1) % mRoundTypes.length;
             updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mRoundIdx);
@@ -211,6 +214,17 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
     private void updateBlockState(boolean enabled, View v) {
         if (v != null) v.setVisibility(enabled ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateAdjustmentVisibility() {
+        boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
+        mBinding.adjustmentEnabledCheckbox.setVisibility(roundingEnabled ? View.VISIBLE : View.GONE);
+        if (!roundingEnabled) {
+            mBinding.adjustmentEnabledCheckbox.setChecked(false);
+            mBinding.adjustmentContainer.setVisibility(View.GONE);
+        } else {
+            updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        }
     }
 
     private void initializeUiWithDefaults() {
@@ -234,7 +248,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
 
         updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
-        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateAdjustmentVisibility();
     }
 
     private void populateUi() {
@@ -261,19 +275,25 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             }
 
             if (mEvent.definition.calculation != null) {
-                mBinding.primaryRoundEnabledCheckbox.setChecked(mEvent.definition.calculation.roundingIntervalMinutes > 0);
+                boolean hasRounding = mEvent.definition.calculation.roundingIntervalMinutes > 0 && mEvent.definition.calculation.roundingDirection != null;
+                mBinding.primaryRoundEnabledCheckbox.setChecked(hasRounding);
                 mRoundIdx = mEvent.definition.calculation.roundingDirection != null ? mEvent.definition.calculation.roundingDirection.ordinal() : 0;
                 updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mRoundIdx);
                 mBinding.primaryRoundValue.setText(String.valueOf(mEvent.definition.calculation.roundingIntervalMinutes));
 
-                mBinding.adjustmentEnabledCheckbox.setChecked(mEvent.definition.calculation.adjustmentMinutes != 0);
-                mBinding.adjustmentValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.adjustmentMinutes)));
-                mAdjustmentIdx = mEvent.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
-                updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
+                if (hasRounding) {
+                    mBinding.adjustmentEnabledCheckbox.setChecked(mEvent.definition.calculation.adjustmentMinutes != 0);
+                    mBinding.adjustmentValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.adjustmentMinutes)));
+                    mAdjustmentIdx = mEvent.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
+                    updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
+                } else {
+                    mBinding.adjustmentEnabledCheckbox.setChecked(false);
+                    mBinding.adjustmentValue.setText("0");
+                }
             }
         }
         updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
-        updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
+        updateAdjustmentVisibility();
     }
 
     private void saveEvent() {
@@ -294,14 +314,15 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             if (mRoundIdx >= 0 && mRoundIdx < RelationalRule.RoundingDirection.values().length) {
                 event.definition.calculation.roundingDirection = RelationalRule.RoundingDirection.values()[mRoundIdx];
             }
+            if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
+                int adj = parseSafeInt(mBinding.adjustmentValue.getText().toString(), 0);
+                event.definition.calculation.adjustmentMinutes = mAdjustmentIdx == 1 ? adj : -adj;
+            } else {
+                event.definition.calculation.adjustmentMinutes = 0;
+            }
         } else {
             event.definition.calculation.roundingIntervalMinutes = 0;
-        }
-
-        if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
-            int adj = parseSafeInt(mBinding.adjustmentValue.getText().toString(), 0);
-            event.definition.calculation.adjustmentMinutes = mAdjustmentIdx == 1 ? adj : -adj;
-        } else {
+            event.definition.calculation.roundingDirection = null;
             event.definition.calculation.adjustmentMinutes = 0;
         }
 

@@ -68,6 +68,31 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
         Utils.showDialogFragment(manager, fragment, "MasjidQrImportDialogFragment");
     }
 
+    private static byte[] rotateYUV(byte[] yuv, int width, int height, int rotation) {
+        if (rotation == 0) return yuv;
+        byte[] rotated = new byte[yuv.length];
+        if (rotation == 90) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    rotated[x * height + (height - 1 - y)] = yuv[y * width + x];
+                }
+            }
+        } else if (rotation == 270) {
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    rotated[(width - 1 - x) * height + y] = yuv[y * width + x];
+                }
+            }
+        } else if (rotation == 180) {
+            for (int i = 0; i < width * height; i++) {
+                rotated[width * height - 1 - i] = yuv[i];
+            }
+        } else {
+            return yuv;
+        }
+        return rotated;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,46 +218,29 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
         reader.setHints(hints);
 
         mIsScanning = true;
-        imageAnalysis.setAnalyzer(mCameraExecutor, new ImageAnalysis.Analyzer() {
-            @Override
-            public void analyze(@NonNull ImageProxy imageProxy) {
-                if (!mIsScanning) {
-                    imageProxy.close();
-                    return;
-                }
-                try {
-                    ImageProxy.PlaneProxy[] planes = imageProxy.getPlanes();
-                    if (planes.length > 0) {
-                        ByteBuffer buffer = planes[0].getBuffer();
-                        byte[] data = new byte[buffer.remaining()];
-                        buffer.get(data);
-                        int width = imageProxy.getWidth();
-                        int height = imageProxy.getHeight();
-                        int rotation = imageProxy.getImageInfo().getRotationDegrees();
-
-                        byte[] rotated = rotateYUV(data, width, height, rotation);
-                        int finalWidth = (rotation == 90 || rotation == 270) ? height : width;
-                        int finalHeight = (rotation == 90 || rotation == 270) ? width : height;
-
-                        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
-                            rotated, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight, false
-                        );
-                        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                        Result result = reader.decodeWithState(bitmap);
-                        if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                            mIsScanning = false;
-                            String scannedText = result.getText().trim();
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(() -> onQrCodeDetected(scannedText));
-                            }
+        imageAnalysis.setAnalyzer(mCameraExecutor, imageProxy -> {
+            if (!mIsScanning) {
+                imageProxy.close();
+                return;
+            }
+            try {
+                ImageProxy.PlaneProxy[] planes = imageProxy.getPlanes();
+                if (planes.length > 0) {
+                    BinaryBitmap bitmap = getBinaryBitmap(imageProxy, planes);
+                    Result result = reader.decodeWithState(bitmap);
+                    if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                        mIsScanning = false;
+                        String scannedText = result.getText().trim();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> onQrCodeDetected(scannedText));
                         }
                     }
-                } catch (Exception ignored) {
-                    // No QR code found in this frame
-                } finally {
-                    reader.reset();
-                    imageProxy.close();
                 }
+            } catch (Exception ignored) {
+                // No QR code found in this frame
+            } finally {
+                reader.reset();
+                imageProxy.close();
             }
         });
 
@@ -244,29 +252,23 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
         }
     }
 
-    private static byte[] rotateYUV(byte[] yuv, int width, int height, int rotation) {
-        if (rotation == 0) return yuv;
-        byte[] rotated = new byte[yuv.length];
-        if (rotation == 90) {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    rotated[x * height + (height - 1 - y)] = yuv[y * width + x];
-                }
-            }
-        } else if (rotation == 270) {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    rotated[(width - 1 - x) * height + y] = yuv[y * width + x];
-                }
-            }
-        } else if (rotation == 180) {
-            for (int i = 0; i < width * height; i++) {
-                rotated[width * height - 1 - i] = yuv[i];
-            }
-        } else {
-            return yuv;
-        }
-        return rotated;
+    @NonNull
+    private static BinaryBitmap getBinaryBitmap(ImageProxy imageProxy, ImageProxy.PlaneProxy[] planes) {
+        ByteBuffer buffer = planes[0].getBuffer();
+        byte[] data = new byte[buffer.remaining()];
+        buffer.get(data);
+        int width = imageProxy.getWidth();
+        int height = imageProxy.getHeight();
+        int rotation = imageProxy.getImageInfo().getRotationDegrees();
+
+        byte[] rotated = rotateYUV(data, width, height, rotation);
+        int finalWidth = (rotation == 90 || rotation == 270) ? height : width;
+        int finalHeight = (rotation == 90 || rotation == 270) ? width : height;
+
+        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
+            rotated, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight, false
+        );
+        return new BinaryBitmap(new HybridBinarizer(source));
     }
 
     private void onQrCodeDetected(String scannedText) {
