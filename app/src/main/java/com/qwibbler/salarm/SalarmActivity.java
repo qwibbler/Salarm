@@ -37,16 +37,15 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.GestureDetector;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -96,12 +95,9 @@ import com.qwibbler.salarm.utils.PermissionUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.color.MaterialColors;
-import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 import java.util.Map;
@@ -120,8 +116,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     private boolean mIsToolBarDisplayed;
     private long mLastFabClickTime = 0;
     private static final long MIN_CLICK_INTERVAL = 500;
-
-    private int mBottomNavPage;
 
     private AlertDialog mKeepAndroidOpenDialog = null;
 
@@ -250,9 +244,10 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
         configureFabAndButtons();
 
+        configureBottomNavigationView();
+
         UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
         int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
-        mBottomNavPage = (tabIndex <= 3) ? 1 : 2;
 
         displayKeepAndroidOpenDialogIfUnread();
 
@@ -273,7 +268,10 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
 
                 configureToolbar();
 
-                configureBottomNavigationView();
+                String tabTitleVisibility = SettingsDAO.getTabTitleVisibility(mPrefs);
+                if (!tabTitleVisibility.equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null) {
+                    updateBottomNavTypeface();
+                }
 
                 applyBottomNavTooltips();
             });
@@ -307,7 +305,6 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             // Re-calculate the current page based on the new visible tabs count
             UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
             int tabIndex = UiDataModel.getUiDataModel().getTabIndex(selectedTab);
-            mBottomNavPage = (tabIndex <= 3) ? 1 : 2;
 
             mBinding.salarmActivityPager.setPageTransformer(false, null);
             updatePageTransformer();
@@ -539,38 +536,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         };
     }
 
-    private final NavigationBarView.OnItemSelectedListener mNavigationListener = item -> {
-        UiDataModel.Tab tab = null;
-        int itemId = item.getItemId();
-        if (itemId == R.id.page_alarm) {
-            tab = UiDataModel.Tab.ALARMS;
-        } else if (itemId == R.id.page_clock) {
-            tab = UiDataModel.Tab.CLOCKS;
-        } else if (itemId == R.id.page_timer) {
-            tab = UiDataModel.Tab.TIMERS;
-        } else if (itemId == R.id.page_stopwatch) {
-            tab = UiDataModel.Tab.STOPWATCH;
-        } else if (itemId == R.id.page_salah) {
-            tab = UiDataModel.Tab.SALAH;
-        } else if (itemId == R.id.page_qibla) {
-            tab = UiDataModel.Tab.QIBLA;
-        } else if (itemId == R.id.page_masjid) {
-            tab = UiDataModel.Tab.MASJID;
-        } else if (itemId == R.id.page_next) {
-            setBottomNavPage(2);
-            return false;
-        } else if (itemId == R.id.page_back) {
-            setBottomNavPage(1);
-            return false;
-        }
 
-        if (tab != null) {
-            UiDataModel.getUiDataModel().setSelectedTab(tab);
-            return true;
-        }
-
-        return false;
-    };
 
     /**
      * This method adjusts the space occupied by system elements (such as the status bar,
@@ -750,79 +716,50 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     }
 
     /**
-     * Configures the {@link BottomNavigationView}, such as the icon color, text color,
+     * Configures the {@link TabLayout}, such as the icon color, text color,
      * text visibility, font update, etc.
      */
-    @SuppressLint("RestrictedApi")
     private void configureBottomNavigationView() {
-        Menu menu = mBinding.salarmActivityBottomMenu.getMenu();
-        menu.clear();
+        mBinding.salarmActivityBottomMenu.removeAllTabs();
 
         int totalTabs = UiDataModel.getUiDataModel().getTabCount();
-        boolean pagingNeeded = totalTabs > 4;
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        mBinding.salarmActivityBottomScrollView.setLayoutParams(scrollParams);
+        mBinding.salarmActivityBottomScrollView.setFillViewport(totalTabs <= 4);
 
-        if (pagingNeeded) {
-            if (mBottomNavPage == 1) {
-                for (int i = 0; i < 4; i++) {
-                    addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i);
-                }
-                MenuItem nextItem = menu.add(Menu.NONE, R.id.page_next, 4, R.string.menu_next_page)
-                        .setIcon(R.drawable.ic_arrow_right);
-                nextItem.setCheckable(false);
-            } else {
-                MenuItem backItem = menu.add(Menu.NONE, R.id.page_back, 0, R.string.menu_previous_page)
-                        .setIcon(R.drawable.ic_chevron_left);
-                backItem.setCheckable(false);
-                for (int i = 4; i < totalTabs; i++) {
-                    addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i - 3);
-                }
-            }
+        if (totalTabs <= 4) {
+            mBinding.salarmActivityBottomMenu.setTabMode(TabLayout.MODE_FIXED);
+            mBinding.salarmActivityBottomMenu.setTabGravity(TabLayout.GRAVITY_FILL);
         } else {
-            for (int i = 0; i < totalTabs; i++) {
-                addTabToMenu(menu, UiDataModel.getUiDataModel().getTabAt(i), i);
-            }
+            mBinding.salarmActivityBottomMenu.setTabMode(TabLayout.MODE_SCROLLABLE);
+            mBinding.salarmActivityBottomMenu.setTabGravity(TabLayout.GRAVITY_START);
         }
 
-        mBinding.salarmActivityBottomMenu.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_LABELED);
+        for (int i = 0; i < totalTabs; i++) {
+            UiDataModel.Tab uiTabItem = UiDataModel.getUiDataModel().getTabAt(i);
+            TabLayout.Tab tlTab = mBinding.salarmActivityBottomMenu.newTab();
+            tlTab.setText(uiTabItem.getLabelResId());
+            tlTab.setIcon(getTabIcon(uiTabItem));
+            tlTab.setTag(uiTabItem);
+            mBinding.salarmActivityBottomMenu.addTab(tlTab);
+        }
 
         final int primaryColor = MaterialColors.getColor(this, androidx.appcompat.R.attr.colorPrimary, Color.BLACK);
         final int surfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurface, Color.BLACK);
         final int onBackgroundColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnBackground, Color.BLACK);
 
-        String tabTitleVisibility = SettingsDAO.getTabTitleVisibility(mPrefs);
-        final boolean shouldUpdateTypeface = !tabTitleVisibility.equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null;
-
-        if (shouldUpdateTypeface) {
-            updateBottomNavTypeface();
-        }
-
-        mBinding.salarmActivityBottomMenu.setOnItemSelectedListener(item -> {
-            if (shouldUpdateTypeface) {
-                mBinding.salarmActivityBottomMenu.post(this::updateBottomNavTypeface);
-            }
-
-            return mNavigationListener.onNavigationItemSelected(item);
-        });
-
-        mBinding.salarmActivityBottomMenu.setItemActiveIndicatorEnabled(SettingsDAO.isTabIndicatorDisplayed(mPrefs));
-
-        if (tabTitleVisibility.equals(DEFAULT_TAB_TITLE_VISIBILITY)) {
-            mBinding.salarmActivityBottomMenu.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_LABELED);
-        } else if (tabTitleVisibility.equals(TAB_TITLE_VISIBILITY_NEVER)) {
-            mBinding.salarmActivityBottomMenu.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_UNLABELED);
-        } else {
-            mBinding.salarmActivityBottomMenu.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_SELECTED);
-        }
-
-        mBinding.salarmActivityBottomMenu.setItemIconTintList(new ColorStateList(
+        mBinding.salarmActivityBottomMenu.setTabTextColors(onBackgroundColor, primaryColor);
+        mBinding.salarmActivityBottomMenu.setTabIconTint(new ColorStateList(
             new int[][]{{android.R.attr.state_selected}, {android.R.attr.state_pressed}, {}},
             new int[]{primaryColor, primaryColor, onBackgroundColor}));
+        mBinding.salarmActivityBottomMenu.setSelectedTabIndicatorColor(primaryColor);
 
         if (ThemeUtils.isNight(getResources()) && SettingsDAO.getDarkMode(mPrefs).equals(AMOLED_DARK_MODE)) {
             mBinding.salarmActivityBottomMenu.setBackgroundColor(Color.BLACK);
-            mBinding.salarmActivityBottomMenu.setItemTextColor(new ColorStateList(
-                new int[][]{{android.R.attr.state_selected}, {android.R.attr.state_pressed}, {}},
-                new int[]{primaryColor, primaryColor, Color.WHITE}));
+            mBinding.salarmActivityBottomMenu.setTabTextColors(Color.WHITE, primaryColor);
         } else {
             final boolean isCardBackgroundDisplayed = SettingsDAO.isCardBackgroundDisplayed(mPrefs);
 
@@ -831,10 +768,31 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             } else {
                 mBinding.salarmActivityBottomMenu.setBackgroundColor(Color.TRANSPARENT);
             }
+        }
 
-            mBinding.salarmActivityBottomMenu.setItemTextColor(new ColorStateList(
-                new int[][]{{android.R.attr.state_selected}, {android.R.attr.state_pressed}, {}},
-                new int[]{primaryColor, primaryColor, onBackgroundColor}));
+        mBinding.salarmActivityBottomMenu.clearOnTabSelectedListeners();
+        mBinding.salarmActivityBottomMenu.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getTag() instanceof UiDataModel.Tab uiTab) {
+                    if (UiDataModel.getUiDataModel().getSelectedTab() != uiTab) {
+                        UiDataModel.getUiDataModel().setSelectedTab(uiTab);
+                    }
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        String tabTitleVisibility = SettingsDAO.getTabTitleVisibility(mPrefs);
+        final boolean shouldUpdateTypeface = !tabTitleVisibility.equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null;
+
+        if (shouldUpdateTypeface) {
+            updateBottomNavTypeface();
         }
 
         mBinding.salarmActivityBottomMenu.post(() -> {
@@ -842,73 +800,8 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 return;
             }
 
-            final GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-                    if (Math.abs(velocityX) > Math.abs(velocityY)) {
-                        if (velocityX > 0) {
-                            setBottomNavPage(1);
-                        } else {
-                            setBottomNavPage(2);
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
-                    return Math.abs(distanceX) > Math.abs(distanceY);
-                }
-
-                @Override
-                public boolean onDown(@NonNull MotionEvent e) {
-                    return true;
-                }
-
-                @Override
-                public boolean onSingleTapUp(@NonNull MotionEvent e) {
-                    return true;
-                }
-            });
-
-            View menuView = mBinding.salarmActivityBottomMenu.getChildAt(0);
-            if (menuView instanceof android.view.ViewGroup menuViewGroup) {
-                for (int i = 0; i < menuViewGroup.getChildCount(); i++) {
-                    View itemView = menuViewGroup.getChildAt(i);
-                    if (itemView != null) {
-                        itemView.setOnTouchListener((v, event) -> {
-                            if (gestureDetector.onTouchEvent(event)) {
-                                if (event.getAction() == MotionEvent.ACTION_UP) {
-                                    v.performClick();
-                                }
-                                return true;
-                            }
-                            return false;
-                        });
-                    }
-                }
-            }
-
-            if (menuView != null) {
-                menuView.setOnTouchListener((v, event) -> {
-                    if (gestureDetector.onTouchEvent(event)) {
-                        if (event.getAction() == MotionEvent.ACTION_UP) {
-                            v.performClick();
-                        }
-                        return true;
-                    }
-                    return false;
-                });
-            }
-
             applyBottomNavTooltips();
         });
-    }
-
-    private void addTabToMenu(Menu menu, UiDataModel.Tab tab, int order) {
-        menu.add(Menu.NONE, tab.getPageResId(), order, tab.getLabelResId())
-                .setIcon(getTabIcon(tab));
     }
 
     private int getTabIcon(UiDataModel.Tab tab) {
@@ -923,84 +816,40 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         };
     }
 
-    private void setBottomNavPage(int page) {
-        if (mBottomNavPage == page) {
-            return;
-        }
-        mBottomNavPage = page;
-        configureBottomNavigationView();
-
-        final UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
-        MenuItem item = mBinding.salarmActivityBottomMenu.getMenu().findItem(selectedTab.getPageResId());
-        if (item != null) {
-            mBinding.salarmActivityBottomMenu.setSelectedItemId(selectedTab.getPageResId());
-        }
-    }
-
-    /**
-     * Updates the typeface of each item in the {@link BottomNavigationView}.
-     *
-     * <p>The selected item receives the bold typeface, while all other items
-     * receive the regular typeface. TextView lookup is cached for performance.</p>
-     */
-    @SuppressLint("RestrictedApi")
     private void updateBottomNavTypeface() {
         if (mRegularTypeface == null) {
             return;
         }
 
-        BottomNavigationMenuView menuView = (BottomNavigationMenuView) mBinding.salarmActivityBottomMenu.getChildAt(0);
-
-        for (int i = 0; i < menuView.getChildCount(); i++) {
-            View itemView = menuView.getChildAt(i);
-
-            ThemeUtils.applyTypeface(itemView, mRegularTypeface);
+        for (int i = 0; i < mBinding.salarmActivityBottomMenu.getTabCount(); i++) {
+            TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(i);
+            if (tab != null && tab.view != null) {
+                ThemeUtils.applyTypeface(tab.view, mRegularTypeface);
+            }
         }
     }
 
-    /**
-     * Installs custom tooltips on all items of the {@link BottomNavigationView}.
-     *
-     * <p>The system tooltips are disabled and replaced with custom tooltips
-     * displayed above each navigation icon when long‑pressed.</p>
-     */
-    @SuppressLint("RestrictedApi")
     private void applyBottomNavTooltips() {
         if (mBinding == null) {
             return;
         }
 
-        for (int i = 0; i < mBinding.salarmActivityBottomMenu.getChildCount(); i++) {
-            View child = mBinding.salarmActivityBottomMenu.getChildAt(i);
+        for (int i = 0; i < mBinding.salarmActivityBottomMenu.getTabCount(); i++) {
+            TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(i);
+            if (tab != null && tab.view != null) {
+                View itemView = tab.view;
 
-            if (child instanceof BottomNavigationMenuView menuView) {
-                for (int j = 0; j < menuView.getChildCount(); j++) {
-                    View itemView = menuView.getChildAt(j);
-                    if (itemView == null) {
-                        continue;
+                // Disable the system tooltip
+                ViewCompat.setTooltipText(itemView, null);
+
+                // Install the custom tooltip
+                itemView.setOnLongClickListener(v -> {
+                    CharSequence title = tab.getText();
+                    if (title != null) {
+                        CustomTooltip.showAbove(v, title.toString(), false);
                     }
-
-                    // Disable the system tooltip
-                    ViewCompat.setTooltipText(itemView, null);
-
-                    // Install the custom tooltip
-                    itemView.setOnLongClickListener(v -> {
-                        if (!(v instanceof BottomNavigationItemView)) {
-                            return true;
-                        }
-                        MenuItem item = ((BottomNavigationItemView) v).getItemData();
-
-                        CharSequence title;
-                        if (item != null) {
-                            title = item.getTitle();
-                            if (title != null) {
-                                CustomTooltip.showAbove(v, title.toString(), false);
-                            }
-                        }
-
-                        return true;
-                    });
-                }
+                    return true;
+                });
             }
         }
     }
@@ -1047,23 +896,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             configureBottomNavigationView();
         }
 
-        // Indicate in the menu which tab is currently active to force the Material indicator to redraw
-        // when the tabs visibility has been changed
-        UiDataModel.Tab currentTab = UiDataModel.getUiDataModel().getSelectedTab();
-        int currentItemId = switch (currentTab) {
-            case ALARMS -> R.id.page_alarm;
-            case CLOCKS -> R.id.page_clock;
-            case TIMERS -> R.id.page_timer;
-            case STOPWATCH -> R.id.page_stopwatch;
-            case SALAH -> R.id.page_salah;
-            case QIBLA -> R.id.page_qibla;
-            case MASJID -> R.id.page_masjid;
-        };
-
-        MenuItem activeItem = mBinding.salarmActivityBottomMenu.getMenu().findItem(currentItemId);
-        if (activeItem != null && !activeItem.isChecked()) {
-            activeItem.setChecked(true);
-        }
+        updateCurrentTab();
 
         if (!SettingsDAO.getTabTitleVisibility(mPrefs).equals(TAB_TITLE_VISIBILITY_NEVER) && mFontPath != null) {
             updateBottomNavTypeface();
@@ -1095,15 +928,18 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
     /**
      * Configure the Bottom Navigation Menu to display UiDataModel's selected tab.
      */
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "RestrictedApi"})
     private void updateCurrentTab() {
         // Fetch the selected tab from the source of truth: UiDataModel.
         final UiDataModel.Tab selectedTab = UiDataModel.getUiDataModel().getSelectedTab();
         // Update the selected tab in the mBottomNavigation if it does not agree with UiDataModel.
-        if (mBinding.salarmActivityBottomMenu.getSelectedItemId() != selectedTab.getPageResId()) {
-            MenuItem item = mBinding.salarmActivityBottomMenu.getMenu().findItem(selectedTab.getPageResId());
-            if (item != null) {
-                mBinding.salarmActivityBottomMenu.setSelectedItemId(selectedTab.getPageResId());
+        for (int i = 0; i < mBinding.salarmActivityBottomMenu.getTabCount(); i++) {
+            TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(i);
+            if (tab != null && tab.getTag() == selectedTab) {
+                if (!tab.isSelected()) {
+                    tab.select();
+                }
+                break;
             }
         }
 
@@ -1119,6 +955,21 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
         if (targetIndex != -1 && mBinding.salarmActivityPager.getCurrentItem() != targetIndex) {
             // 'false' disables the scroll animation during recreation
             mBinding.salarmActivityPager.setCurrentItem(targetIndex, false);
+        }
+
+        if (targetIndex != -1) {
+            final int finalTargetIndex = targetIndex;
+            mBinding.salarmActivityBottomMenu.post(() -> {
+                if (mBinding == null || mBinding.salarmActivityBottomScrollView == null) {
+                    return;
+                }
+                TabLayout.Tab tab = mBinding.salarmActivityBottomMenu.getTabAt(finalTargetIndex);
+                if (tab != null && tab.view != null) {
+                    View itemView = tab.view;
+                    int scrollX = itemView.getLeft() - (mBinding.salarmActivityBottomScrollView.getWidth() - itemView.getWidth()) / 2;
+                    mBinding.salarmActivityBottomScrollView.smoothScrollTo(Math.max(0, scrollX), 0);
+                }
+            });
         }
 
         if (mIsToolBarDisplayed) {
@@ -1277,6 +1128,7 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
             mPriorState = state;
         }
 
+        @SuppressLint("RestrictedApi")
         @Override
         public void onPageSelected(int position) {
             SalarmFragment fragment = mFragmentTabPagerAdapter.getSalarmFragment(position);
@@ -1286,15 +1138,18 @@ public class SalarmActivity extends BaseActivity implements FabContainer {
                 alarmFragment.hideSideButtonsOnlyAnimated();
             }
 
-            int totalTabs = UiDataModel.getUiDataModel().getTabCount();
-            if (totalTabs > 4) {
-                if (position <= 3) {
-                    setBottomNavPage(1);
-                } else {
-                    setBottomNavPage(2);
-                }
-            } else {
-                setBottomNavPage(1);
+            final UiDataModel.Tab finalTab = UiDataModel.getUiDataModel().getTabAt(position);
+            if (mBinding != null && mBinding.salarmActivityBottomScrollView != null) {
+                mBinding.salarmActivityBottomMenu.post(() -> {
+                    if (mBinding == null || mBinding.salarmActivityBottomScrollView == null) {
+                        return;
+                    }
+                    View itemView = mBinding.salarmActivityBottomMenu.findViewById(finalTab.getPageResId());
+                    if (itemView != null) {
+                        int scrollX = itemView.getLeft() - (mBinding.salarmActivityBottomScrollView.getWidth() - itemView.getWidth()) / 2;
+                        mBinding.salarmActivityBottomScrollView.smoothScrollTo(Math.max(0, scrollX), 0);
+                    }
+                });
             }
         }
     }

@@ -112,13 +112,22 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/salarm_activity_bottom_menu"
+    <HorizontalScrollView
+        android:id="@+id/salarm_activity_bottom_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:elevation="0dp"
-        app:menu="@menu/bottom_navigation_menu"
-        tools:background="@color/md_theme_surface"
-        tools:labelVisibilityMode="labeled" />
+        android:scrollbars="none"
+        android:fillViewport="true">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/salarm_activity_bottom_menu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="0dp"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            tools:background="@color/md_theme_surface" />
+
+    </HorizontalScrollView>
 
 </LinearLayout>
