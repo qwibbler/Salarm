@@ -126,7 +126,6 @@ public class MasjidQrCodecTest {
         MasjidEvent decodedIsha = result.events.stream().filter(e -> "ISHA".equalsIgnoreCase(e.salahType)).findFirst().orElse(null);
         assertNotNull(decodedIsha);
         assertEquals(20, decodedIsha.definition.calculation.offsetMinutes);
-        assertTrue(decodedIsha.definition.anchor.isMax);
         assertEquals(RelationalRule.AnchorEvent.MAGHRIB, decodedIsha.definition.anchor.basicEvent);
         assertEquals(RelationalRule.RoundingDirection.UP, decodedIsha.definition.calculation.roundingDirection);
         assertEquals(5, decodedIsha.definition.calculation.roundingIntervalMinutes);

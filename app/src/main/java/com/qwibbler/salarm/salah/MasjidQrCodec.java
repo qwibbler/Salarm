@@ -287,12 +287,12 @@ public class MasjidQrCodec {
         int offset = (def.calculation != null) ? def.calculation.offsetMinutes : 0;
         sb.append(String.format(Locale.US, "%+d", offset));
 
-        // Extreme (l/e) - omit if Maghrib default or false
-        boolean isMaghrib = "MAGHRIB".equalsIgnoreCase(event.salahType);
-        if (def.anchor != null) {
-            if (!isMaghrib || def.anchor.isMax) {
-                sb.append(def.anchor.isMax ? "l" : "e");
-            }
+        // Extreme (l/e/null)
+        Boolean extreme = getExtreme(def.anchor);
+        if (Boolean.TRUE.equals(extreme)) {
+            sb.append("l");
+        } else if (Boolean.FALSE.equals(extreme)) {
+            sb.append("e");
         }
 
         // Anchor
@@ -408,6 +408,11 @@ public class MasjidQrCodec {
         if (code == null) return null;
         SalahType type = CODE_TO_SALAH_TYPE.get(code.toLowerCase(Locale.US));
         return (type != null) ? type.name() : null;
+    }
+
+    private static Boolean getExtreme(RelationalAnchor anchor) {
+        if (anchor == null) return null;
+        return anchor.isMax;
     }
 
     private static String getAnchorCode(RelationalRule.AnchorEvent event) {
