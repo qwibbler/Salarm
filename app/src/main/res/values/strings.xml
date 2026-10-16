@@ -1818,6 +1818,16 @@
     <string name="masjid_events_shown_summary">Choose which Salah events appear in the system</string>
     <string name="masjids_category_title">Masjids</string>
     <string name="salarm_add_new_masjid">Add a New Masjid</string>
+    <string name="masjid_import_qr_title">Import Masjid from QR Code</string>
+    <string name="masjid_import_qr_hint">QR code text string (salarm:v1?&#8230;)</string>
+    <string name="masjid_import_qr_btn_paste">Paste from Clipboard</string>
+    <string name="masjid_import_qr_btn_import">Import</string>
+    <string name="masjid_import_qr_invalid_toast">Invalid or unrecognized Salarm QR Code string</string>
+    <string name="masjid_import_qr_success_toast">Successfully imported %s</string>
+    <string name="masjid_import_qr_camera_permission_needed">Camera permission is required to scan QR code</string>
+    <string name="masjid_import_qr_grant_permission">Grant Permission</string>
+    <string name="masjid_import_qr_rescan">Scan Again</string>
+    <string name="masjid_import_qr_detected_prompt">QR code detected! Click Import to add this masjid.</string>
     <string name="masjid_name_title">Masjid Name*</string>
     <string name="masjid_icon_title">Masjid Icon</string>
     <string name="masjid_select_icon">Select Icon</string>

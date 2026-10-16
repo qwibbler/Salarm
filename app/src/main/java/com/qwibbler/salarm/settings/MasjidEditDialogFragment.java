@@ -129,6 +129,14 @@ public class MasjidEditDialogFragment extends BottomSheetDialogFragment {
             }
         });
 
+        getChildFragmentManager().setFragmentResultListener("masjid_imported", this, (requestKey, result) -> {
+            long newId = result.getLong("selected_masjid_id", -1);
+            if (newId != -1) {
+                getParentFragmentManager().setFragmentResult("masjid_updated", result);
+                dismiss();
+            }
+        });
+
         getChildFragmentManager().setFragmentResultListener("city_picked", this, (requestKey, result) -> {
             double lat = result.getDouble("latitude", 0.0);
             double lon = result.getDouble("longitude", 0.0);

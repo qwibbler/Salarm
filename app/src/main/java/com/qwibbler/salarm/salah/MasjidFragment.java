@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,6 +38,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
+import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uidata.TabListener;
 import com.qwibbler.salarm.uidata.UiDataModel;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
@@ -64,10 +66,13 @@ public class MasjidFragment extends SalarmFragment {
     private List<Masjid> mMasjids = new ArrayList<>();
     private long mSelectedMasjidId = -1;
     private boolean mShowCheckboxes = false;
+    private static final String KEY_SIDE_BUTTONS_VISIBLE = "key_side_buttons_visible";
+    private boolean mSideButtonsVisible = false;
 
     private final TabListener mTabListener = newSelectedTab -> {
         if (newSelectedTab != MASJID) {
             exitCheckboxMode();
+            hideSideButtonsOnlyAnimated();
         }
     };
 
@@ -89,33 +94,52 @@ public class MasjidFragment extends SalarmFragment {
         mViewTimesheetButton = view.findViewById(R.id.view_timesheet_button);
 
         if (mEmptyStateLayout != null) {
-            mEmptyStateLayout.setOnClickListener(v -> showAddOrImportDialog());
+            mEmptyStateLayout.setOnClickListener(v -> {
+                if (mSideButtonsVisible) {
+                    hideSideButtonsWithFabAnimation();
+                } else {
+                    showAddOrImportDialog();
+                }
+            });
         }
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new MasjidPrayerAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
-        mPrevMasjidButton.setOnClickListener(v -> shiftMasjid(-1));
+        mPrevMasjidButton.setOnClickListener(v -> {
+            hideSideButtonsWithFabAnimation();
+            shiftMasjid(-1);
+        });
         mPrevMasjidButton.setOnLongClickListener(v -> {
             showMasjidPickerDialog();
             return true;
         });
 
-        mNextMasjidButton.setOnClickListener(v -> shiftMasjid(1));
+        mNextMasjidButton.setOnClickListener(v -> {
+            hideSideButtonsWithFabAnimation();
+            shiftMasjid(1);
+        });
         mNextMasjidButton.setOnLongClickListener(v -> {
             showMasjidPickerDialog();
             return true;
         });
 
-        view.setOnClickListener(v -> exitCheckboxMode());
-        mContentLayout.setOnClickListener(v -> exitCheckboxMode());
+        view.setOnClickListener(v -> {
+            exitCheckboxMode();
+            hideSideButtonsWithFabAnimation();
+        });
+        mContentLayout.setOnClickListener(v -> {
+            exitCheckboxMode();
+            hideSideButtonsWithFabAnimation();
+        });
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     exitCheckboxMode();
+                    hideSideButtonsWithFabAnimation();
                 }
             }
         });
@@ -123,18 +147,23 @@ public class MasjidFragment extends SalarmFragment {
         mRecyclerView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                if (mShowCheckboxes && e.getAction() == MotionEvent.ACTION_DOWN) {
-                    View child = rv.findChildViewUnder(e.getX(), e.getY());
-                    if (child == null) {
-                        exitCheckboxMode();
-                        return true;
-                    } else {
-                        int pos = rv.getChildAdapterPosition(child);
-                        if (pos != RecyclerView.NO_POSITION) {
-                            PrayerItem item = mAdapter.getItem(pos);
-                            if (item != null && (!item.isConfigured || item.event == null)) {
-                                exitCheckboxMode();
-                                return true;
+                if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (mSideButtonsVisible) {
+                        hideSideButtonsWithFabAnimation();
+                    }
+                    if (mShowCheckboxes) {
+                        View child = rv.findChildViewUnder(e.getX(), e.getY());
+                        if (child == null) {
+                            exitCheckboxMode();
+                            return true;
+                        } else {
+                            int pos = rv.getChildAdapterPosition(child);
+                            if (pos != RecyclerView.NO_POSITION) {
+                                PrayerItem item = mAdapter.getItem(pos);
+                                if (item != null && (!item.isConfigured || item.event == null)) {
+                                    exitCheckboxMode();
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -145,6 +174,7 @@ public class MasjidFragment extends SalarmFragment {
 
         if (savedInstanceState != null) {
             mSelectedMasjidId = savedInstanceState.getLong("selected_masjid_id", -1);
+            mSideButtonsVisible = savedInstanceState.getBoolean(KEY_SIDE_BUTTONS_VISIBLE, false);
         }
 
         UiDataModel.getUiDataModel().addTabListener(mTabListener);
@@ -174,6 +204,7 @@ public class MasjidFragment extends SalarmFragment {
     public void onPause() {
         super.onPause();
         exitCheckboxMode();
+        resetFabAndButtonsState();
     }
 
     @Override
@@ -186,6 +217,7 @@ public class MasjidFragment extends SalarmFragment {
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong("selected_masjid_id", mSelectedMasjidId);
+        outState.putBoolean(KEY_SIDE_BUTTONS_VISIBLE, mSideButtonsVisible);
     }
 
     @Override
@@ -193,6 +225,7 @@ public class MasjidFragment extends SalarmFragment {
         super.setMenuVisibility(menuVisible);
         if (!menuVisible) {
             exitCheckboxMode();
+            hideSideButtonsOnlyAnimated();
         }
     }
 
@@ -201,6 +234,7 @@ public class MasjidFragment extends SalarmFragment {
         super.onHiddenChanged(hidden);
         if (hidden) {
             exitCheckboxMode();
+            hideSideButtonsOnlyAnimated();
         }
     }
 
@@ -282,12 +316,14 @@ public class MasjidFragment extends SalarmFragment {
 
         mMasjidTitleClickableArea.setOnClickListener(v -> {
             exitCheckboxMode();
+            hideSideButtonsWithFabAnimation();
             MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
         });
 
         if (mViewTimesheetButton != null) {
             mViewTimesheetButton.setOnClickListener(v -> {
                 exitCheckboxMode();
+                hideSideButtonsWithFabAnimation();
                 Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
                 intent.putExtra("masjid_id", masjid.id);
                 startActivity(intent);
@@ -396,6 +432,27 @@ public class MasjidFragment extends SalarmFragment {
                 .show();
     }
 
+    private void hideSideButtonsWithFabAnimation() {
+        if (mSideButtonsVisible) {
+            mSideButtonsVisible = false;
+            updateFab(FAB_AND_BUTTONS_SHRINK_AND_EXPAND);
+        }
+    }
+
+    public void hideSideButtonsOnlyAnimated() {
+        if (mSideButtonsVisible) {
+            mSideButtonsVisible = false;
+            updateFab(BUTTONS_SHRINK_AND_EXPAND);
+        }
+    }
+
+    public void resetFabAndButtonsState() {
+        if (mSideButtonsVisible) {
+            mSideButtonsVisible = false;
+            updateFab(FAB_AND_BUTTONS_IMMEDIATE);
+        }
+    }
+
     private void showAddOrImportDialog() {
         exitCheckboxMode();
         CharSequence[] options = new CharSequence[]{
@@ -416,23 +473,63 @@ public class MasjidFragment extends SalarmFragment {
 
     @Override
     public void onUpdateFab(@NonNull ImageView fab) {
-        fab.setImageResource(R.drawable.ic_add);
-        fab.setVisibility(View.VISIBLE);
-        fab.setOnLongClickListener(v -> {
-            showAddOrImportDialog();
-            return true;
-        });
+        fab.setContentDescription(getString(R.string.salarm_add_new_masjid));
+        if (mSideButtonsVisible) {
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            fab.setImageResource(R.drawable.ic_add);
+            fab.setVisibility(View.VISIBLE);
+            fab.setOnLongClickListener(v -> {
+                CustomTooltip.showAbove(v, fab.getContentDescription().toString(), true);
+                return true;
+            });
+        }
     }
 
     @Override
     public void onUpdateFabButtons(@NonNull ImageView left, @NonNull ImageView right) {
-        left.setVisibility(View.GONE);
-        right.setVisibility(View.GONE);
+        if (mSideButtonsVisible) {
+            left.setVisibility(View.VISIBLE);
+            right.setVisibility(View.VISIBLE);
+
+            left.setClickable(true);
+            left.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_add_masjid));
+            left.setContentDescription(getString(R.string.salarm_add_new_masjid));
+            left.setOnClickListener(v -> {
+                hideSideButtonsWithFabAnimation();
+                MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
+            });
+            left.setOnLongClickListener(v -> {
+                CustomTooltip.showAbove(v, getString(R.string.salarm_add_new_masjid), true);
+                return true;
+            });
+
+            right.setClickable(true);
+            right.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_qr_code));
+            right.setContentDescription(getString(R.string.masjid_import_qr_title));
+            right.setOnClickListener(v -> {
+                hideSideButtonsWithFabAnimation();
+                MasjidQrImportDialogFragment.show(getParentFragmentManager());
+            });
+            right.setOnLongClickListener(v -> {
+                CustomTooltip.showAbove(v, getString(R.string.masjid_import_qr_title), true);
+                return true;
+            });
+        } else {
+            left.setVisibility(View.INVISIBLE);
+            right.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public void onFabClick() {
-        showAddOrImportDialog();
+        exitCheckboxMode();
+        if (mSideButtonsVisible) {
+            hideSideButtonsWithFabAnimation();
+        } else {
+            mSideButtonsVisible = true;
+            updateFab(FAB_AND_BUTTONS_SHRINK_AND_EXPAND);
+        }
     }
 
     private static class PrayerItem {
@@ -529,6 +626,7 @@ public class MasjidFragment extends SalarmFragment {
             }
 
             holder.itemView.setOnClickListener(v -> {
+                hideSideButtonsWithFabAnimation();
                 if (mShowCheckboxes) {
                     if (item.isConfigured && item.event != null) {
                         toggleEventSelection(holder.getBindingAdapterPosition());
