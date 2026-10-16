@@ -28,7 +28,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
     static final String ALARM_LOG_TABLE_NAME = "alarm_log";
 
-    private static final int DATABASE_VERSION = 39;
+    private static final int DATABASE_VERSION = 40;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     public ClockDatabaseHelper(Context context) {
@@ -69,7 +69,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.AlarmsColumns.BACKGROUND_IMAGE + " TEXT NOT NULL DEFAULT '', " +
             ClockContract.AlarmsColumns.BLUR_INTENSITY + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.AlarmsColumns.TAGS + " TEXT NOT NULL DEFAULT '', " +
-            ClockContract.AlarmsColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0);");
+            ClockContract.AlarmsColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.AlarmsColumns.TIMEZONE_ID + " TEXT);");
 
         LogUtils.i("Alarms Table created");
     }
@@ -98,6 +99,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             ClockContract.InstancesColumns.RELATIONAL_RULE_ID + " INTEGER NOT NULL DEFAULT -1, " +
             ClockContract.InstancesColumns.DISMISS_AFTER + " INTEGER NOT NULL DEFAULT 0, " +
             ClockContract.InstancesColumns.INITIAL_ALARM_TIME + " INTEGER NOT NULL DEFAULT 0, " +
+            ClockContract.InstancesColumns.TIMEZONE_ID + " TEXT, " +
             ClockContract.InstancesColumns.ALARM_ID + " INTEGER REFERENCES " +
             ALARMS_TABLE_NAME + "(" + ClockContract.AlarmsColumns._ID + ") " +
             "ON UPDATE CASCADE ON DELETE CASCADE);");
@@ -419,6 +421,18 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                         + " TEXT NOT NULL DEFAULT '';");
             }
             LogUtils.i("Added tags column to alarms table for version 39 upgrade.");
+        }
+
+        if (oldVersion < 40) {
+            if (columnMissing(db, ALARMS_TABLE_NAME, ClockContract.AlarmsColumns.TIMEZONE_ID)) {
+                db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.TIMEZONE_ID
+                        + " TEXT;");
+            }
+            if (columnMissing(db, INSTANCES_TABLE_NAME, ClockContract.InstancesColumns.TIMEZONE_ID)) {
+                db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " + ClockContract.InstancesColumns.TIMEZONE_ID
+                        + " TEXT;");
+            }
+            LogUtils.i("Added timezone_id column to alarms and instances tables for version 40 upgrade.");
         }
     }
 

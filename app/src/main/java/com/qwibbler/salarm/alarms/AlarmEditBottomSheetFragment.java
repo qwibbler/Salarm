@@ -61,6 +61,7 @@ import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.data.TimeZones;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.databinding.AlarmEditBottomSheetBinding;
@@ -77,6 +78,7 @@ import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerDatePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
+import com.qwibbler.salarm.dialogfragment.TimezonePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.qwibbler.salarm.events.Events;
@@ -333,6 +335,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindDaysOfWeekButtons();
         bindSelectedDate();
         bindPauseAlarm();
+        bindTimezoneLock();
         bindSalahRule();
         bindLabel();
         bindTags();
@@ -607,6 +610,34 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         } else {
             mBinding.pauseAlarmLayout.setOnClickListener(null);
         }
+    }
+
+    private void bindTimezoneLock() {
+        mBinding.lockTimezoneText.setTypeface(mGeneralTypeface);
+
+        if (mAlarm.isLockedToTimezone()) {
+            TimeZones timeZones = SettingsDAO.getTimeZones(requireContext(), System.currentTimeMillis());
+            CharSequence tzName = timeZones.getTimeZoneName(mAlarm.timezoneId);
+            if (tzName == null) {
+                tzName = mAlarm.timezoneId;
+            }
+            mBinding.lockTimezoneText.setText(getString(R.string.locked_to_timezone, tzName));
+
+            mBinding.cancelTimezoneLock.setTypeface(mGeneralTypeface);
+            mBinding.cancelTimezoneLock.setVisibility(VISIBLE);
+            mBinding.cancelTimezoneLock.setOnClickListener(v -> {
+                mAlarm.timezoneId = null;
+                bindTimezoneLock();
+            });
+        } else {
+            mBinding.lockTimezoneText.setText(getString(R.string.lock_to_timezone));
+            mBinding.cancelTimezoneLock.setVisibility(GONE);
+        }
+
+        mBinding.timezoneAlarmLayout.setOnClickListener(v -> {
+            TimezonePickerDialogFragment fragment = TimezonePickerDialogFragment.newInstance();
+            fragment.show(getChildFragmentManager(), "timezone_picker");
+        });
     }
 
     private void bindSalahRule() {
@@ -1306,6 +1337,15 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 mAlarm.dismissAfter = bundle.getInt(DismissAfterDialogFragment.DISMISS_AFTER_VALUE);
                 bindDismissAfterValue();
             });
+
+        childFragmentManager.setFragmentResultListener(TimezonePickerDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> {
+                String tzId = bundle.getString(TimezonePickerDialogFragment.RESULT_TIMEZONE_ID);
+                if (tzId != null) {
+                    mAlarm.timezoneId = tzId;
+                    bindTimezoneLock();
+                }
+            });
     }
 
     /**
@@ -1554,7 +1594,8 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             requireContext(),
             mPrefs,
             mBinding.scheduleAlarmLayout,
-            mBinding.pauseAlarmLayout
+            mBinding.pauseAlarmLayout,
+            mBinding.timezoneAlarmLayout
         );
 
         ThemeUtils.applyExpressiveBackgroundsToGroup(

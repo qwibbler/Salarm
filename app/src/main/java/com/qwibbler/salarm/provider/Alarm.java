@@ -36,8 +36,10 @@ import com.qwibbler.salarm.utils.RingtoneUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 
@@ -53,7 +55,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      */
     private static final String KEY_SHOW_STYLED_REPEAT_DAY = "show_styled_repeat_day_";
 
-    public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<>() {
+    public static final Creator<Alarm> CREATOR = new Creator<>() {
         public Alarm createFromParcel(Parcel p) {
             return new Alarm(p);
         }
@@ -155,7 +157,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         BACKGROUND_IMAGE,
         BLUR_INTENSITY,
         TAGS,
-        DISMISS_AFTER
+        DISMISS_AFTER,
+        TIMEZONE_ID
     };
     private static final String[] QUERY_ALARMS_WITH_INSTANCES_COLUMNS = {
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID,
@@ -186,6 +189,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + BLUR_INTENSITY,
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + TAGS,
         ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + DISMISS_AFTER,
+        ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + TIMEZONE_ID,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_STATE,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns._ID,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_ID,
@@ -208,7 +212,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.RELATIONAL_RULE_ID,
         ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.DISMISS_AFTER,
-        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.INITIAL_ALARM_TIME
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.INITIAL_ALARM_TIME,
+        ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.TIMEZONE_ID
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
@@ -242,33 +247,35 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     private static final int BLUR_INTENSITY_INDEX = 25;
     private static final int TAGS_INDEX = 26;
     private static final int DISMISS_AFTER_INDEX = 27;
+    private static final int TIMEZONE_ID_INDEX = 28;
 
-    public static final int INSTANCE_STATE_INDEX = 28;
-    public static final int INSTANCE_ID_INDEX = 29;
-    public static final int INSTANCE_ALARM_ID_INDEX = 30;
-    public static final int INSTANCE_YEAR_INDEX = 31;
-    public static final int INSTANCE_MONTH_INDEX = 32;
-    public static final int INSTANCE_DAY_INDEX = 33;
-    public static final int INSTANCE_HOUR_INDEX = 34;
-    public static final int INSTANCE_MINUTE_INDEX = 35;
-    public static final int INSTANCE_LABEL_INDEX = 36;
-    public static final int INSTANCE_SYNC_BY_LABEL_INDEX = 37;
-    public static final int INSTANCE_VIBRATE_INDEX = 38;
-    public static final int INSTANCE_VIBRATION_PATTERN_INDEX = 39;
-    public static final int INSTANCE_FLASH_INDEX = 40;
-    public static final int INSTANCE_RINGTONE_INDEX = 41;
-    public static final int INSTANCE_AUTO_SILENCE_DURATION_INDEX = 42;
-    public static final int INSTANCE_SNOOZE_DURATION_INDEX = 43;
-    public static final int INSTANCE_MISSED_ALARM_REPEAT_COUNT_INDEX = 44;
-    public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 45;
-    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 46;
-    public static final int INSTANCE_ALARM_VOLUME_INDEX = 47;
-    public static final int INSTANCE_RELATIONAL_RULE_ID_INDEX = 48;
-    public static final int INSTANCE_DISMISS_AFTER_INDEX = 49;
-    public static final int INSTANCE_INITIAL_ALARM_TIME_INDEX = 50;
+    public static final int INSTANCE_STATE_INDEX = 29;
+    public static final int INSTANCE_ID_INDEX = 30;
+    public static final int INSTANCE_ALARM_ID_INDEX = 31;
+    public static final int INSTANCE_YEAR_INDEX = 32;
+    public static final int INSTANCE_MONTH_INDEX = 33;
+    public static final int INSTANCE_DAY_INDEX = 34;
+    public static final int INSTANCE_HOUR_INDEX = 35;
+    public static final int INSTANCE_MINUTE_INDEX = 36;
+    public static final int INSTANCE_LABEL_INDEX = 37;
+    public static final int INSTANCE_SYNC_BY_LABEL_INDEX = 38;
+    public static final int INSTANCE_VIBRATE_INDEX = 39;
+    public static final int INSTANCE_VIBRATION_PATTERN_INDEX = 40;
+    public static final int INSTANCE_FLASH_INDEX = 41;
+    public static final int INSTANCE_RINGTONE_INDEX = 42;
+    public static final int INSTANCE_AUTO_SILENCE_DURATION_INDEX = 43;
+    public static final int INSTANCE_SNOOZE_DURATION_INDEX = 44;
+    public static final int INSTANCE_MISSED_ALARM_REPEAT_COUNT_INDEX = 45;
+    public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 46;
+    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 47;
+    public static final int INSTANCE_ALARM_VOLUME_INDEX = 48;
+    public static final int INSTANCE_RELATIONAL_RULE_ID_INDEX = 49;
+    public static final int INSTANCE_DISMISS_AFTER_INDEX = 50;
+    public static final int INSTANCE_INITIAL_ALARM_TIME_INDEX = 51;
+    public static final int INSTANCE_TIMEZONE_ID_INDEX = 52;
 
-    private static final int COLUMN_COUNT = DISMISS_AFTER_INDEX + 1;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_INITIAL_ALARM_TIME_INDEX + 1;
+    private static final int COLUMN_COUNT = TIMEZONE_ID_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_TIMEZONE_ID_INDEX + 1;
     // Public fields
     public long id;
     public boolean enabled;
@@ -300,6 +307,11 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public int blurIntensity;
     public int dismissAfter;
     public List<String> tags = new ArrayList<>();
+    public String timezoneId;
+
+    public boolean isLockedToTimezone() {
+        return timezoneId != null && !timezoneId.trim().isEmpty();
+    }
 
     // Creates a default alarm at the current time.
     public Alarm() {
@@ -458,6 +470,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         this.blurIntensity = original.blurIntensity;
         this.dismissAfter = original.dismissAfter;
         this.tags = new ArrayList<>(original.tags);
+        this.timezoneId = original.timezoneId;
     }
 
     public Alarm(Cursor c) {
@@ -488,6 +501,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         blurIntensity = c.getInt(BLUR_INTENSITY_INDEX);
         dismissAfter = c.getInt(DISMISS_AFTER_INDEX);
         tags = parseTags(c.getString(TAGS_INDEX));
+        timezoneId = c.getString(TIMEZONE_ID_INDEX);
 
         if (c.getColumnCount() == ALARM_JOIN_INSTANCE_COLUMN_COUNT) {
             instanceState = c.getInt(INSTANCE_STATE_INDEX);
@@ -531,6 +545,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         blurIntensity = p.readInt();
         dismissAfter = p.readInt();
         tags = p.createStringArrayList();
+        timezoneId = p.readString();
     }
 
     public ContentValues createContentValues() {
@@ -565,6 +580,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         values.put(BLUR_INTENSITY, blurIntensity);
         values.put(TAGS, joinTags(tags));
         values.put(DISMISS_AFTER, dismissAfter);
+        values.put(TIMEZONE_ID, timezoneId);
 
         if (alert == null) {
             // We want to put null, so default alarm changes
@@ -605,6 +621,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         p.writeInt(blurIntensity);
         p.writeInt(dismissAfter);
         p.writeStringList(tags);
+        p.writeString(timezoneId);
     }
 
     public int describeContents() {
@@ -760,7 +777,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     public static List<String> getTagsByUsage(ContentResolver cr) {
-        final java.util.Map<String, Integer> usageMap = new java.util.HashMap<>();
+        final Map<String, Integer> usageMap = new HashMap<>();
         try (Cursor cursor = cr.query(CONTENT_URI, new String[]{TAGS}, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
@@ -907,7 +924,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             || daysOfWeek.getBits() != other.daysOfWeek.getBits()
             || pauseStartDate != other.pauseStartDate
             || pauseEndDate != other.pauseEndDate
-            || relationalRuleId != other.relationalRuleId;
+            || relationalRuleId != other.relationalRuleId
+            || !Objects.equals(timezoneId, other.timezoneId);
     }
 
     /**
@@ -1056,6 +1074,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         result.mRelationalRuleId = relationalRuleId;
         result.mDismissAfter = dismissAfter;
         result.mIsSalah = relationalRuleId != -1;
+        result.mTimezoneId = timezoneId;
         return result;
     }
 
@@ -1064,7 +1083,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      * @return previous firing time, or null if this is a one-time alarm.
      */
     public Calendar getPreviousAlarmTime(Calendar currentTime) {
-        final Calendar previousInstanceTime = Calendar.getInstance(currentTime.getTimeZone());
+        final TimeZone tz = isLockedToTimezone() ? TimeZone.getTimeZone(timezoneId) : currentTime.getTimeZone();
+        final Calendar previousInstanceTime = Calendar.getInstance(tz);
         previousInstanceTime.set(Calendar.YEAR, year);
         previousInstanceTime.set(Calendar.MONTH, month);
         previousInstanceTime.set(Calendar.DAY_OF_MONTH, day);
@@ -1096,17 +1116,21 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      * specified time has already passed relative to {@code currentTime}.</p>
      */
     public Calendar getNextAlarmTime(Calendar currentTime) {
-        final Calendar nextInstanceTime = Calendar.getInstance(currentTime.getTimeZone());
+        final TimeZone tz = isLockedToTimezone() ? TimeZone.getTimeZone(timezoneId) : currentTime.getTimeZone();
+        final Calendar nextInstanceTime = Calendar.getInstance(tz);
         nextInstanceTime.set(Calendar.SECOND, 0);
         nextInstanceTime.set(Calendar.MILLISECOND, 0);
 
+        final Calendar referenceTime = Calendar.getInstance(tz);
+        referenceTime.setTimeInMillis(currentTime.getTimeInMillis());
+
         if (daysOfWeek.isRepeating()) {
-            nextInstanceTime.setTimeInMillis(currentTime.getTimeInMillis());
+            nextInstanceTime.setTimeInMillis(referenceTime.getTimeInMillis());
             nextInstanceTime.set(Calendar.HOUR_OF_DAY, hour);
             nextInstanceTime.set(Calendar.MINUTE, minutes);
 
             // If we are still behind the passed in currentTime, then add a day
-            if (nextInstanceTime.getTimeInMillis() <= currentTime.getTimeInMillis()) {
+            if (nextInstanceTime.getTimeInMillis() <= referenceTime.getTimeInMillis()) {
                 nextInstanceTime.add(Calendar.DAY_OF_YEAR, 1);
             }
 
@@ -1127,7 +1151,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
                 endOfPauseUtc.setTimeInMillis(pauseEndDate);
 
                 // Create a fake local "current date" that corresponds to the very end of the pause, exactly at the scheduled alarm time.
-                Calendar localEndOfPause = Calendar.getInstance(currentTime.getTimeZone());
+                Calendar localEndOfPause = Calendar.getInstance(tz);
                 localEndOfPause.clear();
                 localEndOfPause.set(Calendar.YEAR, endOfPauseUtc.get(Calendar.YEAR));
                 localEndOfPause.set(Calendar.MONTH, endOfPauseUtc.get(Calendar.MONTH));
@@ -1147,7 +1171,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             nextInstanceTime.set(Calendar.MINUTE, minutes);
 
             // If we are still behind the passed in currentTime, then add a day
-            if (nextInstanceTime.getTimeInMillis() <= currentTime.getTimeInMillis()) {
+            if (nextInstanceTime.getTimeInMillis() <= referenceTime.getTimeInMillis()) {
                 nextInstanceTime.add(Calendar.DAY_OF_YEAR, 1);
             }
         }

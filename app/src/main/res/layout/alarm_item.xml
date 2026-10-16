@@ -70,6 +70,20 @@
         tools:textSize="40sp" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/lock_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/lock_emoji"
+        android:textSize="18sp"
+        android:includeFontPadding="false"
+        android:translationY="-3dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/digital_clock"
+        app:layout_constraintBaseline_toBaselineOf="@id/digital_clock"
+        tools:visibility="visible" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/days_of_week"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

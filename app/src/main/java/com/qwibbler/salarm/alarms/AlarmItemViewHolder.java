@@ -200,6 +200,12 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         mBinding.digitalClock.refreshFormat();
         mBinding.digitalClock.setTime(alarm.hour, alarm.minutes);
 
+        if (alarm.isLockedToTimezone()) {
+            mBinding.lockIcon.setVisibility(VISIBLE);
+        } else {
+            mBinding.lockIcon.setVisibility(GONE);
+        }
+
         if (alarm.relationalRuleId > 0) {
             mBinding.digitalClock.setOnClickListener(null);
             mBinding.digitalClock.setOnLongClickListener(null);

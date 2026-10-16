@@ -115,6 +115,15 @@
     <string name="pause_alarm_title">Pause alarm</string>
     <!-- Label title in the alarm editing panel when the pause is set -->
     <string name="pause_alarm_range">Paused: %1$s</string>
+    <!-- Label title in the alarm editing panel to lock alarm to timezone -->
+    <string name="lock_to_timezone">Lock to timezone</string>
+    <!-- Label title in the alarm editing panel when locked to a timezone -->
+    <string name="locked_to_timezone">Locked to %1$s</string>
+    <!-- Title of timezone picker dialog -->
+    <string name="select_timezone_dialog_title">Lock to timezone</string>
+    <!-- Hint for searching timezones in timezone picker dialog -->
+    <string name="search_timezone_hint">Search timezone…</string>
+    <string name="lock_emoji" translatable="false">🔒</string>
     <!-- Label shown when user is setting up non-repeating alarm for tomorrow -->
     <string name="alarm_tomorrow">Tomorrow</string>
     <!-- Label shown when user is setting up non-repeating alarm for later today -->
