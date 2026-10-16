@@ -79,6 +79,8 @@ import com.qwibbler.salarm.salah.SalahLocationManager;
 import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.settings.SettingsActivity;
+import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uicomponents.EmptyViewController;
 import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
@@ -179,6 +181,15 @@ public final class AlarmFragment extends SalarmFragment
      */
     public AlarmFragment() {
         super(ALARMS);
+    }
+
+    @Override
+    public void setMenuVisibility(boolean menuVisible) {
+        super.setMenuVisibility(menuVisible);
+
+        if (!menuVisible && !mSelectedTags.isEmpty()) {
+            setSelectedTag(null, true);
+        }
     }
 
     @Override
@@ -421,7 +432,7 @@ public final class AlarmFragment extends SalarmFragment
         // the app.
         mAlarmUpdateHandler.hideUndoBar();
 
-        // Hide side buttons only if we're leaving the activity (not rotating the screen)
+        // Hide side buttons only if we're leaving the activity/page (not rotating the screen)
         if (!requireActivity().isChangingConfigurations()) {
             resetFabAndButtonsState();
         }
@@ -494,8 +505,36 @@ public final class AlarmFragment extends SalarmFragment
 
         applyFilters();
     }
+    private void setSelectedTag(@Nullable String tag, boolean selected) {
+        boolean changed;
+        List<String> oldSelectedTags = new ArrayList<>(mSelectedTags);
+
+        if (tag == null) {
+            changed = !mSelectedTags.isEmpty();
+            if (changed) {
+                mSelectedTags.clear();
+            }
+        } else if (selected) {
+            changed = !mSelectedTags.contains(tag);
+            if (changed) {
+                mSelectedTags.add(tag);
+            }
+        } else {
+            changed = mSelectedTags.remove(tag);
+        }
+
+        if (!changed) {
+            return;
+        }
+
+        applyFilters(oldSelectedTags);
+    }
 
     private void applyFilters() {
+        applyFilters(new ArrayList<>(mSelectedTags));
+    }
+
+    private void applyFilters(List<String> oldSelectedTags) {
         if (mItemAdapter == null || mTagFilterAdapter == null || mBinding == null) {
             return;
         }
@@ -530,7 +569,7 @@ public final class AlarmFragment extends SalarmFragment
 
         Collections.sort(availableTags);
 
-        setAdapterItems(filteredList, availableTags, SystemClock.elapsedRealtime());
+        setAdapterItems(filteredList, availableTags, oldSelectedTags, SystemClock.elapsedRealtime());
 
         // Update toggle state based on visible alarms
         updateAllAlarmsToggleState(filteredList);
@@ -625,7 +664,7 @@ public final class AlarmFragment extends SalarmFragment
     private class TagFilterAdapter extends RecyclerView.Adapter<TagFilterViewHolder> {
         private List<String> mAvailableTags = new ArrayList<>();
 
-        public void setTags(final List<String> newTags) {
+        public void setTags(final List<String> newTags, final List<String> oldSelectedTags) {
             final List<String> oldTags = new ArrayList<>(mAvailableTags);
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
@@ -650,12 +689,13 @@ public final class AlarmFragment extends SalarmFragment
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                     if (oldItemPosition == 0 || newItemPosition == 0) {
                         if (oldItemPosition != newItemPosition) return false;
-                        // Always update the "All" chip to ensure its checked state is correct
-                        return false;
+                        return oldSelectedTags.isEmpty() == mSelectedTags.isEmpty();
                     }
                     String tag = newTags.get(newItemPosition - 1);
                     String oldTag = oldTags.get(oldItemPosition - 1);
-                    return tag.equals(oldTag) && mSelectedTags.contains(tag) == mSelectedTags.contains(oldTag);
+                    boolean oldSelected = oldSelectedTags.contains(oldTag);
+                    boolean newSelected = mSelectedTags.contains(tag);
+                    return tag.equals(oldTag) && oldSelected == newSelected;
                 }
             });
             mAvailableTags = newTags;
@@ -670,26 +710,29 @@ public final class AlarmFragment extends SalarmFragment
 
         @Override
         public void onBindViewHolder(@NonNull TagFilterViewHolder holder, int position) {
+            holder.binding.tagChip.setOnCheckedChangeListener(null);
             if (position == 0) {
                 holder.binding.tagChip.setText(R.string.all_alarms_filter);
                 holder.binding.tagChip.setCheckable(true);
                 holder.binding.tagChip.setChecked(mSelectedTags.isEmpty());
-                holder.binding.tagChip.setOnClickListener(v -> {
-                    mSelectedTags.clear();
-                    applyFilters();
+                holder.binding.tagChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                    if (isChecked) {
+                        setSelectedTag(null, true);
+                    } else {
+                        if (mSelectedTags.isEmpty()) {
+                            buttonView.setChecked(true);
+                        }
+                    }
                 });
             } else {
                 String tag = mAvailableTags.get(position - 1);
                 holder.binding.tagChip.setText(tag);
                 holder.binding.tagChip.setCheckable(true);
                 holder.binding.tagChip.setChecked(mSelectedTags.contains(tag));
-                holder.binding.tagChip.setOnClickListener(v -> {
-                    if (mSelectedTags.contains(tag)) {
-                        mSelectedTags.remove(tag);
-                    } else {
-                        mSelectedTags.add(tag);
-                    }
-                    applyFilters();
+                holder.binding.tagChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    Utils.performHapticFeedback(buttonView, HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+                    setSelectedTag(tag, isChecked);
                 });
             }
         }
@@ -726,7 +769,7 @@ public final class AlarmFragment extends SalarmFragment
         } else {
             if (mSideButtonsVisible) {
                 if (!SalahLocationManager.isLocationSet(requireContext())) {
-                    com.qwibbler.salarm.uicomponents.CustomDialog.create(
+                    CustomDialog.create(
                         requireContext(),
                         R.style.AppAlertDialogTheme,
                         null,
@@ -735,8 +778,8 @@ public final class AlarmFragment extends SalarmFragment
                         null,
                         getString(R.string.label_set_location),
                         (dialog, which) -> {
-                            Intent intent = new Intent(requireContext(), com.qwibbler.salarm.settings.SettingsActivity.class);
-                            intent.putExtra(com.qwibbler.salarm.settings.SettingsActivity.KEY_SHOW_SALAH_SETTINGS, true);
+                            Intent intent = new Intent(requireContext(), SettingsActivity.class);
+                            intent.putExtra(SettingsActivity.KEY_SHOW_SALAH_SETTINGS, true);
                             startActivity(intent);
                         },
                         getString(android.R.string.cancel),
@@ -744,7 +787,7 @@ public final class AlarmFragment extends SalarmFragment
                         null,
                         null,
                         null,
-                        com.qwibbler.salarm.uicomponents.CustomDialog.SoftInputMode.NONE
+                        CustomDialog.SoftInputMode.NONE
                     ).show();
                     hideSideButtonsWithFabAnimation();
                     return;
@@ -1005,7 +1048,7 @@ public final class AlarmFragment extends SalarmFragment
      * @param updateToken a monotonically increasing value used to preserve ordering of deferred
      *                    updates
      */
-    private void setAdapterItems(final List<AlarmItemHolder> items, final List<String> availableTags, final long updateToken) {
+    private void setAdapterItems(final List<AlarmItemHolder> items, final List<String> availableTags, final List<String> oldSelectedTags, final long updateToken) {
         if (mBinding == null || !isAdded() || mIsReordering) {
             return;
         }
@@ -1020,19 +1063,19 @@ public final class AlarmFragment extends SalarmFragment
 
         if (mainAnimatorRunning || tagAnimatorRunning) {
             // RecyclerView is currently animating -> defer update.
-            mBinding.alarmRecyclerView.getItemAnimator().isRunning(() -> setAdapterItems(items, availableTags, updateToken));
+            mBinding.alarmRecyclerView.getItemAnimator().isRunning(() -> setAdapterItems(items, availableTags, oldSelectedTags, updateToken));
         } else if (mBinding.alarmRecyclerView.isComputingLayout() || mBinding.tagFilterRecyclerView.isComputingLayout()) {
             // RecyclerView is currently computing a layout -> defer update.
             mBinding.alarmRootView.post(() -> {
                 if (mBinding != null) {
-                    setAdapterItems(items, availableTags, updateToken);
+                    setAdapterItems(items, availableTags, oldSelectedTags, updateToken);
                 }
             });
         } else {
             mCurrentUpdateToken = updateToken;
 
             mItemAdapter.setItems(items);
-            mTagFilterAdapter.setTags(availableTags);
+            mTagFilterAdapter.setTags(availableTags, oldSelectedTags);
 
             // Show or hide the empty view as appropriate.
             final boolean noAlarms = items.isEmpty();
