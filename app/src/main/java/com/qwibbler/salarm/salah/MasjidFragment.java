@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -148,21 +149,16 @@ public class MasjidFragment extends SalarmFragment {
 
         UiDataModel.getUiDataModel().addTabListener(mTabListener);
 
-        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, (requestKey, result) -> {
+        FragmentResultListener updateListener = (requestKey, result) -> {
             long selectedId = result.getLong("selected_masjid_id", -1);
             if (selectedId != -1) {
                 mSelectedMasjidId = selectedId;
             }
             loadMasjids();
-        });
+        };
 
-        getParentFragmentManager().setFragmentResultListener("masjid_imported", this, (requestKey, result) -> {
-            long selectedId = result.getLong("selected_masjid_id", -1);
-            if (selectedId != -1) {
-                mSelectedMasjidId = selectedId;
-            }
-            loadMasjids();
-        });
+        getParentFragmentManager().setFragmentResultListener("masjid_updated", this, updateListener);
+        getParentFragmentManager().setFragmentResultListener("masjid_imported", this, updateListener);
 
         return view;
     }

@@ -10,11 +10,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,28 +27,59 @@ public class MasjidQrCodec {
 
     public static final String SCHEME_PREFIX = "salarm:v1?";
 
-    private static final Map<String, String> CALC_TO_CODE = new HashMap<>();
-    private static final Map<String, String> CODE_TO_CALC = new HashMap<>();
+    private static final Map<CalculationMethod, String> CALC_TO_CODE = new EnumMap<>(CalculationMethod.class);
+    private static final Map<String, CalculationMethod> CODE_TO_CALC = new HashMap<>();
+
+    private static final Map<SalahType, String> SALAH_TYPE_TO_CODE = new EnumMap<>(SalahType.class);
+    private static final Map<String, SalahType> CODE_TO_SALAH_TYPE = new HashMap<>();
+
+    private static final Map<RelationalRule.AnchorEvent, String> ANCHOR_TO_CODE = new EnumMap<>(RelationalRule.AnchorEvent.class);
+    private static final Map<String, RelationalRule.AnchorEvent> CODE_TO_ANCHOR = new HashMap<>();
 
     static {
-        addCalcMapping("MUSLIM_WORLD_LEAGUE", "mwl");
-        addCalcMapping("EGYPTIAN", "egy");
-        addCalcMapping("KARACHI", "kr");
-        addCalcMapping("UMM_AL_QURA", "uaq");
-        addCalcMapping("DUBAI", "dub");
-        addCalcMapping("MOON_SIGHTING_COMMITTEE", "msc");
-        addCalcMapping("NORTH_AMERICA", "na");
-        addCalcMapping("KUWAIT", "kwt");
-        addCalcMapping("QATAR", "qtr");
-        addCalcMapping("SINGAPORE", "sg");
-        addCalcMapping("TEHRAN", "thr");
-        addCalcMapping("TURKEY", "tr");
-        addCalcMapping("OTHER", "oth");
+        addCalcMapping(CalculationMethod.MUSLIM_WORLD_LEAGUE, "mwl");
+        addCalcMapping(CalculationMethod.EGYPTIAN, "egy");
+        addCalcMapping(CalculationMethod.KARACHI, "kr");
+        addCalcMapping(CalculationMethod.UMM_AL_QURA, "uaq");
+        addCalcMapping(CalculationMethod.DUBAI, "dub");
+        addCalcMapping(CalculationMethod.MOON_SIGHTING_COMMITTEE, "msc");
+        addCalcMapping(CalculationMethod.NORTH_AMERICA, "na");
+        addCalcMapping(CalculationMethod.KUWAIT, "kwt");
+        addCalcMapping(CalculationMethod.QATAR, "qtr");
+        addCalcMapping(CalculationMethod.SINGAPORE, "sg");
+        addCalcMapping(CalculationMethod.OTHER, "oth");
+
+        addSalahTypeMapping(SalahType.FAJR, "f");
+        addSalahTypeMapping(SalahType.SUNRISE, "s");
+        addSalahTypeMapping(SalahType.DHUHR, "d");
+        addSalahTypeMapping(SalahType.ASR, "a");
+        addSalahTypeMapping(SalahType.MAGHRIB, "m");
+        addSalahTypeMapping(SalahType.ISHA, "i");
+        addSalahTypeMapping(SalahType.JUMA, "j");
+
+        addAnchorMapping(RelationalRule.AnchorEvent.FAJR, "f");
+        addAnchorMapping(RelationalRule.AnchorEvent.SUNRISE, "s");
+        addAnchorMapping(RelationalRule.AnchorEvent.DHUHR, "d");
+        addAnchorMapping(RelationalRule.AnchorEvent.ASR_SHAFI, "as");
+        addAnchorMapping(RelationalRule.AnchorEvent.ASR_HANAFI, "ah");
+        addAnchorMapping(RelationalRule.AnchorEvent.MAGHRIB, "m");
+        addAnchorMapping(RelationalRule.AnchorEvent.ISHA, "i");
+        CODE_TO_ANCHOR.put("a", RelationalRule.AnchorEvent.ASR_HANAFI);
     }
 
-    private static void addCalcMapping(String enumName, String code) {
-        CALC_TO_CODE.put(enumName, code);
-        CODE_TO_CALC.put(code, enumName);
+    private static void addCalcMapping(CalculationMethod method, String code) {
+        CALC_TO_CODE.put(method, code);
+        CODE_TO_CALC.put(code, method);
+    }
+
+    private static void addSalahTypeMapping(SalahType type, String code) {
+        SALAH_TYPE_TO_CODE.put(type, code);
+        CODE_TO_SALAH_TYPE.put(code, type);
+    }
+
+    private static void addAnchorMapping(RelationalRule.AnchorEvent anchor, String code) {
+        ANCHOR_TO_CODE.put(anchor, code);
+        CODE_TO_ANCHOR.put(code, anchor);
     }
 
     public static class ParsedMasjidResult {
@@ -57,13 +90,6 @@ public class MasjidQrCodec {
             this.masjid = masjid;
             this.events = events;
         }
-    }
-
-    /**
-     * Encodes a Masjid and its events into a compact QR code string.
-     */
-    public static String encode(Masjid masjid, List<MasjidEvent> events) {
-        return encode(null, masjid, events);
     }
 
     /**
@@ -98,8 +124,9 @@ public class MasjidQrCodec {
         }
 
         // Calculation Method
-        if (masjid.calcMethod != null) {
-            String code = CALC_TO_CODE.get(masjid.calcMethod.trim());
+        CalculationMethod calcMethod = masjid.getCalculationMethod(context);
+        if (calcMethod != null) {
+            String code = CALC_TO_CODE.get(calcMethod);
             if (code != null) {
                 params.put("c", code);
             }
@@ -143,13 +170,6 @@ public class MasjidQrCodec {
     }
 
     /**
-     * Decodes a QR code string back into a Masjid object and its events.
-     */
-    public static ParsedMasjidResult decode(String qrText) {
-        return decode(null, qrText);
-    }
-
-    /**
      * Decodes a QR code string back into a Masjid object and its events using context for timezone fallback.
      */
     public static ParsedMasjidResult decode(Context context, String qrText) {
@@ -173,56 +193,33 @@ public class MasjidQrCodec {
         }
 
         // Location
-        if (params.get("loc") != null) {
-            String loc = params.get("loc");
-            if (loc != null) {
-                String[] parts = loc.split(",");
-                if (parts.length >= 2) {
-                    try {
-                        masjid.latitude = Double.parseDouble(parts[0].trim());
-                        masjid.longitude = Double.parseDouble(parts[1].trim());
-                    } catch (NumberFormatException ignored) {}
-                }
+        String loc = params.get("loc");
+        if (loc != null) {
+            String[] parts = loc.split(",");
+            if (parts.length >= 2) {
+                try {
+                    masjid.latitude = Double.parseDouble(parts[0].trim());
+                    masjid.longitude = Double.parseDouble(parts[1].trim());
+                } catch (NumberFormatException ignored) {}
             }
         }
 
         // Timezone
         if (params.get("tz") != null) {
-            String tzVal = params.get("tz");
-            if (tzVal != null) {
-                masjid.timezoneId = decodeUriComponent(tzVal);
-            }
-        } else if (context != null) {
-            SalahUtils.OfflineCity autoCity = SalahUtils.findNearestOfflineCity(context, masjid.latitude, masjid.longitude);
-            if (autoCity != null) {
-                masjid.timezoneId = autoCity.timezoneId;
-            } else {
-                masjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
-            }
+            masjid.timezoneId = decodeUriComponent(params.get("tz"));
         } else {
-            masjid.timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
+            SalahUtils.OfflineCity autoCity = (context != null)
+                    ? SalahUtils.findNearestOfflineCity(context, masjid.latitude, masjid.longitude)
+                    : null;
+            masjid.timezoneId = (autoCity != null) ? autoCity.timezoneId : SalahTimezoneUtils.getPhoneTimeZoneId();
         }
 
         // Calculation Method
-        if (params.containsKey("c")) {
-            String code = params.get("c");
-            String calcEnum = CODE_TO_CALC.get(code);
-            if (calcEnum != null) {
-                masjid.calcMethod = calcEnum;
-            } else {
-                masjid.calcMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE.name();
-            }
-        } else {
-            masjid.calcMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE.name();
-        }
+        CalculationMethod calcEnum = CODE_TO_CALC.get(params.get("c"));
+        masjid.calcMethod = (calcEnum != null ? calcEnum : CalculationMethod.MUSLIM_WORLD_LEAGUE).name();
 
         // Madhab
-        if (params.containsKey("m")) {
-            String m = params.get("m");
-            masjid.madhab = "h".equalsIgnoreCase(m) ? Madhab.HANAFI.name() : Madhab.SHAFI.name();
-        } else {
-            masjid.madhab = Madhab.SHAFI.name();
-        }
+        masjid.madhab = "h".equalsIgnoreCase(params.get("m")) ? Madhab.HANAFI.name() : Madhab.SHAFI.name();
 
         // Intervals
         if (params.get("i") != null) {
@@ -300,11 +297,7 @@ public class MasjidQrCodec {
 
         // Anchor
         String anchorCode = getAnchorCode(def.anchor != null ? def.anchor.basicEvent : null);
-        if (anchorCode != null) {
-            sb.append(anchorCode);
-        } else {
-            sb.append(typeCode);
-        }
+        sb.append(Objects.requireNonNullElse(anchorCode, typeCode));
 
         // Rounding
         if (def.calculation != null && def.calculation.roundingIntervalMinutes > 0 && def.calculation.roundingDirection != null) {
@@ -406,59 +399,26 @@ public class MasjidQrCodec {
         return event;
     }
 
-    private static String getSalahTypeCode(String salahType) {
-        if (salahType == null) return null;
-        return switch (salahType.toUpperCase(Locale.US)) {
-            case "FAJR" -> "f";
-            case "SUNRISE" -> "s";
-            case "DHUHR" -> "d";
-            case "ASR" -> "a";
-            case "MAGHRIB" -> "m";
-            case "ISHA" -> "i";
-            case "JUMA" -> "j";
-            default -> null;
-        };
+    private static String getSalahTypeCode(String salahTypeStr) {
+        SalahType type = SalahType.fromString(salahTypeStr);
+        return (type != null) ? SALAH_TYPE_TO_CODE.get(type) : null;
     }
 
     private static String parseSalahTypeCode(String code) {
         if (code == null) return null;
-        return switch (code.toLowerCase(Locale.US)) {
-            case "f" -> "FAJR";
-            case "s" -> "SUNRISE";
-            case "d" -> "DHUHR";
-            case "a" -> "ASR";
-            case "m" -> "MAGHRIB";
-            case "i" -> "ISHA";
-            case "j" -> "JUMA";
-            default -> null;
-        };
+        SalahType type = CODE_TO_SALAH_TYPE.get(code.toLowerCase(Locale.US));
+        return (type != null) ? type.name() : null;
     }
 
     private static String getAnchorCode(RelationalRule.AnchorEvent event) {
         if (event == null) return null;
-        return switch (event) {
-            case FAJR -> "f";
-            case SUNRISE -> "s";
-            case DHUHR -> "d";
-            case ASR_SHAFI -> "as";
-            case ASR_HANAFI -> "ah";
-            case MAGHRIB -> "m";
-            case ISHA -> "i";
-        };
+        return ANCHOR_TO_CODE.get(event);
     }
 
     private static RelationalRule.AnchorEvent parseAnchorCode(String code) {
         if (code == null) return RelationalRule.AnchorEvent.FAJR;
-        return switch (code.toLowerCase(Locale.US)) {
-            case "f" -> RelationalRule.AnchorEvent.FAJR;
-            case "s" -> RelationalRule.AnchorEvent.SUNRISE;
-            case "d" -> RelationalRule.AnchorEvent.DHUHR;
-            case "as" -> RelationalRule.AnchorEvent.ASR_SHAFI;
-            case "ah", "a" -> RelationalRule.AnchorEvent.ASR_HANAFI;
-            case "m" -> RelationalRule.AnchorEvent.MAGHRIB;
-            case "i" -> RelationalRule.AnchorEvent.ISHA;
-            default -> RelationalRule.AnchorEvent.FAJR;
-        };
+        RelationalRule.AnchorEvent anchor = CODE_TO_ANCHOR.get(code.toLowerCase(Locale.US));
+        return (anchor != null) ? anchor : RelationalRule.AnchorEvent.FAJR;
     }
 
     private static Map<String, String> parseQueryParams(String url) {

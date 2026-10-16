@@ -143,6 +143,7 @@ dependencies {
     implementation 'com.github.martin-stone:hsv-alpha-color-picker-android:3.1.0'
     implementation 'com.batoulapps.adhan:adhan:1.2.1'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation 'com.google.zxing:core:3.5.4'
 
     // Room
     def room_version = "2.6.1"
