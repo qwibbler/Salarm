@@ -188,8 +188,9 @@ public class SalahAlarmSyncManager {
         Alarm nativeAlarm;
 
         Masjid masjid = providedMasjid;
+        MasjidEvent event = null;
         if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
-            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
             if (masjid == null && event != null) {
                 masjid = SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId);
             }
@@ -198,9 +199,11 @@ public class SalahAlarmSyncManager {
             masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.masjidId);
         }
 
+        boolean isJuma = (event != null && "JUMA".equalsIgnoreCase(event.salahType))
+                || "JUMA".equalsIgnoreCase(rule.masjidSalahType);
+
         String label;
         if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
-            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
             String masjidName = masjid != null ? masjid.name : "Masjid";
             String type = event != null ? event.salahType : "Salah";
             label = SalahUtils.getLocalizedSalahName(context, type) + " - " + masjidName;
@@ -226,7 +229,7 @@ public class SalahAlarmSyncManager {
             nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse, true);
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
-            nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
+            nativeAlarm.daysOfWeek = isJuma ? Weekdays.fromCalendarDays(Calendar.FRIDAY) : Weekdays.fromBits(0x7F);
             nativeAlarm.label = "🔔 " + label;
 
             syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
@@ -236,6 +239,9 @@ public class SalahAlarmSyncManager {
         } else {
             nativeAlarm = alarms.get(0);
             nativeAlarm.enabled = rule.enabled;
+            if (isJuma) {
+                nativeAlarm.daysOfWeek = Weekdays.fromCalendarDays(Calendar.FRIDAY);
+            }
             nativeAlarm.label = "🔔 " + label;
 
             syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
