@@ -138,7 +138,6 @@ public class MasjidFragment extends SalarmFragment {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    exitCheckboxMode();
                     hideSideButtonsWithFabAnimation();
                 }
             }
@@ -150,22 +149,6 @@ public class MasjidFragment extends SalarmFragment {
                 if (e.getAction() == MotionEvent.ACTION_DOWN) {
                     if (mSideButtonsVisible) {
                         hideSideButtonsWithFabAnimation();
-                    }
-                    if (mShowCheckboxes) {
-                        View child = rv.findChildViewUnder(e.getX(), e.getY());
-                        if (child == null) {
-                            exitCheckboxMode();
-                            return true;
-                        } else {
-                            int pos = rv.getChildAdapterPosition(child);
-                            if (pos != RecyclerView.NO_POSITION) {
-                                PrayerItem item = mAdapter.getItem(pos);
-                                if (item != null && (!item.isConfigured || item.event == null)) {
-                                    exitCheckboxMode();
-                                    return true;
-                                }
-                            }
-                        }
                     }
                 }
                 return false;
@@ -628,8 +611,6 @@ public class MasjidFragment extends SalarmFragment {
                 if (mShowCheckboxes) {
                     if (item.isConfigured && item.event != null) {
                         toggleEventSelection(holder.getBindingAdapterPosition());
-                    } else {
-                        exitCheckboxMode();
                     }
                 } else {
                     if (item.masjid == null) return;
