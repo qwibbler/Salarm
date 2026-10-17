@@ -1085,16 +1085,46 @@ public final class SettingsDAO {
         prefs.edit().putString(KEY_TIMER_RINGTONE, uri.toString()).apply();
     }
 
+    private static boolean getBooleanSetting(SharedPreferences prefs, boolean isSalah, boolean overrideEnabled,
+                                            String salahKey, String basicKey, boolean defaultValue) {
+        if (isSalah && overrideEnabled && prefs.contains(salahKey)) {
+            return prefs.getBoolean(salahKey, defaultValue);
+        }
+        return prefs.getBoolean(basicKey, defaultValue);
+    }
+
+    private static int getIntSetting(SharedPreferences prefs, boolean isSalah, boolean overrideEnabled,
+                                     String salahKey, String basicKey, int defaultValue) {
+        if (isSalah && overrideEnabled && prefs.contains(salahKey)) {
+            return prefs.getInt(salahKey, defaultValue);
+        }
+        return prefs.getInt(basicKey, defaultValue);
+    }
+
+    private static String getStringSetting(SharedPreferences prefs, boolean isSalah, boolean overrideEnabled,
+                                           String salahKey, String basicKey, String defaultValue) {
+        if (isSalah && overrideEnabled && prefs.contains(salahKey)) {
+            return prefs.getString(salahKey, defaultValue);
+        }
+        return prefs.getString(basicKey, defaultValue);
+    }
+
     /**
      * @return the uri of the ringtone from the settings to play for all alarms
      */
+
     public static Uri getAlarmRingtoneUriFromSettings(SharedPreferences prefs, Uri defaultUri) {
         return getAlarmRingtoneUriFromSettings(prefs, defaultUri, false);
     }
 
     public static Uri getAlarmRingtoneUriFromSettings(SharedPreferences prefs, Uri defaultUri, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_DEFAULT_ALARM_RINGTONE : KEY_DEFAULT_ALARM_RINGTONE;
-        final String uriString = prefs.getString(key, null);
+        if (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs) && prefs.contains(KEY_SALAH_DEFAULT_ALARM_RINGTONE)) {
+            final String uriString = prefs.getString(KEY_SALAH_DEFAULT_ALARM_RINGTONE, null);
+            if (uriString != null) {
+                return Uri.parse(uriString);
+            }
+        }
+        final String uriString = prefs.getString(KEY_DEFAULT_ALARM_RINGTONE, null);
         return uriString == null ? defaultUri : Uri.parse(uriString);
     }
 
@@ -1121,8 +1151,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmVolumeEnabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VOLUME : KEY_ENABLE_PER_ALARM_VOLUME;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VOLUME);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_VOLUME, KEY_ENABLE_PER_ALARM_VOLUME, DEFAULT_ENABLE_PER_ALARM_VOLUME);
     }
 
     /**
@@ -1142,8 +1172,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmCrescendoDurationEnabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION, KEY_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION, DEFAULT_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION);
     }
 
     /**
@@ -1155,8 +1185,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmVolumeCrescendoDuration(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_VOLUME_CRESCENDO_DURATION : KEY_ALARM_VOLUME_CRESCENDO_DURATION;
-        return prefs.getInt(key, DEFAULT_VOLUME_CRESCENDO_DURATION);
+        return getIntSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_VOLUME_CRESCENDO_DURATION, KEY_ALARM_VOLUME_CRESCENDO_DURATION, DEFAULT_VOLUME_CRESCENDO_DURATION);
     }
 
     /**
@@ -1168,8 +1198,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isAdvancedAudioPlaybackEnabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_ADVANCED_AUDIO_PLAYBACK : KEY_ADVANCED_AUDIO_PLAYBACK;
-        return prefs.getBoolean(key, DEFAULT_ADVANCED_AUDIO_PLAYBACK);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmAdvancedAudioOverrideEnabled(prefs),
+                KEY_SALAH_ADVANCED_AUDIO_PLAYBACK, KEY_ADVANCED_AUDIO_PLAYBACK, DEFAULT_ADVANCED_AUDIO_PLAYBACK);
     }
 
     /**
@@ -1181,8 +1211,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isAutoRoutingToExternalAudioDevice(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE : KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE;
-        return prefs.getBoolean(key, DEFAULT_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmAdvancedAudioOverrideEnabled(prefs),
+                KEY_SALAH_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE, KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE, DEFAULT_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE);
     }
 
     /**
@@ -1194,8 +1224,8 @@ public final class SettingsDAO {
     }
 
     public static boolean shouldUseCustomMediaVolume(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_SYSTEM_MEDIA_VOLUME : KEY_SYSTEM_MEDIA_VOLUME;
-        return !prefs.getBoolean(key, DEFAULT_SYSTEM_MEDIA_VOLUME);
+        return !getBooleanSetting(prefs, isSalah, isSalahAlarmAdvancedAudioOverrideEnabled(prefs),
+                KEY_SALAH_SYSTEM_MEDIA_VOLUME, KEY_SYSTEM_MEDIA_VOLUME, DEFAULT_SYSTEM_MEDIA_VOLUME);
     }
 
     /**
@@ -1206,8 +1236,8 @@ public final class SettingsDAO {
     }
 
     public static int getExternalAudioDeviceVolumeValue(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmAdvancedAudioOverrideEnabled(prefs)) ? KEY_SALAH_EXTERNAL_AUDIO_DEVICE_VOLUME : KEY_EXTERNAL_AUDIO_DEVICE_VOLUME;
-        return prefs.getInt(key, DEFAULT_EXTERNAL_AUDIO_DEVICE_VOLUME);
+        return getIntSetting(prefs, isSalah, isSalahAlarmAdvancedAudioOverrideEnabled(prefs),
+                KEY_SALAH_EXTERNAL_AUDIO_DEVICE_VOLUME, KEY_EXTERNAL_AUDIO_DEVICE_VOLUME, DEFAULT_EXTERNAL_AUDIO_DEVICE_VOLUME);
     }
 
     /**
@@ -1235,11 +1265,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isSwipeActionEnabled(SharedPreferences pref, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(pref) && isSalahAlarmDisplayStyleOverrideEnabled(pref)) {
-            return pref.getBoolean(KEY_SALAH_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
-        }
-        // Default value must match the one in res/xml/settings_alarm.xml
-        return pref.getBoolean(KEY_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmStyleOverrideEnabled(pref) && isSalahAlarmDisplayStyleOverrideEnabled(pref),
+                KEY_SALAH_SWIPE_ACTION, KEY_SWIPE_ACTION, DEFAULT_SWIPE_ACTION);
     }
 
     /**
@@ -1289,8 +1316,8 @@ public final class SettingsDAO {
     }
 
     public static VolumeButtonBehavior getAlarmVolumeButtonBehavior(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_VOLUME_BUTTONS : KEY_VOLUME_BUTTONS;
-        final String value = prefs.getString(key, DEFAULT_VOLUME_BEHAVIOR);
+        final String value = getStringSetting(prefs, isSalah, isSalahAlarmActionsOverrideEnabled(prefs),
+                KEY_SALAH_VOLUME_BUTTONS, KEY_VOLUME_BUTTONS, DEFAULT_VOLUME_BEHAVIOR);
         return switch (value) {
             case DEFAULT_VOLUME_BEHAVIOR -> VolumeButtonBehavior.NOTHING;
             case VOLUME_BEHAVIOR_CHANGE_VOLUME -> VolumeButtonBehavior.CHANGE_VOLUME;
@@ -1308,8 +1335,8 @@ public final class SettingsDAO {
     }
 
     public static PowerButtonBehavior getAlarmPowerButtonBehavior(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_POWER_BUTTON : KEY_POWER_BUTTON;
-        final String value = prefs.getString(key, DEFAULT_POWER_BEHAVIOR);
+        final String value = getStringSetting(prefs, isSalah, isSalahAlarmActionsOverrideEnabled(prefs),
+                KEY_SALAH_POWER_BUTTON, KEY_POWER_BUTTON, DEFAULT_POWER_BEHAVIOR);
         return switch (value) {
             case DEFAULT_POWER_BEHAVIOR -> PowerButtonBehavior.NOTHING;
             case POWER_BEHAVIOR_SNOOZE -> PowerButtonBehavior.SNOOZE;
@@ -1326,8 +1353,8 @@ public final class SettingsDAO {
     }
 
     public static HeadphonesButtonBehavior getHeadphonesButtonBehavior(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_HEADPHONES_BUTTON : KEY_HEADPHONES_BUTTON;
-        final String value = prefs.getString(key, DEFAULT_HEADPHONES_BUTTON_BEHAVIOR);
+        final String value = getStringSetting(prefs, isSalah, isSalahAlarmActionsOverrideEnabled(prefs),
+                KEY_SALAH_HEADPHONES_BUTTON, KEY_HEADPHONES_BUTTON, DEFAULT_HEADPHONES_BUTTON_BEHAVIOR);
         return switch (value) {
             case DEFAULT_HEADPHONES_BUTTON_BEHAVIOR -> HeadphonesButtonBehavior.NOTHING;
             case HEADPHONES_BUTTON_BEHAVIOR_SNOOZE -> HeadphonesButtonBehavior.SNOOZE;
@@ -1337,8 +1364,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmAutoSilenceDisabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE : KEY_ENABLE_PER_ALARM_AUTO_SILENCE;
-        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE);
+        return !getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_AUTO_SILENCE, KEY_ENABLE_PER_ALARM_AUTO_SILENCE, DEFAULT_ENABLE_PER_ALARM_AUTO_SILENCE);
     }
 
     /**
@@ -1360,13 +1387,13 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmTimeout(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_AUTO_SILENCE_DURATION : KEY_AUTO_SILENCE_DURATION;
-        return prefs.getInt(key, DEFAULT_AUTO_SILENCE_DURATION);
+        return getIntSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_AUTO_SILENCE_DURATION, KEY_AUTO_SILENCE_DURATION, DEFAULT_AUTO_SILENCE_DURATION);
     }
 
     public static boolean isPerAlarmSnoozeDurationDisabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION : KEY_ENABLE_PER_ALARM_SNOOZE_DURATION;
-        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION);
+        return !getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_SNOOZE_DURATION, KEY_ENABLE_PER_ALARM_SNOOZE_DURATION, DEFAULT_ENABLE_PER_ALARM_SNOOZE_DURATION);
     }
 
     /**
@@ -1382,8 +1409,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmDismissAfterDisabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER : KEY_ENABLE_PER_ALARM_DISMISS_AFTER;
-        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
+        return !getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_DISMISS_AFTER, KEY_ENABLE_PER_ALARM_DISMISS_AFTER, DEFAULT_ENABLE_PER_ALARM_DISMISS_AFTER);
     }
 
     /**
@@ -1406,8 +1433,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeLength(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_SNOOZE_DURATION : KEY_ALARM_SNOOZE_DURATION;
-        return prefs.getInt(key, DEFAULT_ALARM_SNOOZE_DURATION);
+        return getIntSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_SNOOZE_DURATION, KEY_ALARM_SNOOZE_DURATION, DEFAULT_ALARM_SNOOZE_DURATION);
     }
 
     /**
@@ -1418,13 +1445,13 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmDismissAfter(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_DISMISS_AFTER : KEY_ALARM_DISMISS_AFTER;
-        return prefs.getInt(key, DEFAULT_ALARM_DISMISS_AFTER);
+        return getIntSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_DISMISS_AFTER, KEY_ALARM_DISMISS_AFTER, DEFAULT_ALARM_DISMISS_AFTER);
     }
 
     public static boolean isPerAlarmMissedRepeatLimitDisabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT : KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT;
-        return !prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
+        return !getBooleanSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT, KEY_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT, DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT);
     }
 
     /**
@@ -1447,8 +1474,8 @@ public final class SettingsDAO {
     }
 
     public static int getMissedAlarmRepeatLimit(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_REPEAT_MISSED_ALARM : KEY_REPEAT_MISSED_ALARM;
-        final String string = prefs.getString(key, DEFAULT_MISSED_ALARM_REPEAT_LIMIT);
+        final String string = getStringSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_REPEAT_MISSED_ALARM, KEY_REPEAT_MISSED_ALARM, DEFAULT_MISSED_ALARM_REPEAT_LIMIT);
         return Integer.parseInt(string);
     }
 
@@ -1460,8 +1487,8 @@ public final class SettingsDAO {
     }
 
     public static int getFlipAction(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_FLIP_ACTION : KEY_FLIP_ACTION;
-        final String string = prefs.getString(key, DEFAULT_FLIP_ACTION);
+        final String string = getStringSetting(prefs, isSalah, isSalahAlarmActionsOverrideEnabled(prefs),
+                KEY_SALAH_FLIP_ACTION, KEY_FLIP_ACTION, DEFAULT_FLIP_ACTION);
         return Integer.parseInt(string);
     }
 
@@ -1473,8 +1500,8 @@ public final class SettingsDAO {
     }
 
     public static int getShakeAction(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(prefs)) ? KEY_SALAH_SHAKE_ACTION : KEY_SHAKE_ACTION;
-        final String string = prefs.getString(key, DEFAULT_SHAKE_ACTION);
+        final String string = getStringSetting(prefs, isSalah, isSalahAlarmActionsOverrideEnabled(prefs),
+                KEY_SALAH_SHAKE_ACTION, KEY_SHAKE_ACTION, DEFAULT_SHAKE_ACTION);
         return Integer.parseInt(string);
     }
 
@@ -1486,8 +1513,8 @@ public final class SettingsDAO {
     }
 
     public static int getShakeIntensity(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmActionsOverrideEnabled(pref)) ? KEY_SALAH_SHAKE_INTENSITY : KEY_SHAKE_INTENSITY;
-        return pref.getInt(key, DEFAULT_SHAKE_INTENSITY);
+        return getIntSetting(pref, isSalah, isSalahAlarmActionsOverrideEnabled(pref),
+                KEY_SALAH_SHAKE_INTENSITY, KEY_SHAKE_INTENSITY, DEFAULT_SHAKE_INTENSITY);
     }
 
     /**
@@ -1499,8 +1526,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isDismissButtonDisplayedWhenAlarmEnabled(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_DISPLAY_DISMISS_BUTTON : KEY_DISPLAY_DISMISS_BUTTON;
-        return pref.getBoolean(key, DEFAULT_DISPLAY_DISMISS_BUTTON);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmMiscOverrideEnabled(pref),
+                KEY_SALAH_DISPLAY_DISMISS_BUTTON, KEY_DISPLAY_DISMISS_BUTTON, DEFAULT_DISPLAY_DISMISS_BUTTON);
     }
 
     /**
@@ -1511,8 +1538,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmNotificationReminderTime(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmMiscOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_NOTIFICATION_REMINDER : KEY_ALARM_NOTIFICATION_REMINDER;
-        return prefs.getInt(key, DEFAULT_ALARM_NOTIFICATION_REMINDER);
+        return getIntSetting(prefs, isSalah, isSalahAlarmMiscOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_NOTIFICATION_REMINDER, KEY_ALARM_NOTIFICATION_REMINDER, DEFAULT_ALARM_NOTIFICATION_REMINDER);
     }
 
     /**
@@ -1524,8 +1551,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmVibrationPatternEnabled(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN : KEY_ENABLE_PER_ALARM_VIBRATION_PATTERN;
-        return prefs.getBoolean(key, DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmVibrationOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_VIBRATION_PATTERN, KEY_ENABLE_PER_ALARM_VIBRATION_PATTERN, DEFAULT_ENABLE_PER_ALARM_VIBRATION_PATTERN);
     }
 
     /**
@@ -1536,8 +1563,8 @@ public final class SettingsDAO {
     }
 
     public static String getVibrationPattern(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_VIBRATION_PATTERN : KEY_VIBRATION_PATTERN;
-        return prefs.getString(key, DEFAULT_VIBRATION_PATTERN);
+        return getStringSetting(prefs, isSalah, isSalahAlarmVibrationOverrideEnabled(prefs),
+                KEY_SALAH_VIBRATION_PATTERN, KEY_VIBRATION_PATTERN, DEFAULT_VIBRATION_PATTERN);
     }
 
     /**
@@ -1548,8 +1575,8 @@ public final class SettingsDAO {
     }
 
     public static int getVibrationStartDelay(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmVibrationOverrideEnabled(prefs)) ? KEY_SALAH_VIBRATION_START_DELAY : KEY_VIBRATION_START_DELAY;
-        return prefs.getInt(key, DEFAULT_VIBRATION_START_DELAY);
+        return getIntSetting(prefs, isSalah, isSalahAlarmVibrationOverrideEnabled(prefs),
+                KEY_SALAH_VIBRATION_START_DELAY, KEY_VIBRATION_START_DELAY, DEFAULT_VIBRATION_START_DELAY);
     }
 
     /**
@@ -1560,8 +1587,8 @@ public final class SettingsDAO {
     }
 
     public static boolean areAlarmVibrationsEnabledByDefault(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmVibrationOverrideEnabled(pref)) ? KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT : KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT;
-        return pref.getBoolean(key, DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmVibrationOverrideEnabled(pref),
+                KEY_SALAH_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT, KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT, DEFAULT_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT);
     }
 
     /**
@@ -1573,8 +1600,8 @@ public final class SettingsDAO {
     }
 
     public static boolean areSnoozedOrDismissedAlarmVibrationsEnabled(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmVibrationOverrideEnabled(pref)) ? KEY_SALAH_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS : KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS;
-        return pref.getBoolean(key, DEFAULT_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmVibrationOverrideEnabled(pref),
+                KEY_SALAH_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS, KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS, DEFAULT_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS);
     }
 
     /**
@@ -1586,8 +1613,8 @@ public final class SettingsDAO {
     }
 
     public static boolean shouldTurnOnBackFlashForTriggeredAlarm(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM : KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM;
-        return pref.getBoolean(key, DEFAULT_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmMiscOverrideEnabled(pref),
+                KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM, KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM, DEFAULT_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
     }
 
     /**
@@ -1606,8 +1633,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isLowAlarmVolumeWarningDisplayed(SharedPreferences pref, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmMiscOverrideEnabled(pref)) ? KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING : KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING;
-        return pref.getBoolean(key, DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING);
+        return getBooleanSetting(pref, isSalah, isSalahAlarmMiscOverrideEnabled(pref),
+                KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING, KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING, DEFAULT_DISPLAY_LOW_ALARM_VOLUME_WARNING);
     }
 
     /**
@@ -1634,10 +1661,9 @@ public final class SettingsDAO {
     }
 
     public static ClockStyle getAlarmClockStyle(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return getClockStyle(prefs, KEY_SALAH_ALARM_CLOCK_STYLE);
-        }
-        return getClockStyle(prefs, KEY_ALARM_CLOCK_STYLE);
+        boolean override = isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs);
+        String key = (override && prefs.contains(KEY_SALAH_ALARM_CLOCK_STYLE)) ? KEY_SALAH_ALARM_CLOCK_STYLE : KEY_ALARM_CLOCK_STYLE;
+        return getClockStyle(prefs, key);
     }
 
     /**
@@ -1648,10 +1674,8 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockDial(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_SALAH_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
-        }
-        return prefs.getString(KEY_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
+        return getStringSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_CLOCK_DIAL, KEY_ALARM_CLOCK_DIAL, DEFAULT_CLOCK_DIAL);
     }
 
     /**
@@ -1662,10 +1686,8 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockSecondHand(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_SALAH_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
-        }
-        return prefs.getString(KEY_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
+        return getStringSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_CLOCK_SECOND_HAND, KEY_ALARM_CLOCK_SECOND_HAND, DEFAULT_CLOCK_SECOND_HAND);
     }
 
     /**
@@ -1676,10 +1698,8 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmClockDialMaterial(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_SALAH_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
-        }
-        return prefs.getString(KEY_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
+        return getStringSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_CLOCK_DIAL_MATERIAL, KEY_ALARM_CLOCK_DIAL_MATERIAL, DEFAULT_CLOCK_DIAL_MATERIAL);
     }
 
     /**
@@ -1690,10 +1710,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmAnalogClockSize(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
-        }
-        return prefs.getInt(KEY_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
+        return getIntSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_ANALOG_CLOCK_SIZE, KEY_ALARM_ANALOG_CLOCK_SIZE, DEFAULT_ANALOG_CLOCK_SIZE);
     }
 
     /**
@@ -1705,11 +1723,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmSecondHandDisplayed(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_DISPLAY_ALARM_SECOND_HAND, KEY_DISPLAY_ALARM_SECOND_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
     }
 
     /**
@@ -1721,11 +1736,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isSnoozeSelectorDisplayed(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs) && isSalahAlarmDisplayStyleOverrideEnabled(prefs),
+                KEY_SALAH_DISPLAY_SNOOZE_SELECTOR, KEY_DISPLAY_SNOOZE_SELECTOR, DEFAULT_DISPLAY_SNOOZE_SELECTOR);
     }
 
     /**
@@ -1736,10 +1748,8 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmFont(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_SALAH_ALARM_FONT, null);
-        }
-        return prefs.getString(KEY_ALARM_FONT, null);
+        return getStringSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_FONT, KEY_ALARM_FONT, null);
     }
 
     /**
@@ -1750,11 +1760,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmBackgroundColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_BACKGROUND_COLOR, KEY_ALARM_BACKGROUND_COLOR, DEFAULT_ALARM_BACKGROUND_COLOR);
     }
 
     /**
@@ -1765,11 +1772,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmBackgroundAmoledColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_BACKGROUND_AMOLED_COLOR, KEY_ALARM_BACKGROUND_AMOLED_COLOR, DEFAULT_ALARM_BACKGROUND_AMOLED_COLOR);
     }
 
     /**
@@ -1780,11 +1784,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmClockColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_CLOCK_COLOR, KEY_ALARM_CLOCK_COLOR, DEFAULT_ALARM_CLOCK_COLOR);
     }
 
     /**
@@ -1795,11 +1796,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmSecondHandColor(SharedPreferences prefs, Context context, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_SECOND_HAND_COLOR, KEY_ALARM_SECOND_HAND_COLOR, getDefaultAlarmInversePrimaryColor(context));
     }
 
     /**
@@ -1810,11 +1808,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmTitleColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_TITLE_COLOR, KEY_ALARM_TITLE_COLOR, DEFAULT_ALARM_TITLE_COLOR);
     }
 
     /**
@@ -1825,11 +1820,8 @@ public final class SettingsDAO {
     }
 
     public static int getSlideZoneColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SLIDE_ZONE_COLOR, KEY_SLIDE_ZONE_COLOR, DEFAULT_SLIDE_ZONE_COLOR);
     }
 
     /**
@@ -1840,11 +1832,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_BUTTON_COLOR, KEY_ALARM_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
     }
 
     /**
@@ -1855,11 +1844,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeTitleColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_TITLE_COLOR, KEY_SNOOZE_TITLE_COLOR, DEFAULT_SNOOZE_TITLE_COLOR);
     }
 
     /**
@@ -1870,11 +1856,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_BUTTON_COLOR, KEY_SNOOZE_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
     }
 
     /**
@@ -1885,11 +1868,8 @@ public final class SettingsDAO {
     }
 
     public static int getDismissTitleColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_DISMISS_TITLE_COLOR, KEY_DISMISS_TITLE_COLOR, DEFAULT_DISMISS_TITLE_COLOR);
     }
 
     /**
@@ -1900,11 +1880,8 @@ public final class SettingsDAO {
     }
 
     public static int getDismissButtonColor(SharedPreferences prefs, Context context, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_DISMISS_BUTTON_COLOR, KEY_DISMISS_BUTTON_COLOR, getDefaultAlarmInversePrimaryColor(context));
     }
 
     /**
@@ -1915,11 +1892,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeZoneColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_ZONE_COLOR, KEY_SNOOZE_ZONE_COLOR, DEFAULT_SNOOZE_ZONE_COLOR);
     }
 
     /**
@@ -1930,11 +1904,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeMinusButtonColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_MINUS_BUTTON_COLOR, KEY_SALAH_SNOOZE_MINUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
     }
 
     /**
@@ -1945,11 +1916,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozePlusButtonColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_PLUS_BUTTON_COLOR, KEY_SNOOZE_PLUS_BUTTON_COLOR, DEFAULT_SNOOZE_BUTTON_COLOR);
     }
 
     /**
@@ -1960,11 +1928,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeSelectorTextColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_SELECTOR_TEXT_COLOR, KEY_SNOOZE_SELECTOR_TEXT_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
     }
 
     /**
@@ -1975,11 +1940,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozeMinusSymbolColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_MINUS_SYMBOL_COLOR, KEY_SNOOZE_MINUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
     }
 
     /**
@@ -1990,11 +1952,8 @@ public final class SettingsDAO {
     }
 
     public static int getSnoozePlusSymbolColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmColorsOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmColorsOverrideEnabled(prefs),
+                KEY_SALAH_SNOOZE_PLUS_SYMBOL_COLOR, KEY_SNOOZE_PLUS_SYMBOL_COLOR, DEFAULT_SNOOZE_TEXT_COLOR);
     }
 
     /**
@@ -2005,11 +1964,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmDigitalClockFontSize(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
+        return getIntSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_DIGITAL_CLOCK_FONT_SIZE, KEY_ALARM_DIGITAL_CLOCK_FONT_SIZE, DEFAULT_DIGITAL_CLOCK_FONT_SIZE);
     }
 
     /**
@@ -2020,11 +1976,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmTitleFontSize(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
+        return getIntSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_TITLE_FONT_SIZE_PREF, KEY_ALARM_TITLE_FONT_SIZE_PREF, DEFAULT_ALARM_TITLE_FONT_SIZE_PREF);
     }
 
     /**
@@ -2036,11 +1989,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmTextShadowDisplayed(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_DISPLAY_TEXT_SHADOW, KEY_ALARM_DISPLAY_TEXT_SHADOW, DEFAULT_DISPLAY_TEXT_SHADOW);
     }
 
     /**
@@ -2051,11 +2001,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmShadowColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_SHADOW_COLOR, KEY_ALARM_SHADOW_COLOR, DEFAULT_ALARM_SHADOW_COLOR);
     }
 
     /**
@@ -2066,11 +2013,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmShadowOffset(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmFontOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
+        return getIntSetting(prefs, isSalah, isSalahAlarmFontOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_SHADOW_OFFSET, KEY_ALARM_SHADOW_OFFSET, DEFAULT_SHADOW_OFFSET);
     }
 
     /**
@@ -2081,11 +2025,9 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmActionMessageHidden(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs)) {
-            return !prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return !prefs.getBoolean(KEY_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
+        boolean displayed = getBooleanSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs),
+                KEY_SALAH_DISPLAY_ALARM_ACTION_MESSAGE, KEY_DISPLAY_ALARM_ACTION_MESSAGE, DEFAULT_DISPLAY_ALARM_ACTION_MESSAGE);
+        return !displayed;
     }
 
     /**
@@ -2096,11 +2038,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isAlarmTitleDisplayedOnSingleLine(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs),
+                KEY_SALAH_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, KEY_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE, DEFAULT_DISPLAY_ALARM_TITLE_ON_SINGLE_LINE);
     }
 
     /**
@@ -2112,11 +2051,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isRingtoneTitleDisplayed(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs),
+                KEY_SALAH_DISPLAY_RINGTONE_TITLE, KEY_DISPLAY_RINGTONE_TITLE, DEFAULT_DISPLAY_RINGTONE_TITLE);
     }
 
     /**
@@ -2127,11 +2063,8 @@ public final class SettingsDAO {
     }
 
     public static int getRingtoneTitleColor(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmStyleOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
+        return getIntSetting(prefs, isSalah, isSalahAlarmStyleOverrideEnabled(prefs),
+                KEY_SALAH_RINGTONE_TITLE_COLOR, KEY_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
     }
 
     /**
@@ -2142,10 +2075,8 @@ public final class SettingsDAO {
     }
 
     public static String getAlarmBackgroundImage(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getString(KEY_SALAH_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
-        }
-        return prefs.getString(KEY_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
+        return getStringSetting(prefs, isSalah, isSalahAlarmBackgroundImageOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_BACKGROUND_IMAGE, KEY_ALARM_BACKGROUND_IMAGE, DEFAULT_ALARM_BACKGROUND_IMAGE);
     }
 
     /**
@@ -2156,11 +2087,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmBlurIntensity(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getInt(KEY_SALAH_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getInt(KEY_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
+        return getIntSetting(prefs, isSalah, isSalahAlarmBackgroundImageOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_BLUR_INTENSITY, KEY_ALARM_BLUR_INTENSITY, DEFAULT_BLUR_INTENSITY);
     }
 
     /**
@@ -2172,11 +2100,8 @@ public final class SettingsDAO {
     }
 
     public static boolean isPerAlarmBackgroundImageEnable(SharedPreferences prefs, boolean isSalah) {
-        if (isSalah && isSalahAlarmBackgroundImageOverrideEnabled(prefs)) {
-            return prefs.getBoolean(KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
-        }
-        // Default value must match the one in res/xml/settings_alarm_display.xml
-        return prefs.getBoolean(KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
+        return getBooleanSetting(prefs, isSalah, isSalahAlarmBackgroundImageOverrideEnabled(prefs),
+                KEY_SALAH_ENABLE_PER_ALARM_BACKGROUND_IMAGE, KEY_ENABLE_PER_ALARM_BACKGROUND_IMAGE, DEFAULT_ENABLE_PER_ALARM_BACKGROUND_IMAGE);
     }
 
     /**
@@ -2187,8 +2112,8 @@ public final class SettingsDAO {
     }
 
     public static int getAlarmVolume(SharedPreferences prefs, boolean isSalah) {
-        final String key = (isSalah && isSalahAlarmRingtoneOverrideEnabled(prefs)) ? KEY_SALAH_ALARM_VOLUME_SETTING : KEY_ALARM_VOLUME_SETTING;
-        return prefs.getInt(key, DEFAULT_ALARM_VOLUME);
+        return getIntSetting(prefs, isSalah, isSalahAlarmRingtoneOverrideEnabled(prefs),
+                KEY_SALAH_ALARM_VOLUME_SETTING, KEY_ALARM_VOLUME_SETTING, DEFAULT_ALARM_VOLUME);
     }
 
     private static ClockStyle getClockStyle(SharedPreferences prefs, String key) {

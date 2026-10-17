@@ -380,6 +380,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             minute,
             alert
         );
+        if (alert == null) {
+            alarm.alert = DataModel.getDataModel().getAlarmRingtoneUriFromSettings(isSalah);
+        }
         final AudioManager audioManager = context.getApplicationContext().getSystemService(AudioManager.class);
 
         alarm.syncByLabel = false;

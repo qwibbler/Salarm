@@ -109,17 +109,19 @@ public final class AlarmKlaxon {
             } else {
                 LogUtils.v("AlarmKlaxon.start() with MediaPlayer");
 
-                if (SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)) {
-                    AudioManager audioManager = appContext.getSystemService(AudioManager.class);
+                int targetVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)
+                    ? alarmInstance.mAlarmVolume
+                    : SettingsDAO.getAlarmVolume(prefs, isSalah);
 
-                    if (instance.mPreviousAlarmVolume == -1) {
-                        instance.mPreviousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                    }
+                AudioManager audioManager = appContext.getSystemService(AudioManager.class);
 
-                    int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                    if (currentVolume != alarmInstance.mAlarmVolume) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, alarmInstance.mAlarmVolume, 0);
-                    }
+                if (instance.mPreviousAlarmVolume == -1) {
+                    instance.mPreviousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+                }
+
+                int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+                if (currentVolume != targetVolume) {
+                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, targetVolume, 0);
                 }
 
                 instance.getAsyncRingtonePlayer().play(alarmInstance.mRingtone, crescendoDuration);
@@ -185,6 +187,20 @@ public final class AlarmKlaxon {
         releaseResources();
     }
 
+    public static synchronized void releaseResources() {
+        if (sInstance != null && sInstance.mAsyncRingtonePlayer != null) {
+            sInstance.mAsyncRingtonePlayer.shutdown();
+            sInstance.mAsyncRingtonePlayer = null;
+        }
+    }
+
+    public static synchronized void stopListeningToPreferences() {
+        if (sInstance != null && sInstance.mRingtonePlayer != null) {
+            sInstance.mRingtonePlayer.stopListeningToPreferences();
+            sInstance.mRingtonePlayer = null;
+        }
+    }
+
     // MediaPlayer
     private AsyncRingtonePlayer getAsyncRingtonePlayer() {
         if (mAsyncRingtonePlayer == null) {
@@ -194,13 +210,6 @@ public final class AlarmKlaxon {
         return mAsyncRingtonePlayer;
     }
 
-    public static synchronized void releaseResources() {
-        if (sInstance != null && sInstance.mAsyncRingtonePlayer != null) {
-            sInstance.mAsyncRingtonePlayer.shutdown();
-            sInstance.mAsyncRingtonePlayer = null;
-        }
-    }
-
     // ExoPlayer
     private RingtonePlayer getRingtonePlayer() {
         if (mRingtonePlayer == null) {
@@ -208,12 +217,5 @@ public final class AlarmKlaxon {
         }
 
         return mRingtonePlayer;
-    }
-
-    public static synchronized void stopListeningToPreferences() {
-        if (sInstance != null && sInstance.mRingtonePlayer != null) {
-            sInstance.mRingtonePlayer.stopListeningToPreferences();
-            sInstance.mRingtonePlayer = null;
-        }
     }
 }

@@ -424,7 +424,7 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     private void updateAdjustmentVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ALARM_SHOW_ROUNDING, false);
-        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING, false);
+        boolean showAdjustment = SettingsDAO.isSalahAdjustAlarmAfterRoundingEnabled(prefs);
 
         boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
         boolean shouldShowAdjustmentCheckbox = showRounding && showAdjustment && roundingEnabled;
