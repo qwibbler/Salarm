@@ -117,12 +117,102 @@ public class SalahAlarmSyncManager {
         }
     }
 
+    public static void syncAutoTagsForAlarm(Context context, Alarm nativeAlarm, RelationalRule rule, Masjid providedMasjid) {
+        if (nativeAlarm == null || rule == null) return;
+
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        SalahDatabase db = SalahDatabase.getDatabase(context);
+
+        // 1. Tag with Salah auto-tag if auto-tagging is enabled
+        if (SettingsDAO.isSalahAutoTagEnabled(prefs)) {
+            String salahTag = SettingsDAO.getSalahAutoTagName(prefs);
+            if (salahTag == null || salahTag.trim().isEmpty()) {
+                salahTag = "Salah";
+            } else {
+                salahTag = salahTag.trim();
+            }
+
+            if (!nativeAlarm.tags.contains(salahTag)) {
+                nativeAlarm.tags.add(salahTag);
+            }
+        }
+
+        // 2. Determine if the anchor event was a masjid event
+        Masjid masjid = providedMasjid;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            if (masjid == null && event != null) {
+                masjid = db.masjidDao().getById(event.masjidId);
+            }
+        }
+        if (masjid == null && rule.masjidId > 0) {
+            masjid = db.masjidDao().getById(rule.masjidId);
+        }
+
+        if (masjid != null) {
+            // Anchor event was a masjid event: ALSO tag with "Masjid" AND "[masjid name]"
+            if (!nativeAlarm.tags.contains("Masjid")) {
+                nativeAlarm.tags.add("Masjid");
+            }
+
+            String masjidName = masjid.name != null ? masjid.name.trim() : "";
+            if (!masjidName.isEmpty() && !nativeAlarm.tags.contains(masjidName)) {
+                nativeAlarm.tags.add(masjidName);
+            }
+
+            // Remove tags of any other masjids in case the masjid anchor was changed
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null && !m.name.trim().equalsIgnoreCase(masjidName)) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        } else {
+            // Not a masjid event: remove "Masjid" tag and any masjid name tags
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        }
+    }
+
     private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone, Masjid providedMasjid) {
         ContentResolver cr = context.getContentResolver();
 
         // Find existing alarm mapped to this rule
         List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(rule.id));
         Alarm nativeAlarm;
+
+        Masjid masjid = providedMasjid;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            if (masjid == null && event != null) {
+                masjid = SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId);
+            }
+        }
+        if (masjid == null && rule.masjidId > 0) {
+            masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.masjidId);
+        }
+
+        String label;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            String masjidName = masjid != null ? masjid.name : "Masjid";
+            String type = event != null ? event.salahType : "Salah";
+            label = SalahUtils.getLocalizedSalahName(context, type) + " - " + masjidName;
+        } else if (rule.masjidSalahType != null) {
+            // Tracked default alarm
+            label = SalahUtils.getLocalizedSalahName(context, rule.masjidSalahType);
+        } else if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.basicEvent != null) {
+            label = RelationalRule.getEventName(context, rule.definition.anchor.basicEvent);
+        } else {
+            label = "Salah";
+        }
+
         if (alarms.isEmpty()) {
             LogUtils.i("Creating new native alarm for rule: " + rule.id);
 
@@ -137,41 +227,19 @@ public class SalahAlarmSyncManager {
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
             nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
-
-            String label;
-            if (rule.definition.anchor.masjidEventId != null) {
-                MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
-                Masjid masjid = providedMasjid;
-                if (masjid == null && event != null) {
-                    masjid = SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId);
-                }
-                String masjidName = masjid != null ? masjid.name : "Masjid";
-                String type = event != null ? event.salahType : "Salah";
-                label = SalahUtils.getLocalizedSalahName(context, type) + " - " + masjidName;
-            } else if (rule.masjidSalahType != null) {
-                // Tracked default alarm
-                label = SalahUtils.getLocalizedSalahName(context, rule.masjidSalahType);
-            } else if (rule.definition.anchor.basicEvent != null) {
-                label = RelationalRule.getEventName(context, rule.definition.anchor.basicEvent);
-            } else {
-                label = "Salah";
-            }
             nativeAlarm.label = "🔔 " + label;
 
-            // Add auto-tag if enabled
-            SharedPreferences prefs = getDefaultSharedPreferences(context);
-            if (SettingsDAO.isSalahAutoTagEnabled(prefs)) {
-                String tagName = SettingsDAO.getSalahAutoTagName(prefs);
-                if (!nativeAlarm.tags.contains(tagName)) {
-                    nativeAlarm.tags.add(tagName);
-                }
-            }
+            syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
 
             nativeAlarm.addAlarm(cr);
             LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
         } else {
             nativeAlarm = alarms.get(0);
             nativeAlarm.enabled = rule.enabled;
+            nativeAlarm.label = "🔔 " + label;
+
+            syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
+
             nativeAlarm.updateAlarm(cr);
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }
@@ -365,6 +433,7 @@ public class SalahAlarmSyncManager {
             alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, true);
         }
 
+        syncAutoTagsForAlarm(context, alarm, rule, null);
         alarm.updateAlarm(cr);
 
         // 2. Update AOSP instances
