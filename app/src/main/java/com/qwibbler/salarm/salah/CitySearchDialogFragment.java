@@ -8,49 +8,72 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_CITY_NAME;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.City;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.settings.PermissionsManagementActivity;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.qwibbler.salarm.settings.PreferencesKeys;
+import com.qwibbler.salarm.utils.LogUtils;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class CitySearchDialogFragment extends DialogFragment {
 
     private static Map<String, Object[]> sBuiltInCoords;
+    private final List<CitySearchResult> mBuiltInResults = new ArrayList<>();
+    private final List<CitySearchResult> mDisplayResults = new ArrayList<>();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private CityAdapter mAdapter;
+    private ProgressBar mProgressBar;
+    private MaterialButton mBtnRefineOnline;
+    private MaterialButton mBtnCustomLocation;
+    private String mCurrentQuery = "";
+    private Runnable mSearchRunnable;
+    private boolean mIsSelecting = false;
+    private boolean mIsPickerMode = false;
 
     private static Map<String, Object[]> getBuiltInCoords(Context context) {
         if (sBuiltInCoords == null) {
             sBuiltInCoords = new HashMap<>();
             try (InputStream is = context.getAssets().open("city_coordinates.json")) {
-                java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream();
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
                 byte[] buffer = new byte[8192];
                 int length;
                 while ((length = is.read(buffer)) != -1) {
@@ -58,21 +81,21 @@ public class CitySearchDialogFragment extends DialogFragment {
                 }
                 String json = result.toString("UTF-8");
                 JSONObject obj = new JSONObject(json);
-                java.util.Iterator<String> keys = obj.keys();
+                Iterator<String> keys = obj.keys();
                 while (keys.hasNext()) {
                     String key = keys.next();
                     try {
                         JSONObject coord = obj.getJSONObject(key);
                         sBuiltInCoords.put(key, new Object[]{
-                                coord.getDouble("lat"),
-                                coord.getDouble("lon"),
-                                coord.optString("tz", "")
+                            coord.getDouble("lat"),
+                            coord.getDouble("lon"),
+                            coord.optString("tz", "")
                         });
                     } catch (Exception ignored) {
                     }
                 }
             } catch (Exception e) {
-                com.qwibbler.salarm.utils.LogUtils.e("Error loading built-in coordinates", e);
+                LogUtils.e("Error loading built-in coordinates", e);
             }
         }
         return sBuiltInCoords;
@@ -82,80 +105,6 @@ public class CitySearchDialogFragment extends DialogFragment {
         String key = (city != null ? city : "") + "|" + (province != null ? province : "") + "|" + (country != null ? country : "");
         return key.replaceAll("\\s+", " ").trim();
     }
-
-    private static class CitySearchResult {
-        String cityId;
-        String city;
-        String province;
-        String country;
-        String countryCode;
-        String timeZoneId;
-        List<String> altNames;
-        double latitude;
-        double longitude;
-
-        CitySearchResult(String city, String province, String country, String countryCode, double lat, double lon) {
-            this(null, city, province, country, countryCode, null, null, lat, lon);
-        }
-
-        CitySearchResult(String cityId, String city, String province, String country, String countryCode, String tzId, List<String> altNames, double lat, double lon) {
-            this.cityId = cityId;
-            this.city = city;
-            this.province = province != null ? province : "";
-            this.country = country != null ? country : "";
-            this.countryCode = countryCode != null ? countryCode : "";
-            this.timeZoneId = tzId;
-            this.altNames = altNames;
-            this.latitude = lat;
-            this.longitude = lon;
-        }
-
-        public String getFullLocation() {
-            StringBuilder sb = new StringBuilder();
-            if (!province.isEmpty()) sb.append(province);
-            if (!country.isEmpty()) {
-                if (sb.length() > 0) sb.append(", ");
-                sb.append(country);
-            }
-            return sb.toString();
-        }
-
-        public boolean matches(String query) {
-            String lowerQuery = query.toLowerCase(Locale.getDefault());
-            if (city.toLowerCase(Locale.getDefault()).contains(lowerQuery)
-                    || province.toLowerCase(Locale.getDefault()).contains(lowerQuery)
-                    || country.toLowerCase(Locale.getDefault()).contains(lowerQuery)) {
-                return true;
-            }
-
-            if (altNames != null) {
-                for (String alt : altNames) {
-                    if (alt.toLowerCase(Locale.getDefault()).contains(lowerQuery)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return city + " " + province + " " + country;
-        }
-    }
-
-    private final List<CitySearchResult> mBuiltInResults = new ArrayList<>();
-    private final List<CitySearchResult> mDisplayResults = new ArrayList<>();
-    private CityAdapter mAdapter;
-    private ProgressBar mProgressBar;
-    private MaterialButton mBtnRefineOnline;
-    private String mCurrentQuery = "";
-
-    private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-    private Runnable mSearchRunnable;
-    private boolean mIsSelecting = false;
-    private boolean mIsPickerMode = false;
 
     public void setPickerMode(boolean isPickerMode) {
         mIsPickerMode = isPickerMode;
@@ -189,11 +138,26 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         SearchView searchView = view.findViewById(R.id.city_search_view);
         ListView listView = view.findViewById(R.id.city_results_list);
+
         mProgressBar = view.findViewById(R.id.city_search_progress);
         mBtnRefineOnline = view.findViewById(R.id.btn_refine_online);
+        mBtnCustomLocation = view.findViewById(R.id.btn_custom_location);
+
+        if (mBtnCustomLocation != null) {
+            mBtnCustomLocation.setOnClickListener(v -> showCustomLocationDialog());
+        }
 
         mAdapter = new CityAdapter(requireContext(), mDisplayResults);
         listView.setAdapter(mAdapter);
+
+        listView.setOnItemClickListener((parent, view1, position, id) -> {
+            if (position >= 0 && position < mDisplayResults.size()) {
+                CitySearchResult selected = mDisplayResults.get(position);
+                if (!selected.isHeader && !selected.isSeparator) {
+                    selectCity(selected);
+                }
+            }
+        });
 
         populateInitialList();
 
@@ -225,20 +189,108 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         mBtnRefineOnline.setOnClickListener(v -> performOnlineSearch(mCurrentQuery));
 
-        listView.setOnItemClickListener((parent, view1, position, id) -> {
-            CitySearchResult selected = mDisplayResults.get(position);
-            selectCity(selected);
-        });
-
         return new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.salarm_city_search_title)
-                .setView(view)
-                .create();
+            .setTitle(R.string.salarm_city_search_title)
+            .setView(view)
+            .create();
+    }
+
+    private void showCustomLocationDialog() {
+        Context context = getContext();
+        if (context == null) return;
+
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_custom_location, null);
+        TextInputEditText nameInput = dialogView.findViewById(R.id.custom_location_name_input);
+        TextInputEditText latInput = dialogView.findViewById(R.id.custom_location_lat_input);
+        TextInputEditText lonInput = dialogView.findViewById(R.id.custom_location_lon_input);
+        AutoCompleteTextView tzInput = dialogView.findViewById(R.id.custom_location_tz_input);
+
+        String[] ids = TimeZone.getAvailableIDs();
+        List<String> timezoneList = new ArrayList<>();
+        Collections.addAll(timezoneList, ids);
+        Collections.sort(timezoneList);
+        ArrayAdapter<String> tzAdapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, timezoneList);
+        tzInput.setAdapter(tzAdapter);
+        tzInput.setText(SalahTimezoneUtils.getPhoneTimeZoneId(), false);
+
+        new MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.salarm_custom_location_dialog_title)
+            .setView(dialogView)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                String nameStr = nameInput.getText() != null ? nameInput.getText().toString().trim() : "";
+                String latStr = latInput.getText() != null ? latInput.getText().toString().trim() : "";
+                String lonStr = lonInput.getText() != null ? lonInput.getText().toString().trim() : "";
+                String tzStr = tzInput.getText() != null ? tzInput.getText().toString().trim() : "";
+
+                double lat, lon;
+                try {
+                    lat = Double.parseDouble(latStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(context, R.string.salarm_custom_location_invalid_lat, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                try {
+                    lon = Double.parseDouble(lonStr);
+                } catch (NumberFormatException e) {
+                    Toast.makeText(context, R.string.salarm_custom_location_invalid_lon, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (lat < -90.0 || lat > 90.0) {
+                    Toast.makeText(context, R.string.salarm_custom_location_invalid_lat, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (lon < -180.0 || lon > 180.0) {
+                    Toast.makeText(context, R.string.salarm_custom_location_invalid_lon, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (nameStr.isEmpty()) {
+                    nameStr = String.format(Locale.US, "Custom (%.4f, %.4f)", lat, lon);
+                }
+
+                if (tzStr.isEmpty()) {
+                    tzStr = SalahTimezoneUtils.getPhoneTimeZoneId();
+                }
+
+                CitySearchResult customRes = new CitySearchResult(null, nameStr, "Custom Location", "", "", tzStr, null, lat, lon);
+                customRes.isCustom = true;
+
+                selectCity(customRes);
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 
     private void populateInitialList() {
         mDisplayResults.clear();
+
+        Context context = getContext();
+        boolean hasRecents = false;
+        if (context != null) {
+            List<RecentLocation> recents = RecentLocationsManager.getRecentLocations(context);
+            if (!recents.isEmpty()) {
+                hasRecents = true;
+                mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_recent_locations_title)));
+                for (RecentLocation rl : recents) {
+                    CitySearchResult res = new CitySearchResult(null, rl.getCityName(), rl.getProvince(), rl.getCountry(),
+                        rl.getCountryCode(), rl.getTimeZoneId(), null, rl.getLatitude(), rl.getLongitude());
+                    res.isRecent = true;
+                    res.isCustom = rl.isCustom();
+                    mDisplayResults.add(res);
+                }
+            }
+        }
+
+        if (hasRecents) {
+            mDisplayResults.add(CitySearchResult.createSeparator());
+        }
+
+        // Recents ALSO appear in the full list below the separator!
         mDisplayResults.addAll(mBuiltInResults);
+
+        mAdapter.notifyDataSetChanged();
 
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getNetworkIO().execute(() -> {
@@ -247,21 +299,21 @@ public class CitySearchDialogFragment extends DialogFragment {
                 if (!isAdded() || mAdapter == null) return;
 
                 List<CitySearchResult> toAdd = new ArrayList<>();
-                    for (CityCoordinate cached : cachedResults) {
-                        CitySearchResult res = new CitySearchResult(
-                                null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
-                        );
+                for (CityCoordinate cached : cachedResults) {
+                    CitySearchResult res = new CitySearchResult(
+                        null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
+                    );
 
                     boolean duplicate = false;
                     for (CitySearchResult d : mDisplayResults) {
-                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                        if (!d.isHeader && !d.isSeparator && d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
                             duplicate = true;
                             break;
                         }
                     }
                     if (!duplicate) toAdd.add(res);
                 }
-                mDisplayResults.addAll(0, toAdd);
+                mDisplayResults.addAll(toAdd);
                 mAdapter.notifyDataSetChanged();
             });
         });
@@ -269,11 +321,38 @@ public class CitySearchDialogFragment extends DialogFragment {
 
     private void filterAndSearch(String query) {
         mDisplayResults.clear();
+
+        Context context = getContext();
+        boolean hasMatchingRecents = false;
+        if (context != null) {
+            List<RecentLocation> recents = RecentLocationsManager.getRecentLocations(context);
+            List<CitySearchResult> matchingRecents = new ArrayList<>();
+            for (RecentLocation rl : recents) {
+                CitySearchResult res = new CitySearchResult(null, rl.getCityName(), rl.getProvince(), rl.getCountry(),
+                    rl.getCountryCode(), rl.getTimeZoneId(), null, rl.getLatitude(), rl.getLongitude());
+                res.isRecent = true;
+                res.isCustom = rl.isCustom();
+                if (res.matches(query)) {
+                    matchingRecents.add(res);
+                }
+            }
+            if (!matchingRecents.isEmpty()) {
+                hasMatchingRecents = true;
+                mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_recent_locations_title)));
+                mDisplayResults.addAll(matchingRecents);
+            }
+        }
+
+        if (hasMatchingRecents) {
+            mDisplayResults.add(CitySearchResult.createSeparator());
+        }
+
         for (CitySearchResult res : mBuiltInResults) {
             if (res.matches(query)) {
                 mDisplayResults.add(res);
             }
         }
+
         mAdapter.notifyDataSetChanged();
         performGeocoderSearch(query);
     }
@@ -285,29 +364,28 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         AppExecutors.getNetworkIO().execute(() -> {
-                // Offline search: Query database cache
-                List<CityCoordinate> cachedResults = SalahDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
-                AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded() || mAdapter == null || mProgressBar == null) return;
-                    mProgressBar.setVisibility(View.GONE);
+            // Offline search: Query database cache
+            List<CityCoordinate> cachedResults = SalahDatabase.getDatabase(appContext).cityCoordinateDao().searchByName(query);
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mAdapter == null || mProgressBar == null) return;
+                mProgressBar.setVisibility(View.GONE);
 
-                    // Add cached results at the TOP
-                    List<CitySearchResult> toAdd = new ArrayList<>();
-                    for (CityCoordinate cached : cachedResults) {
-                        CitySearchResult res = new CitySearchResult(
-                                null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
-                        );
+                List<CitySearchResult> toAdd = new ArrayList<>();
+                for (CityCoordinate cached : cachedResults) {
+                    CitySearchResult res = new CitySearchResult(
+                        null, cached.cityName, cached.province, cached.country, cached.countryCode, cached.timeZoneId, null, cached.latitude, cached.longitude
+                    );
 
                     boolean duplicate = false;
                     for (CitySearchResult d : mDisplayResults) {
-                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                        if (!d.isHeader && !d.isSeparator && d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
                             duplicate = true;
                             break;
                         }
                     }
                     if (!duplicate) toAdd.add(res);
                 }
-                mDisplayResults.addAll(0, toAdd);
+                mDisplayResults.addAll(toAdd);
                 mAdapter.notifyDataSetChanged();
                 mBtnRefineOnline.setVisibility(View.VISIBLE);
             });
@@ -332,12 +410,12 @@ public class CitySearchDialogFragment extends DialogFragment {
                 mProgressBar.setVisibility(View.GONE);
                 for (OpenMeteoClient.SearchResult nr : openMeteoResults) {
                     CitySearchResult res = new CitySearchResult(
-                            null, nr.name, nr.province, nr.country, nr.countryCode, nr.timezone, null, nr.latitude, nr.longitude
+                        null, nr.name, nr.province, nr.country, nr.countryCode, nr.timezone, null, nr.latitude, nr.longitude
                     );
 
                     boolean duplicate = false;
                     for (CitySearchResult d : mDisplayResults) {
-                        if (d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
+                        if (!d.isHeader && !d.isSeparator && d.city.equalsIgnoreCase(res.city) && d.country.equalsIgnoreCase(res.country)) {
                             duplicate = true;
                             break;
                         }
@@ -346,7 +424,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                 }
                 mAdapter.notifyDataSetChanged();
                 if (openMeteoResults.isEmpty()) {
-                    android.widget.Toast.makeText(appContext, R.string.no_results, android.widget.Toast.LENGTH_SHORT).show();
+                    Toast.makeText(appContext, R.string.no_results, Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -354,13 +432,13 @@ public class CitySearchDialogFragment extends DialogFragment {
 
     private void showInternetDisabledDialog() {
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.online_search_internet_disabled_title)
-                .setMessage(R.string.online_search_internet_disabled_message)
-                .setPositiveButton(R.string.online_search_internet_settings_button, (dialog, which) -> {
-                    startActivity(new Intent(requireContext(), PermissionsManagementActivity.class));
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+            .setTitle(R.string.online_search_internet_disabled_title)
+            .setMessage(R.string.online_search_internet_disabled_message)
+            .setPositiveButton(R.string.online_search_internet_settings_button, (dialog, which) -> {
+                startActivity(new Intent(requireContext(), PermissionsManagementActivity.class));
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 
     private void selectCity(CitySearchResult city) {
@@ -421,7 +499,7 @@ public class CitySearchDialogFragment extends DialogFragment {
         AppExecutors.getNetworkIO().execute(() -> {
             // 2. Check local database cache
             CityCoordinate cached = SalahDatabase.getDatabase(appContext).cityCoordinateDao().findByKey(
-                    normalizeKey(city.city, city.province, city.country));
+                normalizeKey(city.city, city.province, city.country));
 
             if (cached != null) {
                 AppExecutors.getMainThread().post(() -> {
@@ -440,7 +518,7 @@ public class CitySearchDialogFragment extends DialogFragment {
 
             // 3. Perform online lookup if allowed
             if (getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)
-                    && Geocoder.isPresent()) {
+                && Geocoder.isPresent()) {
                 Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
                 try {
                     List<Address> addresses = geocoder.getFromLocationName(city.city, 1);
@@ -468,17 +546,17 @@ public class CitySearchDialogFragment extends DialogFragment {
 
                             // Save to cache in background
                             final CityCoordinate toCache = new CityCoordinate(
-                                    normalizeKey(city.city, city.province, city.country),
-                                    city.city, city.province, city.country,
-                                    city.latitude, city.longitude, city.countryCode, city.timeZoneId
+                                normalizeKey(city.city, city.province, city.country),
+                                city.city, city.province, city.country,
+                                city.latitude, city.longitude, city.countryCode, city.timeZoneId
                             );
                             AppExecutors.getNetworkIO().execute(() ->
-                                    SalahDatabase.getDatabase(appContext).cityCoordinateDao().insert(toCache));
+                                SalahDatabase.getDatabase(appContext).cityCoordinateDao().insert(toCache));
 
                             saveAndDismiss(city);
                         } else {
                             mIsSelecting = false;
-                            android.widget.Toast.makeText(appContext, R.string.salarm_error_resolve_city, android.widget.Toast.LENGTH_SHORT).show();
+                            Toast.makeText(appContext, R.string.salarm_error_resolve_city, Toast.LENGTH_SHORT).show();
                         }
                     });
                 } catch (IOException e) {
@@ -494,7 +572,7 @@ public class CitySearchDialogFragment extends DialogFragment {
                     if (!getDefaultSharedPreferences(appContext).getBoolean(KEY_INTERNET_ACCESS_ALLOWED, DEFAULT_INTERNET_ACCESS_ALLOWED)) {
                         showInternetDisabledDialog();
                     } else {
-                        android.widget.Toast.makeText(appContext, R.string.salarm_error_resolve_city, android.widget.Toast.LENGTH_SHORT).show();
+                        Toast.makeText(appContext, R.string.salarm_error_resolve_city, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -511,6 +589,10 @@ public class CitySearchDialogFragment extends DialogFragment {
             mIsSelecting = false;
             return;
         }
+
+        RecentLocation recent = new RecentLocation(city.city, city.province, city.country, city.countryCode,
+            city.latitude, city.longitude, city.timeZoneId, city.isCustom, System.currentTimeMillis());
+        RecentLocationsManager.addRecentLocation(context, recent);
 
         // Cache coordinates if resolved online (custom city)
         if (city.cityId == null && city.latitude != 0 && city.longitude != 0) {
@@ -535,25 +617,157 @@ public class CitySearchDialogFragment extends DialogFragment {
             getParentFragmentManager().setFragmentResult("city_picked", result);
         } else {
             SalahLocationManager.handleNewLocation(context, city.latitude, city.longitude, false, true);
-            android.content.SharedPreferences.Editor editor = getDefaultSharedPreferences(context).edit();
+            SharedPreferences.Editor editor = getDefaultSharedPreferences(context).edit();
             editor.putString(KEY_SALAH_CITY_NAME, finalDisplayName);
             if (city.timeZoneId != null) {
-                editor.putString(com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, city.timeZoneId);
+                editor.putString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, city.timeZoneId);
             }
             editor.apply();
         }
         dismiss();
     }
 
+    private static class CitySearchResult {
+        String cityId;
+        String city;
+        String province;
+        String country;
+        String countryCode;
+        String timeZoneId;
+        List<String> altNames;
+        double latitude;
+        double longitude;
+        boolean isRecent = false;
+        boolean isCustom = false;
+        boolean isHeader = false;
+        boolean isSeparator = false;
+        String headerTitle;
+
+        CitySearchResult(String city, String province, String country, String countryCode, double lat, double lon) {
+            this(null, city, province, country, countryCode, null, null, lat, lon);
+        }
+
+        CitySearchResult(String cityId, String city, String province, String country, String countryCode, String tzId, List<String> altNames, double lat, double lon) {
+            this.cityId = cityId;
+            this.city = city != null ? city : "";
+            this.province = province != null ? province : "";
+            this.country = country != null ? country : "";
+            this.countryCode = countryCode != null ? countryCode : "";
+            this.timeZoneId = tzId;
+            this.altNames = altNames;
+            this.latitude = lat;
+            this.longitude = lon;
+        }
+
+        static CitySearchResult createHeader(String title) {
+            CitySearchResult res = new CitySearchResult("", "", "", "", 0.0, 0.0);
+            res.isHeader = true;
+            res.headerTitle = title;
+            return res;
+        }
+
+        static CitySearchResult createSeparator() {
+            CitySearchResult res = new CitySearchResult("", "", "", "", 0.0, 0.0);
+            res.isSeparator = true;
+            return res;
+        }
+
+        public String getFullLocation() {
+            StringBuilder sb = new StringBuilder();
+            if (!province.isEmpty()) sb.append(province);
+            if (!country.isEmpty()) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(country);
+            }
+            return sb.toString();
+        }
+
+        public boolean matches(String query) {
+            if (isHeader || isSeparator) return false;
+            String lowerQuery = query.toLowerCase(Locale.getDefault());
+            if (city.toLowerCase(Locale.getDefault()).contains(lowerQuery)
+                || province.toLowerCase(Locale.getDefault()).contains(lowerQuery)
+                || country.toLowerCase(Locale.getDefault()).contains(lowerQuery)
+                || (timeZoneId != null && timeZoneId.toLowerCase(Locale.getDefault()).contains(lowerQuery))) {
+                return true;
+            }
+
+            if (altNames != null) {
+                for (String alt : altNames) {
+                    if (alt.toLowerCase(Locale.getDefault()).contains(lowerQuery)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return city + " " + province + " " + country;
+        }
+    }
+
     private static class CityAdapter extends ArrayAdapter<CitySearchResult> {
+
+        private static final int VIEW_TYPE_CITY = 0;
+        private static final int VIEW_TYPE_HEADER = 1;
+        private static final int VIEW_TYPE_SEPARATOR = 2;
+
         CityAdapter(Context context, List<CitySearchResult> cities) {
             super(context, 0, cities);
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 3;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            CitySearchResult item = getItem(position);
+            if (item != null) {
+                if (item.isHeader) return VIEW_TYPE_HEADER;
+                if (item.isSeparator) return VIEW_TYPE_SEPARATOR;
+            }
+            return VIEW_TYPE_CITY;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            CitySearchResult item = getItem(position);
+            if (item != null && (item.isHeader || item.isSeparator)) {
+                return false;
+            }
+            return super.isEnabled(position);
         }
 
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            int viewType = getItemViewType(position);
             View view = convertView;
+
+            if (viewType == VIEW_TYPE_HEADER) {
+                if (view == null) {
+                    view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_header_item, parent, false);
+                }
+                TextView headerView = view.findViewById(R.id.section_header_text);
+                CitySearchResult item = getItem(position);
+                if (item != null && headerView != null) {
+                    headerView.setText(item.headerTitle);
+                }
+                return view;
+            }
+
+            if (viewType == VIEW_TYPE_SEPARATOR) {
+                if (view == null) {
+                    view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_divider_item, parent, false);
+                }
+                return view;
+            }
+
             if (view == null) {
                 view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_list_item, parent, false);
             }
@@ -563,10 +777,22 @@ public class CitySearchDialogFragment extends DialogFragment {
             TextView locView = view.findViewById(R.id.city_location);
 
             if (city != null) {
-                nameView.setText(city.city);
-                String fullLoc = city.getFullLocation();
-                locView.setText(fullLoc);
-                locView.setVisibility(fullLoc.isEmpty() ? View.GONE : View.VISIBLE);
+                if (city.isRecent) {
+                    nameView.setText(city.city);
+                    String fullLoc = city.getFullLocation();
+                    String tzInfo = (city.timeZoneId != null && !city.timeZoneId.isEmpty()) ? " • " + city.timeZoneId : "";
+                    if (fullLoc.isEmpty()) {
+                        locView.setText(getContext().getString(R.string.salarm_recent_label) + String.format(Locale.US, " • %.4f, %.4f", city.latitude, city.longitude) + tzInfo);
+                    } else {
+                        locView.setText(getContext().getString(R.string.salarm_recent_label) + " • " + fullLoc + tzInfo);
+                    }
+                    locView.setVisibility(View.VISIBLE);
+                } else {
+                    nameView.setText(city.city);
+                    String fullLoc = city.getFullLocation();
+                    locView.setText(fullLoc);
+                    locView.setVisibility(fullLoc.isEmpty() ? View.GONE : View.VISIBLE);
+                }
             }
 
             return view;

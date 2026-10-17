@@ -253,6 +253,7 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_VIEW_LATITUDE = "key_salah_view_latitude";
     public static final String KEY_SALAH_VIEW_LONGITUDE = "key_salah_view_longitude";
     public static final String KEY_SALAH_VIEW_CITY_NAME = "key_salah_view_city_name";
+    public static final String KEY_SALAH_RECENT_LOCATIONS = "key_salah_recent_locations";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";

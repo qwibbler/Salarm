@@ -17,6 +17,8 @@ import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,6 +90,39 @@ public class SalahSettingsDialog extends BottomSheetDialogFragment {
 
         mCitySummary = view.findViewById(R.id.current_view_city_summary);
         updateCitySummary(mCitySummary, prefs);
+
+        TextView recentHeader = view.findViewById(R.id.recent_locations_header);
+        View recentScroll = view.findViewById(R.id.recent_locations_scroll);
+        ChipGroup chipGroup = view.findViewById(R.id.recent_locations_chip_group);
+
+        List<RecentLocation> recents = RecentLocationsManager.getRecentLocations(context);
+        if (recentHeader != null && recentScroll != null && chipGroup != null && !recents.isEmpty()) {
+            recentHeader.setVisibility(View.VISIBLE);
+            recentScroll.setVisibility(View.VISIBLE);
+            chipGroup.removeAllViews();
+            for (RecentLocation loc : recents) {
+                Chip chip = new Chip(context);
+                chip.setText(loc.getCityName());
+                chip.setClickable(true);
+                chip.setCheckable(false);
+                chip.setOnClickListener(v -> {
+                    prefs.edit()
+                            .putString(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME, loc.getCityName())
+                            .putString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE, String.valueOf(loc.getLatitude()))
+                            .putString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE, String.valueOf(loc.getLongitude()))
+                            .apply();
+
+                    if (loc.getTimeZoneId() != null && !loc.getTimeZoneId().isEmpty()) {
+                        prefs.edit().putString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, loc.getTimeZoneId()).apply();
+                    }
+
+                    RecentLocationsManager.addRecentLocation(context, loc);
+                    if (mListener != null) mListener.onSettingsChanged();
+                    dismiss();
+                });
+                chipGroup.addView(chip);
+            }
+        }
 
         view.findViewById(R.id.use_current_location_button).setOnClickListener(v -> {
             prefs.edit()
