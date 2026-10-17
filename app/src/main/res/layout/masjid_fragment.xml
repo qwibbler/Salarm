@@ -135,18 +135,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:paddingBottom="@dimen/alarm_list_padding_bottom"
             android:clipToPadding="false" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/view_timesheet_button"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="96dp"
-            android:text="@string/view_timesheet"
-            app:icon="@drawable/ic_download" />
 
     </LinearLayout>
 

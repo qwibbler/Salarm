@@ -1,5 +1,6 @@
 package com.qwibbler.salarm.salah;
 
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import static com.qwibbler.salarm.uidata.UiDataModel.Tab.MASJID;
 
 import android.content.Context;
@@ -10,9 +11,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.MotionEvent;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,21 +29,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.batoulapps.adhan.CalculationMethod;
+import com.google.android.material.color.MaterialColors;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.base.SalarmFragment;
+import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
-import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uidata.TabListener;
 import com.qwibbler.salarm.uidata.UiDataModel;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
-import com.google.android.material.color.MaterialColors;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -53,6 +53,7 @@ import java.util.Objects;
 
 public class MasjidFragment extends SalarmFragment {
 
+    private static final String KEY_SIDE_BUTTONS_VISIBLE = "key_side_buttons_visible";
     private View mEmptyStateLayout;
     private View mContentLayout;
     private View mPrevMasjidButton;
@@ -60,13 +61,10 @@ public class MasjidFragment extends SalarmFragment {
     private View mMasjidTitleClickableArea;
     private TextView mMasjidTitleText;
     private RecyclerView mRecyclerView;
-    private View mViewTimesheetButton;
     private MasjidPrayerAdapter mAdapter;
-
     private List<Masjid> mMasjids = new ArrayList<>();
     private long mSelectedMasjidId = -1;
     private boolean mShowCheckboxes = false;
-    private static final String KEY_SIDE_BUTTONS_VISIBLE = "key_side_buttons_visible";
     private boolean mSideButtonsVisible = false;
 
     private final TabListener mTabListener = newSelectedTab -> {
@@ -91,7 +89,6 @@ public class MasjidFragment extends SalarmFragment {
         mMasjidTitleClickableArea = view.findViewById(R.id.masjid_title_clickable_area);
         mMasjidTitleText = view.findViewById(R.id.masjid_title_text);
         mRecyclerView = view.findViewById(R.id.masjid_prayer_list);
-        mViewTimesheetButton = view.findViewById(R.id.view_timesheet_button);
 
         if (mEmptyStateLayout != null) {
             mEmptyStateLayout.setOnClickListener(v -> {
@@ -290,7 +287,7 @@ public class MasjidFragment extends SalarmFragment {
                 } else {
                     masjidTitleIcon.setImageResource(R.drawable.ic_masjid_timings);
                     masjidTitleIcon.setImageTintList(ColorStateList.valueOf(
-                            MaterialColors.getColor(masjidTitleIcon, androidx.appcompat.R.attr.colorPrimary)));
+                        MaterialColors.getColor(masjidTitleIcon, androidx.appcompat.R.attr.colorPrimary)));
                 }
             }
         }
@@ -301,15 +298,7 @@ public class MasjidFragment extends SalarmFragment {
             MasjidEditDialogFragment.show(getParentFragmentManager(), masjid.id);
         });
 
-        if (mViewTimesheetButton != null) {
-            mViewTimesheetButton.setOnClickListener(v -> {
-                exitCheckboxMode();
-                hideSideButtonsWithFabAnimation();
-                Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
-                intent.putExtra("masjid_id", masjid.id);
-                startActivity(intent);
-            });
-        }
+        updateFab(FAB_AND_BUTTONS_IMMEDIATE);
 
         if (mMasjids.size() > 1) {
             mPrevMasjidButton.setVisibility(View.VISIBLE);
@@ -404,13 +393,13 @@ public class MasjidFragment extends SalarmFragment {
         }
 
         new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.masjids_category_title)
-                .setSingleChoiceItems(names, checkedItem, (dialog, which) -> {
-                    mSelectedMasjidId = mMasjids.get(which).id;
-                    updateUI();
-                    dialog.dismiss();
-                })
-                .show();
+            .setTitle(R.string.masjids_category_title)
+            .setSingleChoiceItems(names, checkedItem, (dialog, which) -> {
+                mSelectedMasjidId = mMasjids.get(which).id;
+                updateUI();
+                dialog.dismiss();
+            })
+            .show();
     }
 
     private void hideSideButtonsWithFabAnimation() {
@@ -437,19 +426,19 @@ public class MasjidFragment extends SalarmFragment {
     private void showAddOrImportDialog() {
         exitCheckboxMode();
         CharSequence[] options = new CharSequence[]{
-                getString(R.string.salarm_add_new_masjid),
-                getString(R.string.masjid_import_qr_title)
+            getString(R.string.salarm_add_new_masjid),
+            getString(R.string.masjid_import_qr_title)
         };
         new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.masjids_category_title)
-                .setItems(options, (dialog, which) -> {
-                    if (which == 0) {
-                        MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
-                    } else if (which == 1) {
-                        MasjidQrImportDialogFragment.show(getParentFragmentManager());
-                    }
-                })
-                .show();
+            .setTitle(R.string.masjids_category_title)
+            .setItems(options, (dialog, which) -> {
+                if (which == 0) {
+                    MasjidEditDialogFragment.show(getParentFragmentManager(), 0);
+                } else if (which == 1) {
+                    MasjidQrImportDialogFragment.show(getParentFragmentManager());
+                }
+            })
+            .show();
     }
 
     @Override
@@ -513,173 +502,6 @@ public class MasjidFragment extends SalarmFragment {
         }
     }
 
-    private static class PrayerItem {
-        String type;
-        String name;
-        long timeMillis;
-        String summary;
-        boolean isConfigured;
-        Masjid masjid;
-        MasjidEvent event;
-
-        PrayerItem(String type, String name, long timeMillis, String summary, boolean isConfigured, Masjid masjid, MasjidEvent event) {
-            this.type = type;
-            this.name = name;
-            this.timeMillis = timeMillis;
-            this.summary = summary;
-            this.isConfigured = isConfigured;
-            this.masjid = masjid;
-            this.event = event;
-        }
-    }
-
-    private class MasjidPrayerAdapter extends RecyclerView.Adapter<MasjidPrayerAdapter.ViewHolder> {
-        private List<PrayerItem> mItems = new ArrayList<>();
-
-        void setItems(final List<PrayerItem> items) {
-            final List<PrayerItem> oldItems = mItems;
-            mItems = items;
-            DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                @Override
-                public int getOldListSize() {
-                    return oldItems.size();
-                }
-
-                @Override
-                public int getNewListSize() {
-                    return mItems.size();
-                }
-
-                @Override
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return oldItems.get(oldItemPosition).type.equals(mItems.get(newItemPosition).type);
-                }
-
-                @Override
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    PrayerItem oldItem = oldItems.get(oldItemPosition);
-                    PrayerItem newItem = mItems.get(newItemPosition);
-                    boolean eventSelectedSame = (oldItem.event == null && newItem.event == null) ||
-                            (oldItem.event != null && newItem.event != null && oldItem.event.isSelected == newItem.event.isSelected);
-                    return oldItem.type.equals(newItem.type) &&
-                            oldItem.timeMillis == newItem.timeMillis &&
-                            Objects.equals(oldItem.summary, newItem.summary) &&
-                            oldItem.isConfigured == newItem.isConfigured &&
-                            eventSelectedSame;
-                }
-            }).dispatchUpdatesTo(this);
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.masjid_prayer_item, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            PrayerItem item = mItems.get(position);
-            holder.name.setText(item.name);
-
-            if (mShowCheckboxes && item.isConfigured && item.event != null) {
-                holder.checkBox.setVisibility(View.VISIBLE);
-                holder.checkBox.setChecked(item.event.isSelected);
-            } else {
-                holder.checkBox.setVisibility(View.GONE);
-            }
-
-            if (item.isConfigured && item.summary != null && !item.summary.isEmpty()) {
-                holder.summary.setText(item.summary);
-                holder.summary.setVisibility(View.VISIBLE);
-                holder.time.setTextColor(MaterialColors.getColor(holder.itemView, android.R.attr.textColorPrimary));
-            } else {
-                holder.summary.setVisibility(View.GONE);
-                int secondaryColor = MaterialColors.getColor(holder.itemView, android.R.attr.textColorSecondary, Color.GRAY);
-                holder.time.setTextColor(secondaryColor);
-            }
-
-            if (item.timeMillis > 0) {
-                Date date = new Date(item.timeMillis);
-                DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getContext());
-                holder.time.setText(timeFormat.format(date));
-            } else {
-                holder.time.setText("--:--");
-            }
-
-            holder.itemView.setOnClickListener(v -> {
-                hideSideButtonsWithFabAnimation();
-                if (mShowCheckboxes) {
-                    if (item.isConfigured && item.event != null) {
-                        toggleEventSelection(holder.getBindingAdapterPosition());
-                    }
-                } else {
-                    if (item.masjid == null) return;
-                    if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
-                        showFixedTimeDialogue(item.masjid, item.type);
-                    } else {
-                        SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), item.masjid.id, item.type);
-                    }
-                }
-            });
-
-            holder.itemView.setOnLongClickListener(v -> {
-                if (item.isConfigured && item.event != null) {
-                    mShowCheckboxes = !mShowCheckboxes;
-                    notifyItemRangeChanged(0, getItemCount());
-                    return true;
-                }
-                return false;
-            });
-        }
-
-        private void toggleEventSelection(int position) {
-            if (position < 0 || position >= mItems.size()) return;
-            PrayerItem item = mItems.get(position);
-            if (item == null || item.event == null) return;
-            Context context = getContext();
-            if (context == null) return;
-            final Context appContext = context.getApplicationContext();
-
-            item.event.isSelected = !item.event.isSelected;
-            item.event.isManuallyDeselected = !item.event.isSelected;
-
-            notifyItemChanged(position);
-
-            final MasjidEvent eventToUpdate = item.event;
-            AppExecutors.getDiskIO().execute(() -> {
-                SalahDatabase.getDatabase(appContext).masjidEventDao().update(eventToUpdate);
-                SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
-            });
-        }
-
-        PrayerItem getItem(int position) {
-            if (position >= 0 && position < mItems.size()) {
-                return mItems.get(position);
-            }
-            return null;
-        }
-
-        @Override
-        public int getItemCount() {
-            return mItems.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            CheckBox checkBox;
-            TextView name;
-            TextView summary;
-            TextView time;
-
-            ViewHolder(View view) {
-                super(view);
-                checkBox = view.findViewById(R.id.prayer_checkbox);
-                name = view.findViewById(R.id.prayer_name);
-                summary = view.findViewById(R.id.prayer_calc_summary);
-                time = view.findViewById(R.id.prayer_time);
-            }
-        }
-    }
-
     private void showFixedTimeDialogue(Masjid masjid, String type) {
         Context context = getContext();
         if (context == null) return;
@@ -700,8 +522,8 @@ public class MasjidFragment extends SalarmFragment {
                 event.isSelected = masjid.showMasjidEvents;
 
                 double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                        ? new double[]{masjid.latitude, masjid.longitude}
-                        : SalahUtils.getCoordinates(appContext);
+                    ? new double[]{masjid.latitude, masjid.longitude}
+                    : SalahUtils.getCoordinates(appContext);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
                 Date prayerTime = switch (type) {
                     case "DHUHR", "JUMA" -> st.dhuhr;
@@ -720,8 +542,8 @@ public class MasjidFragment extends SalarmFragment {
                 event.id = db.masjidEventDao().insert(event);
             } else if (!event.definition.isFixedTime) {
                 double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                        ? new double[]{masjid.latitude, masjid.longitude}
-                        : SalahUtils.getCoordinates(appContext);
+                    ? new double[]{masjid.latitude, masjid.longitude}
+                    : SalahUtils.getCoordinates(appContext);
                 SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
 
                 long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
@@ -786,5 +608,219 @@ public class MasjidFragment extends SalarmFragment {
                 }
             });
         });
+    }
+
+    private static class PrayerItem {
+        String type;
+        String name;
+        long timeMillis;
+        String summary;
+        boolean isConfigured;
+        Masjid masjid;
+        MasjidEvent event;
+
+        PrayerItem(String type, String name, long timeMillis, String summary, boolean isConfigured, Masjid masjid, MasjidEvent event) {
+            this.type = type;
+            this.name = name;
+            this.timeMillis = timeMillis;
+            this.summary = summary;
+            this.isConfigured = isConfigured;
+            this.masjid = masjid;
+            this.event = event;
+        }
+    }
+
+    private class MasjidPrayerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private static final int VIEW_TYPE_PRAYER = 0;
+        private static final int VIEW_TYPE_TIMESHEET = 1;
+
+        private List<PrayerItem> mItems = new ArrayList<>();
+
+        void setItems(final List<PrayerItem> items) {
+            final List<PrayerItem> oldItems = mItems;
+            mItems = items;
+            DiffUtil.calculateDiff(new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() {
+                    return oldItems.size() + (oldItems.isEmpty() ? 0 : 1);
+                }
+
+                @Override
+                public int getNewListSize() {
+                    return mItems.size() + (mItems.isEmpty() ? 0 : 1);
+                }
+
+                @Override
+                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                    boolean oldIsTimesheet = oldItemPosition >= oldItems.size();
+                    boolean newIsTimesheet = newItemPosition >= mItems.size();
+                    if (oldIsTimesheet && newIsTimesheet) return true;
+                    if (oldIsTimesheet || newIsTimesheet) return false;
+                    return oldItems.get(oldItemPosition).type.equals(mItems.get(newItemPosition).type);
+                }
+
+                @Override
+                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                    boolean oldIsTimesheet = oldItemPosition >= oldItems.size();
+                    boolean newIsTimesheet = newItemPosition >= mItems.size();
+                    if (oldIsTimesheet && newIsTimesheet) return true;
+                    if (oldIsTimesheet || newIsTimesheet) return false;
+                    PrayerItem oldItem = oldItems.get(oldItemPosition);
+                    PrayerItem newItem = mItems.get(newItemPosition);
+                    boolean eventSelectedSame = (oldItem.event == null && newItem.event == null) ||
+                        (oldItem.event != null && newItem.event != null && oldItem.event.isSelected == newItem.event.isSelected);
+                    return oldItem.type.equals(newItem.type) &&
+                        oldItem.timeMillis == newItem.timeMillis &&
+                        Objects.equals(oldItem.summary, newItem.summary) &&
+                        oldItem.isConfigured == newItem.isConfigured &&
+                        eventSelectedSame;
+                }
+            }).dispatchUpdatesTo(this);
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position < mItems.size()) {
+                return VIEW_TYPE_PRAYER;
+            }
+            return VIEW_TYPE_TIMESHEET;
+        }
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            if (viewType == VIEW_TYPE_TIMESHEET) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.masjid_timesheet_button_item, parent, false);
+                return new TimesheetViewHolder(view);
+            }
+            return new PrayerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.masjid_prayer_item, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (getItemViewType(position) == VIEW_TYPE_TIMESHEET) {
+                TimesheetViewHolder timesheetHolder = (TimesheetViewHolder) holder;
+                timesheetHolder.button.setOnClickListener(v -> {
+                    exitCheckboxMode();
+                    hideSideButtonsWithFabAnimation();
+                    if (mSelectedMasjidId != -1) {
+                        Intent intent = new Intent(requireContext(), MasjidCardEditorActivity.class);
+                        intent.putExtra("masjid_id", mSelectedMasjidId);
+                        startActivity(intent);
+                    }
+                });
+                return;
+            }
+
+            PrayerViewHolder prayerHolder = (PrayerViewHolder) holder;
+            PrayerItem item = mItems.get(position);
+            prayerHolder.name.setText(item.name);
+
+            if (mShowCheckboxes && item.isConfigured && item.event != null) {
+                prayerHolder.checkBox.setVisibility(View.VISIBLE);
+                prayerHolder.checkBox.setChecked(item.event.isSelected);
+            } else {
+                prayerHolder.checkBox.setVisibility(View.GONE);
+            }
+
+            if (item.isConfigured && item.summary != null && !item.summary.isEmpty()) {
+                prayerHolder.summary.setText(item.summary);
+                prayerHolder.summary.setVisibility(View.VISIBLE);
+                prayerHolder.time.setTextColor(MaterialColors.getColor(prayerHolder.itemView, android.R.attr.textColorPrimary));
+            } else {
+                prayerHolder.summary.setVisibility(View.GONE);
+                int secondaryColor = MaterialColors.getColor(prayerHolder.itemView, android.R.attr.textColorSecondary, Color.GRAY);
+                prayerHolder.time.setTextColor(secondaryColor);
+            }
+
+            if (item.timeMillis > 0) {
+                Date date = new Date(item.timeMillis);
+                DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getContext());
+                prayerHolder.time.setText(timeFormat.format(date));
+            } else {
+                prayerHolder.time.setText("--:--");
+            }
+
+            prayerHolder.itemView.setOnClickListener(v -> {
+                hideSideButtonsWithFabAnimation();
+                if (mShowCheckboxes) {
+                    if (item.isConfigured && item.event != null) {
+                        toggleEventSelection(prayerHolder.getBindingAdapterPosition());
+                    }
+                } else {
+                    if (item.masjid == null) return;
+                    if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
+                        showFixedTimeDialogue(item.masjid, item.type);
+                    } else {
+                        SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), item.masjid.id, item.type);
+                    }
+                }
+            });
+
+            prayerHolder.itemView.setOnLongClickListener(v -> {
+                if (item.isConfigured && item.event != null) {
+                    mShowCheckboxes = !mShowCheckboxes;
+                    notifyItemRangeChanged(0, getItemCount());
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        private void toggleEventSelection(int position) {
+            if (position < 0 || position >= mItems.size()) return;
+            PrayerItem item = mItems.get(position);
+            if (item == null || item.event == null) return;
+            Context context = getContext();
+            if (context == null) return;
+            final Context appContext = context.getApplicationContext();
+
+            item.event.isSelected = !item.event.isSelected;
+            item.event.isManuallyDeselected = !item.event.isSelected;
+
+            notifyItemChanged(position);
+
+            final MasjidEvent eventToUpdate = item.event;
+            AppExecutors.getDiskIO().execute(() -> {
+                SalahDatabase.getDatabase(appContext).masjidEventDao().update(eventToUpdate);
+                SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
+            });
+        }
+
+        PrayerItem getItem(int position) {
+            if (position >= 0 && position < mItems.size()) {
+                return mItems.get(position);
+            }
+            return null;
+        }
+
+        @Override
+        public int getItemCount() {
+            return mItems.size() + (mItems.isEmpty() ? 0 : 1);
+        }
+
+        class TimesheetViewHolder extends RecyclerView.ViewHolder {
+            View button;
+
+            TimesheetViewHolder(View view) {
+                super(view);
+                button = view.findViewById(R.id.view_timesheet_button);
+            }
+        }
+
+        class PrayerViewHolder extends RecyclerView.ViewHolder {
+            CheckBox checkBox;
+            TextView name;
+            TextView summary;
+            TextView time;
+
+            PrayerViewHolder(View view) {
+                super(view);
+                checkBox = view.findViewById(R.id.prayer_checkbox);
+                name = view.findViewById(R.id.prayer_name);
+                summary = view.findViewById(R.id.prayer_calc_summary);
+                time = view.findViewById(R.id.prayer_time);
+            }
+        }
     }
 }
