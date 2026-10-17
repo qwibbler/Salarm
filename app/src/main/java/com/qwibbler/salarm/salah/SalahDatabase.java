@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class, MasjidEvent.class}, version = 15)
+@Database(entities = {RelationalRule.class, CityCoordinate.class, Masjid.class, MasjidEvent.class}, version = 19)
 public abstract class SalahDatabase extends RoomDatabase {
 
     private static volatile SalahDatabase INSTANCE;
@@ -199,6 +199,100 @@ public abstract class SalahDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_15_16 = new Migration(15, 16) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndEnabled` INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndBeforeMinutes` INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndAfterMinutes` INTEGER NOT NULL DEFAULT 10");
+        }
+    };
+
+    static final Migration MIGRATION_16_17 = new Migration(16, 17) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndEnabled` INTEGER NOT NULL DEFAULT 0");
+            } catch (Exception ignored) {}
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndBeforeMinutes` INTEGER NOT NULL DEFAULT 0");
+            } catch (Exception ignored) {}
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndAfterMinutes` INTEGER NOT NULL DEFAULT 10");
+            } catch (Exception ignored) {}
+        }
+    };
+
+    static final Migration MIGRATION_17_18 = new Migration(17, 18) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndEnabled` INTEGER NOT NULL DEFAULT 0");
+            } catch (Exception ignored) {}
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndBeforeMinutes` INTEGER NOT NULL DEFAULT 0");
+            } catch (Exception ignored) {}
+            try {
+                database.execSQL("ALTER TABLE `masjid_events` ADD COLUMN `dndAfterMinutes` INTEGER NOT NULL DEFAULT 10");
+            } catch (Exception ignored) {}
+        }
+    };
+
+    static final Migration MIGRATION_18_19 = new Migration(18, 19) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS `relational_rules_temp` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`enabled` INTEGER NOT NULL, " +
+                    "`masjidId` INTEGER NOT NULL, " +
+                    "`masjidSalahType` TEXT, " +
+                    "`isSelected` INTEGER NOT NULL, " +
+                    "`isManuallyDeselected` INTEGER NOT NULL, " +
+                    "`autostopEnabled` INTEGER NOT NULL, " +
+                    "`autostopOffsetMinutes` INTEGER NOT NULL, " +
+                    "`isFixedTime` INTEGER, " +
+                    "`fixedHour` INTEGER, " +
+                    "`fixedMinute` INTEGER, " +
+                    "`anchor_basicEvent` TEXT, " +
+                    "`anchor_masjidEventId` INTEGER, " +
+                    "`anchor_isMax` INTEGER, " +
+                    "`calc_offsetMinutes` INTEGER, " +
+                    "`calc_roundingDirection` TEXT, " +
+                    "`calc_roundingIntervalMinutes` INTEGER, " +
+                    "`calc_adjustmentMinutes` INTEGER, " +
+                    "`clip_offsetMinutes` INTEGER, " +
+                    "`clip_roundingDirection` TEXT, " +
+                    "`clip_roundingIntervalMinutes` INTEGER, " +
+                    "`clip_boundaryType` TEXT, " +
+                    "`clip_anchor_basicEvent` TEXT, " +
+                    "`clip_anchor_masjidEventId` INTEGER, " +
+                    "`clip_anchor_isMax` INTEGER, " +
+                    "`autostop_basicEvent` TEXT, " +
+                    "`autostop_masjidEventId` INTEGER, " +
+                    "`autostop_isMax` INTEGER)");
+
+            database.execSQL("INSERT OR IGNORE INTO `relational_rules_temp` (" +
+                    "id, enabled, masjidId, masjidSalahType, isSelected, isManuallyDeselected, " +
+                    "autostopEnabled, autostopOffsetMinutes, isFixedTime, fixedHour, fixedMinute, " +
+                    "anchor_basicEvent, anchor_masjidEventId, anchor_isMax, " +
+                    "calc_offsetMinutes, calc_roundingDirection, calc_roundingIntervalMinutes, calc_adjustmentMinutes, " +
+                    "clip_offsetMinutes, clip_roundingDirection, clip_roundingIntervalMinutes, clip_boundaryType, " +
+                    "clip_anchor_basicEvent, clip_anchor_masjidEventId, clip_anchor_isMax, " +
+                    "autostop_basicEvent, autostop_masjidEventId, autostop_isMax) " +
+                    "SELECT id, enabled, masjidId, masjidSalahType, isSelected, isManuallyDeselected, " +
+                    "autostopEnabled, autostopOffsetMinutes, isFixedTime, fixedHour, fixedMinute, " +
+                    "anchor_basicEvent, anchor_masjidEventId, anchor_isMax, " +
+                    "calc_offsetMinutes, calc_roundingDirection, calc_roundingIntervalMinutes, calc_adjustmentMinutes, " +
+                    "clip_offsetMinutes, clip_roundingDirection, clip_roundingIntervalMinutes, clip_boundaryType, " +
+                    "clip_anchor_basicEvent, clip_anchor_masjidEventId, clip_anchor_isMax, " +
+                    "autostop_basicEvent, autostop_masjidEventId, autostop_isMax " +
+                    "FROM `relational_rules`");
+
+            database.execSQL("DROP TABLE `relational_rules`");
+            database.execSQL("ALTER TABLE `relational_rules_temp` RENAME TO `relational_rules`");
+        }
+    };
+
 
     public static SalahDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
@@ -206,7 +300,7 @@ public abstract class SalahDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     SalahDatabase.class, "salah_database")
-                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
+                            .addMigrations(MIGRATION_6_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19)
                             .fallbackToDestructiveMigration()
                             .build();
                 }

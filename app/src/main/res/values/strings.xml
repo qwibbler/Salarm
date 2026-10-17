@@ -1918,9 +1918,9 @@
 
     <string name="salah_alarm_rule_description_base_max">alarm %1$s latest time of %2$s</string>
     <string name="salah_alarm_rule_description_base_min">alarm %1$s earliest time of %2$s</string>
-    <string name="masjid_rule_description_base">Jamat %1$s %2$s</string>
-    <string name="masjid_rule_description_base_max">Jamat %1$s latest time of %2$s</string>
-    <string name="masjid_rule_description_base_min">Jamat %1$s earliest time of %2$s</string>
+    <string name="masjid_rule_description_base">Jamaat %1$s %2$s</string>
+    <string name="masjid_rule_description_base_max">Jamaat %1$s latest time of %2$s</string>
+    <string name="masjid_rule_description_base_min">Jamaat %1$s earliest time of %2$s</string>
     <string name="view_timesheet">View Timesheet</string>
     <string name="masjid_card_editor_title">Masjid Card Editor</string>
     <string name="masjid_card_export_png">PNG</string>
@@ -1939,4 +1939,10 @@
     <string name="masjid_card_export_label">Export</string>
     <string name="masjid_card_flip">Flip Card Side</string>
     <string name="masjid_card_orientation_toggle">Toggle Orientation</string>
+    <string name="masjid_dnd_title">Turn on Do Not Disturb</string>
+    <string name="masjid_dnd_from">From</string>
+    <string name="masjid_dnd_before_jamaat">mins before Jamaat to</string>
+    <string name="masjid_dnd_after_jamaat">mins after Jamaat</string>
+    <string name="masjid_jamaat_time">Jamaat Time</string>
+    <string name="dnd_permission_required">Do Not Disturb access permission is required to turn on Do Not Disturb automatically.</string>
 </resources>

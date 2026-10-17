@@ -1,12 +1,16 @@
 package com.qwibbler.salarm.settings;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +23,10 @@ import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.databinding.DialogMasjidAlarmBinding;
+import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
+import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
+import com.qwibbler.salarm.data.SettingsDAO;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import com.qwibbler.salarm.salah.Masjid;
 import com.qwibbler.salarm.salah.MasjidEvent;
 import com.qwibbler.salarm.salah.RelationalAlarmUiHelper;
@@ -33,10 +41,13 @@ import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.CustomDialog;
 import com.qwibbler.salarm.utils.Utils;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
@@ -46,6 +57,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     private long mMasjidId;
     private String mSalahType;
     private MasjidEvent mEvent;
+    private Madhab mMadhab = Madhab.SHAFI;
 
     private DialogMasjidAlarmBinding mBinding;
 
@@ -58,6 +70,9 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     private boolean mPrimaryIsMax = true;
     private int mRoundIdx = 0;
     private int mAdjustmentIdx = 0;
+
+    private int mFixedHour = 12;
+    private int mFixedMinute = 30;
 
     private final List<SelectableEvent> mSelectableEvents = new ArrayList<>();
 
@@ -107,7 +122,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void setupInitialization() {
-        RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue);
+        RelationalAlarmUiHelper.setupNumericDropdowns(mBinding.primaryOffsetValue, mBinding.primaryRoundValue, mBinding.adjustmentValue, mBinding.dndBeforeValue, mBinding.dndAfterValue);
 
         final Context appContext = requireContext().getApplicationContext();
         AppExecutors.getDiskIO().execute(() -> {
@@ -115,11 +130,24 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             mEvent = db.masjidEventDao().getMasjidEvent(mMasjidId, mSalahType);
 
             Masjid masjid = db.masjidDao().getById(mMasjidId);
+            Madhab madhab = (masjid != null) ? masjid.getMadhab(appContext) : SalahUtils.getMadhab(appContext);
             double[] coords = (masjid != null && (masjid.latitude != 0.0 || masjid.longitude != 0.0))
                     ? new double[]{masjid.latitude, masjid.longitude}
                     : SalahUtils.getCoordinates(appContext);
             CalculationMethod method = (masjid != null) ? masjid.getCalculationMethod(appContext) : SalahUtils.getCalculationMethod(appContext);
             SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], method);
+
+            if ("DHUHR".equals(mSalahType) && salahTimes.dhuhr != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(salahTimes.dhuhr);
+                mFixedHour = cal.get(Calendar.HOUR_OF_DAY);
+                mFixedMinute = cal.get(Calendar.MINUTE);
+            } else if ("JUMA".equals(mSalahType) && salahTimes.dhuhr != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(salahTimes.dhuhr);
+                mFixedHour = cal.get(Calendar.HOUR_OF_DAY);
+                mFixedMinute = cal.get(Calendar.MINUTE);
+            }
 
             SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
             boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
@@ -150,6 +178,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
 
             AppExecutors.getMainThread().post(() -> {
                 if (!isAdded() || mBinding == null) return;
+                mMadhab = madhab;
 
                 mSelectableEvents.clear();
                 mSelectableEvents.addAll(selectableEvents);
@@ -183,6 +212,8 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void setupListeners() {
+        mBinding.fixedTimeButton.setOnClickListener(v -> showTimePicker());
+
         mBinding.primaryOffsetToggle.setOnClickListener(v -> {
             mPrimaryOffsetIdx = (mPrimaryOffsetIdx + 1) % mOffsetTypes.length;
             updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
@@ -206,6 +237,41 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
             mAdjustmentIdx = (mAdjustmentIdx + 1) % mAdjustmentTypes.length;
             updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
         });
+
+        mBinding.dndEnabledCheckbox.setOnCheckedChangeListener((b, checked) -> updateBlockState(checked, mBinding.dndContainer));
+    }
+
+    private void showTimePicker() {
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
+        if (SPINNER_TIME_PICKER_STYLE.equals(SettingsDAO.getMaterialTimePickerStyle(prefs))) {
+            final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(mFixedHour, mFixedMinute);
+            getChildFragmentManager().setFragmentResultListener(SpinnerTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
+                mFixedHour = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_HOURS);
+                mFixedMinute = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
+                updateFixedTimeButton();
+            });
+            SpinnerTimePickerDialogFragment.show(getChildFragmentManager(), fragment);
+        } else {
+            getChildFragmentManager().setFragmentResultListener(MaterialTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
+                mFixedHour = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_HOURS);
+                mFixedMinute = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
+                updateFixedTimeButton();
+            });
+            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", mFixedHour, mFixedMinute, prefs);
+        }
+    }
+
+    private void updateFixedTimeButton() {
+        if (mBinding == null) return;
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, mFixedHour);
+        cal.set(Calendar.MINUTE, mFixedMinute);
+        DateFormat df = android.text.format.DateFormat.getTimeFormat(requireContext());
+        if (df != null) {
+            mBinding.fixedTimeButton.setText(df.format(cal.getTime()));
+        } else {
+            mBinding.fixedTimeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", mFixedHour, mFixedMinute));
+        }
     }
 
     private void updateToggle(TextView v, String[] vals, int idx) {
@@ -228,72 +294,106 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     }
 
     private void initializeUiWithDefaults() {
-        if ("MAGHRIB".equals(mSalahType)) {
-            mBinding.primaryOffsetValue.setText("8");
-            mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+        boolean isFixed = "DHUHR".equals(mSalahType) || "JUMA".equals(mSalahType) || (mEvent != null && mEvent.definition != null && mEvent.definition.isFixedTime);
+
+        if (isFixed) {
+            mBinding.fixedTimeContainer.setVisibility(View.VISIBLE);
+            mBinding.primaryOffsetContainer.setVisibility(View.GONE);
+            mBinding.primaryRoundEnabledCheckbox.setVisibility(View.GONE);
+            mBinding.primaryRoundContainer.setVisibility(View.GONE);
+            mBinding.adjustmentEnabledCheckbox.setVisibility(View.GONE);
+            mBinding.adjustmentContainer.setVisibility(View.GONE);
+            updateFixedTimeButton();
         } else {
-            mBinding.primaryOffsetValue.setText("0");
-            mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+            mBinding.fixedTimeContainer.setVisibility(View.GONE);
+            mBinding.primaryOffsetContainer.setVisibility(View.VISIBLE);
+            mBinding.primaryRoundEnabledCheckbox.setVisibility(View.VISIBLE);
+            if ("MAGHRIB".equals(mSalahType)) {
+                mBinding.primaryOffsetValue.setText("8");
+                mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+            } else {
+                mBinding.primaryOffsetValue.setText("0");
+                mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+            }
+            updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, 1);
+            updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, 1);
+            mBinding.primaryEvent.setText(SalahUtils.getLocalizedSalahName(requireContext(), mSalahType), false);
+
+            mBinding.primaryRoundEnabledCheckbox.setChecked(false);
+            updateToggle(mBinding.primaryRoundToggle, mRoundTypes, 0);
+            mBinding.primaryRoundValue.setText("0");
+
+            mBinding.adjustmentEnabledCheckbox.setChecked(false);
+            mBinding.adjustmentValue.setText("0");
+            updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
+
+            updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+            updateAdjustmentVisibility();
         }
-        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, 1);
-        updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, 1);
-        mBinding.primaryEvent.setText(SalahUtils.getLocalizedSalahName(requireContext(), mSalahType), false);
 
-        mBinding.primaryRoundEnabledCheckbox.setChecked(false);
-        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, 0);
-        mBinding.primaryRoundValue.setText("0");
-
-        mBinding.adjustmentEnabledCheckbox.setChecked(false);
-        mBinding.adjustmentValue.setText("0");
-        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, 0);
-
-        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
-        updateAdjustmentVisibility();
+        // DND defaults
+        mBinding.dndEnabledCheckbox.setChecked(false);
+        mBinding.dndBeforeValue.setText(String.valueOf(0));
+        mBinding.dndAfterValue.setText(String.valueOf(10));
+        updateBlockState(false, mBinding.dndContainer);
     }
 
     private void populateUi() {
         initializeUiWithDefaults();
 
         if (mEvent != null && mEvent.definition != null) {
-            if (mEvent.definition.calculation != null) {
-                mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.offsetMinutes)));
-                mPrimaryOffsetIdx = mEvent.definition.calculation.offsetMinutes >= 0 ? 1 : 0;
-                updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
-            }
-            if (mEvent.definition.anchor != null) {
-                mPrimaryIsMax = mEvent.definition.anchor.isMax;
-                updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, mPrimaryIsMax ? 1 : 0);
-                if (mEvent.definition.anchor.basicEvent != null) {
-                    mBinding.primaryEvent.setText(RelationalRule.getEventName(requireContext(), mEvent.definition.anchor.basicEvent), false);
+            if (mEvent.definition.isFixedTime) {
+                mFixedHour = mEvent.definition.fixedHour;
+                mFixedMinute = mEvent.definition.fixedMinute;
+                updateFixedTimeButton();
+            } else {
+                if (mEvent.definition.calculation != null) {
+                    mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.offsetMinutes)));
+                    mPrimaryOffsetIdx = mEvent.definition.calculation.offsetMinutes >= 0 ? 1 : 0;
+                    updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+                }
+                if (mEvent.definition.anchor != null) {
+                    mPrimaryIsMax = mEvent.definition.anchor.isMax;
+                    updateToggle(mBinding.primaryExtremeToggle, mExtremeTypes, mPrimaryIsMax ? 1 : 0);
+                    if (mEvent.definition.anchor.basicEvent != null) {
+                        mBinding.primaryEvent.setText(RelationalRule.getEventName(requireContext(), mEvent.definition.anchor.basicEvent), false);
 
-                    if ("MAGHRIB".equals(mSalahType) || mEvent.definition.anchor.basicEvent == RelationalRule.AnchorEvent.MAGHRIB) {
-                        mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+                        if ("MAGHRIB".equals(mSalahType) || mEvent.definition.anchor.basicEvent == RelationalRule.AnchorEvent.MAGHRIB) {
+                            mBinding.primaryExtremeToggle.setVisibility(View.GONE);
+                        } else {
+                            mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                if (mEvent.definition.calculation != null) {
+                    boolean hasRounding = mEvent.definition.calculation.roundingIntervalMinutes > 0 && mEvent.definition.calculation.roundingDirection != null;
+                    mBinding.primaryRoundEnabledCheckbox.setChecked(hasRounding);
+                    mRoundIdx = mEvent.definition.calculation.roundingDirection != null ? mEvent.definition.calculation.roundingDirection.ordinal() : 0;
+                    updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mRoundIdx);
+                    mBinding.primaryRoundValue.setText(String.valueOf(mEvent.definition.calculation.roundingIntervalMinutes));
+
+                    if (hasRounding) {
+                        mBinding.adjustmentEnabledCheckbox.setChecked(mEvent.definition.calculation.adjustmentMinutes != 0);
+                        mBinding.adjustmentValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.adjustmentMinutes)));
+                        mAdjustmentIdx = mEvent.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
+                        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
                     } else {
-                        mBinding.primaryExtremeToggle.setVisibility(View.VISIBLE);
+                        mBinding.adjustmentEnabledCheckbox.setChecked(false);
+                        mBinding.adjustmentValue.setText("0");
                     }
                 }
             }
 
-            if (mEvent.definition.calculation != null) {
-                boolean hasRounding = mEvent.definition.calculation.roundingIntervalMinutes > 0 && mEvent.definition.calculation.roundingDirection != null;
-                mBinding.primaryRoundEnabledCheckbox.setChecked(hasRounding);
-                mRoundIdx = mEvent.definition.calculation.roundingDirection != null ? mEvent.definition.calculation.roundingDirection.ordinal() : 0;
-                updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mRoundIdx);
-                mBinding.primaryRoundValue.setText(String.valueOf(mEvent.definition.calculation.roundingIntervalMinutes));
-
-                if (hasRounding) {
-                    mBinding.adjustmentEnabledCheckbox.setChecked(mEvent.definition.calculation.adjustmentMinutes != 0);
-                    mBinding.adjustmentValue.setText(String.valueOf(Math.abs(mEvent.definition.calculation.adjustmentMinutes)));
-                    mAdjustmentIdx = mEvent.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
-                    updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
-                } else {
-                    mBinding.adjustmentEnabledCheckbox.setChecked(false);
-                    mBinding.adjustmentValue.setText("0");
-                }
-            }
+            mBinding.dndEnabledCheckbox.setChecked(mEvent.dndEnabled);
+            mBinding.dndBeforeValue.setText(String.valueOf(mEvent.dndBeforeMinutes));
+            mBinding.dndAfterValue.setText(String.valueOf(mEvent.dndAfterMinutes));
+            updateBlockState(mEvent.dndEnabled, mBinding.dndContainer);
         }
-        updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
-        updateAdjustmentVisibility();
+        if (!("DHUHR".equals(mSalahType) || "JUMA".equals(mSalahType) || (mEvent != null && mEvent.definition != null && mEvent.definition.isFixedTime))) {
+            updateBlockState(mBinding.primaryRoundEnabledCheckbox.isChecked(), mBinding.primaryRoundContainer);
+            updateAdjustmentVisibility();
+        }
     }
 
     private void saveEvent() {
@@ -301,32 +401,57 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
         event.masjidId = mMasjidId;
         event.salahType = mSalahType;
         if (event.definition == null) event.definition = new RelationalDefinition();
-        if (event.definition.anchor == null) event.definition.anchor = new RelationalAnchor();
-        if (event.definition.calculation == null) event.definition.calculation = new RelationalCalculation();
 
-        event.definition.anchor.basicEvent = getAnchorEvent(mBinding.primaryEvent.getText().toString());
-        int offset = parseSafeInt(mBinding.primaryOffsetValue.getText().toString(), 0);
-        event.definition.calculation.offsetMinutes = mPrimaryOffsetIdx == 1 ? offset : -offset;
-        event.definition.anchor.isMax = mPrimaryIsMax;
+        boolean isFixed = "DHUHR".equals(mSalahType) || "JUMA".equals(mSalahType);
+        event.definition.isFixedTime = isFixed;
 
-        if (mBinding.primaryRoundEnabledCheckbox.isChecked()) {
-            event.definition.calculation.roundingIntervalMinutes = parseSafeInt(mBinding.primaryRoundValue.getText().toString(), 0);
-            if (mRoundIdx >= 0 && mRoundIdx < RelationalRule.RoundingDirection.values().length) {
-                event.definition.calculation.roundingDirection = RelationalRule.RoundingDirection.values()[mRoundIdx];
-            }
-            if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
-                int adj = parseSafeInt(mBinding.adjustmentValue.getText().toString(), 0);
-                event.definition.calculation.adjustmentMinutes = mAdjustmentIdx == 1 ? adj : -adj;
+        if (isFixed) {
+            event.definition.fixedHour = mFixedHour;
+            event.definition.fixedMinute = mFixedMinute;
+            event.definition.anchor = null;
+            event.definition.calculation = null;
+        } else {
+            if (event.definition.anchor == null) event.definition.anchor = new RelationalAnchor();
+            if (event.definition.calculation == null) event.definition.calculation = new RelationalCalculation();
+
+            event.definition.anchor.basicEvent = getAnchorEvent(mBinding.primaryEvent.getText().toString());
+            int offset = parseSafeInt(mBinding.primaryOffsetValue.getText().toString(), 0);
+            event.definition.calculation.offsetMinutes = mPrimaryOffsetIdx == 1 ? offset : -offset;
+            event.definition.anchor.isMax = mPrimaryIsMax;
+
+            if (mBinding.primaryRoundEnabledCheckbox.isChecked()) {
+                event.definition.calculation.roundingIntervalMinutes = parseSafeInt(mBinding.primaryRoundValue.getText().toString(), 0);
+                if (mRoundIdx >= 0 && mRoundIdx < RelationalRule.RoundingDirection.values().length) {
+                    event.definition.calculation.roundingDirection = RelationalRule.RoundingDirection.values()[mRoundIdx];
+                }
+                if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
+                    int adj = parseSafeInt(mBinding.adjustmentValue.getText().toString(), 0);
+                    event.definition.calculation.adjustmentMinutes = mAdjustmentIdx == 1 ? adj : -adj;
+                } else {
+                    event.definition.calculation.adjustmentMinutes = 0;
+                }
             } else {
+                event.definition.calculation.roundingIntervalMinutes = 0;
+                event.definition.calculation.roundingDirection = null;
                 event.definition.calculation.adjustmentMinutes = 0;
             }
-        } else {
-            event.definition.calculation.roundingIntervalMinutes = 0;
-            event.definition.calculation.roundingDirection = null;
-            event.definition.calculation.adjustmentMinutes = 0;
         }
 
         event.definition.clip = null;
+
+        event.dndEnabled = mBinding.dndEnabledCheckbox.isChecked();
+        event.dndBeforeMinutes = parseSafeInt(mBinding.dndBeforeValue.getText().toString(), 0);
+        event.dndAfterMinutes = parseSafeInt(mBinding.dndAfterValue.getText().toString(), 10);
+
+        if (event.dndEnabled) {
+            NotificationManager nm = requireContext().getSystemService(NotificationManager.class);
+            if (nm != null && !nm.isNotificationPolicyAccessGranted()) {
+                Toast.makeText(requireContext(), R.string.dnd_permission_required, Toast.LENGTH_LONG).show();
+                try {
+                    startActivity(new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+                } catch (Exception ignored) {}
+            }
+        }
 
         AppExecutors.getDiskIO().execute(() -> {
             SalahDatabase db = SalahDatabase.getDatabase(requireContext());
@@ -359,14 +484,7 @@ public class SalahMasjidAlarmDialogFragment extends DialogFragment {
     private RelationalRule.AnchorEvent getAnchorEvent(String name) {
         if (name == null || name.isEmpty() || !isAdded()) return RelationalRule.AnchorEvent.FAJR;
         if (getString(R.string.asr_label).equals(name)) {
-            Madhab madhab;
-            if (mMasjidId > 0) {
-                Masjid masjid = SalahDatabase.getDatabase(requireContext()).masjidDao().getById(mMasjidId);
-                madhab = (masjid != null) ? masjid.getMadhab(requireContext()) : SalahUtils.getMadhab(requireContext());
-            } else {
-                madhab = SalahUtils.getMadhab(requireContext());
-            }
-            return madhab == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI;
+            return mMadhab == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI;
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
         for (int i = 0; i < events.length; i++) {

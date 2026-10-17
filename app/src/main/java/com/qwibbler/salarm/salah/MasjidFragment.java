@@ -38,6 +38,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
 import com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity;
+import com.qwibbler.salarm.settings.MasjidDndDialogFragment;
 import com.qwibbler.salarm.settings.MasjidEditDialogFragment;
 import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
@@ -338,9 +339,15 @@ public class MasjidFragment extends SalarmFragment {
                         timeMillis = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
                         if (timeMillis > 0) {
                             isConfigured = true;
-                            if (!"DHUHR".equals(type) && !"JUMA".equals(type) && event.definition.anchor != null) {
+                            if (event.definition.isFixedTime) {
+                                summary = event.definition.getSummary(appContext, null, true);
+                            } else if (event.definition.anchor != null) {
                                 String anchorName = RelationalRule.getAnchorDescription(appContext, event.definition.anchor);
                                 summary = event.definition.getSummary(appContext, anchorName, true);
+                            }
+                            String dndStr = RelationalDefinition.getDndSummary(appContext, event.dndEnabled, event.dndBeforeMinutes, event.dndAfterMinutes);
+                            if (!dndStr.isEmpty()) {
+                                summary = summary.isEmpty() ? dndStr : summary + "\n" + dndStr;
                             }
                         }
                     } catch (Exception ignored) {
@@ -510,112 +517,24 @@ public class MasjidFragment extends SalarmFragment {
         }
     }
 
-    private void showFixedTimeDialogue(Masjid masjid, String type) {
-        Context context = getContext();
-        if (context == null) return;
-        final Context appContext = context.getApplicationContext();
-
-        if (!"DHUHR".equals(type) && !"JUMA".equals(type)) {
-            return;
-        }
-
-        AppExecutors.getDiskIO().execute(() -> {
-            SalahDatabase db = SalahDatabase.getDatabase(appContext);
-            MasjidEvent event = db.masjidEventDao().getMasjidEvent(masjid.id, type);
-            if (event == null) {
-                event = new MasjidEvent();
-                event.masjidId = masjid.id;
-                event.salahType = type;
-                event.definition.isFixedTime = true;
-                event.isSelected = masjid.showMasjidEvents;
-
-                double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                    ? new double[]{masjid.latitude, masjid.longitude}
-                    : SalahUtils.getCoordinates(appContext);
-                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
-                Date prayerTime = switch (type) {
-                    case "DHUHR", "JUMA" -> st.dhuhr;
-                    default -> null;
-                };
-
-                if (prayerTime != null) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(prayerTime);
-                    event.definition.fixedHour = cal.get(Calendar.HOUR_OF_DAY);
-                    event.definition.fixedMinute = cal.get(Calendar.MINUTE);
-                } else {
-                    event.definition.fixedHour = 12;
-                    event.definition.fixedMinute = 0;
-                }
-                event.id = db.masjidEventDao().insert(event);
-            } else if (!event.definition.isFixedTime) {
-                double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
-                    ? new double[]{masjid.latitude, masjid.longitude}
-                    : SalahUtils.getCoordinates(appContext);
-                SalahCalculator.SalahTimes st = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], masjid.getCalculationMethod(appContext));
-
-                long evaluated = SalahCalculator.evaluateMasjidEvent(appContext, event, st, new Date(), true);
-                if (evaluated > 0) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTimeInMillis(evaluated);
-                    event.definition.fixedHour = cal.get(Calendar.HOUR_OF_DAY);
-                    event.definition.fixedMinute = cal.get(Calendar.MINUTE);
-                } else {
-                    event.definition.fixedHour = 12;
-                    event.definition.fixedMinute = 0;
-                }
-                event.definition.isFixedTime = true;
-                db.masjidEventDao().update(event);
-            }
-
-            final MasjidEvent finalEvent = event;
-
-            AppExecutors.getMainThread().post(() -> {
-                if (isAdded()) {
-                    showTimePicker(finalEvent);
-                }
-            });
-        });
-    }
-
-    private void showTimePicker(MasjidEvent event) {
+    private void showFixedTimePicker(Masjid masjid, String type, int hour, int minute) {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-
         if (SPINNER_TIME_PICKER_STYLE.equals(SettingsDAO.getMaterialTimePickerStyle(prefs))) {
-            final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(event.definition.fixedHour, event.definition.fixedMinute);
+            final SpinnerTimePickerDialogFragment fragment = SpinnerTimePickerDialogFragment.newInstance(hour, minute);
             getChildFragmentManager().setFragmentResultListener(SpinnerTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
                 int h = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_HOURS);
                 int m = bundle.getInt(SpinnerTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
-                updateEventTime(event, h, m);
+                MasjidDndDialogFragment.show(getParentFragmentManager(), masjid.id, type, h, m);
             });
             SpinnerTimePickerDialogFragment.show(getChildFragmentManager(), fragment);
         } else {
             getChildFragmentManager().setFragmentResultListener(MaterialTimePickerDialogFragment.REQUEST_KEY, this, (requestKey, bundle) -> {
                 int h = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_HOURS);
                 int m = bundle.getInt(MaterialTimePickerDialogFragment.BUNDLE_KEY_MINUTES);
-                updateEventTime(event, h, m);
+                MasjidDndDialogFragment.show(getParentFragmentManager(), masjid.id, type, h, m);
             });
-            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", event.definition.fixedHour, event.definition.fixedMinute, prefs);
+            MaterialTimePickerDialogFragment.show(requireContext(), getChildFragmentManager(), "fixed_time_picker", hour, minute, prefs);
         }
-    }
-
-    private void updateEventTime(MasjidEvent event, int hour, int minute) {
-        event.definition.fixedHour = hour;
-        event.definition.fixedMinute = minute;
-        Context context = getContext();
-        if (context == null) return;
-        final Context appContext = context.getApplicationContext();
-        AppExecutors.getDiskIO().execute(() -> {
-            SalahDatabase db = SalahDatabase.getDatabase(appContext);
-            db.masjidEventDao().update(event);
-
-            SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
-            AppExecutors.getMainThread().post(() -> {
-                if (isAdded()) {
-                    loadMasjids();
-                }
-            });
-        });
     }
 
     private static class PrayerItem {
@@ -762,7 +681,18 @@ public class MasjidFragment extends SalarmFragment {
                 } else {
                     if (item.masjid == null) return;
                     if ("DHUHR".equals(item.type) || "JUMA".equals(item.type)) {
-                        showFixedTimeDialogue(item.masjid, item.type);
+                        int defaultHour = 12;
+                        int defaultMinute = 30;
+                        if (item.event != null && item.event.definition != null && item.event.definition.isFixedTime) {
+                            defaultHour = item.event.definition.fixedHour;
+                            defaultMinute = item.event.definition.fixedMinute;
+                        } else if (item.timeMillis > 0) {
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(item.timeMillis);
+                            defaultHour = cal.get(Calendar.HOUR_OF_DAY);
+                            defaultMinute = cal.get(Calendar.MINUTE);
+                        }
+                        showFixedTimePicker(item.masjid, item.type, defaultHour, defaultMinute);
                     } else {
                         SalahMasjidAlarmDialogFragment.show(getParentFragmentManager(), item.masjid.id, item.type);
                     }

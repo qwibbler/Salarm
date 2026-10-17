@@ -22,8 +22,34 @@
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="?attr/colorPrimary" />
 
+        <!-- Fixed Time Section (for Dhuhr / Juma / Fixed times) -->
+        <LinearLayout
+            android:id="@+id/fixed_time_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/masjid_jamaat_time"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorPrimary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fixed_time_button"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="13:30" />
+        </LinearLayout>
+
         <!-- Row 1: [Value] min [After/Before] [Max/Min] time of [Event] -->
         <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/primary_offset_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:alignItems="center"
@@ -144,6 +170,58 @@
                 android:id="@+id/adjustment_toggle"
                 style="@style/RelationalAlarm.TextButton"
                 tools:text="Earlier" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <!-- Do Not Disturb Section -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/dnd_enabled_checkbox"
+            style="@style/RelationalAlarm.HeadingCheckbox"
+            android:layout_marginTop="16dp"
+            android:text="@string/masjid_dnd_title" />
+
+        <!-- DND Row: From [Before] mins before Jamaat to [After] mins after Jamat -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/dnd_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_from" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_before_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_before_jamaat" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_after_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_after_jamaat" />
         </com.google.android.flexbox.FlexboxLayout>
 
     </LinearLayout>

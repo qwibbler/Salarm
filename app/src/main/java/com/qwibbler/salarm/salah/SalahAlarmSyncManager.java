@@ -2,8 +2,11 @@ package com.qwibbler.salarm.salah;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
@@ -19,7 +22,10 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -99,6 +105,7 @@ public class SalahAlarmSyncManager {
                         disableNativeAlarmForRule(appContext, rule.id);
                     }
                 }
+                scheduleAllMasjidDnd(appContext);
             } catch (Throwable t) {
                 LogUtils.e("Error syncing selected rules", t);
             }
@@ -454,6 +461,112 @@ public class SalahAlarmSyncManager {
 
         if (wasStyledDaysEnabled && skipTime != null) {
             alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);
+        }
+    }
+
+    public static void scheduleAllMasjidDnd(Context context) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                List<Masjid> masjids = db.masjidDao().getAll();
+                List<MasjidEvent> events = db.masjidEventDao().getAll();
+
+                List<DndInterval> intervals = new ArrayList<>();
+                long now = System.currentTimeMillis();
+
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+
+                // Evaluate for today and next 7 days
+                for (int day = 0; day < 7; day++) {
+                    Date date = cal.getTime();
+                    for (MasjidEvent event : events) {
+                        if (!event.dndEnabled) continue;
+
+                        Masjid masjid = null;
+                        for (Masjid m : masjids) {
+                            if (m.id == event.masjidId) {
+                                masjid = m;
+                                break;
+                            }
+                        }
+                        if (masjid == null || !masjid.showMasjidEvents) continue;
+
+                        if ("JUMA".equalsIgnoreCase(event.salahType) && cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+                            continue;
+                        }
+
+                        double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                                ? new double[]{masjid.latitude, masjid.longitude}
+                                : SalahUtils.getCoordinates(appContext);
+                        CalculationMethod method = masjid.getCalculationMethod(appContext);
+                        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(appContext, date, coords[0], coords[1], method);
+
+                        long eventTime = SalahCalculator.evaluateMasjidEvent(appContext, event, times, date, true);
+                        if (eventTime > 0) {
+                            long start = eventTime - (event.dndBeforeMinutes * 60 * 1000L);
+                            long end = eventTime + (event.dndAfterMinutes * 60 * 1000L);
+                            if (end > now) {
+                                intervals.add(new DndInterval(start, end));
+                            }
+                        }
+                    }
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+
+                List<DndInterval> merged = mergeIntervals(intervals);
+
+                AlarmManager am = (AlarmManager) appContext.getSystemService(Context.ALARM_SERVICE);
+                if (am != null) {
+                    for (int i = 0; i < merged.size(); i++) {
+                        DndInterval interval = merged.get(i);
+                        if (interval.end > now) {
+                            Intent startIntent = new Intent(appContext, MasjidDndReceiver.class).setAction(MasjidDndReceiver.ACTION_DND_ON);
+                            PendingIntent startPi = PendingIntent.getBroadcast(appContext, 20000 + i * 2, startIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                            if (interval.start > now) {
+                                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval.start, startPi);
+                            }
+
+                            Intent endIntent = new Intent(appContext, MasjidDndReceiver.class).setAction(MasjidDndReceiver.ACTION_DND_OFF);
+                            PendingIntent endPi = PendingIntent.getBroadcast(appContext, 20000 + i * 2 + 1, endIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval.end, endPi);
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                LogUtils.e("Error scheduling Masjid DND", t);
+            }
+        });
+    }
+
+    private static List<DndInterval> mergeIntervals(List<DndInterval> intervals) {
+        if (intervals.isEmpty()) return intervals;
+        Collections.sort(intervals, (a, b) -> Long.compare(a.start, b.start));
+        List<DndInterval> merged = new ArrayList<>();
+        DndInterval current = intervals.get(0);
+        for (int i = 1; i < intervals.size(); i++) {
+            DndInterval next = intervals.get(i);
+            if (next.start <= current.end) {
+                current = new DndInterval(current.start, Math.max(current.end, next.end));
+            } else {
+                merged.add(current);
+                current = next;
+            }
+        }
+        merged.add(current);
+        return merged;
+    }
+
+    private static class DndInterval {
+        final long start;
+        final long end;
+        DndInterval(long start, long end) {
+            this.start = start;
+            this.end = end;
         }
     }
 

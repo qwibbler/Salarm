@@ -29,67 +29,46 @@ public class RelationalDefinition {
     @Embedded(prefix = "clip_")
     public RelationalClip clip;
 
-    public String getSummary(Context context, String anchorName, boolean isMasjidDefinition) {
-        if (context == null) return "";
-        if (isFixedTime) {
-            try {
-                Calendar cal = Calendar.getInstance();
-                cal.set(Calendar.HOUR_OF_DAY, fixedHour);
-                cal.set(Calendar.MINUTE, fixedMinute);
-                DateFormat df = android.text.format.DateFormat.getTimeFormat(context);
-                if (df != null) return df.format(cal.getTime());
-            } catch (Exception ignored) {}
-            return String.format(Locale.getDefault(), "%02d:%02d", fixedHour, fixedMinute);
-        }
+    public RelationalDefinition() {
+        this.anchor = new RelationalAnchor();
+        this.calculation = new RelationalCalculation();
+    }
 
-        if (anchorName == null || anchorName.isEmpty()) return "";
-        if (calculation == null || anchor == null) return "";
-
-        StringBuilder sb = new StringBuilder();
-        String offsetPart = getOffsetPart(context, calculation.offsetMinutes);
-
-        int baseResId;
-        if (isMasjidDefinition) {
-            if (anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
-                baseResId = anchor.isMax ? R.string.masjid_rule_description_base_max : R.string.masjid_rule_description_base_min;
-            } else {
-                baseResId = R.string.masjid_rule_description_base;
+    @Ignore
+    public RelationalDefinition(RelationalDefinition other) {
+        if (other != null) {
+            this.isFixedTime = other.isFixedTime;
+            this.fixedHour = other.fixedHour;
+            this.fixedMinute = other.fixedMinute;
+            this.anchor = new RelationalAnchor(other.anchor);
+            this.calculation = new RelationalCalculation(other.calculation);
+            if (other.clip != null) {
+                this.clip = new RelationalClip(other.clip);
             }
+        }
+    }
+
+    public static String getDndSummary(Context context, boolean enabled, int beforeMin, int afterMin) {
+        if (!enabled || (beforeMin == 0 && afterMin == 0)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder("DND ");
+        if (beforeMin == 0) {
+            sb.append("from Jamaat start");
+        } else if (beforeMin == 1) {
+            sb.append("from 1 min before");
         } else {
-            if (anchor.basicEvent != null) {
-                baseResId = anchor.isMax ? R.string.salah_alarm_rule_description_base_max : R.string.salah_alarm_rule_description_base_min;
-            } else {
-                baseResId = R.string.salah_rule_description_base;
-            }
-        }
-        sb.append(context.getString(baseResId, offsetPart, anchorName));
-
-        boolean hasRounding = (calculation.roundingIntervalMinutes > 0 && calculation.roundingDirection != null);
-        sb.append(getRoundingPart(context, calculation.roundingDirection, calculation.roundingIntervalMinutes));
-
-        if (hasRounding && calculation.adjustmentMinutes != 0) {
-            String adjPart = getAdjustmentPart(context, calculation.adjustmentMinutes);
-            sb.append(context.getString(R.string.salah_rule_adjusted, adjPart));
+            sb.append("from ").append(beforeMin).append(" mins before");
         }
 
-        if (clip != null) {
-            String clipOffsetPart = getOffsetPart(context, clip.offsetMinutes);
-            String clipEventName = clip.anchor.basicEvent != null
-                    ? RelationalRule.getEventName(context, clip.anchor.basicEvent)
-                    : ""; // Logic for masjid-anchored clips can be added here if needed
-
-            if (!clipEventName.isEmpty()) {
-                int clipResId = clip.boundaryType == RelationalRule.BoundaryType.NO_LATER_THAN
-                        ? R.string.salah_rule_no_later
-                        : R.string.salah_rule_no_earlier;
-                sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
-                sb.append(getRoundingPart(context, clip.roundingDirection, clip.roundingIntervalMinutes));
-            }
+        if (afterMin == 0) {
+            sb.append(" to Jamaat start");
+        } else if (afterMin == 1) {
+            sb.append(" to 1 min after");
+        } else {
+            sb.append(" to ").append(afterMin).append(" mins after");
         }
-
-        String description = sb.toString();
-        if (description.isEmpty()) return "";
-        return description.substring(0, 1).toUpperCase(Locale.getDefault()) + description.substring(1);
+        return sb.toString();
     }
 
     public static String getOffsetPart(Context context, int offset) {
@@ -113,23 +92,77 @@ public class RelationalDefinition {
         return context.getString(resId, Math.abs(offset));
     }
 
-    public RelationalDefinition() {
-        this.anchor = new RelationalAnchor();
-        this.calculation = new RelationalCalculation();
-    }
+    public String getSummary(Context context, String anchorName, boolean isMasjidDefinition) {
+        if (context == null) return "";
+        StringBuilder sb = new StringBuilder();
+        if (isFixedTime) {
+            try {
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, fixedHour);
+                cal.set(Calendar.MINUTE, fixedMinute);
+                DateFormat df = android.text.format.DateFormat.getTimeFormat(context);
+                if (df != null) {
+                    sb.append(df.format(cal.getTime()));
+                } else {
+                    sb.append(String.format(Locale.getDefault(), "%02d:%02d", fixedHour, fixedMinute));
+                }
+            } catch (Exception ignored) {
+                sb.append(String.format(Locale.getDefault(), "%02d:%02d", fixedHour, fixedMinute));
+            }
+        } else {
+            if (anchorName == null || anchorName.isEmpty()) return "";
+            if (calculation == null || anchor == null) return "";
 
-    @Ignore
-    public RelationalDefinition(RelationalDefinition other) {
-        if (other != null) {
-            this.isFixedTime = other.isFixedTime;
-            this.fixedHour = other.fixedHour;
-            this.fixedMinute = other.fixedMinute;
-            this.anchor = new RelationalAnchor(other.anchor);
-            this.calculation = new RelationalCalculation(other.calculation);
-            if (other.clip != null) {
-                this.clip = new RelationalClip(other.clip);
+            String offsetPart = getOffsetPart(context, calculation.offsetMinutes);
+
+            int baseResId = getBaseResId(isMasjidDefinition);
+            sb.append(context.getString(baseResId, offsetPart, anchorName));
+
+            boolean hasRounding = (calculation.roundingIntervalMinutes > 0 && calculation.roundingDirection != null);
+            sb.append(getRoundingPart(context, calculation.roundingDirection, calculation.roundingIntervalMinutes));
+
+            if (hasRounding && calculation.adjustmentMinutes != 0) {
+                String adjPart = getAdjustmentPart(context, calculation.adjustmentMinutes);
+                sb.append(context.getString(R.string.salah_rule_adjusted, adjPart));
+            }
+
+            if (clip != null) {
+                String clipOffsetPart = getOffsetPart(context, clip.offsetMinutes);
+                String clipEventName = clip.anchor.basicEvent != null
+                    ? RelationalRule.getEventName(context, clip.anchor.basicEvent)
+                    : "";
+
+                if (!clipEventName.isEmpty()) {
+                    int clipResId = clip.boundaryType == RelationalRule.BoundaryType.NO_LATER_THAN
+                        ? R.string.salah_rule_no_later
+                        : R.string.salah_rule_no_earlier;
+                    sb.append(context.getString(clipResId, clipOffsetPart, clipEventName));
+                    sb.append(getRoundingPart(context, clip.roundingDirection, clip.roundingIntervalMinutes));
+                }
             }
         }
+
+        String description = sb.toString();
+        if (description.isEmpty()) return "";
+        return description.substring(0, 1).toUpperCase(Locale.getDefault()) + description.substring(1);
+    }
+
+    private int getBaseResId(boolean isMasjidDefinition) {
+        int baseResId;
+        if (isMasjidDefinition) {
+            if (anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
+                baseResId = anchor.isMax ? R.string.masjid_rule_description_base_max : R.string.masjid_rule_description_base_min;
+            } else {
+                baseResId = R.string.masjid_rule_description_base;
+            }
+        } else {
+            if (anchor.basicEvent != null) {
+                baseResId = anchor.isMax ? R.string.salah_alarm_rule_description_base_max : R.string.salah_alarm_rule_description_base_min;
+            } else {
+                baseResId = R.string.salah_rule_description_base;
+            }
+        }
+        return baseResId;
     }
 
     @Override
@@ -138,11 +171,11 @@ public class RelationalDefinition {
         if (o == null || getClass() != o.getClass()) return false;
         RelationalDefinition that = (RelationalDefinition) o;
         return isFixedTime == that.isFixedTime &&
-                fixedHour == that.fixedHour &&
-                fixedMinute == that.fixedMinute &&
-                Objects.equals(anchor, that.anchor) &&
-                Objects.equals(calculation, that.calculation) &&
-                Objects.equals(clip, that.clip);
+            fixedHour == that.fixedHour &&
+            fixedMinute == that.fixedMinute &&
+            Objects.equals(anchor, that.anchor) &&
+            Objects.equals(calculation, that.calculation) &&
+            Objects.equals(clip, that.clip);
     }
 
     @Override
