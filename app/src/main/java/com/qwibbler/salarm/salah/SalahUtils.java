@@ -7,33 +7,38 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_A
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
+import android.text.format.DateFormat;
 
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.City;
+import com.qwibbler.salarm.data.DataModel;
+import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.settings.PreferencesDefaultValues;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.LogUtils;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import org.json.JSONObject;
-import com.qwibbler.salarm.data.City;
-import com.qwibbler.salarm.data.DataModel;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Shared utility methods for Salah features.
  */
 public class SalahUtils {
+    private static Map<String, Object[]> sBuiltInCoords;
+
     /**
      * Retrieves the current Salah coordinates from preferences.
      */
@@ -91,8 +96,8 @@ public class SalahUtils {
             if (match != null) {
                 String displayName = match.isNear ? appContext.getString(R.string.salarm_near_city, match.name) : match.name;
                 getDefaultSharedPreferences(appContext).edit()
-                        .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, displayName)
-                        .apply();
+                    .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, displayName)
+                    .apply();
                 return;
             }
 
@@ -102,8 +107,8 @@ public class SalahUtils {
                 if (res != null) {
                     String locationName = res.toString();
                     getDefaultSharedPreferences(appContext).edit()
-                            .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, locationName)
-                            .apply();
+                        .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, locationName)
+                        .apply();
 
                     // Save successful online lookup to Room cache (normalized)
                     double normLat = Math.round(lat * 1000.0) / 1000.0;
@@ -119,20 +124,10 @@ public class SalahUtils {
             // 3. Fallback (Priority 4)
             String fallbackName = String.format(Locale.getDefault(), "Lat: %.4f, Lon: %.4f", lat, lon);
             getDefaultSharedPreferences(appContext).edit()
-                    .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, fallbackName)
-                    .apply();
+                .putString(PreferencesKeys.KEY_SALAH_CITY_NAME, fallbackName)
+                .apply();
         });
     }
-
-    public static class OfflineCity {
-        public String name;
-        public String timezoneId;
-        public double latitude;
-        public double longitude;
-        public boolean isNear;
-    }
-
-    private static Map<String, Object[]> sBuiltInCoords;
 
     private static Map<String, Object[]> getBuiltInCoords(Context context) {
         if (sBuiltInCoords == null) {
@@ -152,9 +147,9 @@ public class SalahUtils {
                     try {
                         JSONObject coord = obj.getJSONObject(key);
                         sBuiltInCoords.put(key, new Object[]{
-                                coord.getDouble("lat"),
-                                coord.getDouble("lon"),
-                                coord.optString("tz", "")
+                            coord.getDouble("lat"),
+                            coord.getDouble("lon"),
+                            coord.optString("tz", "")
                         });
                     } catch (Exception ignored) {
                     }
@@ -174,8 +169,8 @@ public class SalahUtils {
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
@@ -287,4 +282,130 @@ public class SalahUtils {
         };
     }
 
+    /**
+     * Formats the next Salah event info string (countdown or time) according to
+     * the user's "key_salah_display_next_event_info" preference.
+     * Returns null if "nothing" is selected or if no next event time is available.
+     */
+    public static String getNextEventInfoText(Context context) {
+        try {
+            SharedPreferences prefs = getDefaultSharedPreferences(context);
+            String showSetting = SettingsDAO.getSalahShowNextEventInfo(prefs);
+            if ("nothing".equals(showSetting)) {
+                return null;
+            }
+
+            double[] coords = getCoordinates(context);
+            if (coords[0] == 0.0 && coords[1] == 0.0) {
+                return null;
+            }
+
+            CalculationMethod method = getCalculationMethod(context);
+            Madhab madhab = getMadhab(context);
+            boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+            long now = System.currentTimeMillis();
+
+            Calendar cal = Calendar.getInstance();
+            SalahCalculator.SalahTimes times =
+                SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
+
+            List<RelationalRule.AnchorEvent> events = new ArrayList<>();
+            events.add(RelationalRule.AnchorEvent.FAJR);
+            events.add(RelationalRule.AnchorEvent.SUNRISE);
+            events.add(RelationalRule.AnchorEvent.DHUHR);
+
+            if (showBothAsr) {
+                events.add(RelationalRule.AnchorEvent.ASR_SHAFI);
+                events.add(RelationalRule.AnchorEvent.ASR_HANAFI);
+            } else {
+                events.add(madhab == Madhab.HANAFI
+                    ? RelationalRule.AnchorEvent.ASR_HANAFI
+                    : RelationalRule.AnchorEvent.ASR_SHAFI);
+            }
+
+            events.add(RelationalRule.AnchorEvent.MAGHRIB);
+            events.add(RelationalRule.AnchorEvent.ISHA);
+
+            RelationalRule.AnchorEvent nextEvent = null;
+            Date nextEventTime = null;
+
+            // Find next event today
+            for (RelationalRule.AnchorEvent event : events) {
+                Date time = SalahCalculator.getEventTime(event, times);
+                if (time != null && time.getTime() > now) {
+                    if (nextEventTime == null || time.before(nextEventTime)) {
+                        nextEventTime = time;
+                        nextEvent = event;
+                    }
+                }
+            }
+
+            // If no more events today, find first event tomorrow
+            if (nextEventTime == null) {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+                times = SalahCalculator.calculateAllSalahTimes(context, cal.getTime(), coords[0], coords[1], method);
+                if (times != null) {
+                    for (RelationalRule.AnchorEvent event : events) {
+                        Date time = SalahCalculator.getEventTime(event, times);
+                        if (time != null) {
+                            if (nextEventTime == null || time.before(nextEventTime)) {
+                                nextEventTime = time;
+                                nextEvent = event;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (nextEventTime == null || nextEvent == null) {
+                return null;
+            }
+
+            String eventName = RelationalRule.getEventName(context, nextEvent);
+            long remainingMillis = nextEventTime.getTime() - now;
+
+            if ("time".equals(showSetting)) {
+                String formattedTime = DateFormat.getTimeFormat(context).format(nextEventTime);
+                return String.format(Locale.getDefault(),
+                    context.getString(R.string.salah_next_event_info_time_format), eventName, formattedTime);
+            } else {
+                // countdown
+                boolean showSeconds = SettingsDAO.areClockSecondsDisplayed(prefs);
+                long remainingSeconds = (remainingMillis + 999) / 1000;
+                int hours = (int) (remainingSeconds / 3600);
+                int minutes = (int) ((remainingSeconds % 3600) / 60);
+                int seconds = (int) (remainingSeconds % 60);
+
+                String countdown;
+                if (hours > 0) {
+                    if (showSeconds) {
+                        countdown = String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, seconds);
+                    } else {
+                        countdown = String.format(Locale.getDefault(), "%d:%02d", hours, minutes);
+                    }
+                } else {
+                    if (showSeconds) {
+                        countdown = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+                    } else {
+                        countdown = String.format(Locale.getDefault(), "%d min", minutes);
+                    }
+                }
+
+                return String.format(Locale.getDefault(),
+                    context.getString(R.string.salah_next_event_info_countdown_format), countdown, eventName);
+            }
+        } catch (Throwable t) {
+            LogUtils.e("Error calculating next Salah event info", t);
+            return null;
+        }
+    }
+
+    public static class OfflineCity {
+        public String name;
+        public String timezoneId;
+        public double latitude;
+        public double longitude;
+        public boolean isNear;
+    }
 }

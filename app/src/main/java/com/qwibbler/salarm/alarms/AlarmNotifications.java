@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.service.notification.StatusBarNotification;
+import android.view.View;
+import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -33,6 +35,7 @@ import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
@@ -311,11 +314,15 @@ public final class AlarmNotifications {
         PendingIntent dismissPendingIntent = PendingIntent.getService(
             context, id, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+        String snoozeContentText = instance.mIsSalah
+            ? AlarmUtils.getAlarmText(localizedContext, instance, true)
+            : localizedContext.getString(R.string.alarm_alert_snooze_until,
+                AlarmUtils.getFormattedTime(localizedContext, instance.getAlarmTime()));
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID)
             .setShowWhen(false)
             .setContentTitle(instance.getLabelOrDefault(localizedContext))
-            .setContentText(localizedContext.getString(R.string.alarm_alert_snooze_until,
-                AlarmUtils.getFormattedTime(localizedContext, instance.getAlarmTime())))
+            .setContentText(snoozeContentText)
             .setContentIntent(contentIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
             .setSmallIcon(R.drawable.ic_tab_alarm_static)
@@ -369,12 +376,14 @@ public final class AlarmNotifications {
         PendingIntent contentIntent = PendingIntent.getActivity(
             context, id, viewAlarmIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+        String missedContentText = instance.mIsSalah
+            ? AlarmUtils.getAlarmText(localizedContext, instance, true)
+            : (label.isEmpty() ? alarmTime : localizedContext.getString(R.string.alarm_missed_text, alarmTime, label));
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ALARM_MISSED_NOTIFICATION_CHANNEL_ID)
             .setShowWhen(false)
             .setContentTitle(localizedContext.getString(R.string.alarm_missed_title))
-            .setContentText(label.isEmpty()
-                ? alarmTime
-                : localizedContext.getString(R.string.alarm_missed_text, alarmTime, label))
+            .setContentText(missedContentText)
             .setContentIntent(contentIntent)
             .setDeleteIntent(deleteIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
@@ -425,13 +434,39 @@ public final class AlarmNotifications {
         PendingIntent dismissPendingIntent = PendingIntent.getService(context,
             ALARM_FIRING_NOTIFICATION_ID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+        String firingContentText = AlarmUtils.getAlarmText(localizedContext, instance, true);
+
+        // Setup custom RemoteViews for custom expanded / heads-up notification
+        String timeOnlyStr = android.text.format.DateFormat.getTimeFormat(localizedContext).format(instance.getAlarmTime().getTime());
+        RemoteViews customNotifView = new RemoteViews(context.getPackageName(), R.layout.alarm_notification_firing);
+        customNotifView.setTextViewText(R.id.title, instance.getLabelOrDefault(localizedContext));
+        customNotifView.setTextViewText(R.id.time, timeOnlyStr);
+        customNotifView.setOnClickPendingIntent(R.id.notification_layout, contentIntent);
+
+        if (instance.mIsSalah) {
+            String nextEventInfo = SalahUtils.getNextEventInfoText(localizedContext);
+            if (nextEventInfo != null && !nextEventInfo.isEmpty()) {
+                customNotifView.setTextViewText(R.id.subtitle, nextEventInfo);
+                customNotifView.setViewVisibility(R.id.subtitle, View.VISIBLE);
+            } else {
+                customNotifView.setViewVisibility(R.id.subtitle, View.GONE);
+            }
+        } else {
+            if (!instance.mLabel.isEmpty()) {
+                customNotifView.setTextViewText(R.id.subtitle, instance.mLabel);
+                customNotifView.setViewVisibility(R.id.subtitle, View.VISIBLE);
+            } else {
+                customNotifView.setViewVisibility(R.id.subtitle, View.GONE);
+            }
+        }
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context, FIRING_NOTIFICATION_CHANNEL_ID)
             .setContentTitle(instance.getLabelOrDefault(localizedContext))
-            .setContentText(AlarmUtils.getFormattedTime(localizedContext, instance.getAlarmTime()))
+            .setContentText(firingContentText)
             .setContentIntent(contentIntent)
             .setDeleteIntent(dismissPendingIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
-            .setSmallIcon(R.drawable.ic_tab_alarm_static)
+            .setSmallIcon(R.drawable.ic_salah_alarm)
             .setOngoing(true)
             .setAutoCancel(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -439,7 +474,11 @@ public final class AlarmNotifications {
             .setWhen(0)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setLocalOnly(true);
+            .setLocalOnly(true)
+            .setCustomContentView(customNotifView)
+            .setCustomBigContentView(customNotifView)
+            .setCustomHeadsUpContentView(customNotifView)
+            .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
         // Setup Snooze Action only if snooze duration has NOT been set to "None" in the settings
         // or if "Enable alarm snooze actions" is enabled in the alarm editing panel.
@@ -486,6 +525,7 @@ public final class AlarmNotifications {
         clearNotification(context, instance);
 
         final Notification builtNotification = notification.build();
+        builtNotification.flags |= Notification.FLAG_INSISTENT;
 
         if (context instanceof Service) {
             int foregroundServiceType = 0;

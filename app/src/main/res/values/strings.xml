@@ -1675,6 +1675,7 @@
     <string name="salah_display_next_event_info_nothing">Do not show next event</string>
     <string name="salah_next_event_info_countdown_format">%1$s to %2$s</string>
     <string name="salah_next_event_info_time_format">%1$s at %2$s</string>
+    <string name="salah_alarm_to_event">%1$s to %2$s</string>
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Salah Alarm</string>
