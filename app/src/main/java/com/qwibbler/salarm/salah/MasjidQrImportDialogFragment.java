@@ -70,7 +70,7 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
 
     private static byte[] rotateYUV(byte[] yuv, int width, int height, int rotation) {
         if (rotation == 0) return yuv;
-        byte[] rotated = new byte[yuv.length];
+        byte[] rotated = new byte[width * height];
         if (rotation == 90) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
@@ -80,7 +80,7 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
         } else if (rotation == 270) {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    rotated[(width - 1 - x) * height + y] = yuv[y * width + x];
+                    rotated[(width - 1 - x) * height + (height - 1 - y)] = yuv[y * width + x];
                 }
             }
         } else if (rotation == 180) {
@@ -91,6 +91,50 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
             return yuv;
         }
         return rotated;
+    }
+
+    @NonNull
+    private static BinaryBitmap getBinaryBitmap(ImageProxy imageProxy, ImageProxy.PlaneProxy[] planes) {
+        ImageProxy.PlaneProxy yPlane = planes[0];
+        ByteBuffer buffer = yPlane.getBuffer();
+        int width = imageProxy.getWidth();
+        int height = imageProxy.getHeight();
+        int rowStride = yPlane.getRowStride();
+        int pixelStride = yPlane.getPixelStride();
+
+        byte[] data;
+        if (rowStride == width && pixelStride == 1 && buffer.remaining() == width * height) {
+            data = new byte[buffer.remaining()];
+            buffer.get(data);
+        } else {
+            data = new byte[width * height];
+            byte[] rowBuffer = new byte[rowStride];
+            int bufferPos = buffer.position();
+            for (int y = 0; y < height; y++) {
+                int linePos = bufferPos + y * rowStride;
+                if (linePos < buffer.limit()) {
+                    buffer.position(linePos);
+                    if (pixelStride == 1) {
+                        buffer.get(data, y * width, Math.min(width, buffer.remaining()));
+                    } else {
+                        buffer.get(rowBuffer, 0, Math.min(rowStride, buffer.remaining()));
+                        for (int x = 0; x < width; x++) {
+                            data[y * width + x] = rowBuffer[x * pixelStride];
+                        }
+                    }
+                }
+            }
+        }
+
+        int rotation = imageProxy.getImageInfo().getRotationDegrees();
+        byte[] rotated = rotateYUV(data, width, height, rotation);
+        int finalWidth = (rotation == 90 || rotation == 270) ? height : width;
+        int finalHeight = (rotation == 90 || rotation == 270) ? width : height;
+
+        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
+            rotated, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight, false
+        );
+        return new BinaryBitmap(new HybridBinarizer(source));
     }
 
     @Override
@@ -155,14 +199,10 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
             getString(R.string.masjid_import_qr_title),
             null,
             view,
-            getString(R.string.masjid_import_qr_btn_import),
-            (dialog, which) -> processImport(),
-            getString(android.R.string.cancel),
             null,
-            null,
-            null,
-            null,
-            CustomDialog.SoftInputMode.SHOW_KEYBOARD
+            CustomDialog.SoftInputMode.SHOW_KEYBOARD,
+            new CustomDialog.DialogButton(getString(android.R.string.cancel), (dialog, which) -> dialog.dismiss(), true),
+            new CustomDialog.DialogButton(getString(R.string.masjid_import_qr_btn_import), (dialog, which) -> processImport(), false)
         );
     }
 
@@ -236,7 +276,7 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
                         }
                     }
                 }
-            } catch (Exception ignored) {
+            } catch (Throwable ignored) {
                 // No QR code found in this frame
             } finally {
                 reader.reset();
@@ -252,27 +292,8 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
         }
     }
 
-    @NonNull
-    private static BinaryBitmap getBinaryBitmap(ImageProxy imageProxy, ImageProxy.PlaneProxy[] planes) {
-        ByteBuffer buffer = planes[0].getBuffer();
-        byte[] data = new byte[buffer.remaining()];
-        buffer.get(data);
-        int width = imageProxy.getWidth();
-        int height = imageProxy.getHeight();
-        int rotation = imageProxy.getImageInfo().getRotationDegrees();
-
-        byte[] rotated = rotateYUV(data, width, height, rotation);
-        int finalWidth = (rotation == 90 || rotation == 270) ? height : width;
-        int finalHeight = (rotation == 90 || rotation == 270) ? width : height;
-
-        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(
-            rotated, finalWidth, finalHeight, 0, 0, finalWidth, finalHeight, false
-        );
-        return new BinaryBitmap(new HybridBinarizer(source));
-    }
-
     private void onQrCodeDetected(String scannedText) {
-        if (!isAdded()) return;
+        if (!isAdded() || getContext() == null) return;
 
         if (mInputEditText != null) {
             mInputEditText.setText(scannedText);
@@ -283,14 +304,18 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
             mBtnRescan.setVisibility(View.VISIBLE);
         }
 
-        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(requireContext().getApplicationContext(), scannedText);
-        if (mDetectedPromptContainer != null && mTvDetectedTitle != null) {
-            mDetectedPromptContainer.setVisibility(View.VISIBLE);
-            if (result != null && result.masjid != null && result.masjid.name != null) {
-                mTvDetectedTitle.setText(result.masjid.name);
-            } else {
-                mTvDetectedTitle.setText(R.string.masjid_import_qr_title);
+        try {
+            MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(getContext().getApplicationContext(), scannedText);
+            if (mDetectedPromptContainer != null && mTvDetectedTitle != null) {
+                mDetectedPromptContainer.setVisibility(View.VISIBLE);
+                if (result != null && result.masjid != null && result.masjid.name != null) {
+                    mTvDetectedTitle.setText(result.masjid.name);
+                } else {
+                    mTvDetectedTitle.setText(R.string.masjid_import_qr_title);
+                }
             }
+        } catch (Throwable e) {
+            LogUtils.e("Failed to decode scanned QR code", e);
         }
     }
 
@@ -305,8 +330,9 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
     }
 
     private void checkClipboardAutoFill() {
+        if (getContext() == null) return;
         try {
-            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null && clipboard.hasPrimaryClip()) {
                 ClipData clipData = clipboard.getPrimaryClip();
                 if (clipData != null && clipData.getItemCount() > 0) {
@@ -316,14 +342,15 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogUtils.e("Failed to check clipboard", e);
         }
     }
 
     private void pasteFromClipboard() {
+        if (getContext() == null) return;
         try {
-            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
             if (clipboard != null && clipboard.hasPrimaryClip()) {
                 ClipData clipData = clipboard.getPrimaryClip();
                 if (clipData != null && clipData.getItemCount() > 0) {
@@ -334,17 +361,17 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
                     }
                 }
             }
-            Toast.makeText(requireContext(), "Clipboard is empty", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
+            Toast.makeText(getContext(), "Clipboard is empty", Toast.LENGTH_SHORT).show();
+        } catch (Throwable e) {
             LogUtils.e("Failed to paste from clipboard", e);
         }
     }
 
     private void processImport() {
-        if (mInputEditText == null || mInputEditText.getText() == null) return;
+        if (mInputEditText == null || mInputEditText.getText() == null || getContext() == null) return;
         String rawText = mInputEditText.getText().toString().trim();
 
-        Context appContext = requireContext().getApplicationContext();
+        Context appContext = getContext().getApplicationContext();
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(appContext, rawText);
 
         if (result == null || result.masjid == null) {
@@ -352,30 +379,51 @@ public class MasjidQrImportDialogFragment extends DialogFragment {
             return;
         }
 
+        FragmentManager fragmentManager = null;
+        try {
+            fragmentManager = getParentFragmentManager();
+        } catch (Exception e) {
+            LogUtils.e("Could not get parent fragment manager", e);
+        }
+
+        final FragmentManager finalFm = fragmentManager;
+
         AppExecutors.getDiskIO().execute(() -> {
-            SalahDatabase db = SalahDatabase.getDatabase(appContext);
-            result.masjid.fillMissingValuesWithDefaults(appContext);
+            try {
+                SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                result.masjid.fillMissingValuesWithDefaults(appContext);
 
-            long newMasjidId = db.masjidDao().insert(result.masjid);
+                long newMasjidId = db.masjidDao().insert(result.masjid);
 
-            if (result.events != null) {
-                for (MasjidEvent event : result.events) {
-                    event.masjidId = newMasjidId;
-                    db.masjidEventDao().insert(event);
+                if (result.events != null) {
+                    for (MasjidEvent event : result.events) {
+                        event.masjidId = newMasjidId;
+                        db.masjidEventDao().insert(event);
+                    }
                 }
-            }
 
-            SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
+                SalahAlarmSyncManager.syncSelectedRulesToAlarms(appContext);
 
-            AppExecutors.getMainThread().post(() -> {
-                if (getContext() != null) {
-                    Toast.makeText(appContext, getString(R.string.masjid_import_qr_success_toast, result.masjid.name), Toast.LENGTH_SHORT).show();
+                AppExecutors.getMainThread().post(() -> {
+                    Toast.makeText(appContext, appContext.getString(R.string.masjid_import_qr_success_toast, result.masjid.name), Toast.LENGTH_SHORT).show();
                     Bundle resultBundle = new Bundle();
                     resultBundle.putLong("selected_masjid_id", newMasjidId);
-                    getParentFragmentManager().setFragmentResult("masjid_updated", resultBundle);
-                    getParentFragmentManager().setFragmentResult("masjid_imported", resultBundle);
-                }
-            });
+                    if (finalFm != null) {
+                        try {
+                            finalFm.setFragmentResult("masjid_updated", resultBundle);
+                            finalFm.setFragmentResult("masjid_imported", resultBundle);
+                        } catch (Exception e) {
+                            LogUtils.e("Failed to set fragment result", e);
+                        }
+                    }
+                    if (isAdded()) {
+                        dismissAllowingStateLoss();
+                    }
+                });
+            } catch (Throwable t) {
+                LogUtils.e("Failed to import masjid from QR", t);
+                AppExecutors.getMainThread().post(() -> Toast.makeText(appContext, R.string.masjid_import_qr_invalid_toast, Toast.LENGTH_SHORT).show());
+            }
         });
     }
 

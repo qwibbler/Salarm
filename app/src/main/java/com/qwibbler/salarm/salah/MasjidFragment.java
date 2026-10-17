@@ -43,6 +43,7 @@ import com.qwibbler.salarm.settings.SalahMasjidAlarmDialogFragment;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uidata.TabListener;
 import com.qwibbler.salarm.uidata.UiDataModel;
+import com.qwibbler.salarm.utils.LogUtils;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -282,8 +283,15 @@ public class MasjidFragment extends SalarmFragment {
             ImageView masjidTitleIcon = rootView.findViewById(R.id.masjid_title_icon);
             if (masjidTitleIcon != null) {
                 if (masjid.iconUri != null && !masjid.iconUri.isEmpty()) {
-                    masjidTitleIcon.setImageURI(Uri.parse(masjid.iconUri));
-                    masjidTitleIcon.setImageTintList(null);
+                    try {
+                        masjidTitleIcon.setImageURI(Uri.parse(masjid.iconUri));
+                        masjidTitleIcon.setImageTintList(null);
+                    } catch (Exception e) {
+                        LogUtils.e("Failed to load masjid icon URI", e);
+                        masjidTitleIcon.setImageResource(R.drawable.ic_masjid_timings);
+                        masjidTitleIcon.setImageTintList(ColorStateList.valueOf(
+                            MaterialColors.getColor(masjidTitleIcon, androidx.appcompat.R.attr.colorPrimary)));
+                    }
                 } else {
                     masjidTitleIcon.setImageResource(R.drawable.ic_masjid_timings);
                     masjidTitleIcon.setImageTintList(ColorStateList.valueOf(
@@ -733,10 +741,14 @@ public class MasjidFragment extends SalarmFragment {
                 prayerHolder.time.setTextColor(secondaryColor);
             }
 
-            if (item.timeMillis > 0) {
+            if (item.timeMillis > 0 && getContext() != null) {
                 Date date = new Date(item.timeMillis);
                 DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getContext());
-                prayerHolder.time.setText(timeFormat.format(date));
+                if (timeFormat != null) {
+                    prayerHolder.time.setText(timeFormat.format(date));
+                } else {
+                    prayerHolder.time.setText("--:--");
+                }
             } else {
                 prayerHolder.time.setText("--:--");
             }

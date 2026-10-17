@@ -46,7 +46,6 @@ public class Masjid {
     }
 
 
-
     public boolean fillMissingValuesWithDefaults(Context context) {
         boolean modified = false;
 
@@ -65,7 +64,10 @@ public class Masjid {
         }
 
         if (timezoneId == null || timezoneId.trim().isEmpty()) {
-            timezoneId = SalahTimezoneUtils.getPhoneTimeZoneId();
+            SalahUtils.OfflineCity autoCity = (context != null)
+                ? SalahUtils.findNearestOfflineCity(context, latitude, longitude)
+                : null;
+            timezoneId = (autoCity != null && autoCity.timezoneId != null) ? autoCity.timezoneId : SalahTimezoneUtils.getPhoneTimeZoneId();
             modified = true;
         }
 

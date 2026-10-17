@@ -61,6 +61,7 @@ public class RelationalRule {
     }
 
     public static String getAnchorDescription(Context context, RelationalAnchor anchor) {
+        if (anchor == null || context == null) return "";
         if (anchor.masjidEventId != null) {
             MasjidEvent masjidEvent = SalahDatabase.getDatabase(context).masjidEventDao().getById(anchor.masjidEventId);
             if (masjidEvent != null) {
@@ -127,7 +128,7 @@ public class RelationalRule {
     }
 
     public String getRuleDescription(Context context) {
-        if (context == null) return "";
+        if (context == null || definition == null) return "";
         String anchorName = getAnchorDescription(context, definition.anchor);
         if (anchorName.isEmpty()) {
             if (masjidSalahType != null) {

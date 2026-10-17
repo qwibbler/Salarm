@@ -187,5 +187,97 @@ public class MasjidQrCodecTest {
         assertNull(MasjidQrCodec.decode(null, null));
         assertNull(MasjidQrCodec.decode(null, ""));
         assertNull(MasjidQrCodec.decode(null, "invalid text without scheme"));
+        assertNull(MasjidQrCodec.decode(null, "http://example.com?name=test&loc=1,2"));
+        assertNull(MasjidQrCodec.decode(null, "https://google.com/maps?q=123,456"));
+    }
+
+    @Test
+    public void testEventsWithUnencodedPlusAndSpaces() {
+        String qr = "salarm:v1?n=Test%20Masjid&loc=37.7749,-122.4194&e=f:+0s;d:13:30;a:15ls";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertNotNull(result.masjid);
+        assertEquals("Test Masjid", result.masjid.name);
+        assertEquals(3, result.events.size());
+
+        MasjidEvent fajr = result.events.get(0);
+        assertEquals("FAJR", fajr.salahType);
+        assertEquals(0, fajr.definition.calculation.offsetMinutes);
+        assertEquals(RelationalRule.AnchorEvent.SUNRISE, fajr.definition.anchor.basicEvent);
+
+        MasjidEvent dhuhr = result.events.get(1);
+        assertEquals("DHUHR", dhuhr.salahType);
+        assertTrue(dhuhr.definition.isFixedTime);
+        assertEquals(13, dhuhr.definition.fixedHour);
+        assertEquals(30, dhuhr.definition.fixedMinute);
+
+        MasjidEvent asr = result.events.get(2);
+        assertEquals("ASR", asr.salahType);
+        assertEquals(15, asr.definition.calculation.offsetMinutes);
+        assertTrue(asr.definition.anchor.isMax);
+    }
+
+    @Test
+    public void testUserProvidedQrString() {
+        String qr = "salarm:v1?n=Northern%20Sui%20Gas%20Society%20Jamia%20Masjid&loc=31.45472,74.39781&c=kr&m=h&i=10,20&e=f:-20es;j:13:30;d:13:30;a:+0lah;m:+0m;i:+0li";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertNotNull(result.masjid);
+        assertEquals("Northern Sui Gas Society Jamia Masjid", result.masjid.name);
+        assertEquals(31.45472, result.masjid.latitude, 0.00001);
+        assertEquals(74.39781, result.masjid.longitude, 0.00001);
+        assertEquals(CalculationMethod.KARACHI.name(), result.masjid.calcMethod);
+        assertEquals(Madhab.HANAFI.name(), result.masjid.madhab);
+        assertEquals(3, result.masjid.intervalsCount);
+        assertEquals(10, result.masjid.boundary1);
+        assertEquals(20, result.masjid.boundary2);
+
+        assertNotNull(result.events);
+        assertEquals(6, result.events.size());
+    }
+
+    @Test
+    public void testBaselinePayloadFromPrompt() {
+        String qr = "salarm:v1?n=Test%20Masjid&loc=24.8607%2C67.0011&tz=Asia%2FKarachi&c=mwl&m=h&i=16&e=f%3A-20f%3Br%3A30";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertNotNull(result.masjid);
+        assertEquals("Test Masjid", result.masjid.name);
+        assertEquals(24.8607, result.masjid.latitude, 0.0001);
+        assertEquals(67.0011, result.masjid.longitude, 0.0001);
+        assertEquals("Asia/Karachi", result.masjid.timezoneId);
+        assertEquals(CalculationMethod.MUSLIM_WORLD_LEAGUE.name(), result.masjid.calcMethod);
+        assertEquals(Madhab.HANAFI.name(), result.masjid.madhab);
+        assertEquals(1, result.events.size());
+        assertEquals("FAJR", result.events.get(0).salahType);
+        assertEquals(-20, result.events.get(0).definition.calculation.offsetMinutes);
+    }
+
+    @Test
+    public void testMalformedPercentEscapes() {
+        String qr = "salarm:v1?n=Test%2&loc=24.8607%ZZ67.0011&e=f:%2B10s";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertNotNull(result.masjid);
+        assertEquals("Test%2", result.masjid.name);
+    }
+
+    @Test
+    public void testOversizedIntegersAndMalformedEvents() {
+        String qr = "salarm:v1?n=Test&e=f:%2B99999999999999999999s;d:13:30;invalid_event";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertEquals(1, result.events.size());
+        assertEquals("DHUHR", result.events.get(0).salahType);
+    }
+
+    @Test
+    public void testPayloadWithNoEvents() {
+        String qr = "salarm:v1?n=No%20Events%20Masjid&loc=30.0,70.0";
+        MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
+        assertNotNull(result);
+        assertNotNull(result.masjid);
+        assertEquals("No Events Masjid", result.masjid.name);
+        assertTrue(result.events.isEmpty());
     }
 }

@@ -6,6 +6,7 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_INTERNET_ACCESS_A
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Looper;
 
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
@@ -183,18 +184,24 @@ public class SalahUtils {
         OfflineCity bestMatch = null;
         double minDistance = 80467; // 50 miles threshold
 
-        // 1. Check local database cache (Priority 1)
-        List<CityCoordinate> cachedResults = SalahDatabase.getDatabase(context).cityCoordinateDao().getAll();
-        for (CityCoordinate cached : cachedResults) {
-            double distance = calculateDistance(lat, lon, cached.latitude, cached.longitude);
-            if (distance < minDistance) {
-                minDistance = distance;
-                bestMatch = new OfflineCity();
-                bestMatch.name = cached.cityName + (cached.country != null && !cached.country.isEmpty() ? ", " + cached.country : "");
-                bestMatch.latitude = cached.latitude;
-                bestMatch.longitude = cached.longitude;
-                bestMatch.timezoneId = cached.timeZoneId;
-                bestMatch.isNear = distance > 32187; // > 20 miles
+        // 1. Check local database cache (Priority 1) if not on main thread
+        if (context != null && Looper.getMainLooper() != Looper.myLooper()) {
+            try {
+                List<CityCoordinate> cachedResults = SalahDatabase.getDatabase(context).cityCoordinateDao().getAll();
+                for (CityCoordinate cached : cachedResults) {
+                    double distance = calculateDistance(lat, lon, cached.latitude, cached.longitude);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        bestMatch = new OfflineCity();
+                        bestMatch.name = cached.cityName + (cached.country != null && !cached.country.isEmpty() ? ", " + cached.country : "");
+                        bestMatch.latitude = cached.latitude;
+                        bestMatch.longitude = cached.longitude;
+                        bestMatch.timezoneId = cached.timeZoneId;
+                        bestMatch.isNear = distance > 32187; // > 20 miles
+                    }
+                }
+            } catch (Exception e) {
+                LogUtils.e("Error querying cached city coordinates", e);
             }
         }
 

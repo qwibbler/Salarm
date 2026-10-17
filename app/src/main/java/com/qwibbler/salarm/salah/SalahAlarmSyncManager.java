@@ -78,7 +78,7 @@ public class SalahAlarmSyncManager {
                     boolean shouldBeActive = rule.isSelected;
 
                     Masjid masjid = null;
-                    if (rule.definition.anchor.masjidEventId != null) {
+                    if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
                         MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
                         if (event != null) {
                             for (Masjid m : allMasjids) {

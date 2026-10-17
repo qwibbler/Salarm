@@ -82,16 +82,6 @@ public class MasjidQrCodec {
         CODE_TO_ANCHOR.put(code, anchor);
     }
 
-    public static class ParsedMasjidResult {
-        public final Masjid masjid;
-        public final List<MasjidEvent> events;
-
-        public ParsedMasjidResult(Masjid masjid, List<MasjidEvent> events) {
-            this.masjid = masjid;
-            this.events = events;
-        }
-    }
-
     /**
      * Encodes a Masjid and its events into a compact QR code string, skipping 'tz' if it matches autoderived timezone.
      */
@@ -155,7 +145,7 @@ public class MasjidQrCodec {
                 }
             }
             if (!encodedEvents.isEmpty()) {
-                params.put("e", String.join(";", encodedEvents));
+                params.put("e", encodeUriComponent(String.join(";", encodedEvents)));
             }
         }
 
@@ -178,9 +168,20 @@ public class MasjidQrCodec {
         }
 
         String content = qrText.trim();
+        if ((content.startsWith("\"") && content.endsWith("\"")) || (content.startsWith("'") && content.endsWith("'"))) {
+            if (content.length() >= 2) {
+                content = content.substring(1, content.length() - 1).trim();
+            }
+        }
+
+        int salarmIdx = content.toLowerCase(Locale.US).indexOf("salarm:");
+        if (salarmIdx < 0) {
+            return null;
+        }
+        content = content.substring(salarmIdx);
+
         Map<String, String> params = parseQueryParams(content);
-        if (params.isEmpty() && !content.startsWith("salarm:")) {
-            // Not a Salarm QR URI, return null
+        if (params.isEmpty()) {
             return null;
         }
 
@@ -193,14 +194,15 @@ public class MasjidQrCodec {
         }
 
         // Location
-        String loc = params.get("loc");
+        String loc = decodeUriComponent(params.get("loc"));
         if (loc != null) {
             String[] parts = loc.split(",");
             if (parts.length >= 2) {
                 try {
                     masjid.latitude = Double.parseDouble(parts[0].trim());
                     masjid.longitude = Double.parseDouble(parts[1].trim());
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
 
@@ -208,10 +210,7 @@ public class MasjidQrCodec {
         if (params.get("tz") != null) {
             masjid.timezoneId = decodeUriComponent(params.get("tz"));
         } else {
-            SalahUtils.OfflineCity autoCity = (context != null)
-                    ? SalahUtils.findNearestOfflineCity(context, masjid.latitude, masjid.longitude)
-                    : null;
-            masjid.timezoneId = (autoCity != null) ? autoCity.timezoneId : SalahTimezoneUtils.getPhoneTimeZoneId();
+            masjid.timezoneId = null;
         }
 
         // Calculation Method
@@ -223,7 +222,7 @@ public class MasjidQrCodec {
 
         // Intervals
         if (params.get("i") != null) {
-            String iStr = params.get("i");
+            String iStr = decodeUriComponent(params.get("i"));
             if (iStr != null) {
                 if (iStr.contains(",")) {
                     String[] parts = iStr.split(",");
@@ -254,7 +253,7 @@ public class MasjidQrCodec {
 
         // Events
         if (params.get("e") != null) {
-            String eventsStr = params.get("e");
+            String eventsStr = decodeUriComponent(params.get("e"));
             if (eventsStr != null) {
                 String[] rawEvents = eventsStr.split(";");
                 for (String rawEvent : rawEvents) {
@@ -321,7 +320,8 @@ public class MasjidQrCodec {
     private static MasjidEvent decodeMasjidEvent(String rawEvent) {
         if (rawEvent == null || !rawEvent.contains(":")) return null;
 
-        String[] parts = rawEvent.split(":", 2);
+        String rawDecoded = decodeUriComponent(rawEvent).trim();
+        String[] parts = rawDecoded.split(":", 2);
         String typeCode = parts[0].trim();
         String defStr = parts[1].trim();
 
@@ -343,60 +343,69 @@ public class MasjidQrCodec {
                     event.definition.fixedHour = Integer.parseInt(timeParts[0].trim());
                     event.definition.fixedMinute = Integer.parseInt(timeParts[1].trim());
                     return event;
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
 
+        if (defStr.startsWith(" ")) {
+            defStr = "+" + defStr.trim();
+        }
+
         // Relational definition parsing using regex
-        // Pattern: ([+-]\d+)([le])?([a-z]+)(?:r([nud])(\d+)(?:a([+-]\d+))?)?
-        Pattern pattern = Pattern.compile("^([+-]\\d+)([le])?([a-z]+)(?:r([nud])(\\d+)(?:a([+-]\\d+))?)?$");
+        // Pattern: ([+-]?\d+)([le])?(as|ah|[fsdmia])(?:r([nud])(\d+)(?:a([+-]?\d+))?)?
+        Pattern pattern = Pattern.compile("^([+-]?\\d+)([le])?(as|ah|[fsdmia])(?:r([nud])(\\d+)(?:a([+-]?\\d+))?)?$");
         Matcher matcher = pattern.matcher(defStr);
 
         if (!matcher.matches()) {
             return null;
         }
 
-        int offset = Integer.parseInt(matcher.group(1));
-        String extreme = matcher.group(2);
-        String anchorCode = matcher.group(3);
-        String roundDir = matcher.group(4);
-        String roundIntervalStr = matcher.group(5);
-        String adjStr = matcher.group(6);
+        try {
+            int offset = Integer.parseInt(matcher.group(1));
+            String extreme = matcher.group(2);
+            String anchorCode = matcher.group(3);
+            String roundDir = matcher.group(4);
+            String roundIntervalStr = matcher.group(5);
+            String adjStr = matcher.group(6);
 
-        event.definition.isFixedTime = false;
-        if (event.definition.calculation == null) {
-            event.definition.calculation = new RelationalCalculation();
-        }
-        event.definition.calculation.offsetMinutes = offset;
-
-        if (event.definition.anchor == null) {
-            event.definition.anchor = new RelationalAnchor();
-        }
-
-        if (extreme != null) {
-            event.definition.anchor.isMax = "l".equalsIgnoreCase(extreme);
-        } else {
-            event.definition.anchor.isMax = false;
-        }
-
-        event.definition.anchor.basicEvent = parseAnchorCode(anchorCode);
-
-        // Rounding
-        if (roundDir != null && roundIntervalStr != null) {
-            event.definition.calculation.roundingIntervalMinutes = Integer.parseInt(roundIntervalStr);
-            event.definition.calculation.roundingDirection = switch (roundDir) {
-                case "u" -> RelationalRule.RoundingDirection.UP;
-                case "d" -> RelationalRule.RoundingDirection.DOWN;
-                default -> RelationalRule.RoundingDirection.NEAREST;
-            };
-
-            // Adjustment
-            if (adjStr != null) {
-                event.definition.calculation.adjustmentMinutes = Integer.parseInt(adjStr);
+            event.definition.isFixedTime = false;
+            if (event.definition.calculation == null) {
+                event.definition.calculation = new RelationalCalculation();
             }
-        }
+            event.definition.calculation.offsetMinutes = offset;
 
-        return event;
+            if (event.definition.anchor == null) {
+                event.definition.anchor = new RelationalAnchor();
+            }
+
+            if (extreme != null) {
+                event.definition.anchor.isMax = "l".equalsIgnoreCase(extreme);
+            } else {
+                event.definition.anchor.isMax = false;
+            }
+
+            event.definition.anchor.basicEvent = parseAnchorCode(anchorCode);
+
+            // Rounding
+            if (roundDir != null && roundIntervalStr != null) {
+                event.definition.calculation.roundingIntervalMinutes = Integer.parseInt(roundIntervalStr);
+                event.definition.calculation.roundingDirection = switch (roundDir) {
+                    case "u" -> RelationalRule.RoundingDirection.UP;
+                    case "d" -> RelationalRule.RoundingDirection.DOWN;
+                    default -> RelationalRule.RoundingDirection.NEAREST;
+                };
+
+                // Adjustment
+                if (adjStr != null) {
+                    event.definition.calculation.adjustmentMinutes = Integer.parseInt(adjStr);
+                }
+            }
+
+            return event;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String getSalahTypeCode(String salahTypeStr) {
@@ -454,9 +463,19 @@ public class MasjidQrCodec {
     private static String decodeUriComponent(String value) {
         if (value == null) return null;
         try {
-            return URLDecoder.decode(value.replace("%20", "+"), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
+            return URLDecoder.decode(value.replace("+", "%2B").replace("%20", "+"), StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
             return value;
+        }
+    }
+
+    public static class ParsedMasjidResult {
+        public final Masjid masjid;
+        public final List<MasjidEvent> events;
+
+        public ParsedMasjidResult(Masjid masjid, List<MasjidEvent> events) {
+            this.masjid = masjid;
+            this.events = events;
         }
     }
 }
