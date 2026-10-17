@@ -161,27 +161,43 @@ public class CitySearchDialogFragment extends DialogFragment {
 
         populateInitialList();
 
+        if (mBtnCustomLocation != null) {
+            mBtnCustomLocation.setVisibility(View.VISIBLE);
+        }
+        if (mBtnRefineOnline != null) {
+            mBtnRefineOnline.setVisibility(View.GONE);
+        }
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mCurrentQuery = query;
-                performGeocoderSearch(query);
+                mCurrentQuery = query.trim();
+                if (!mCurrentQuery.isEmpty()) {
+                    if (mBtnCustomLocation != null) mBtnCustomLocation.setVisibility(View.GONE);
+                    if (mBtnRefineOnline != null) mBtnRefineOnline.setVisibility(View.VISIBLE);
+                    filterAndSearch(mCurrentQuery);
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mCurrentQuery = newText;
+                mCurrentQuery = newText.trim();
                 if (mSearchRunnable != null) {
                     mHandler.removeCallbacks(mSearchRunnable);
                 }
 
-                if (newText.length() > 1) {
-                    mSearchRunnable = () -> filterAndSearch(newText);
-                    mHandler.postDelayed(mSearchRunnable, 500);
-                } else if (newText.isEmpty()) {
+                if (!mCurrentQuery.isEmpty()) {
+                    if (mBtnCustomLocation != null) mBtnCustomLocation.setVisibility(View.GONE);
+                    if (mBtnRefineOnline != null) mBtnRefineOnline.setVisibility(View.VISIBLE);
+                    if (mCurrentQuery.length() > 1) {
+                        mSearchRunnable = () -> filterAndSearch(mCurrentQuery);
+                        mHandler.postDelayed(mSearchRunnable, 500);
+                    }
+                } else {
                     populateInitialList();
-                    mBtnRefineOnline.setVisibility(View.GONE);
+                    if (mBtnCustomLocation != null) mBtnCustomLocation.setVisibility(View.VISIBLE);
+                    if (mBtnRefineOnline != null) mBtnRefineOnline.setVisibility(View.GONE);
                 }
                 return true;
             }
@@ -267,11 +283,9 @@ public class CitySearchDialogFragment extends DialogFragment {
         mDisplayResults.clear();
 
         Context context = getContext();
-        boolean hasRecents = false;
         if (context != null) {
             List<RecentLocation> recents = RecentLocationsManager.getRecentLocations(context);
             if (!recents.isEmpty()) {
-                hasRecents = true;
                 mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_recent_locations_title)));
                 for (RecentLocation rl : recents) {
                     CitySearchResult res = new CitySearchResult(null, rl.getCityName(), rl.getProvince(), rl.getCountry(),
@@ -280,14 +294,15 @@ public class CitySearchDialogFragment extends DialogFragment {
                     res.isCustom = rl.isCustom();
                     mDisplayResults.add(res);
                 }
+
+                // Header separating Recent from the full list
+                mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_all_locations_title)));
+            } else {
+                mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_all_locations_title)));
             }
         }
 
-        if (hasRecents) {
-            mDisplayResults.add(CitySearchResult.createSeparator());
-        }
-
-        // Recents ALSO appear in the full list below the separator!
+        // Recent entries intentionally appear again in the full list.
         mDisplayResults.addAll(mBuiltInResults);
 
         mAdapter.notifyDataSetChanged();
@@ -321,31 +336,6 @@ public class CitySearchDialogFragment extends DialogFragment {
 
     private void filterAndSearch(String query) {
         mDisplayResults.clear();
-
-        Context context = getContext();
-        boolean hasMatchingRecents = false;
-        if (context != null) {
-            List<RecentLocation> recents = RecentLocationsManager.getRecentLocations(context);
-            List<CitySearchResult> matchingRecents = new ArrayList<>();
-            for (RecentLocation rl : recents) {
-                CitySearchResult res = new CitySearchResult(null, rl.getCityName(), rl.getProvince(), rl.getCountry(),
-                    rl.getCountryCode(), rl.getTimeZoneId(), null, rl.getLatitude(), rl.getLongitude());
-                res.isRecent = true;
-                res.isCustom = rl.isCustom();
-                if (res.matches(query)) {
-                    matchingRecents.add(res);
-                }
-            }
-            if (!matchingRecents.isEmpty()) {
-                hasMatchingRecents = true;
-                mDisplayResults.add(CitySearchResult.createHeader(getString(R.string.salarm_recent_locations_title)));
-                mDisplayResults.addAll(matchingRecents);
-            }
-        }
-
-        if (hasMatchingRecents) {
-            mDisplayResults.add(CitySearchResult.createSeparator());
-        }
 
         for (CitySearchResult res : mBuiltInResults) {
             if (res.matches(query)) {
@@ -434,9 +424,8 @@ public class CitySearchDialogFragment extends DialogFragment {
         new MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.online_search_internet_disabled_title)
             .setMessage(R.string.online_search_internet_disabled_message)
-            .setPositiveButton(R.string.online_search_internet_settings_button, (dialog, which) -> {
-                startActivity(new Intent(requireContext(), PermissionsManagementActivity.class));
-            })
+            .setPositiveButton(R.string.online_search_internet_settings_button, (dialog, which) ->
+                startActivity(new Intent(requireContext(), PermissionsManagementActivity.class)))
             .setNegativeButton(android.R.string.cancel, null)
             .show();
     }
@@ -761,18 +750,11 @@ public class CitySearchDialogFragment extends DialogFragment {
                 return view;
             }
 
-            if (viewType == VIEW_TYPE_SEPARATOR) {
-                if (view == null) {
-                    view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_divider_item, parent, false);
-                }
-                return view;
-            }
-
             if (view == null) {
                 view = LayoutInflater.from(getContext()).inflate(R.layout.salah_city_list_item, parent, false);
             }
-
             CitySearchResult city = getItem(position);
+
             TextView nameView = view.findViewById(R.id.city_name);
             TextView locView = view.findViewById(R.id.city_location);
 

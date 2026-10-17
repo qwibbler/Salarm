@@ -1818,6 +1818,7 @@
     <string name="salarm_custom_location_invalid_lat">Invalid latitude (-90 to 90)</string>
     <string name="salarm_custom_location_invalid_lon">Invalid longitude (-180 to 180)</string>
     <string name="salarm_recent_locations_title">Recent Locations</string>
+    <string name="salarm_all_locations_title">Available Locations</string>
     <string name="salarm_recent_label">Recent</string>
     <string name="salarm_near_city">Near %s</string>
 
