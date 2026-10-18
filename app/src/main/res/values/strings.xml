@@ -1917,8 +1917,8 @@
     <string name="ordinal_th">%1$dth</string>
     <string name="masjid_interval_range">%1$s to %2$s</string>
 
-    <string name="salah_alarm_rule_description_base_max">alarm %1$s latest time of %2$s</string>
-    <string name="salah_alarm_rule_description_base_min">alarm %1$s earliest time of %2$s</string>
+    <string name="salah_alarm_rule_description_base_max">alarm %1$s latest starting time of %2$s</string>
+    <string name="salah_alarm_rule_description_base_min">alarm %1$s earliest ending time of %2$s</string>
     <string name="masjid_rule_description_base">Jamaat %1$s %2$s</string>
     <string name="masjid_rule_description_base_max">Jamaat %1$s latest time of %2$s</string>
     <string name="masjid_rule_description_base_min">Jamaat %1$s earliest time of %2$s</string>

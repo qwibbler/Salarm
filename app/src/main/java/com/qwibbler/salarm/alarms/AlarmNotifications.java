@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.graphics.BitmapFactory;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -168,6 +169,7 @@ public final class AlarmNotifications {
                 .setContentIntent(firstUpcoming.contentIntent)
                 .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
                 .setSmallIcon(R.drawable.ic_tab_alarm_static)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setGroup(UPCOMING_GROUP_KEY)
                 .setGroupSummary(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -203,6 +205,7 @@ public final class AlarmNotifications {
                 .setContentIntent(firstMissed.contentIntent)
                 .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
                 .setSmallIcon(R.drawable.ic_tab_alarm_static)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setGroup(MISSED_GROUP_KEY)
                 .setGroupSummary(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -256,6 +259,7 @@ public final class AlarmNotifications {
             .setContentIntent(contentIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
             .setSmallIcon(R.drawable.ic_tab_alarm_static)
+            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
             .setAutoCancel(false)
             .setSortKey(createSortKey(instance))
             .setDefaults(0) // No sound on Android 7 and earlier versions
@@ -326,6 +330,7 @@ public final class AlarmNotifications {
             .setContentIntent(contentIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
             .setSmallIcon(R.drawable.ic_tab_alarm_static)
+            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
             .setAutoCancel(false)
             .setSortKey(createSortKey(instance))
             .setDefaults(0) // No sound on Android 7 and earlier versions
@@ -389,6 +394,7 @@ public final class AlarmNotifications {
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
             .setSortKey(createSortKey(instance))
             .setSmallIcon(R.drawable.ic_tab_alarm_static)
+            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
             .setDefaults(NotificationCompat.DEFAULT_ALL) // Sound + Vibrate on Android 7 and earlier versions
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -466,7 +472,8 @@ public final class AlarmNotifications {
             .setContentIntent(contentIntent)
             .setDeleteIntent(dismissPendingIntent)
             .setColor(ContextCompat.getColor(context, R.color.md_theme_primary))
-            .setSmallIcon(R.drawable.ic_salah_alarm)
+            .setSmallIcon(R.drawable.ic_tab_alarm_static)
+            .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
             .setOngoing(true)
             .setAutoCancel(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)

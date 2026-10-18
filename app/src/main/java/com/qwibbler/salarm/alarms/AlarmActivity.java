@@ -14,8 +14,6 @@ import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -82,6 +80,7 @@ import com.qwibbler.salarm.events.Events;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
+import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.PillView;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
@@ -95,7 +94,6 @@ import com.qwibbler.salarm.utils.Utils;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.Objects;
 
 public class AlarmActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
@@ -122,11 +120,10 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             LOGGER.i("Disconnected from AlarmService");
         }
     };
-
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private AlarmActivityBinding mBinding;
     private SharedPreferences mPrefs;
     private Typeface mGeneralBoldTypeface;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private Alarm mAlarm;
     private AlarmInstance mAlarmInstance;
     private boolean mAlarmHandled;
@@ -156,12 +153,6 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     private int mSnoozePlusSymbolColor;
     private int mDefaultSnoozeMinutes;
     private boolean mIsSalah;
-    private String mShowNextEventInfo;
-
-    private Animator mTranslationAnimator;
-    private int mInitialPointerIndex = MotionEvent.INVALID_POINTER_ID;
-    private float mInitialTouchX = 0;
-
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -182,7 +173,6 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             }
         }
     };
-
     private final BroadcastReceiver mPowerBtnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -208,6 +198,10 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             }
         }
     };
+    private String mShowNextEventInfo;
+    private Animator mTranslationAnimator;
+    private int mInitialPointerIndex = MotionEvent.INVALID_POINTER_ID;
+    private float mInitialTouchX = 0;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -806,19 +800,19 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
         mBinding.alarmButton.setContentDescription(getString(disabled
             ? (isOccasionalAlarmDeletedAfterUse()
-            ? R.string.description_direction_both_for_occasional_non_repeatable_alarm
-            : R.string.description_direction_both_for_non_repeatable_alarm)
+               ? R.string.description_direction_both_for_occasional_non_repeatable_alarm
+               : R.string.description_direction_both_for_non_repeatable_alarm)
             : (isOccasionalAlarmDeletedAfterUse()
-            ? R.string.description_direction_both_for_occasional_alarm
-            : R.string.description_direction_both)
+               ? R.string.description_direction_both_for_occasional_alarm
+               : R.string.description_direction_both)
         ));
 
         mBinding.snoozeText.setTypeface(mGeneralBoldTypeface);
         mBinding.snoozeText.setTextColor(SettingsDAO.getSnoozeTitleColor(mPrefs, mIsSalah));
         int snoozeTextRes = isSnoozeDisabledForAlarmInstance()
             ? (isOccasionalAlarmDeletedAfterUse()
-            ? R.string.delete
-            : R.string.button_action_dismiss)
+               ? R.string.delete
+               : R.string.button_action_dismiss)
             : R.string.button_action_snooze;
 
         mBinding.snoozeText.setText(getString(snoozeTextRes));
@@ -1158,8 +1152,8 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
         boolean isDefault = mSnoozeSelectorIndex == 0;
         int textRes = isDefault
             ? isOccasionalAlarmDeletedAfterUse()
-            ? R.string.delete
-            : R.string.button_action_dismiss
+              ? R.string.delete
+              : R.string.button_action_dismiss
             : R.string.button_action_snooze;
 
         if (mIsSwipeActionEnabled) {
@@ -1412,113 +1406,17 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
 
-        double[] coords = com.qwibbler.salarm.salah.SalahUtils.getCoordinates(this);
-        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.salah.SalahUtils.getCalculationMethod(this);
-        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.salah.SalahUtils.getMadhab(this);
-        boolean showBothAsr = mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR, false)
-            && mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
-        long now = System.currentTimeMillis();
-
-        Calendar cal = Calendar.getInstance();
-        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times =
-            com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
-
-        java.util.List<com.qwibbler.salarm.salah.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.FAJR);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.SUNRISE);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.DHUHR);
-
-        if (showBothAsr) {
-            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
-            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI);
-        } else {
-            events.add(madhab == com.batoulapps.adhan.Madhab.HANAFI
-                ? com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI
-                : com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
-        }
-
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.MAGHRIB);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ISHA);
-
-        com.qwibbler.salarm.salah.RelationalRule.AnchorEvent nextEvent = null;
-        java.util.Date nextEventTime = null;
-
-        // Find next event today
-        for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
-            java.util.Date time = getEventTime(event, times);
-            if (time != null && time.getTime() > now) {
-                if (nextEventTime == null || time.before(nextEventTime)) {
-                    nextEventTime = time;
-                    nextEvent = event;
-                }
-            }
-        }
-
-        // If no more events today, find first event tomorrow
-        if (nextEventTime == null) {
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            times = com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
-            for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
-                java.util.Date time = getEventTime(event, times);
-                if (time != null) {
-                    if (nextEventTime == null || time.before(nextEventTime)) {
-                        nextEventTime = time;
-                        nextEvent = event;
-                    }
-                }
-            }
-        }
-
-        if (nextEventTime == null) {
-            if (mBinding.nextEventInfo != null) {
-                mBinding.nextEventInfo.setVisibility(GONE);
-            }
+        String info = SalahUtils.getNextEventInfoText(this);
+        if (info == null) {
+            mBinding.nextEventInfo.setVisibility(GONE);
             return;
         }
 
-        String eventName = com.qwibbler.salarm.salah.RelationalRule.getEventName(this, nextEvent);
+        mBinding.nextEventInfo.setText(info);
 
-        long remainingMillis = nextEventTime.getTime() - now;
-
-        if (mBinding.nextEventInfo == null) return;
-
-        if ("time".equals(mShowNextEventInfo)) {
-            String formattedTime = android.text.format.DateFormat.getTimeFormat(this).format(nextEventTime);
-            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
-                getString(R.string.salah_next_event_info_time_format), eventName, formattedTime));
-        } else {
-            // countdown
-            long remainingSeconds = (remainingMillis + 999) / 1000;
-            int hours = (int) (remainingSeconds / 3600);
-            int minutes = (int) ((remainingSeconds % 3600) / 60);
-            int seconds = (int) (remainingSeconds % 60);
-
-            String countdown;
-            if (hours > 0) {
-                countdown = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
-            } else {
-                countdown = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
-            }
-
-            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
-                getString(R.string.salah_next_event_info_countdown_format), countdown, eventName));
-
-            // Update again in a second
+        if ("countdown".equals(mShowNextEventInfo)) {
             mHandler.postDelayed(this::updateNextEventInfo, 1000);
         }
-    }
-
-    private java.util.Date getEventTime(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event,
-                                        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times) {
-        return switch (event) {
-            case FAJR -> times.fajr;
-            case SUNRISE -> times.sunrise;
-            case DHUHR -> times.dhuhr;
-            case ASR_SHAFI -> times.asrShafi;
-            case ASR_HANAFI -> times.asrHanafi;
-            case MAGHRIB -> times.maghrib;
-            case ISHA -> times.isha;
-        };
     }
 
     /**
