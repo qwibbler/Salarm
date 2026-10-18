@@ -18,6 +18,7 @@ import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider;
@@ -143,6 +144,8 @@ public class SalahAlarmSyncManager {
                 nativeAlarm.tags.add(salahTag);
             }
         }
+
+        AlarmUtils.syncInternationalAutoTag(prefs, nativeAlarm);
 
         // 2. Determine if the anchor event was a masjid event
         Masjid masjid = providedMasjid;

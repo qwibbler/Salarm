@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import androidx.core.view.HapticFeedbackConstantsCompat;
 
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.events.Events;
 import com.qwibbler.salarm.salah.SalahDatabase;
@@ -76,6 +77,8 @@ public final class AlarmUpdateHandler {
                 Events.sendAlarmEvent(R.string.action_create, R.string.label_salarm);
                 ContentResolver cr = mAppContext.getContentResolver();
 
+                AlarmUtils.syncInternationalAutoTag(SalarmApplication.getDefaultSharedPreferences(mAppContext), alarm);
+
                 // Add alarm to db
                 newAlarm = alarm.addAlarm(cr);
 
@@ -117,7 +120,7 @@ public final class AlarmUpdateHandler {
             ContentResolver cr = mAppContext.getContentResolver();
 
             if (alarm.relationalRuleId > 0 && !minorUpdate) {
-                com.qwibbler.salarm.salah.SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
+                SalahAlarmSyncManager.recalculateNextInstanceSync(mAppContext, alarm);
 
                 if (popToast) {
                     final List<AlarmInstance> instanceList = AlarmInstance.getInstancesByAlarmId(cr, alarm.id);
@@ -130,6 +133,8 @@ public final class AlarmUpdateHandler {
                 }
                 return;
             }
+
+            AlarmUtils.syncInternationalAutoTag(SalarmApplication.getDefaultSharedPreferences(mAppContext), alarm);
 
             // Update alarm
             alarm.updateAlarm(cr);

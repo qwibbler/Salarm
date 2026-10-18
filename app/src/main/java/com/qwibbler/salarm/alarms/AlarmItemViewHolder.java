@@ -198,12 +198,31 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
 
     private void bindClock(Alarm alarm) {
         mBinding.digitalClock.refreshFormat();
-        mBinding.digitalClock.setTime(alarm.hour, alarm.minutes);
 
         if (alarm.isLockedToTimezone()) {
             mBinding.lockIcon.setVisibility(VISIBLE);
+
+            final AlarmInstance alarmInstance = mItemHolder.getAlarmInstance();
+            final Calendar nextAlarmTime = alarm.getNextAlarmTimeCalendar(alarmInstance);
+            final Calendar localCal = Calendar.getInstance();
+            localCal.setTimeInMillis(nextAlarmTime.getTimeInMillis());
+
+            final int localHour = localCal.get(Calendar.HOUR_OF_DAY);
+            final int localMinute = localCal.get(Calendar.MINUTE);
+            mBinding.digitalClock.setTime(localHour, localMinute);
+
+            final Context context = itemView.getContext();
+            final String setTimeStr = AlarmUtils.formatSetTime(context, alarm.hour, alarm.minutes);
+            final String offsetStr = AlarmUtils.formatTimezoneOffset(alarm.timezoneId);
+            final String textInfo = context.getString(R.string.locked_timezone_set_time_and_offset, setTimeStr, offsetStr);
+
+            mBinding.lockedTimezoneInfo.setText(textInfo);
+            mBinding.lockedTimezoneInfo.setTypeface(mGeneralTypeface);
+            mBinding.lockedTimezoneInfo.setVisibility(VISIBLE);
         } else {
+            mBinding.digitalClock.setTime(alarm.hour, alarm.minutes);
             mBinding.lockIcon.setVisibility(GONE);
+            mBinding.lockedTimezoneInfo.setVisibility(GONE);
         }
 
         if (alarm.relationalRuleId > 0) {
@@ -324,6 +343,7 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         mBinding.digitalClock.animate().cancel();
         mBinding.daysOfWeek.animate().cancel();
         mBinding.alarmTags.animate().cancel();
+        mBinding.lockedTimezoneInfo.animate().cancel();
 
         if (mBinding.digitalClock.getAlpha() == targetAlpha) {
             return;
@@ -334,6 +354,7 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
             mBinding.digitalClock.setAlpha(targetAlpha);
             mBinding.daysOfWeek.setAlpha(targetAlpha);
             mBinding.alarmTags.setAlpha(targetAlpha);
+            mBinding.lockedTimezoneInfo.setAlpha(targetAlpha);
             return;
         }
 
@@ -341,6 +362,7 @@ public class AlarmItemViewHolder extends RecyclerView.ViewHolder {
         mBinding.digitalClock.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
         mBinding.daysOfWeek.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
         mBinding.alarmTags.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
+        mBinding.lockedTimezoneInfo.animate().alpha(targetAlpha).setDuration(ALPHA_ANIMATION_DURATION).start();
     }
 
     // ********************

@@ -32,8 +32,8 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
 
-import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.salah.SalahUtils;
@@ -42,9 +42,9 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.Utils;
 
-import java.util.Calendar;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -270,6 +270,10 @@ public final class AlarmNotifications {
             .setOngoing(true)
             .setGroup(UPCOMING_GROUP_KEY);
 
+        if (instance.isLockedToTimezone()) {
+            builder.setSubText(AlarmUtils.formatCurrentTimeInTimezone(localizedContext, instance.mTimezoneId));
+        }
+
         // Setup up dismiss action
         Intent dismissIntent = AlarmStateManager.createStateChangeIntent(context,
             AlarmStateManager.ALARM_DISMISS_TAG, instance, AlarmInstance.PREDISMISSED_STATE);
@@ -321,7 +325,7 @@ public final class AlarmNotifications {
         String snoozeContentText = instance.mIsSalah
             ? AlarmUtils.getAlarmText(localizedContext, instance, true)
             : localizedContext.getString(R.string.alarm_alert_snooze_until,
-                AlarmUtils.getFormattedTime(localizedContext, instance.getAlarmTime()));
+            AlarmUtils.getFormattedTime(localizedContext, instance.getAlarmTime()));
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ALARM_SNOOZE_NOTIFICATION_CHANNEL_ID)
             .setShowWhen(false)
@@ -339,6 +343,10 @@ public final class AlarmNotifications {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setLocalOnly(true)
             .setGroup(UPCOMING_GROUP_KEY);
+
+        if (instance.isLockedToTimezone()) {
+            builder.setSubText(AlarmUtils.formatCurrentTimeInTimezone(localizedContext, instance.mTimezoneId));
+        }
 
         builder.addAction(R.drawable.ic_alarm_off, dismissActionTitle, dismissPendingIntent);
 
@@ -403,6 +411,10 @@ public final class AlarmNotifications {
             .setAutoCancel(true)
             .setGroup(MISSED_GROUP_KEY);
 
+        if (instance.isLockedToTimezone()) {
+            builder.setSubText(AlarmUtils.formatCurrentTimeInTimezone(localizedContext, instance.mTimezoneId));
+        }
+
         NotificationManagerCompat nm = NotificationManagerCompat.from(context);
 
         final Notification notification = builder.build();
@@ -458,8 +470,9 @@ public final class AlarmNotifications {
                 customNotifView.setViewVisibility(R.id.subtitle, View.GONE);
             }
         } else {
-            if (!instance.mLabel.isEmpty()) {
-                customNotifView.setTextViewText(R.id.subtitle, instance.mLabel);
+            if (instance.isLockedToTimezone()) {
+                String tzTime = AlarmUtils.formatCurrentTimeInTimezone(localizedContext, instance.mTimezoneId);
+                customNotifView.setTextViewText(R.id.subtitle, tzTime);
                 customNotifView.setViewVisibility(R.id.subtitle, View.VISIBLE);
             } else {
                 customNotifView.setViewVisibility(R.id.subtitle, View.GONE);
@@ -481,8 +494,13 @@ public final class AlarmNotifications {
             .setWhen(0)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setLocalOnly(true)
-            .setCustomContentView(customNotifView)
+            .setLocalOnly(true);
+
+        if (instance.isLockedToTimezone()) {
+            notification.setSubText(AlarmUtils.formatCurrentTimeInTimezone(localizedContext, instance.mTimezoneId));
+        }
+
+        notification.setCustomContentView(customNotifView)
             .setCustomBigContentView(customNotifView)
             .setCustomHeadsUpContentView(customNotifView)
             .setStyle(new NotificationCompat.DecoratedCustomViewStyle());

@@ -82,6 +82,7 @@ import com.qwibbler.salarm.provider.AlarmInstance;
 import com.qwibbler.salarm.provider.ClockContract.AlarmLogColumns;
 import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.PillView;
+import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.AnimatorUtils;
 import com.qwibbler.salarm.utils.ClockUtils;
 import com.qwibbler.salarm.utils.FormattedTextUtils;
@@ -1383,6 +1384,18 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
     }
 
     private void initNextEventInfo() {
+        if (mAlarmInstance != null && mAlarmInstance.isLockedToTimezone()) {
+            if (mBinding.nextEventInfo != null) {
+                mBinding.nextEventInfo.setTypeface(mGeneralBoldTypeface);
+                if (mIsTextShadowDisplayed) {
+                    mBinding.nextEventInfo.setShadowLayer(mShadowRadius, mShadowOffset, mShadowOffset, mShadowColor);
+                }
+                mBinding.nextEventInfo.setVisibility(VISIBLE);
+                updateNextEventInfo();
+            }
+            return;
+        }
+
         if (!mAlarmInstance.mIsSalah || "nothing".equals(mShowNextEventInfo)) {
             if (mBinding.nextEventInfo != null) {
                 mBinding.nextEventInfo.setVisibility(GONE);
@@ -1403,6 +1416,13 @@ public class AlarmActivity extends BaseActivity implements View.OnClickListener,
 
     private void updateNextEventInfo() {
         if (isFinishing() || mAlarmHandled || mBinding.nextEventInfo == null || mBinding.nextEventInfo.getVisibility() == GONE) {
+            return;
+        }
+
+        if (mAlarmInstance != null && mAlarmInstance.isLockedToTimezone()) {
+            String timeInTz = AlarmUtils.formatCurrentTimeInTimezone(this, mAlarmInstance.mTimezoneId);
+            mBinding.nextEventInfo.setText(timeInTz);
+            mHandler.postDelayed(this::updateNextEventInfo, 1000);
             return;
         }
 

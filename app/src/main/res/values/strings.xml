@@ -119,6 +119,8 @@
     <string name="lock_to_timezone">Lock to timezone</string>
     <!-- Label title in the alarm editing panel when locked to a timezone -->
     <string name="locked_to_timezone">Locked to %1$s</string>
+    <!-- Information displaying the set time and timezone offset for a locked timezone alarm -->
+    <string name="locked_timezone_set_time_and_offset">%1$s %2$s</string>
     <!-- Title of timezone picker dialog -->
     <string name="select_timezone_dialog_title">Lock to timezone</string>
     <!-- Hint for searching timezones in timezone picker dialog -->

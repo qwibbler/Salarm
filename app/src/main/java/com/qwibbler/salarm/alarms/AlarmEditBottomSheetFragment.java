@@ -627,7 +627,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.cancelTimezoneLock.setVisibility(VISIBLE);
             mBinding.cancelTimezoneLock.setOnClickListener(v -> {
                 mAlarm.timezoneId = null;
+                if (SettingsDAO.isSalahAutoTagEnabled(mPrefs) && mAlarm.tags != null) {
+                    mAlarm.tags.remove("International");
+                }
                 bindTimezoneLock();
+                bindTags();
             });
         } else {
             mBinding.lockTimezoneText.setText(getString(R.string.lock_to_timezone));
@@ -1343,7 +1347,9 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 String tzId = bundle.getString(TimezonePickerDialogFragment.RESULT_TIMEZONE_ID);
                 if (tzId != null) {
                     mAlarm.timezoneId = tzId;
+                    AlarmUtils.syncInternationalAutoTag(mPrefs, mAlarm);
                     bindTimezoneLock();
+                    bindTags();
                 }
             });
     }

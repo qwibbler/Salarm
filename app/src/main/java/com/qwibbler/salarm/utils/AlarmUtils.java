@@ -9,6 +9,7 @@ package com.qwibbler.salarm.utils;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -30,10 +31,12 @@ import com.qwibbler.salarm.uicomponents.toast.SnackbarManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -470,6 +473,56 @@ public class AlarmUtils {
         final String text = formatElapsedTimeUntilAlarm(snackbarAnchor.getContext(), alarmTimeDelta);
         SnackbarManager.show(Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_SHORT));
         ViewCompat.setStateDescription(snackbarAnchor, text);
+    }
+
+    public static String formatSetTime(Context context, int hour, int minute) {
+        final boolean is24HourFormat = DateFormat.is24HourFormat(context);
+        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), is24HourFormat ? "Hm" : "hma");
+        return DateFormat.format(pattern, cal).toString();
+    }
+
+    public static String formatTimezoneOffset(String timezoneId) {
+        if (timezoneId == null || timezoneId.trim().isEmpty()) {
+            return "";
+        }
+        final TimeZone tz = TimeZone.getTimeZone(timezoneId);
+        final long now = System.currentTimeMillis();
+        final int offsetMs = tz.getOffset(now);
+        final char sign = offsetMs >= 0 ? '+' : '-';
+        final long absMs = Math.abs((long) offsetMs);
+        final long hours = absMs / DateUtils.HOUR_IN_MILLIS;
+        final long minutes = (absMs % DateUtils.HOUR_IN_MILLIS) / DateUtils.MINUTE_IN_MILLIS;
+        return String.format(Locale.ENGLISH, "(UTC%c%d:%02d)", sign, hours, minutes);
+    }
+
+    public static String formatCurrentTimeInTimezone(Context context, String timezoneId) {
+        if (timezoneId == null || timezoneId.trim().isEmpty()) {
+            return "";
+        }
+        final TimeZone tz = TimeZone.getTimeZone(timezoneId);
+        final Calendar cal = Calendar.getInstance(tz);
+        final boolean is24HourFormat = DateFormat.is24HourFormat(context);
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), is24HourFormat ? "Hm" : "hma");
+        final String timeStr = DateFormat.format(pattern, cal).toString();
+        final String offsetStr = formatTimezoneOffset(timezoneId);
+        return timeStr + " " + offsetStr;
+    }
+
+    public static void syncInternationalAutoTag(SharedPreferences prefs, Alarm alarm) {
+        if (alarm == null) {
+            return;
+        }
+        if (alarm.isLockedToTimezone() && SettingsDAO.isSalahAutoTagEnabled(prefs)) {
+            if (alarm.tags == null) {
+                alarm.tags = new ArrayList<>();
+            }
+            if (!alarm.tags.contains("International")) {
+                alarm.tags.add("International");
+            }
+        }
     }
 
 }
