@@ -78,7 +78,7 @@ public class MasjidQrCodecTest {
 
         String encoded = MasjidQrCodec.encode(null, masjid, events);
         assertNotNull(encoded);
-        assertTrue(encoded.startsWith("salarm:v1?"));
+        assertTrue(encoded.startsWith("https://salarm.meafar.com/mc?"));
         assertTrue(encoded.contains("n=Islamic%20Center%20of%20North%20America"));
         assertTrue(encoded.contains("c=kr"));
         assertTrue(encoded.contains("m=h"));
@@ -193,7 +193,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testEventsWithUnencodedPlusAndSpaces() {
-        String qr = "salarm:v1?n=Test%20Masjid&loc=37.7749,-122.4194&e=f:+0s;d:13:30;a:15ls";
+        String qr = "https://salarm.meafar.com/mc?n=Test%20Masjid&loc=37.7749,-122.4194&e=f:+0s;d:13:30;a:15ls";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertNotNull(result.masjid);
@@ -219,7 +219,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testUserProvidedQrString() {
-        String qr = "salarm:v1?n=Northern%20Sui%20Gas%20Society%20Jamia%20Masjid&loc=31.45472,74.39781&c=kr&m=h&i=10,20&e=f:-20es;j:13:30;d:13:30;a:+0lah;m:+0m;i:+0li";
+        String qr = "https://salarm.meafar.com/mc?n=Northern%20Sui%20Gas%20Society%20Jamia%20Masjid&loc=31.45472,74.39781&c=kr&m=h&i=10,20&e=f:-20es;j:13:30;d:13:30;a:+0lah;m:+0m;i:+0li";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertNotNull(result.masjid);
@@ -238,7 +238,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testBaselinePayloadFromPrompt() {
-        String qr = "salarm:v1?n=Test%20Masjid&loc=24.8607%2C67.0011&tz=Asia%2FKarachi&c=mwl&m=h&i=16&e=f%3A-20f%3Br%3A30";
+        String qr = "https://salarm.meafar.com/mc?n=Test%20Masjid&loc=24.8607%2C67.0011&tz=Asia%2FKarachi&c=mwl&m=h&i=16&e=f%3A-20f%3Br%3A30";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertNotNull(result.masjid);
@@ -255,7 +255,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testMalformedPercentEscapes() {
-        String qr = "salarm:v1?n=Test%2&loc=24.8607%ZZ67.0011&e=f:%2B10s";
+        String qr = "https://salarm.meafar.com/mc?n=Test%2&loc=24.8607%ZZ67.0011&e=f:%2B10s";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertNotNull(result.masjid);
@@ -264,7 +264,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testOversizedIntegersAndMalformedEvents() {
-        String qr = "salarm:v1?n=Test&e=f:%2B99999999999999999999s;d:13:30;invalid_event";
+        String qr = "https://salarm.meafar.com/mc?n=Test&e=f:%2B99999999999999999999s;d:13:30;invalid_event";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertEquals(1, result.events.size());
@@ -273,7 +273,7 @@ public class MasjidQrCodecTest {
 
     @Test
     public void testPayloadWithNoEvents() {
-        String qr = "salarm:v1?n=No%20Events%20Masjid&loc=30.0,70.0";
+        String qr = "https://salarm.meafar.com/mc?n=No%20Events%20Masjid&loc=30.0,70.0";
         MasjidQrCodec.ParsedMasjidResult result = MasjidQrCodec.decode(null, qr);
         assertNotNull(result);
         assertNotNull(result.masjid);

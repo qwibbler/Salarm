@@ -1848,7 +1848,7 @@
     <string name="masjids_category_title">Masjids</string>
     <string name="salarm_add_new_masjid">Add a New Masjid</string>
     <string name="masjid_import_qr_title">Import Masjid from QR Code</string>
-    <string name="masjid_import_qr_hint">QR code text string (salarm:v1?&#8230;)</string>
+    <string name="masjid_import_qr_hint">QR code text string (https://salarm.meafar.com/mc?&#8230;)</string>
     <string name="masjid_import_qr_btn_paste">Paste from Clipboard</string>
     <string name="masjid_import_qr_btn_import">Import</string>
     <string name="masjid_import_qr_invalid_toast">Invalid or unrecognized Salarm QR Code string</string>

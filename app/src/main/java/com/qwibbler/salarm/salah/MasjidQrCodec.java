@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class MasjidQrCodec {
 
-    public static final String SCHEME_PREFIX = "salarm:v1?";
+    public static final String SCHEME_PREFIX = "https://salarm.meafar.com/mc?";
 
     private static final Map<CalculationMethod, String> CALC_TO_CODE = new EnumMap<>(CalculationMethod.class);
     private static final Map<String, CalculationMethod> CODE_TO_CALC = new HashMap<>();
