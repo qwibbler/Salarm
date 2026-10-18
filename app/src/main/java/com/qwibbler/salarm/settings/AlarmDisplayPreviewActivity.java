@@ -13,8 +13,6 @@ import static androidx.core.util.TypedValueCompat.dpToPx;
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_BLUR_INTENSITY;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR;
-import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -65,6 +63,7 @@ import com.qwibbler.salarm.base.BaseActivity;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.AlarmActivityBinding;
+import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.uicomponents.PillView;
 import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.AnimatorUtils;
@@ -76,8 +75,6 @@ import com.qwibbler.salarm.utils.SdkUtils;
 import com.qwibbler.salarm.utils.ThemeUtils;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.Locale;
 import java.util.Objects;
 
 public class AlarmDisplayPreviewActivity extends BaseActivity implements View.OnClickListener, View.OnTouchListener {
@@ -89,13 +86,11 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
     private static final int TRANSLATION_DURATION_MILLIS = 1000;
     private static final int ALPHA_DURATION_MILLIS = 400;
     private static final int ALERT_REVEAL_DURATION_MILLIS = 500;
-    private static final int ALERT_DISMISS_DELAY_MILLIS = 2500;
-
+    private static final int ALERT_DISMISS_DELAY_MILLIS = 50;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private AlarmActivityBinding mBinding;
-
     private SharedPreferences mPrefs;
     private Typeface mGeneralBoldTypeface;
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private float mAlarmTitleFontSize;
     private int mAlarmTitleColor;
     private int mAlarmButtonColor;
@@ -990,113 +985,17 @@ public class AlarmDisplayPreviewActivity extends BaseActivity implements View.On
             return;
         }
 
-        double[] coords = com.qwibbler.salarm.salah.SalahUtils.getCoordinates(this);
-        com.batoulapps.adhan.CalculationMethod method = com.qwibbler.salarm.salah.SalahUtils.getCalculationMethod(this);
-        com.batoulapps.adhan.Madhab madhab = com.qwibbler.salarm.salah.SalahUtils.getMadhab(this);
-        boolean showBothAsr = mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR, false)
-            && mPrefs.getBoolean(KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
-        long now = System.currentTimeMillis();
-
-        Calendar cal = Calendar.getInstance();
-        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times =
-            com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
-
-        java.util.List<com.qwibbler.salarm.salah.RelationalRule.AnchorEvent> events = new java.util.ArrayList<>();
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.FAJR);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.SUNRISE);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.DHUHR);
-
-        if (showBothAsr) {
-            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
-            events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI);
-        } else {
-            events.add(madhab == com.batoulapps.adhan.Madhab.HANAFI
-                ? com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_HANAFI
-                : com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ASR_SHAFI);
-        }
-
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.MAGHRIB);
-        events.add(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent.ISHA);
-
-        com.qwibbler.salarm.salah.RelationalRule.AnchorEvent nextEvent = null;
-        java.util.Date nextEventTime = null;
-
-        // Find next event today
-        for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
-            java.util.Date time = getEventTime(event, times);
-            if (time != null && time.getTime() > now) {
-                if (nextEventTime == null || time.before(nextEventTime)) {
-                    nextEventTime = time;
-                    nextEvent = event;
-                }
-            }
-        }
-
-        // If no more events today, find first event tomorrow
-        if (nextEventTime == null) {
-            cal.add(Calendar.DAY_OF_YEAR, 1);
-            times = com.qwibbler.salarm.salah.SalahCalculator.calculateAllSalahTimes(this, cal.getTime(), coords[0], coords[1], method);
-            for (com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event : events) {
-                java.util.Date time = getEventTime(event, times);
-                if (time != null) {
-                    if (nextEventTime == null || time.before(nextEventTime)) {
-                        nextEventTime = time;
-                        nextEvent = event;
-                    }
-                }
-            }
-        }
-
-        if (nextEventTime == null) {
-            if (mBinding.nextEventInfo != null) {
-                mBinding.nextEventInfo.setVisibility(GONE);
-            }
+        String info = SalahUtils.getNextEventInfoText(this);
+        if (info == null) {
+            mBinding.nextEventInfo.setVisibility(GONE);
             return;
         }
 
-        String eventName = com.qwibbler.salarm.salah.RelationalRule.getEventName(this, nextEvent);
+        mBinding.nextEventInfo.setText(info);
 
-        long remainingMillis = nextEventTime.getTime() - now;
-
-        if (mBinding.nextEventInfo == null) return;
-
-        if ("time".equals(mShowNextEventInfo)) {
-            String formattedTime = android.text.format.DateFormat.getTimeFormat(this).format(nextEventTime);
-            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
-                getString(R.string.salah_next_event_info_time_format), eventName, formattedTime));
-        } else {
-            // countdown
-            long remainingSeconds = (remainingMillis + 999) / 1000;
-            int hours = (int) (remainingSeconds / 3600);
-            int minutes = (int) ((remainingSeconds % 3600) / 60);
-            int seconds = (int) (remainingSeconds % 60);
-
-            String countdown;
-            if (hours > 0) {
-                countdown = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
-            } else {
-                countdown = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
-            }
-
-            mBinding.nextEventInfo.setText(String.format(Locale.getDefault(),
-                getString(R.string.salah_next_event_info_countdown_format), countdown, eventName));
-
-            // Update again in a second
+        if ("countdown".equals(mShowNextEventInfo)) {
             mHandler.postDelayed(this::updateNextEventInfo, 1000);
         }
-    }
-
-    private java.util.Date getEventTime(com.qwibbler.salarm.salah.RelationalRule.AnchorEvent event,
-                                        com.qwibbler.salarm.salah.SalahCalculator.SalahTimes times) {
-        return switch (event) {
-            case FAJR -> times.fajr;
-            case SUNRISE -> times.sunrise;
-            case DHUHR -> times.dhuhr;
-            case ASR_SHAFI -> times.asrShafi;
-            case ASR_HANAFI -> times.asrHanafi;
-            case MAGHRIB -> times.maghrib;
-            case ISHA -> times.isha;
-        };
     }
 
     /**

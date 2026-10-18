@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="?attr/dialogPreferredPadding"
+        android:paddingVertical="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/masjid_event_time_set_at"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorPrimary" />
+
+        <!-- Fixed Time Section (for Dhuhr / Juma / Fixed times) -->
+        <LinearLayout
+            android:id="@+id/fixed_time_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="@string/masjid_jamaat_time"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorPrimary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fixed_time_button"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="13:30" />
+        </LinearLayout>
+
+        <!-- Row 1: [Value] min [After/Before] [Max/Min] time of [Event] -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/primary_offset_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/primary_offset_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="5" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/relational_alarm_minutes" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/primary_offset_toggle"
+                style="@style/RelationalAlarm.TextButton"
+                tools:text="After" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/primary_extreme_toggle"
+                style="@style/RelationalAlarm.TextButton"
+                tools:text="@string/masjid_salah_extreme_max" />
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_time_of" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/primary_event"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Event"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Fajr" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <!-- Rounding Section -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/primary_round_enabled_checkbox"
+            style="@style/RelationalAlarm.HeadingCheckbox"
+            android:layout_marginTop="10dp"
+            android:text="@string/relational_alarm_round" />
+
+        <!-- Rounding Row: [Round Toggle] [Round Value] min -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/primary_round_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/primary_round_toggle"
+                style="@style/RelationalAlarm.TextButton"
+                tools:text="To the Nearest" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/primary_round_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="5" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/relational_alarm_minutes" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <!-- Adjustment Section Title -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/adjustment_enabled_checkbox"
+            style="@style/RelationalAlarm.HeadingCheckbox"
+            android:layout_marginTop="10dp"
+            android:checked="false"
+            android:text="@string/relational_alarm_adjust_alarm" />
+
+        <!-- Adjustment Row: Adjusted by [Value] min [Toggle] -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/adjustment_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/adjustment_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/relational_alarm_minutes" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/adjustment_toggle"
+                style="@style/RelationalAlarm.TextButton"
+                tools:text="Earlier" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <!-- Do Not Disturb Section -->
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/dnd_enabled_checkbox"
+            style="@style/RelationalAlarm.HeadingCheckbox"
+            android:layout_marginTop="16dp"
+            android:text="@string/masjid_dnd_title" />
+
+        <!-- DND Row: From [Before] mins before Jamaat to [After] mins after Jamat -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/dnd_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_from" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_before_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_before_jamaat" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_after_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_after_jamaat" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

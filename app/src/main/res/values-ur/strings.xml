@@ -4,7 +4,7 @@
     modified
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 --><resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="6674495003718166674">"گھڑی"</string>
+    <string name="app_label" msgid="6674495003718166674">صلارم</string>
     <string name="default_label" msgid="5590025289805630372">"الارم"</string>
     <string name="alarm_vibrate" msgid="3476686921490362230">"وائبریٹ"</string>
     <string name="time_picker_dialog_title">وقت منتخب کریں</string>
@@ -23,6 +23,7 @@
     <string name="alarm_tomorrow" msgid="131356848787643420">"آئندہ کل"</string>
     <string name="alarm_today" msgid="7873594221106531654">"ﺁﺝ"</string>
     <string name="alarm_alert_dismiss_text" msgid="4942914605480888820">"برخاست کریں"</string>
+    <string name="alarm_alert_dismiss_and_delete_text_button">برخاست کریں</string>
     <string name="alarm_missed_title" msgid="3828345099754063392">"خاموش کردہ الارم"</string>
     <string name="alarm_missed_text" msgid="6585658367289194023">"<xliff:g id="ALARM_TIME">%1$s</xliff:g> - <xliff:g id="ALARM_LABEL">%2$s</xliff:g>"</string>
     <string name="alarm_alert_snoozed_text" msgid="7064642998528766113">"اسنوز کردہ"</string>
@@ -103,6 +104,7 @@
     <string name="button_action_snooze">اسنوز کریں</string>
     <string name="button_action_dismiss">کالعدم کریں</string>
     <string name="button_action_control_volume">والیوم کنٹرول کریں</string>
+    <string name="add_label">"لیبل لگائیں "</string>
     <string name="label_description" msgid="8736179296142915727">"لیبل"</string>
     <string name="ringtone_description" msgid="7580922112921069925">"رنگ ٹون"</string>
     <string name="menu_alarm" msgid="4772010125376647519">"الارم"</string>
@@ -146,6 +148,7 @@
     <string name="timer_notification_label" msgid="4933184831583137249">"ٹائمر"</string>
     <string name="missed_named_timer_notification_label" msgid="665604640028289175">"ٹائمر چھوٹ گیا: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="timer_pause" msgid="3748323712728398743">"موقوف کریں"</string>
+    <string name="label_seconds">سیکنڈ</string>
     <string name="hours_minutes_seconds" msgid="5680088738059791288">"<xliff:g id="SECONDS">%1$02d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="HOURS">%3$d</xliff:g>"</string>
     <string name="minutes_seconds" msgid="6189446107009577914">"<xliff:g id="SECONDS">%1$02d</xliff:g>:<xliff:g id="MINUTES">%2$d</xliff:g>"</string>
     <string name="jocular_content_message_1">"آپ کی رفتار بہت زیادہ ہے۔"</string>
@@ -203,6 +206,7 @@
     <string name="world_hours_tomorrow" msgid="2504465609269004794">"آئندہ کل، <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="world_hours_yesterday" msgid="4425086322610882745">"گزشتہ کل، <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="next_alarm_description" msgid="2650244835760747046">"اگلا الارم: <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
+    <string name="yesterday">کل</string>
     <string name="no_alarms" msgid="6429431324842022917">"کوئی الارمز نہیں ہیں"</string>
     <string name="invalid_time" msgid="2782334750243998633">"‏غلط وقت <xliff:g id="INVALID_HOUR">%1$d</xliff:g>:<xliff:g id="INVALID_MINUTES">%2$d</xliff:g>‎ <xliff:g id="INVALID_AMPM">%3$s</xliff:g>"</string>
     <string name="no_alarm_at" msgid="8140632482969193119">"<xliff:g id="ALARM_TIME_HOUR">%1$d</xliff:g>:<xliff:g id="ALARM_TIME_MINUTES">%2$d</xliff:g> پر کوئی الارم نہیں"</string>
@@ -232,4 +236,14 @@
     <string name="label_default">طے شدہ</string>
     <string name="selected">منتخب</string>
     <string name="more_options">مزید اختیارات</string>
+    <string name="today">ﺁﺝ</string>
+    <string name="label_none">کوئی نہیں</string>
+    <string name="label_new_image">"نئی تصویر "</string>
+    <string name="label_new_font">"نیا فونٹ "</string>
+    <string name="warning">"تنبیہ "</string>
+    <string name="label_hours">گھنٹے</string>
+    <string name="label_minutes">منٹ</string>
+    <string name="alarm_log_window_24h">"پچھلے 24 گھنٹے "</string>
+    <string name="alarm_log_window_3d">"پچھلے 3 دن "</string>
+    <string name="alarm_log_window_7d">پچھلے 7 دن</string>
 </resources>

@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -45,17 +46,25 @@ import androidx.core.util.Pair;
 import androidx.core.view.HapticFeedbackConstantsCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.qwibbler.salarm.SalarmActivity;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.timepicker.MaterialTimePicker;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmActivity;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.data.TimeZones;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.data.WidgetDAO;
 import com.qwibbler.salarm.databinding.AlarmEditBottomSheetBinding;
-import com.qwibbler.salarm.databinding.SalarmActivityBinding;
 import com.qwibbler.salarm.dialogfragment.AlarmDelayPickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmMissedRepeatLimitDialogFragment;
 import com.qwibbler.salarm.dialogfragment.AlarmSnoozeDurationDialogFragment;
@@ -68,15 +77,16 @@ import com.qwibbler.salarm.dialogfragment.LabelDialogFragment;
 import com.qwibbler.salarm.dialogfragment.MaterialTimePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerDatePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.SpinnerTimePickerDialogFragment;
+import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
+import com.qwibbler.salarm.dialogfragment.TimezonePickerDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VibrationPatternDialogFragment;
 import com.qwibbler.salarm.dialogfragment.VolumeCrescendoDurationDialogFragment;
 import com.qwibbler.salarm.events.Events;
-import com.qwibbler.salarm.salah.SalahDatabase;
-import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
-import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
-import com.qwibbler.salarm.dialogfragment.TagSelectionDialogFragment;
 import com.qwibbler.salarm.ringtone.RingtonePickerActivity;
+import com.qwibbler.salarm.salah.RelationalRule;
+import com.qwibbler.salarm.salah.SalahAlarmDialogFragment;
+import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.settings.AlarmDisplayPreviewActivity;
 import com.qwibbler.salarm.uicomponents.CustomTooltip;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
@@ -92,13 +102,6 @@ import com.qwibbler.salarm.utils.Utils;
 import com.qwibbler.salarm.utils.WidgetUtils;
 import com.qwibbler.salarm.widgets.DigitalAppWidgetProvider;
 import com.qwibbler.salarm.widgets.NextAlarmAppWidgetProvider;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.color.MaterialColors;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.timepicker.MaterialTimePicker;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -240,10 +243,19 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
     public void onStart() {
         super.onStart();
 
-        SalarmActivity activity = (SalarmActivity) requireActivity();
-        SalarmActivityBinding activityBinding = activity.getSalarmActivityBinding();
+        final FragmentActivity hostActivity = getActivity();
+        final View snackbarAnchor;
+        if (hostActivity instanceof SalarmActivity) {
+            snackbarAnchor = ((SalarmActivity) hostActivity).getSalarmActivityBinding().contentView;
+        } else if (hostActivity != null) {
+            snackbarAnchor = hostActivity.findViewById(android.R.id.content);
+        } else {
+            snackbarAnchor = null;
+        }
 
-        mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, activityBinding.contentView);
+        if (snackbarAnchor instanceof ViewGroup group) {
+            mAlarmUpdateHandler = new AlarmUpdateHandler(requireContext(), null, group);
+        }
     }
 
     @Override
@@ -323,6 +335,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         bindDaysOfWeekButtons();
         bindSelectedDate();
         bindPauseAlarm();
+        bindTimezoneLock();
         bindSalahRule();
         bindLabel();
         bindTags();
@@ -522,11 +535,12 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
 
         mBinding.scheduleAlarm.setTypeface(mGeneralTypeface);
 
-        mBinding.scheduleAlarmLayout.setOnClickListener(v -> DatePickerDialogFragment.show(
-            getChildFragmentManager(),
-            mPrefs,
-            mAlarm,
-            this::applyDate)
+        mBinding.scheduleAlarmLayout.setOnClickListener(v ->
+            DatePickerDialogFragment.show(
+                getChildFragmentManager(),
+                mPrefs,
+                mAlarm,
+                this::applyDate)
         );
 
         if (mAlarm.daysOfWeek.isRepeating()) {
@@ -569,11 +583,11 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_range, dateRangeStr));
 
             mBinding.cancelPauseAlarm.setTypeface(mGeneralTypeface);
-            mBinding.cancelPauseAlarm.setVisibility(View.VISIBLE);
+            mBinding.cancelPauseAlarm.setVisibility(VISIBLE);
         } else {
-            mBinding.pauseAlarm.setText(R.string.pause_alarm_title);
+            mBinding.pauseAlarm.setText(getString(R.string.pause_alarm_title));
 
-            mBinding.cancelPauseAlarm.setVisibility(View.GONE);
+            mBinding.cancelPauseAlarm.setVisibility(GONE);
         }
 
         if (isRepeating || isSalahAlarm) {
@@ -598,12 +612,47 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         }
     }
 
+    private void bindTimezoneLock() {
+        mBinding.lockTimezoneText.setTypeface(mGeneralTypeface);
+
+        if (mAlarm.isLockedToTimezone()) {
+            TimeZones timeZones = SettingsDAO.getTimeZones(requireContext(), System.currentTimeMillis());
+            CharSequence tzName = timeZones.getTimeZoneName(mAlarm.timezoneId);
+            if (tzName == null) {
+                tzName = mAlarm.timezoneId;
+            }
+            mBinding.lockTimezoneText.setText(getString(R.string.locked_to_timezone, tzName));
+
+            mBinding.cancelTimezoneLock.setTypeface(mGeneralTypeface);
+            mBinding.cancelTimezoneLock.setVisibility(VISIBLE);
+            mBinding.cancelTimezoneLock.setOnClickListener(v -> {
+                mAlarm.timezoneId = null;
+                if (mAlarm.tags != null) {
+                    String intlTag = SettingsDAO.getAutoTagInternationalName(mPrefs);
+                    if (intlTag != null && !intlTag.trim().isEmpty()) {
+                        mAlarm.tags.remove(intlTag.trim());
+                    }
+                    mAlarm.tags.remove("International");
+                }
+                bindTimezoneLock();
+                bindTags();
+            });
+        } else {
+            mBinding.lockTimezoneText.setText(getString(R.string.lock_to_timezone));
+            mBinding.cancelTimezoneLock.setVisibility(GONE);
+        }
+
+        mBinding.timezoneAlarmLayout.setOnClickListener(v -> {
+            TimezonePickerDialogFragment fragment = TimezonePickerDialogFragment.newInstance();
+            fragment.show(getChildFragmentManager(), "timezone_picker");
+        });
+    }
+
     private void bindSalahRule() {
         if (mAlarm.relationalRuleId == -1) {
             mIsSalah = false;
             AppExecutors.getMainThread().post(() -> {
-                if (!isAdded() || mBinding == null) return;
-                mBinding.salahRuleDescription.setVisibility(View.GONE);
+                mBinding.salahRuleDescription.setVisibility(GONE);
                 bindDismissAfterValue();
                 updateAllGroupBackgrounds();
             });
@@ -627,11 +676,13 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                     mAlarm.tags = reloadedAlarm.tags;
                 }
 
+                String description = mSalahRule.getRuleDescription(requireContext());
+
                 AppExecutors.getMainThread().post(() -> {
                     if (!isAdded() || mBinding == null) return;
-                    mBinding.salahRuleDescription.setVisibility(View.VISIBLE);
+                    mBinding.salahRuleDescription.setVisibility(VISIBLE);
                     mBinding.salahRuleDescription.setTypeface(mGeneralTypeface);
-                    mBinding.salahRuleDescription.setText(mSalahRule.getRuleDescription(requireContext()));
+                    mBinding.salahRuleDescription.setText(description);
                     mBinding.salahRuleDescription.setOnClickListener(v ->
                         SalahAlarmDialogFragment.show(getChildFragmentManager(), mAlarm.relationalRuleId)
                     );
@@ -644,8 +695,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
                 });
             } else {
                 AppExecutors.getMainThread().post(() -> {
-                    if (!isAdded() || mBinding == null) return;
-                    mBinding.salahRuleDescription.setVisibility(View.GONE);
+                    mBinding.salahRuleDescription.setVisibility(GONE);
                     bindDismissAfterValue();
                     updateAllGroupBackgrounds();
                 });
@@ -682,7 +732,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             }
             mBinding.editTags.setText(sb.toString());
         } else {
-            mBinding.editTags.setText(R.string.add_tags);
+            mBinding.editTags.setText(getString(R.string.add_tags));
         }
         mBinding.editTags.setAlpha(1f);
         mBinding.editTags.setTypeface(mGeneralTypeface);
@@ -1101,7 +1151,7 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
         int blurIntensity = mAlarm.blurIntensity;
 
         if (blurIntensity == DEFAULT_BLUR_INTENSITY) {
-            mBinding.alarmBlurIntensityValue.setText(R.string.label_none);
+            mBinding.alarmBlurIntensityValue.setText(getString(R.string.label_none));
         } else {
             mBinding.alarmBlurIntensityValue.setText(String.valueOf(blurIntensity));
         }
@@ -1294,6 +1344,20 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             (requestKey, bundle) -> {
                 mAlarm.dismissAfter = bundle.getInt(DismissAfterDialogFragment.DISMISS_AFTER_VALUE);
                 bindDismissAfterValue();
+            });
+
+        childFragmentManager.setFragmentResultListener(TimezonePickerDialogFragment.REQUEST_KEY, this,
+            (requestKey, bundle) -> {
+                String tzId = bundle.getString(TimezonePickerDialogFragment.RESULT_TIMEZONE_ID);
+                if (tzId != null) {
+                    boolean wasLockedToTimezone = mAlarm.isLockedToTimezone();
+                    mAlarm.timezoneId = tzId;
+                    if (!wasLockedToTimezone) {
+                        AlarmUtils.syncInternationalAutoTag(mPrefs, mAlarm);
+                    }
+                    bindTimezoneLock();
+                    bindTags();
+                }
             });
     }
 
@@ -1543,7 +1607,8 @@ public class AlarmEditBottomSheetFragment extends BottomSheetDialogFragment {
             requireContext(),
             mPrefs,
             mBinding.scheduleAlarmLayout,
-            mBinding.pauseAlarmLayout
+            mBinding.pauseAlarmLayout,
+            mBinding.timezoneAlarmLayout
         );
 
         ThemeUtils.applyExpressiveBackgroundsToGroup(

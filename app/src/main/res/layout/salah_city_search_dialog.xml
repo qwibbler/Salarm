@@ -26,20 +26,37 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_refine_online"
-        style="@style/Widget.Material3.Button.TextButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/online_search_refine"
-        android:visibility="gone"
-        app:icon="@drawable/ic_fab_public" />
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_custom_location"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/salarm_custom_location_button"
+            app:icon="@drawable/ic_search" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_refine_online"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/online_search_refine"
+            android:visibility="gone"
+            app:icon="@drawable/ic_fab_public" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/city_results_list"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="320dp"
         android:divider="?attr/dividerHorizontal"
         android:dividerHeight="0.5dp" />
 

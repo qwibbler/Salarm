@@ -65,9 +65,37 @@
         android:fontFeatureSettings="tnum"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/alarm_label"
-        app:layout_constraintBottom_toTopOf="@+id/days_of_week"
+        app:layout_constraintBottom_toTopOf="@+id/locked_timezone_info"
         tools:text="08:30"
         tools:textSize="40sp" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/lock_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/lock_emoji"
+        android:textSize="18sp"
+        android:includeFontPadding="false"
+        android:translationY="-3dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/digital_clock"
+        app:layout_constraintBaseline_toBaselineOf="@id/digital_clock"
+        tools:visibility="visible" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/locked_timezone_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textColor="?attr/colorTertiary"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/digital_clock"
+        app:layout_constraintBottom_toTopOf="@+id/days_of_week"
+        tools:text="5:00 PM (+5)"
+        tools:visibility="visible" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/days_of_week"
@@ -79,7 +107,7 @@
         android:maxLines="2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/preemptive_dismiss_button"
-        app:layout_constraintTop_toBottomOf="@+id/digital_clock"
+        app:layout_constraintTop_toBottomOf="@+id/locked_timezone_info"
         app:layout_constraintBottom_toTopOf="@+id/upcoming_date"
         app:layout_constrainedWidth="true"
         app:layout_constraintHorizontal_bias="0.0"

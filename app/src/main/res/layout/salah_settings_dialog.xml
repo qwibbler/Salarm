@@ -46,8 +46,32 @@
         tools:text="Currently viewing: Default"
         android:textAppearance="?attr/textAppearanceBodySmall"
         android:textColor="?attr/colorOnSurfaceVariant"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/recent_locations_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/salarm_recent_locations_title"
+        android:textAppearance="?attr/textAppearanceLabelMedium"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <HorizontalScrollView
+        android:id="@+id/recent_locations_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/recent_locations_chip_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleLine="true" />
+    </HorizontalScrollView>
 
     <TextView
         android:layout_width="match_parent"

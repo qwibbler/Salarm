@@ -29,6 +29,8 @@ import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.base.AppExecutors;
 import com.qwibbler.salarm.base.BaseSettingsScreenFragment;
 import com.qwibbler.salarm.data.WidgetDAO;
+import com.qwibbler.salarm.salah.MasjidEvent;
+import com.qwibbler.salarm.salah.SalahUtils;
 import com.qwibbler.salarm.salah.SalahDatabase;
 import com.qwibbler.salarm.salah.RelationalRule;
 import com.qwibbler.salarm.provider.Alarm;
@@ -417,7 +419,16 @@ public class AppWidgetSalahSettingsFragment extends BaseSettingsScreenFragment i
                     if (alarm != null && !alarm.label.isEmpty()) {
                         title = alarm.label;
                     } else {
-                        title = RelationalRule.getEventName(context, rule.anchorEvent) + " Alarm";
+                        String eventName = "";
+                        if (rule.definition.anchor.masjidEventId != null) {
+                            MasjidEvent event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+                            if (event != null) {
+                                eventName = SalahUtils.getLocalizedSalahName(context, event.salahType);
+                            }
+                        } else if (rule.definition.anchor.basicEvent != null) {
+                            eventName = RelationalRule.getEventName(context, rule.definition.anchor.basicEvent);
+                        }
+                        title = eventName + " Alarm";
                     }
 
                     items.add(new EventItem(key, title, subtitle, visibleEvents.contains(key)));

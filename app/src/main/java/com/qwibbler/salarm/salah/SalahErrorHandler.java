@@ -6,7 +6,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
+import android.database.sqlite.SQLiteDatabaseLockedException;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteTableLockedException;
+import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.SystemClock;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -36,8 +42,8 @@ public class SalahErrorHandler {
         // Critically important errors (DB corruption, invalid location data)
         if (isCriticalError(t)) {
             sendErrorNotification(appContext,
-                appContext.getString(R.string.salah_error_background_sync),
-                appContext.getString(R.string.salah_error_background_sync_details));
+                appContext.getString(R.string.salarm_error_background_sync),
+                appContext.getString(R.string.salarm_error_background_sync_details));
         }
     }
 
@@ -50,10 +56,17 @@ public class SalahErrorHandler {
     }
 
     private static boolean isCriticalError(Throwable t) {
-        // Example logic: Database errors or unexpected RuntimeExceptions are critical.
-        // transient coordinate parse errors might not be.
-        return t instanceof android.database.sqlite.SQLiteException ||
-               t instanceof NullPointerException;
+        // Database errors are generally critical, but we suppress transient lock errors
+        // during the boot grace period to avoid annoying the user on slow devices.
+        if (t instanceof SQLiteException) {
+            boolean isTransient = t instanceof SQLiteDatabaseLockedException ||
+                                  t instanceof SQLiteTableLockedException ||
+                                  t instanceof SQLiteCantOpenDatabaseException;
+
+            return SystemClock.elapsedRealtime() >= 120_000 || !isTransient;
+        }
+
+        return t instanceof NullPointerException;
     }
 
     private static void sendErrorNotification(Context context, String title, String message) {

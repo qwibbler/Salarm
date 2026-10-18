@@ -17,7 +17,7 @@ public record TimeZones(CharSequence[] timeZoneIds, CharSequence[] timeZoneNames
      * @param timeZoneId identifies the timezone to locate
      * @return the timezone name with the {@code timeZoneId}; {@code null} if it does not exist
      */
-    CharSequence getTimeZoneName(CharSequence timeZoneId) {
+    public CharSequence getTimeZoneName(CharSequence timeZoneId) {
         for (int i = 0; i < timeZoneIds.length; i++) {
             if (TextUtils.equals(timeZoneId, timeZoneIds[i])) {
                 return timeZoneNames[i];

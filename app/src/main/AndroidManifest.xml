@@ -34,6 +34,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -226,6 +228,10 @@
         </receiver>
 
         <receiver
+            android:name="com.qwibbler.salarm.salah.MasjidDndReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name="com.qwibbler.salarm.base.PackageReplacedReceiver"
             android:exported="true">
             <intent-filter>
@@ -319,6 +325,12 @@
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:theme="@style/Theme.Salarm" />
+
+        <activity
+            android:name="com.qwibbler.salarm.salah.ui.MasjidCardEditorActivity"
+            android:label="@string/masjid_card_editor_title"
+            android:theme="@style/Theme.Salarm"
+            android:exported="false" />
 
         <service
             android:name="com.qwibbler.salarm.screensaver.Screensaver"

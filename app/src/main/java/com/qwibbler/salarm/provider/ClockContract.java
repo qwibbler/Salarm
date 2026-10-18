@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 import com.qwibbler.salarm.BuildConfig;
+import com.qwibbler.salarm.data.Weekdays;
 
 /**
  * <p>
@@ -221,7 +222,7 @@ public final class ClockContract {
          * Days of the week encoded as a bit set.
          * <p>Type: INTEGER</p>
          * <p>
-         * {@link com.qwibbler.salarm.data.Weekdays}
+         * {@link Weekdays}
          */
         String DAYS_OF_WEEK = "daysofweek";
 
@@ -242,6 +243,12 @@ public final class ClockContract {
          * <p>Type: INTEGER (long)</p>
          */
         String RELATIONAL_RULE_ID = "relational_rule_id";
+
+        /**
+         * Optional locked timezone ID (e.g. "Asia/Tokyo") for international alarms.
+         * <p>Type: TEXT</p>
+         */
+        String TIMEZONE_ID = "timezone_id";
     }
 
     /**
@@ -364,6 +371,12 @@ public final class ClockContract {
          * <p>Type: INTEGER (long)</p>
          */
         String RELATIONAL_RULE_ID = "relational_rule_id";
+
+        /**
+         * Optional locked timezone ID (e.g. "Asia/Tokyo") for international alarms.
+         * <p>Type: TEXT</p>
+         */
+        String TIMEZONE_ID = "timezone_id";
     }
 
     /**

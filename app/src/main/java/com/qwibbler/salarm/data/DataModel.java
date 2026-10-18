@@ -23,14 +23,15 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.format.DateFormat;
 
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 
-import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.timer.TimerService;
 import com.qwibbler.salarm.uicomponents.toast.CustomToast;
 
@@ -613,7 +614,18 @@ public final class DataModel {
         return getAlarmRingtoneUriFromSettings(false);
     }
 
+    /**
+     * @param uri the uri of the ringtone from the settings to play for all alarms
+     */
+    public void setAlarmRingtoneUriFromSettings(Uri uri) {
+        enforceMainLooper();
+        mAlarmModel.setAlarmRingtoneUriFromSettings(uri);
+    }
+
     public Uri getAlarmRingtoneUriFromSettings(boolean isSalah) {
+        if (mAlarmModel == null) {
+            return Settings.System.DEFAULT_ALARM_ALERT_URI;
+        }
         enforceMainLooper();
         return mAlarmModel.getAlarmRingtoneUriFromSettings(isSalah);
     }
@@ -628,14 +640,6 @@ public final class DataModel {
     public String getAlarmRingtoneTitle(boolean isSalah) {
         enforceMainLooper();
         return mAlarmModel.getAlarmRingtoneTitle(isSalah);
-    }
-
-    /**
-     * @param uri the uri of the ringtone from the settings to play for all alarms
-     */
-    public void setAlarmRingtoneUriFromSettings(Uri uri) {
-        enforceMainLooper();
-        mAlarmModel.setAlarmRingtoneUriFromSettings(uri);
     }
 
     /**

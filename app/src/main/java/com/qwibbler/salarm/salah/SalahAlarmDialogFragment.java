@@ -2,22 +2,28 @@ package com.qwibbler.salarm.salah;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.alarms.AlarmEditBottomSheetFragment;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.databinding.DialogAddRelationalAlarmBinding;
 import com.qwibbler.salarm.settings.PreferencesKeys;
@@ -26,7 +32,8 @@ import com.qwibbler.salarm.utils.LogUtils;
 import com.qwibbler.salarm.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class SalahAlarmDialogFragment extends DialogFragment {
@@ -74,6 +81,10 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     private int mAutostopOffsetIdx = 0; // default "before"
     private int mAdjustmentIdx = 0; // default "earlier"
 
+    private final List<MasjidEvent> mMasjidEvents = new ArrayList<>();
+    private final List<Masjid> mMasjids = new ArrayList<>();
+    private final List<SelectableEvent> mSelectableEvents = new ArrayList<>();
+
     public static SalahAlarmDialogFragment newInstance() {
         return new SalahAlarmDialogFragment();
     }
@@ -104,32 +115,13 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         mBoundaryTypes = getResources().getStringArray(R.array.relational_alarm_boundary_type);
         mAdjustmentTypes = getResources().getStringArray(R.array.relational_alarm_adjustment_type);
 
-        setupAdapters();
+        setupAdapters(savedInstanceState);
         setupListeners();
 
+        // Initialize button text synchronously to avoid blank buttons in FlexboxLayout
+        initializeButtonToggles();
+
         updateRoundingVisibility();
-
-        if (savedInstanceState != null) {
-            restoreState(savedInstanceState);
-        } else {
-            setInitialDefaults();
-
-            Bundle args = getArguments();
-            if (args != null && args.containsKey(ARG_RULE_ID)) {
-                long ruleId = args.getLong(ARG_RULE_ID);
-                final Context appContext = requireContext().getApplicationContext();
-                AppExecutors.getDiskIO().execute(() -> {
-                    RelationalRule rule = SalahDatabase.getDatabase(appContext).relationalRuleDao().getById(ruleId);
-                    if (rule != null) {
-                        AppExecutors.getMainThread().post(() -> {
-                            if (isAdded() && mBinding != null) {
-                                populateUiFromRule(rule);
-                            }
-                        });
-                    }
-                });
-            }
-        }
 
         return CustomDialog.create(
             requireContext(),
@@ -185,41 +177,131 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         super.onDestroyView();
     }
 
-    private void setupAdapters() {
+    private void setupAdapters(Bundle savedInstanceState) {
         RelationalAlarmUiHelper.setupNumericDropdowns(
-                mBinding.primaryOffsetValue,
-                mBinding.primaryRoundValue,
-                mBinding.adjustmentValue,
-                mBinding.safetyOffsetValue,
-                mBinding.safetyRoundValue,
-                mBinding.autostopOffsetValue
+            mBinding.primaryOffsetValue,
+            mBinding.primaryRoundValue,
+            mBinding.adjustmentValue,
+            mBinding.safetyOffsetValue,
+            mBinding.safetyRoundValue,
+            mBinding.autostopOffsetValue
         );
 
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
-        boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+        final Context appContext = requireContext().getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            SalahDatabase db = SalahDatabase.getDatabase(appContext);
+            List<MasjidEvent> masjidEvents = db.masjidEventDao().getAll();
+            List<Masjid> masjids = db.masjidDao().getAll();
 
-        List<String> eventsList = new ArrayList<>();
-        String[] originalEvents = getResources().getStringArray(R.array.relational_alarm_prayer_events);
-        if (showBothAsr) {
-            eventsList.addAll(Arrays.asList(originalEvents));
-        } else {
+            double[] coords = SalahUtils.getCoordinates(appContext);
+            CalculationMethod method = SalahUtils.getCalculationMethod(appContext);
+            SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(appContext, new Date(), coords[0], coords[1], method);
+
+            SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(appContext);
+            boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
+                    && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_ALARM_EVENTS, false);
+
+            List<SelectableEvent> selectableEvents = new ArrayList<>();
+            String[] originalEvents = appContext.getResources().getStringArray(R.array.relational_alarm_prayer_events);
+
+            // Basic events
             for (int i = 0; i < originalEvents.length; i++) {
-                if (i == 3) { // ASR_SHAFI
-                    eventsList.add(getString(R.string.asr_label));
-                } else if (i != 4) { // Not ASR_HANAFI
-                    eventsList.add(originalEvents[i]);
+                RelationalRule.AnchorEvent event = RelationalRule.AnchorEvent.values()[i];
+                Date time = SalahCalculator.getEventTime(event, salahTimes);
+                String label;
+                if (!showBothAsr) {
+                    if (event == RelationalRule.AnchorEvent.ASR_SHAFI) {
+                        label = appContext.getString(R.string.asr_label);
+                    } else if (event == RelationalRule.AnchorEvent.ASR_HANAFI) {
+                        continue;
+                    } else {
+                        label = originalEvents[i];
+                    }
+                } else {
+                    label = originalEvents[i];
+                }
+                selectableEvents.add(new SelectableEvent(label, time != null ? time.getTime() : 0, true));
+            }
+
+            // Masjid events
+            for (MasjidEvent e : masjidEvents) {
+                if (e.isSelected) {
+                    Masjid masjid = null;
+                    for (Masjid m : masjids) {
+                        if (m.id == e.masjidId) {
+                            masjid = m;
+                            break;
+                        }
+                    }
+                    if (masjid != null) {
+                        String masjidLabel = SalahUtils.getLocalizedSalahName(appContext, e.salahType) + " - " + masjid.name;
+                        long time = SalahCalculator.evaluateMasjidEvent(appContext, e, salahTimes, new Date(), true);
+                        selectableEvents.add(new SelectableEvent(masjidLabel, time, false));
+                    }
                 }
             }
-        }
 
-        ArrayAdapter<String> prayerEventsAdapter = new ArrayAdapter<>(requireContext(),
-        R.layout.dropdown_item_relational, eventsList);
-        mBinding.primaryEvent.setAdapter(prayerEventsAdapter);
-        mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
-        mBinding.autostopEvent.setAdapter(prayerEventsAdapter);
+            Collections.sort(selectableEvents, (a, b) -> Long.compare(a.time, b.time));
 
-        mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> updateAutostopEvent(position));
+            AppExecutors.getMainThread().post(() -> {
+                if (!isAdded() || mBinding == null) return;
+
+                mMasjidEvents.clear();
+                mMasjids.clear();
+                mMasjidEvents.addAll(masjidEvents);
+                mMasjids.addAll(masjids);
+
+                mSelectableEvents.clear();
+                mSelectableEvents.addAll(selectableEvents);
+
+                List<String> eventsList = new ArrayList<>();
+                for (SelectableEvent se : mSelectableEvents) {
+                    eventsList.add(se.label);
+                }
+
+                ArrayAdapter<String> prayerEventsAdapter = new ArrayAdapter<>(requireContext(),
+                        R.layout.dropdown_item_relational, eventsList);
+                mBinding.primaryEvent.setAdapter(prayerEventsAdapter);
+                mBinding.safetyEvent.setAdapter(prayerEventsAdapter);
+                mBinding.autostopEvent.setAdapter(prayerEventsAdapter);
+
+                mBinding.primaryEvent.setThreshold(100);
+                mBinding.safetyEvent.setThreshold(100);
+                mBinding.autostopEvent.setThreshold(100);
+
+                mBinding.primaryEvent.setOnItemClickListener((parent, view, position, id) -> {
+                    String selected = (String) parent.getItemAtPosition(position);
+                    int actualPos = eventsList.indexOf(selected);
+                    if (actualPos >= 0) {
+                        updateAutostopEvent(actualPos);
+                        mBinding.safetyEvent.setText(mBinding.autostopEvent.getText().toString(), false);
+                    }
+                });
+
+                // Now that adapters are set, initialize UI
+                if (savedInstanceState != null) {
+                    restoreState(savedInstanceState);
+                } else {
+                    setInitialDefaults();
+
+                    // Re-populate if editing
+                    Bundle args = getArguments();
+                    if (args != null && args.containsKey(ARG_RULE_ID)) {
+                        long ruleId = args.getLong(ARG_RULE_ID);
+                        AppExecutors.getDiskIO().execute(() -> {
+                            RelationalRule rule = SalahDatabase.getDatabase(appContext).relationalRuleDao().getById(ruleId);
+                            if (rule != null) {
+                                AppExecutors.getMainThread().post(() -> {
+                                    if (isAdded() && mBinding != null) {
+                                        populateUiFromRule(rule);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        });
     }
 
     private void setInitialDefaults() {
@@ -254,11 +336,11 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
         updateAdjustmentVisibility();
 
-        if (mBinding.primaryEvent.getAdapter().getCount() > 0) {
-            mBinding.primaryEvent.setText(mBinding.primaryEvent.getAdapter().getItem(0).toString(), false);
+        if (!mSelectableEvents.isEmpty()) {
+            mBinding.primaryEvent.setText(mSelectableEvents.get(0).label, false);
+            updateAutostopEvent(0);
+            mBinding.safetyEvent.setText(mBinding.autostopEvent.getText().toString(), false);
         }
-        updateAutostopEvent(0);
-        mBinding.safetyEvent.setText(mBinding.safetyEvent.getAdapter().getItem(1).toString(), false);
     }
 
     private void restoreState(@NonNull Bundle savedInstanceState) {
@@ -287,7 +369,6 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         mBinding.autostopOffsetValue.setText(savedInstanceState.getString(KEY_AUTOSTOP_VALUE));
         mAutostopOffsetIdx = savedInstanceState.getInt(KEY_AUTOSTOP_OFFSET_IDX);
         updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
-        mBinding.adjustmentEnabledCheckbox.setChecked(savedInstanceState.getBoolean(KEY_ADJUSTMENT_VALUE, false)); // We don't have boolean anymore, just check value
         mBinding.adjustmentValue.setText(savedInstanceState.getString(KEY_ADJUSTMENT_VALUE));
         mAdjustmentIdx = savedInstanceState.getInt(KEY_ADJUSTMENT_IDX);
         updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
@@ -304,8 +385,23 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     }
 
     private void updateAutostopEvent(int primaryPosition) {
-        int nextPosition = (primaryPosition + 1) % mBinding.primaryEvent.getAdapter().getCount();
-        mBinding.autostopEvent.setText(mBinding.primaryEvent.getAdapter().getItem(nextPosition).toString(), false);
+        if (primaryPosition < 0 || primaryPosition >= mSelectableEvents.size()) return;
+
+        // Find next basic event
+        for (int i = primaryPosition + 1; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.autostopEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
+            }
+        }
+
+        // Fallback to first basic event if none found after (circular)
+        for (int i = 0; i < mSelectableEvents.size(); i++) {
+            if (mSelectableEvents.get(i).isBasic) {
+                mBinding.autostopEvent.setText(mSelectableEvents.get(i).label, false);
+                return;
+            }
+        }
     }
 
     private void updateRoundingVisibility() {
@@ -328,10 +424,9 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     private void updateAdjustmentVisibility() {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(requireContext());
         boolean showRounding = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ALARM_SHOW_ROUNDING, false);
-        boolean showAdjustment = prefs.getBoolean(PreferencesKeys.KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING, false);
+        boolean showAdjustment = SettingsDAO.isSalahAdjustAlarmAfterRoundingEnabled(prefs);
 
         boolean roundingEnabled = mBinding.primaryRoundEnabledCheckbox.isChecked();
-
         boolean shouldShowAdjustmentCheckbox = showRounding && showAdjustment && roundingEnabled;
 
         mBinding.adjustmentEnabledCheckbox.setVisibility(shouldShowAdjustmentCheckbox ? View.VISIBLE : View.GONE);
@@ -340,6 +435,16 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         } else {
             updateBlockState(mBinding.adjustmentEnabledCheckbox.isChecked(), mBinding.adjustmentContainer);
         }
+    }
+
+    private void initializeButtonToggles() {
+        updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
+        updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
+        updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
+        updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
+        updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
+        updateToggle(mBinding.autostopOffsetToggle, mOffsetTypes, mAutostopOffsetIdx);
+        updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
     }
 
     private void setupListeners() {
@@ -411,38 +516,42 @@ public class SalahAlarmDialogFragment extends DialogFragment {
 
         @SuppressWarnings("unchecked")
         ArrayAdapter<String> adapter = (ArrayAdapter<String>) mBinding.primaryEvent.getAdapter();
-        String primaryEventName = RelationalRule.getEventName(requireContext(), rule.anchorEvent);
-        int primaryPos = adapter.getPosition(primaryEventName);
-        if (primaryPos >= 0) {
-            mBinding.primaryEvent.setText(adapter.getItem(primaryPos), false);
+        if (adapter != null) {
+            String primaryLabel = getLabelForAnchor(rule.definition.anchor);
+            int primaryPos = adapter.getPosition(primaryLabel);
+            if (primaryPos >= 0) {
+                mBinding.primaryEvent.setText(adapter.getItem(primaryPos), false);
+            }
         }
 
-        mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(rule.offsetMinutes)));
-        mPrimaryOffsetIdx = rule.offsetMinutes >= 0 ? 1 : 0;
+        mBinding.primaryOffsetValue.setText(String.valueOf(Math.abs(rule.definition.calculation.offsetMinutes)));
+        mPrimaryOffsetIdx = rule.definition.calculation.offsetMinutes >= 0 ? 1 : 0;
         updateToggle(mBinding.primaryOffsetToggle, mOffsetTypes, mPrimaryOffsetIdx);
-        mBinding.primaryRoundEnabledCheckbox.setChecked(rule.roundingIntervalMinutes > 0);
-        mPrimaryRoundIdx = rule.roundingDirection != null ? rule.roundingDirection.ordinal() : 0;
+        mBinding.primaryRoundEnabledCheckbox.setChecked(rule.definition.calculation.roundingIntervalMinutes > 0);
+        mPrimaryRoundIdx = rule.definition.calculation.roundingDirection != null ? rule.definition.calculation.roundingDirection.ordinal() : 0;
         updateToggle(mBinding.primaryRoundToggle, mRoundTypes, mPrimaryRoundIdx);
-        mBinding.primaryRoundValue.setText(String.valueOf(rule.roundingIntervalMinutes));
+        mBinding.primaryRoundValue.setText(String.valueOf(rule.definition.calculation.roundingIntervalMinutes));
 
-        if (rule.clip != null) {
+        if (rule.definition.clip != null) {
             mBinding.safetyEnabledCheckbox.setChecked(true);
-            mSafetyBoundIdx = rule.clip.boundaryType == RelationalRule.BoundaryType.NO_EARLIER_THAN ? 0 : 1;
+            mSafetyBoundIdx = rule.definition.clip.boundaryType == RelationalRule.BoundaryType.NO_EARLIER_THAN ? 0 : 1;
             updateToggle(mBinding.safetyBoundaryToggle, mBoundaryTypes, mSafetyBoundIdx);
 
-            String safetyEventName = RelationalRule.getEventName(requireContext(), rule.clip.clipEvent);
-            int safetyPos = adapter.getPosition(safetyEventName);
-            if (safetyPos >= 0) {
-                mBinding.safetyEvent.setText(adapter.getItem(safetyPos), false);
+            if (adapter != null) {
+                String safetyLabel = getLabelForAnchor(rule.definition.clip.anchor);
+                int safetyPos = adapter.getPosition(safetyLabel);
+                if (safetyPos >= 0) {
+                    mBinding.safetyEvent.setText(adapter.getItem(safetyPos), false);
+                }
             }
 
-            mBinding.safetyOffsetValue.setText(String.valueOf(Math.abs(rule.clip.clipOffsetMinutes)));
-            mSafetyOffsetIdx = rule.clip.clipOffsetMinutes >= 0 ? 1 : 0;
+            mBinding.safetyOffsetValue.setText(String.valueOf(Math.abs(rule.definition.clip.offsetMinutes)));
+            mSafetyOffsetIdx = rule.definition.clip.offsetMinutes >= 0 ? 1 : 0;
             updateToggle(mBinding.safetyOffsetToggle, mOffsetTypes, mSafetyOffsetIdx);
-            mBinding.safetyRoundEnabledCheckbox.setChecked(rule.clip.clipRoundingIntervalMinutes > 0);
-            mSafetyRoundIdx = rule.clip.clipRoundingDirection != null ? rule.clip.clipRoundingDirection.ordinal() : 0;
+            mBinding.safetyRoundEnabledCheckbox.setChecked(rule.definition.clip.roundingIntervalMinutes > 0);
+            mSafetyRoundIdx = rule.definition.clip.roundingDirection != null ? rule.definition.clip.roundingDirection.ordinal() : 0;
             updateToggle(mBinding.safetyRoundToggle, mRoundTypes, mSafetyRoundIdx);
-            mBinding.safetyRoundValue.setText(String.valueOf(rule.clip.clipRoundingIntervalMinutes));
+            mBinding.safetyRoundValue.setText(String.valueOf(rule.definition.clip.roundingIntervalMinutes));
         } else {
             mBinding.safetyEnabledCheckbox.setChecked(false);
             mBinding.safetyRoundEnabledCheckbox.setChecked(false);
@@ -450,8 +559,8 @@ public class SalahAlarmDialogFragment extends DialogFragment {
 
         if (rule.autostopEnabled) {
             mBinding.autostopEnabledCheckbox.setChecked(true);
-            if (rule.autostopAnchorEvent != null) {
-                String autostopEventName = RelationalRule.getEventName(requireContext(), rule.autostopAnchorEvent);
+            if (adapter != null) {
+                String autostopEventName = getLabelForAnchor(rule.autostopAnchor);
                 int autostopPos = adapter.getPosition(autostopEventName);
                 if (autostopPos >= 0) {
                     mBinding.autostopEvent.setText(adapter.getItem(autostopPos), false);
@@ -464,10 +573,10 @@ public class SalahAlarmDialogFragment extends DialogFragment {
             mBinding.autostopEnabledCheckbox.setChecked(false);
         }
 
-        if (rule.adjustmentMinutes != 0) {
+        if (rule.definition.calculation.adjustmentMinutes != 0) {
             mBinding.adjustmentEnabledCheckbox.setChecked(true);
-            mBinding.adjustmentValue.setText(String.valueOf(Math.abs(rule.adjustmentMinutes)));
-            mAdjustmentIdx = rule.adjustmentMinutes >= 0 ? 1 : 0;
+            mBinding.adjustmentValue.setText(String.valueOf(Math.abs(rule.definition.calculation.adjustmentMinutes)));
+            mAdjustmentIdx = rule.definition.calculation.adjustmentMinutes >= 0 ? 1 : 0;
             updateToggle(mBinding.adjustmentToggle, mAdjustmentTypes, mAdjustmentIdx);
         } else {
             mBinding.adjustmentEnabledCheckbox.setChecked(false);
@@ -481,6 +590,24 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         updateAdjustmentVisibility();
     }
 
+    private String getLabelForAnchor(RelationalAnchor anchor) {
+        if (anchor.masjidEventId != null) {
+            for (MasjidEvent e : mMasjidEvents) {
+                if (e.id == anchor.masjidEventId) {
+                    for (Masjid m : mMasjids) {
+                        if (m.id == e.masjidId) {
+                            return SalahUtils.getLocalizedSalahName(requireContext(), e.salahType) + " - " + m.name;
+                        }
+                    }
+                }
+            }
+        }
+        if (anchor.basicEvent != null) {
+            return RelationalRule.getEventName(requireContext(), anchor.basicEvent);
+        }
+        return "";
+    }
+
     private void saveRelationalAlarm() {
         if (mBinding == null || !isAdded()) return;
 
@@ -491,33 +618,31 @@ public class SalahAlarmDialogFragment extends DialogFragment {
                 rule.id = args.getLong(ARG_RULE_ID);
             }
 
-            android.net.Uri defaultRingtone = com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
-
+            Uri defaultRingtone = DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true);
             boolean isNewRule = rule.id == 0;
-
             final FragmentManager fm = getParentFragmentManager();
 
-            // Disable button to prevent double-save and indicate activity
-            if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
-                View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
+            if (getDialog() instanceof AlertDialog dialog) {
+                View saveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 if (saveButton != null) saveButton.setEnabled(false);
             }
 
             SalahAlarmSyncManager.saveRule(requireContext().getApplicationContext(), rule, defaultRingtone, syncedAlarm -> {
-                Bundle result = new Bundle();
-                result.putLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, syncedAlarm.id);
-                result.putBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, isNewRule);
-                fm.setFragmentResult(REQUEST_KEY, result);
+                if (isAdded() && syncedAlarm != null) {
+                    Bundle result = new Bundle();
+                    result.putLong(AlarmEditBottomSheetFragment.ARG_ALARM_ID, syncedAlarm.id);
+                    result.putBoolean(AlarmEditBottomSheetFragment.ARG_IS_NEW_ALARM, isNewRule);
+                    fm.setFragmentResult(REQUEST_KEY, result);
+                }
             });
 
             dismiss();
 
         } catch (Exception e) {
             LogUtils.e("Error parsing relational alarm data", e);
-            android.widget.Toast.makeText(requireContext(), R.string.salah_error_saving, android.widget.Toast.LENGTH_LONG).show();
-            // Re-enable button on failure
-            if (getDialog() instanceof androidx.appcompat.app.AlertDialog dialog) {
-                View saveButton = dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE);
+            Toast.makeText(requireContext(), R.string.salah_error_saving, Toast.LENGTH_LONG).show();
+            if (getDialog() instanceof AlertDialog dialog) {
+                View saveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
                 if (saveButton != null) saveButton.setEnabled(true);
             }
         }
@@ -538,7 +663,7 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         if (context == null) return 0;
         if (getString(R.string.asr_label).equals(eventName)) {
             Madhab madhab = SalahUtils.getMadhab(context);
-            return madhab == Madhab.HANAFI ? 4 : 3; // 4: ASR_HANAFI, 3: ASR_SHAFI
+            return (madhab == Madhab.HANAFI ? RelationalRule.AnchorEvent.ASR_HANAFI : RelationalRule.AnchorEvent.ASR_SHAFI).ordinal();
         }
         String[] events = getResources().getStringArray(R.array.relational_alarm_prayer_events);
         for (int i = 0; i < events.length; i++) {
@@ -550,32 +675,37 @@ public class SalahAlarmDialogFragment extends DialogFragment {
     private RelationalRule parseRuleFromUi() {
         RelationalRule rule = new RelationalRule();
         rule.enabled = true;
-        rule.anchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.primaryEvent))];
+
+        String primaryLabel = getText(mBinding.primaryEvent);
+        setAnchorFromLabel(rule.definition.anchor, primaryLabel);
 
         int primaryOffset = parseMinutes(getText(mBinding.primaryOffsetValue));
         if (mPrimaryOffsetIdx == 0) primaryOffset *= -1;
-        rule.offsetMinutes = primaryOffset;
+        rule.definition.calculation.offsetMinutes = primaryOffset;
 
-        rule.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
-        rule.roundingIntervalMinutes = mBinding.primaryRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.primaryRoundValue)) : 0;
+        rule.definition.calculation.roundingDirection = RelationalRule.RoundingDirection.values()[mPrimaryRoundIdx];
+        rule.definition.calculation.roundingIntervalMinutes = mBinding.primaryRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.primaryRoundValue)) : 0;
 
         if (mBinding.safetyEnabledCheckbox.isChecked()) {
-            RelationalRule.Clip clip = new RelationalRule.Clip();
+            RelationalClip clip = new RelationalClip();
             clip.boundaryType = mSafetyBoundIdx == 0 ? RelationalRule.BoundaryType.NO_EARLIER_THAN : RelationalRule.BoundaryType.NO_LATER_THAN;
-            clip.clipEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.safetyEvent))];
+
+            String safetyLabel = getText(mBinding.safetyEvent);
+            setAnchorFromLabel(clip.anchor, safetyLabel);
 
             int safetyOffset = parseMinutes(getText(mBinding.safetyOffsetValue));
             if (mSafetyOffsetIdx == 0) safetyOffset *= -1;
-            clip.clipOffsetMinutes = safetyOffset;
+            clip.offsetMinutes = safetyOffset;
 
-            clip.clipRoundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
-            clip.clipRoundingIntervalMinutes = mBinding.safetyRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.safetyRoundValue)) : 0;
-            rule.clip = clip;
+            clip.roundingDirection = RelationalRule.RoundingDirection.values()[mSafetyRoundIdx];
+            clip.roundingIntervalMinutes = mBinding.safetyRoundEnabledCheckbox.isChecked() ? parseMinutes(getText(mBinding.safetyRoundValue)) : 0;
+            rule.definition.clip = clip;
         }
 
         if (mBinding.autostopEnabledCheckbox.isChecked()) {
             rule.autostopEnabled = true;
-            rule.autostopAnchorEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(getText(mBinding.autostopEvent))];
+            String autostopLabel = getText(mBinding.autostopEvent);
+            setAnchorFromLabel(rule.autostopAnchor, autostopLabel);
 
             int autostopOffset = parseMinutes(getText(mBinding.autostopOffsetValue));
             if (mAutostopOffsetIdx == 0) autostopOffset *= -1;
@@ -585,10 +715,45 @@ public class SalahAlarmDialogFragment extends DialogFragment {
         if (mBinding.adjustmentEnabledCheckbox.isChecked()) {
             int adjustment = parseMinutes(getText(mBinding.adjustmentValue));
             if (mAdjustmentIdx == 0) adjustment *= -1;
-            rule.adjustmentMinutes = adjustment;
+            rule.definition.calculation.adjustmentMinutes = adjustment;
         } else {
-            rule.adjustmentMinutes = 0;
+            rule.definition.calculation.adjustmentMinutes = 0;
         }
         return rule;
+    }
+
+    private void setAnchorFromLabel(RelationalAnchor anchor, String label) {
+        for (MasjidEvent e : mMasjidEvents) {
+            Masjid masjid = null;
+            for (Masjid m : mMasjids) {
+                if (m.id == e.masjidId) {
+                    masjid = m;
+                    break;
+                }
+            }
+            if (masjid != null) {
+                String masjidLabel = SalahUtils.getLocalizedSalahName(requireContext(), e.salahType) + " - " + masjid.name;
+                if (masjidLabel.equals(label)) {
+                    anchor.masjidEventId = e.id;
+                    anchor.basicEvent = null;
+                    return;
+                }
+            }
+        }
+
+        anchor.basicEvent = RelationalRule.AnchorEvent.values()[getPrayerEventIndex(label)];
+        anchor.masjidEventId = null;
+    }
+
+    private static class SelectableEvent {
+        final String label;
+        final long time;
+        final boolean isBasic;
+
+        SelectableEvent(String label, long time, boolean isBasic) {
+            this.label = label;
+            this.time = time;
+            this.isBasic = isBasic;
+        }
     }
 }

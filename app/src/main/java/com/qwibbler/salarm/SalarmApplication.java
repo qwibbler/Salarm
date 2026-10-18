@@ -46,6 +46,61 @@ public class SalarmApplication extends Application implements Application.Activi
     private int mStartedActivities = 0;
     private boolean mIsChangingConfiguration = false;
 
+    public static Context getAppContext() {
+        return sInstance;
+    }
+
+    /**
+     * Returns the default {@link SharedPreferences} instance from the underlying storage context.
+     */
+    public static SharedPreferences getDefaultSharedPreferences(Context context) {
+        final Context appContext = context.getApplicationContext();
+        final Context storageContext;
+
+        final String name = appContext.getPackageName() + "_preferences";
+        final String oldName = "com.best.deskclock_preferences";
+
+        if (SdkUtils.isAtLeastAndroid7()) {
+            // All N devices have split storage areas. Migrate the existing preferences into the new
+            // device encrypted storage area if that has not yet occurred.
+            storageContext = appContext.createDeviceProtectedStorageContext();
+            final String prefsFilename = storageContext.getDataDir() + "/shared_prefs/" + name + ".xml";
+            final File prefs = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
+
+            if (!prefs.exists()) {
+                if (storageContext.moveSharedPreferencesFrom(appContext, name)) {
+                    android.util.Log.i("SalarmApplication", "Migrated " + name + " to device protected storage.");
+                } else if (storageContext.moveSharedPreferencesFrom(appContext, oldName)) {
+                    android.util.Log.i("SalarmApplication", "Migrated " + oldName + " from credential storage.");
+                }
+
+                // Ensure the file is named correctly if we moved from oldName or it was already in device protected storage
+                final String oldPrefsFilename = storageContext.getDataDir() + "/shared_prefs/" + oldName + ".xml";
+                final File oldPrefs = new File(Objects.requireNonNull(Uri.parse(oldPrefsFilename).getPath()));
+                if (!prefs.exists() && oldPrefs.exists()) {
+                    if (oldPrefs.renameTo(prefs)) {
+                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
+                    }
+                }
+            }
+        } else {
+            storageContext = appContext;
+            final String prefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + name + ".xml";
+            final File prefs = new File(prefsFilename);
+            if (!prefs.exists()) {
+                final String oldPrefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + oldName + ".xml";
+                final File oldPrefs = new File(oldPrefsFilename);
+                if (oldPrefs.exists()) {
+                    if (oldPrefs.renameTo(prefs)) {
+                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
+                    }
+                }
+            }
+        }
+
+        return PreferenceManager.getDefaultSharedPreferences(storageContext);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -125,61 +180,6 @@ public class SalarmApplication extends Application implements Application.Activi
             case LIGHT_THEME -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             case DARK_THEME -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
-    }
-
-    public static Context getAppContext() {
-        return sInstance;
-    }
-
-    /**
-     * Returns the default {@link SharedPreferences} instance from the underlying storage context.
-     */
-    public static SharedPreferences getDefaultSharedPreferences(Context context) {
-        final Context appContext = context.getApplicationContext();
-        final Context storageContext;
-
-        final String name = appContext.getPackageName() + "_preferences";
-        final String oldName = "com.best.deskclock_preferences";
-
-        if (SdkUtils.isAtLeastAndroid7()) {
-            // All N devices have split storage areas. Migrate the existing preferences into the new
-            // device encrypted storage area if that has not yet occurred.
-            storageContext = appContext.createDeviceProtectedStorageContext();
-            final String prefsFilename = storageContext.getDataDir() + "/shared_prefs/" + name + ".xml";
-            final File prefs = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
-
-            if (!prefs.exists()) {
-                if (storageContext.moveSharedPreferencesFrom(appContext, name)) {
-                    android.util.Log.i("SalarmApplication", "Migrated " + name + " to device protected storage.");
-                } else if (storageContext.moveSharedPreferencesFrom(appContext, oldName)) {
-                    android.util.Log.i("SalarmApplication", "Migrated " + oldName + " from credential storage.");
-                }
-
-                // Ensure the file is named correctly if we moved from oldName or it was already in device protected storage
-                final String oldPrefsFilename = storageContext.getDataDir() + "/shared_prefs/" + oldName + ".xml";
-                final File oldPrefs = new File(Objects.requireNonNull(Uri.parse(oldPrefsFilename).getPath()));
-                if (!prefs.exists() && oldPrefs.exists()) {
-                    if (oldPrefs.renameTo(prefs)) {
-                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
-                    }
-                }
-            }
-        } else {
-            storageContext = appContext;
-            final String prefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + name + ".xml";
-            final File prefs = new File(prefsFilename);
-            if (!prefs.exists()) {
-                final String oldPrefsFilename = storageContext.getApplicationInfo().dataDir + "/shared_prefs/" + oldName + ".xml";
-                final File oldPrefs = new File(oldPrefsFilename);
-                if (oldPrefs.exists()) {
-                    if (oldPrefs.renameTo(prefs)) {
-                        android.util.Log.i("SalarmApplication", "Successfully rebranded preferences from " + oldName + " to " + name);
-                    }
-                }
-            }
-        }
-
-        return PreferenceManager.getDefaultSharedPreferences(storageContext);
     }
 
 }

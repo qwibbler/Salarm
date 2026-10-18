@@ -10,9 +10,15 @@ android {
         minSdk = 23
         targetSdk = 37
         versionCode = 2037
-        versionName = 'v0.2.0-alpha.3'
+        versionName = 'v0.3.0-alpha.1'
         ndk {
             abiFilters = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
         }
     }
 
@@ -137,6 +143,13 @@ dependencies {
     implementation 'com.github.martin-stone:hsv-alpha-color-picker-android:3.1.0'
     implementation 'com.batoulapps.adhan:adhan:1.2.1'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation 'com.google.zxing:core:3.5.4'
+
+    // CameraX
+    def camerax_version = "1.6.2"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation "androidx.camera:camera-view:$camerax_version"
 
     // Room
     def room_version = "2.6.1"

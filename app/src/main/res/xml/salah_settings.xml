@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="@string/salah_location_category_title"
+        android:title="@string/salarm_location_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
@@ -17,8 +17,8 @@
             android:layout="@layout/settings_preference_layout"
             android:title="Location Mode"
             android:summary="%s"
-            android:entries="@array/salah_location_mode_entries"
-            android:entryValues="@array/salah_location_mode_values"
+            android:entries="@array/salarm_location_mode_entries"
+            android:entryValues="@array/salarm_location_mode_values"
             android:defaultValue="GPS"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
@@ -34,7 +34,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/salah_prayer_settings_category_title"
+        android:title="@string/salarm_prayer_settings_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 
@@ -54,8 +54,8 @@
             android:layout="@layout/settings_preference_layout"
             android:title="Madhab"
             android:summary="%s"
-            android:entries="@array/salah_madhab_entries"
-            android:entryValues="@array/salah_madhab_values"
+            android:entries="@array/salarm_madhab_entries"
+            android:entryValues="@array/salarm_madhab_values"
             android:defaultValue="HANAFI"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false" />
@@ -63,7 +63,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/salah_advanced_settings_category_title"
+        android:title="@string/salarm_advanced_settings_category_title"
         app:allowDividerAbove="false"
         app:iconSpaceReserved="false">
 

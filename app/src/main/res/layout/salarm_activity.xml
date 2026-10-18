@@ -66,7 +66,7 @@
                 app:layout_constraintEnd_toStartOf="@id/fab"
                 app:layout_constraintBottom_toBottomOf="@+id/fab"
                 app:layout_constraintTop_toTopOf="@+id/fab"
-                app:layout_constraintHorizontal_bias="0.6"
+                app:layout_constraintHorizontal_bias="0.8"
                 tools:layout_width="55dp"
                 tools:layout_height="55dp"
                 tools:visibility="visible"
@@ -103,7 +103,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/fab"
                 app:layout_constraintBottom_toBottomOf="@id/fab"
-                app:layout_constraintHorizontal_bias="0.4"
+                app:layout_constraintHorizontal_bias="0.2"
                 tools:layout_width="55dp"
                 tools:layout_height="55dp"
                 tools:visibility="visible"
@@ -113,13 +113,22 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/salarm_activity_bottom_menu"
+    <HorizontalScrollView
+        android:id="@+id/salarm_activity_bottom_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:elevation="0dp"
-        app:menu="@menu/bottom_navigation_menu"
-        tools:background="@color/md_theme_surface"
-        tools:labelVisibilityMode="labeled" />
+        android:scrollbars="none"
+        android:fillViewport="true">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/salarm_activity_bottom_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:elevation="0dp"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            tools:background="@color/md_theme_surface" />
+
+    </HorizontalScrollView>
 
 </LinearLayout>

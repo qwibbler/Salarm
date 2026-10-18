@@ -36,6 +36,7 @@ import com.qwibbler.salarm.utils.RingtoneUtils;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 public final class AlarmInstance implements ClockContract.InstancesColumns {
 
@@ -72,7 +73,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         ALARM_VOLUME,
         RELATIONAL_RULE_ID,
         DISMISS_AFTER,
-        INITIAL_ALARM_TIME
+        INITIAL_ALARM_TIME,
+        TIMEZONE_ID
     };
 
     /**
@@ -102,8 +104,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int RELATIONAL_RULE_ID_INDEX = 20;
     private static final int DISMISS_AFTER_INDEX = 21;
     private static final int INITIAL_ALARM_TIME_INDEX = 22;
+    private static final int TIMEZONE_ID_INDEX = 23;
 
-    private static final int COLUMN_COUNT = INITIAL_ALARM_TIME_INDEX + 1;
+    private static final int COLUMN_COUNT = TIMEZONE_ID_INDEX + 1;
     // Public fields
     public long mId;
     public int mYear;
@@ -130,6 +133,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public int mDismissAfter;
     public long mInitialAlarmTimeMillis;
     public boolean mIsSalah;
+    public String mTimezoneId;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -183,6 +187,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mDismissAfter = instance.mDismissAfter;
         this.mInitialAlarmTimeMillis = instance.mInitialAlarmTimeMillis;
         this.mIsSalah = instance.mIsSalah;
+        this.mTimezoneId = instance.mTimezoneId;
     }
 
     public AlarmInstance(Cursor c, boolean joinedTable) {
@@ -221,6 +226,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mDismissAfter = c.getInt(Alarm.INSTANCE_DISMISS_AFTER_INDEX);
             mInitialAlarmTimeMillis = c.getLong(Alarm.INSTANCE_INITIAL_ALARM_TIME_INDEX);
             mIsSalah = mRelationalRuleId != -1;
+            mTimezoneId = c.getString(Alarm.INSTANCE_TIMEZONE_ID_INDEX);
 
         } else {
             mId = c.getLong(ID_INDEX);
@@ -256,6 +262,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mDismissAfter = c.getInt(DISMISS_AFTER_INDEX);
             mInitialAlarmTimeMillis = c.getLong(INITIAL_ALARM_TIME_INDEX);
             mIsSalah = mRelationalRuleId != -1;
+            mTimezoneId = c.getString(TIMEZONE_ID_INDEX);
         }
     }
 
@@ -293,6 +300,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(RELATIONAL_RULE_ID, mRelationalRuleId);
         values.put(DISMISS_AFTER, mDismissAfter);
         values.put(INITIAL_ALARM_TIME, mInitialAlarmTimeMillis);
+        values.put(TIMEZONE_ID, mTimezoneId);
 
         return values;
     }
@@ -490,13 +498,19 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         return mLabel.isEmpty() ? context.getString(R.string.default_label) : mLabel;
     }
 
+    public boolean isLockedToTimezone() {
+        return mTimezoneId != null && !mTimezoneId.trim().isEmpty();
+    }
+
     /**
      * Return the time when an alarm should fire.
      *
      * @return the time
      */
     public Calendar getAlarmTime() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = isLockedToTimezone()
+            ? Calendar.getInstance(TimeZone.getTimeZone(mTimezoneId))
+            : Calendar.getInstance();
         calendar.set(Calendar.YEAR, mYear);
         calendar.set(Calendar.MONTH, mMonth);
         calendar.set(Calendar.DAY_OF_MONTH, mDay);

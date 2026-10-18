@@ -14,7 +14,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Space;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +28,7 @@ import androidx.core.widget.NestedScrollView;
 
 import com.qwibbler.salarm.R;
 import com.qwibbler.salarm.data.SettingsDAO;
+import com.qwibbler.salarm.databinding.DialogCustomLayoutBinding;
 import com.qwibbler.salarm.databinding.DialogMessageCustomBinding;
 import com.qwibbler.salarm.databinding.DialogTitleCustomBinding;
 import com.qwibbler.salarm.utils.ThemeUtils;
@@ -47,6 +52,52 @@ public class CustomDialog {
         @Nullable DialogInterface.OnClickListener neutralListener,
         @Nullable OnDialogReady onDialogReady,
         @NonNull SoftInputMode softInputMode
+    ) {
+        List<DialogButton> buttons = new ArrayList<>();
+        if (neutralText != null) buttons.add(new DialogButton(neutralText, neutralListener));
+        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
+        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
+        return create(context, styleRes, icon, title, message, customView, onDialogReady, softInputMode, buttons.toArray(new DialogButton[0]));
+    }
+
+    public static AlertDialog create(
+        @NonNull Context context,
+        @Nullable @StyleRes Integer styleRes,
+        @Nullable Drawable icon,
+        @Nullable CharSequence title,
+        @Nullable CharSequence message,
+        @Nullable View customView,
+        @Nullable CharSequence positiveText,
+        @Nullable DialogInterface.OnClickListener positiveListener,
+        @Nullable CharSequence negativeText,
+        @Nullable DialogInterface.OnClickListener negativeListener,
+        @Nullable CharSequence neutralText,
+        @Nullable DialogInterface.OnClickListener neutralListener,
+        @Nullable CharSequence copyText,
+        @Nullable View.OnClickListener copyListener,
+        @Nullable OnDialogReady onDialogReady,
+        @NonNull SoftInputMode softInputMode
+    ) {
+        List<DialogButton> buttons = new ArrayList<>();
+        if (neutralText != null) buttons.add(new DialogButton(neutralText, neutralListener));
+        if (negativeText != null) buttons.add(new DialogButton(negativeText, negativeListener));
+        if (positiveText != null) buttons.add(new DialogButton(positiveText, positiveListener));
+        if (copyText != null) buttons.add(new DialogButton(copyText, (d, w) -> {
+            if (copyListener != null) copyListener.onClick(null);
+        }));
+        return create(context, styleRes, icon, title, message, customView, onDialogReady, softInputMode, buttons.toArray(new DialogButton[0]));
+    }
+
+    public static AlertDialog create(
+        @NonNull Context context,
+        @Nullable @StyleRes Integer styleRes,
+        @Nullable Drawable icon,
+        @Nullable CharSequence title,
+        @Nullable CharSequence message,
+        @Nullable View customView,
+        @Nullable OnDialogReady onDialogReady,
+        @NonNull SoftInputMode softInputMode,
+        DialogButton... buttons
     ) {
 
         SharedPreferences prefs = getDefaultSharedPreferences(context);
@@ -74,60 +125,78 @@ public class CustomDialog {
             builder.setCustomTitle(titleBinding.getRoot());
         }
 
-        // Dialog view
-        View dialogContent = null;
+        // Custom Layout for Content and Buttons
+        DialogCustomLayoutBinding layoutBinding = DialogCustomLayoutBinding.inflate(LayoutInflater.from(context));
+        View dialogViewRoot = layoutBinding.getRoot();
 
-        // Message
+        // Content (Message or Custom View)
+        View content = null;
         if (message != null) {
             DialogMessageCustomBinding messageBinding = DialogMessageCustomBinding.inflate(LayoutInflater.from(context));
             messageBinding.dialogMessage.setText(message);
             messageBinding.dialogMessage.setTypeface(typeface);
-
-            dialogContent = messageBinding.getRoot();
-
-            builder.setView(dialogContent);
+            content = messageBinding.getRoot();
         } else if (customView != null) {
-            dialogContent = customView;
-
-            builder.setView(dialogContent);
+            content = customView;
         }
 
-        final View finalDialogContent = dialogContent;
-
-        if (positiveText != null) {
-            builder.setPositiveButton(positiveText, positiveListener);
-        }
-        if (negativeText != null) {
-            builder.setNegativeButton(negativeText, negativeListener);
-        }
-        if (neutralText != null) {
-            builder.setNeutralButton(neutralText, neutralListener);
+        if (content != null) {
+            if (content.getParent() != null) {
+                ((android.view.ViewGroup) content.getParent()).removeView(content);
+            }
+            layoutBinding.customContentContainer.addView(content);
         }
 
+        builder.setView(dialogViewRoot);
         AlertDialog dialog = builder.create();
 
-        // Apply typeface to buttons
+        // Action Buttons
+        if (buttons != null && buttons.length > 0) {
+            for (int i = 0; i < buttons.length; i++) {
+                final DialogButton dialogButton = buttons[i];
+                if (dialogButton == null || dialogButton.text == null) continue;
+
+                com.google.android.material.button.MaterialButton button = new com.google.android.material.button.MaterialButton(context, null, android.R.attr.buttonBarButtonStyle);
+                button.setText(dialogButton.text);
+                button.setAllCaps(false);
+                button.setTypeface(typeface);
+                button.setOnClickListener(v -> {
+                    if (dialogButton.listener != null) {
+                        dialogButton.listener.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+                    }
+                    if (dialogButton.dismissOnClick) {
+                        dialog.dismiss();
+                    }
+                });
+
+                // Add button with natural width
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                layoutBinding.customButtonBar.addView(button, lp);
+
+                // Add flexible spacer between buttons for "space-between" effect
+                if (i < buttons.length - 1) {
+                    Space spacer = new Space(context);
+                    LinearLayout.LayoutParams spacerLp = new LinearLayout.LayoutParams(0, 0, 1f);
+                    layoutBinding.customButtonBar.addView(spacer, spacerLp);
+                }
+            }
+        } else {
+            layoutBinding.customButtonBar.setVisibility(View.GONE);
+        }
+
+        final View finalContent = content;
+
+        // Apply typeface and extra logic on show
         dialog.setOnShowListener(d -> {
             if (dialog.getWindow() != null) {
                 Utils.setupTapToDismissKeyboard(dialog.getWindow());
             }
 
-            if (finalDialogContent != null && finalDialogContent.findViewById(R.id.scroll_view) != null) {
-                configureScrollView(finalDialogContent);
-            }
-
-            Button positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            Button negative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-            Button neutral = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-
-            if (positive != null) {
-                positive.setTypeface(typeface);
-            }
-            if (negative != null) {
-                negative.setTypeface(typeface);
-            }
-            if (neutral != null) {
-                neutral.setTypeface(typeface);
+            if (finalContent != null && finalContent.findViewById(R.id.scroll_view) != null) {
+                configureScrollView(finalContent);
             }
 
             if (onDialogReady != null) {
@@ -137,12 +206,8 @@ public class CustomDialog {
 
         // Window configuration
         Window window = dialog.getWindow();
-
         if (window != null) {
-            // Display within the cutout area
             ThemeUtils.allowDisplayCutout(window);
-
-            // Soft input mode
             if (softInputMode == SoftInputMode.SHOW_KEYBOARD) {
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
                     | WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
@@ -155,6 +220,7 @@ public class CustomDialog {
 
     private static void configureScrollView(View dialogView) {
         NestedScrollView scrollView = dialogView.findViewById(R.id.scroll_view);
+        if (scrollView == null) return;
 
         boolean scrollable = scrollView.canScrollVertically(1) || scrollView.canScrollVertically(-1);
 
@@ -163,7 +229,6 @@ public class CustomDialog {
         }
 
         scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-
             scrollView.setScrollIndicators(View.SCROLL_INDICATOR_TOP | View.SCROLL_INDICATOR_BOTTOM);
 
             boolean atTop = !scrollView.canScrollVertically(-1);
@@ -177,6 +242,18 @@ public class CustomDialog {
             }
         });
     }
+
+    public record DialogButton(CharSequence text, DialogInterface.OnClickListener listener, boolean dismissOnClick) {
+            public DialogButton(@Nullable CharSequence text, @Nullable DialogInterface.OnClickListener listener) {
+                this(text, listener, true);
+            }
+
+            public DialogButton(@Nullable CharSequence text, @Nullable DialogInterface.OnClickListener listener, boolean dismissOnClick) {
+                this.text = text;
+                this.listener = listener;
+                this.dismissOnClick = dismissOnClick;
+            }
+        }
 
     public interface OnDialogReady {
         void onReady(AlertDialog dialog);

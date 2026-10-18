@@ -119,6 +119,8 @@ public class ClockProvider extends ContentProvider {
             ALARMS_TABLE_NAME + "." + AlarmsColumns.TAGS);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.DISMISS_AFTER,
             ALARMS_TABLE_NAME + "." + AlarmsColumns.DISMISS_AFTER);
+        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.TIMEZONE_ID,
+            ALARMS_TABLE_NAME + "." + AlarmsColumns.TIMEZONE_ID);
 
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_STATE,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_STATE);
@@ -166,6 +168,8 @@ public class ClockProvider extends ContentProvider {
             INSTANCES_TABLE_NAME + "." + InstancesColumns.DISMISS_AFTER);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.INITIAL_ALARM_TIME,
             INSTANCES_TABLE_NAME + "." + InstancesColumns.INITIAL_ALARM_TIME);
+        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.TIMEZONE_ID,
+            INSTANCES_TABLE_NAME + "." + InstancesColumns.TIMEZONE_ID);
     }
 
     static {

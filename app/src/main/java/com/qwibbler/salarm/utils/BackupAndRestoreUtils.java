@@ -195,6 +195,7 @@ public class BackupAndRestoreUtils {
             alarmObject.put("backgroundImage", alarm.backgroundImage);
             alarmObject.put("blurIntensity", alarm.blurIntensity);
             alarmObject.put("dismissAfter", alarm.dismissAfter);
+            alarmObject.put("timezoneId", alarm.timezoneId);
 
             if (alarm.daysOfWeek.isRepeating() || !alarm.isSpecifiedDate()) {
                 alarmsArray.put(alarmObject);
@@ -452,10 +453,13 @@ public class BackupAndRestoreUtils {
             day = calendar.get(Calendar.DAY_OF_MONTH);
         }
 
+        String timezoneId = alarmObject.has("timezoneId") && !alarmObject.isNull("timezoneId") ? alarmObject.optString("timezoneId") : null;
+
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes, vibrate, vibrationPattern, flash,
             Weekdays.fromBits(daysOfWeek), label, syncAlarmByLabel, alarmRingtone, deleteAfterUse, autoSilenceDuration, snoozeDuration,
             missedAlarmRepeatLimit, crescendoDuration, alarmVolume, manualSortOrder, pauseStartDate, pauseEndDate,
             relationalRuleId, newBackgroundImage, blurIntensity, dismissAfter);
+        restoredAlarm.timezoneId = timezoneId;
 
         restoredAlarm.addAlarm(contentResolver);
 

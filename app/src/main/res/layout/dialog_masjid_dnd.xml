@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="?attr/dialogPreferredPadding"
+        android:paddingVertical="12dp">
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/dnd_enabled_checkbox"
+            style="@style/RelationalAlarm.HeadingCheckbox"
+            android:layout_marginTop="8dp"
+            android:text="@string/masjid_dnd_title" />
+
+        <!-- DND Row: From [Before] mins before Jamaat to [After] mins after Jamat -->
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/dnd_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:alignItems="center"
+            app:flexWrap="wrap">
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_from" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_before_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="0" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_before_jamaat" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/RelationalAlarm.DropdownLayout.Numeric">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dnd_after_value"
+                    style="@style/RelationalAlarm.AutoCompleteTextView.Numeric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/RelationalAlarm.Text"
+                android:text="@string/masjid_dnd_after_jamaat" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

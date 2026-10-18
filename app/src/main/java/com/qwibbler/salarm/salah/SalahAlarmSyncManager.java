@@ -2,21 +2,31 @@ package com.qwibbler.salarm.salah;
 
 import static com.qwibbler.salarm.SalarmApplication.getDefaultSharedPreferences;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.batoulapps.adhan.CalculationMethod;
 import com.qwibbler.salarm.alarms.AlarmStateManager;
 import com.qwibbler.salarm.base.AppExecutors;
+import com.qwibbler.salarm.data.DataModel;
 import com.qwibbler.salarm.data.SettingsDAO;
 import com.qwibbler.salarm.data.Weekdays;
 import com.qwibbler.salarm.provider.Alarm;
 import com.qwibbler.salarm.provider.AlarmInstance;
+import com.qwibbler.salarm.utils.AlarmUtils;
 import com.qwibbler.salarm.utils.LogUtils;
+import com.qwibbler.salarm.utils.WidgetUtils;
+import com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,7 +52,6 @@ public class SalahAlarmSyncManager {
         // Persist to Room
         AppExecutors.getDiskIO().execute(() -> {
             try {
-                LogUtils.i("Persisting RelationalRule to Room database...");
                 if (rule.id == 0) {
                     rule.id = db.relationalRuleDao().insert(rule);
                     LogUtils.i("Inserted new rule with ID: " + rule.id);
@@ -52,7 +61,7 @@ public class SalahAlarmSyncManager {
                 }
 
                 // Sync to AOSP SQLite
-                Alarm syncedAlarm = syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone);
+                Alarm syncedAlarm = syncRuleToNativeAlarmInternal(appContext, rule, defaultRingtone, null);
 
                 if (listener != null) {
                     AppExecutors.getMainThread().post(() -> listener.onRuleSynced(syncedAlarm));
@@ -64,12 +73,238 @@ public class SalahAlarmSyncManager {
         });
     }
 
-    private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone) {
+    public static void syncSelectedRulesToAlarms(Context context) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                List<RelationalRule> allRules = db.relationalRuleDao().getAll();
+                List<Masjid> allMasjids = db.masjidDao().getAll();
+
+                for (RelationalRule rule : allRules) {
+                    boolean shouldBeActive = rule.isSelected;
+
+                    Masjid masjid = null;
+                    if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+                        MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+                        if (event != null) {
+                            for (Masjid m : allMasjids) {
+                                if (m.id == event.masjidId) {
+                                    masjid = m;
+                                    break;
+                                }
+                            }
+                        }
+                        if (masjid == null || !masjid.showMasjidEvents) {
+                            shouldBeActive = false;
+                        }
+                    }
+
+                    if (shouldBeActive) {
+                        syncRuleToNativeAlarmInternal(appContext, rule, null, masjid);
+                    } else {
+                        disableNativeAlarmForRule(appContext, rule.id);
+                    }
+                }
+                scheduleAllMasjidDnd(appContext);
+            } catch (Throwable t) {
+                LogUtils.e("Error syncing selected rules", t);
+            }
+        });
+    }
+
+    private static void disableNativeAlarmForRule(Context context, long ruleId) {
+        ContentResolver cr = context.getContentResolver();
+        List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(ruleId));
+        for (Alarm alarm : alarms) {
+            if (alarm.enabled) {
+                alarm.enabled = false;
+                alarm.updateAlarm(cr);
+                AlarmStateManager.deleteAllInstances(context, alarm.id);
+            }
+        }
+    }
+
+    public static void syncAutoTagsForAlarm(Context context, Alarm nativeAlarm, RelationalRule rule, Masjid providedMasjid) {
+        if (nativeAlarm == null || rule == null) return;
+
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        SalahDatabase db = SalahDatabase.getDatabase(context);
+
+        if (nativeAlarm.tags == null) {
+            nativeAlarm.tags = new ArrayList<>();
+        }
+
+        boolean autoTagEnabled = SettingsDAO.isAutoTagAlarmsEnabled(prefs);
+
+        if (!autoTagEnabled) {
+            // IF autotag is off, DO NOT autotag anything!
+            // Ensure masjid is NOT autotagged with either generic masjid tag OR individual masjid name tag.
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+            return;
+        }
+
+        // 1. Tag with Salah auto-tag if auto-tagging is enabled and tag name is non-empty
+        String salahTag = SettingsDAO.getAutoTagSalahName(prefs);
+        if (salahTag != null && !salahTag.trim().isEmpty()) {
+            salahTag = salahTag.trim();
+            if (!nativeAlarm.tags.contains(salahTag)) {
+                nativeAlarm.tags.add(salahTag);
+            }
+        }
+
+        AlarmUtils.syncInternationalAutoTag(prefs, nativeAlarm);
+
+        // 2. Determine if the anchor event was a masjid event
+        Masjid masjid = providedMasjid;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            if (masjid == null && event != null) {
+                masjid = db.masjidDao().getById(event.masjidId);
+            }
+        }
+        if (masjid == null && rule.masjidId > 0) {
+            masjid = db.masjidDao().getById(rule.masjidId);
+        }
+
+        if (masjid != null) {
+            // Anchor event was a masjid event: ALSO tag with generic masjid tag AND "[masjid name]"
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                genericMasjidTag = genericMasjidTag.trim();
+                if (!nativeAlarm.tags.contains(genericMasjidTag)) {
+                    nativeAlarm.tags.add(genericMasjidTag);
+                }
+            }
+
+            String masjidName = masjid.name != null ? masjid.name.trim() : "";
+            if (!masjidName.isEmpty() && !nativeAlarm.tags.contains(masjidName)) {
+                nativeAlarm.tags.add(masjidName);
+            }
+
+            // Remove tags of any other masjids in case the masjid anchor was changed
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null && !m.name.trim().equalsIgnoreCase(masjidName)) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        } else {
+            // Not a masjid event: remove generic masjid tag and any masjid name tags
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        }
+    }
+
+    public static void syncAutoTagsForAnchorChange(Context context, Alarm nativeAlarm, RelationalRule rule, Masjid masjid) {
+        if (nativeAlarm == null || rule == null) return;
+
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        SalahDatabase db = SalahDatabase.getDatabase(context);
+
+        if (nativeAlarm.tags == null) {
+            nativeAlarm.tags = new ArrayList<>();
+        }
+
+        if (masjid != null) {
+            // Switched to or updated a Masjid event anchor
+            if (SettingsDAO.isAutoTagAlarmsEnabled(prefs)) {
+                String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+                if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                    genericMasjidTag = genericMasjidTag.trim();
+                    if (!nativeAlarm.tags.contains(genericMasjidTag)) {
+                        nativeAlarm.tags.add(genericMasjidTag);
+                    }
+                }
+
+                String masjidName = masjid.name != null ? masjid.name.trim() : "";
+                if (!masjidName.isEmpty() && !nativeAlarm.tags.contains(masjidName)) {
+                    nativeAlarm.tags.add(masjidName);
+                }
+            }
+
+            // Remove tags of any other masjids in case the masjid anchor was changed
+            String currentMasjidName = masjid.name != null ? masjid.name.trim() : "";
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null && !m.name.trim().equalsIgnoreCase(currentMasjidName)) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        } else {
+            // Switched to a Base event anchor: remove generic masjid tag and any masjid name tags
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        }
+    }
+
+    private static Alarm syncRuleToNativeAlarmInternal(Context context, RelationalRule rule, Uri defaultRingtone, Masjid providedMasjid) {
         ContentResolver cr = context.getContentResolver();
 
         // Find existing alarm mapped to this rule
         List<Alarm> alarms = Alarm.getAlarms(cr, Alarm.RELATIONAL_RULE_ID + "=?", String.valueOf(rule.id));
         Alarm nativeAlarm;
+
+        Masjid masjid = providedMasjid;
+        MasjidEvent event = null;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            event = SalahDatabase.getDatabase(context).masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            if (masjid == null && event != null) {
+                masjid = SalahDatabase.getDatabase(context).masjidDao().getById(event.masjidId);
+            }
+        }
+        if (masjid == null && rule.masjidId > 0) {
+            masjid = SalahDatabase.getDatabase(context).masjidDao().getById(rule.masjidId);
+        }
+
+        boolean isJuma = (event != null && "JUMA".equalsIgnoreCase(event.salahType))
+                || "JUMA".equalsIgnoreCase(rule.masjidSalahType);
+
+        String label;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            String masjidName = masjid != null ? masjid.name : "Masjid";
+            String type = event != null ? event.salahType : "Salah";
+            label = SalahUtils.getLocalizedSalahName(context, type) + " - " + masjidName;
+        } else if (rule.masjidSalahType != null) {
+            // Tracked default alarm
+            label = SalahUtils.getLocalizedSalahName(context, rule.masjidSalahType);
+        } else if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.basicEvent != null) {
+            label = RelationalRule.getEventName(context, rule.definition.anchor.basicEvent);
+        } else {
+            label = "Salah";
+        }
+
         if (alarms.isEmpty()) {
             LogUtils.i("Creating new native alarm for rule: " + rule.id);
 
@@ -77,34 +312,34 @@ public class SalahAlarmSyncManager {
             if (ringtoneToUse == null) {
                 // Solution B: Fallback to thread-hopping fetcher if not provided
                 ringtoneToUse = AppExecutors.getOnMainThread(() ->
-                    com.qwibbler.salarm.data.DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
+                    DataModel.getDataModel().getAlarmRingtoneUriFromSettings(true));
             }
 
             nativeAlarm = Alarm.createDefaultAlarm(context, 0, 0, ringtoneToUse, true);
             nativeAlarm.relationalRuleId = rule.id;
             nativeAlarm.enabled = rule.enabled;
-            nativeAlarm.daysOfWeek = Weekdays.fromBits(0x7F);
-            nativeAlarm.label = "🔔 " + RelationalRule.getEventName(context, rule.anchorEvent);
+            nativeAlarm.daysOfWeek = isJuma ? Weekdays.fromCalendarDays(Calendar.FRIDAY) : Weekdays.fromBits(0x7F);
+            nativeAlarm.label = "🔔 " + label;
 
-            // Add auto-tag if enabled
-            SharedPreferences prefs = getDefaultSharedPreferences(context);
-            if (SettingsDAO.isSalahAutoTagEnabled(prefs)) {
-                String tagName = SettingsDAO.getSalahAutoTagName(prefs);
-                if (!nativeAlarm.tags.contains(tagName)) {
-                    nativeAlarm.tags.add(tagName);
-                }
-            }
+            syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
 
             nativeAlarm.addAlarm(cr);
             LogUtils.i("Created new native alarm with ID: " + nativeAlarm.id);
         } else {
             nativeAlarm = alarms.get(0);
             nativeAlarm.enabled = rule.enabled;
+            if (isJuma) {
+                nativeAlarm.daysOfWeek = Weekdays.fromCalendarDays(Calendar.FRIDAY);
+            }
+            nativeAlarm.label = "🔔 " + label;
+
+            syncAutoTagsForAnchorChange(context, nativeAlarm, rule, masjid);
+
             nativeAlarm.updateAlarm(cr);
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
         }
 
-        recalculateNextInstanceInternal(context, nativeAlarm, rule, null);
+        recalculateNextInstanceInternal(context, nativeAlarm, rule);
 
         return nativeAlarm;
     }
@@ -145,6 +380,10 @@ public class SalahAlarmSyncManager {
         }
     }
 
+    private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule) {
+        recalculateNextInstanceInternal(context, alarm, rule, null);
+    }
+
     private static void recalculateNextInstanceInternal(Context context, Alarm alarm, RelationalRule rule, Calendar skipTime) {
         if (!alarm.enabled) {
             alarm.updateAlarm(context.getContentResolver());
@@ -153,7 +392,7 @@ public class SalahAlarmSyncManager {
                 AppExecutors.getDiskIO().execute(() -> SalahDatabase.getDatabase(context).relationalRuleDao().update(rule));
             }
             AlarmStateManager.deleteAllInstances(context, alarm.id);
-            com.qwibbler.salarm.utils.WidgetUtils.scheduleWidgetUpdate(context, com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider.class);
+            WidgetUtils.scheduleWidgetUpdate(context, SalahTimelineWidgetProvider.class);
             return;
         }
 
@@ -161,8 +400,27 @@ public class SalahAlarmSyncManager {
         final SharedPreferences prefs = getDefaultSharedPreferences(context);
         final boolean wasStyledDaysEnabled = alarm.isRepeatDayStyleEnabled(prefs);
 
-        double[] coords = SalahUtils.getCoordinates(context);
-        CalculationMethod method = SalahUtils.getCalculationMethod(context);
+        double[] coords = null;
+        CalculationMethod method = null;
+        if (rule.definition != null && rule.definition.anchor != null && rule.definition.anchor.masjidEventId != null) {
+            SalahDatabase db = SalahDatabase.getDatabase(context);
+            MasjidEvent event = db.masjidEventDao().getById(rule.definition.anchor.masjidEventId);
+            if (event != null) {
+                Masjid masjid = db.masjidDao().getById(event.masjidId);
+                if (masjid != null) {
+                    method = masjid.getCalculationMethod(context);
+                    if (masjid.latitude != 0.0 || masjid.longitude != 0.0) {
+                        coords = new double[]{masjid.latitude, masjid.longitude};
+                    }
+                }
+            }
+        }
+        if (coords == null) {
+            coords = SalahUtils.getCoordinates(context);
+        }
+        if (method == null) {
+            method = SalahUtils.getCalculationMethod(context);
+        }
 
         Calendar now = Calendar.getInstance();
         // Use minute precision for all comparisons to match AOSP Alarm behavior
@@ -188,7 +446,7 @@ public class SalahAlarmSyncManager {
             }
         }
 
-        // If it's a one-time alarm for a specific date, start from that date unless already past it
+        // If it's a one-time alarm for a specific day, start from that date unless already past it
         if (alarm.year > 0) {
             Calendar specificDate = Calendar.getInstance();
             specificDate.set(alarm.year, alarm.month, alarm.day, 0, 0, 0);
@@ -213,7 +471,7 @@ public class SalahAlarmSyncManager {
             }
 
             SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(context, candidateDate.getTime(), coords[0], coords[1], method);
-            result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+            result = RelationalRule.evaluateTimeWithConflictCheck(context, rule, times, candidateDate.getTime());
 
             if (result.time() > 0) {
                 long resultMin = (result.time() / 60000) * 60000;
@@ -280,10 +538,116 @@ public class SalahAlarmSyncManager {
         instance.addInstance(cr);
         AlarmStateManager.registerInstance(context, instance, true);
 
-        com.qwibbler.salarm.utils.WidgetUtils.scheduleWidgetUpdate(context, com.qwibbler.salarm.widgets.SalahTimelineWidgetProvider.class);
+        WidgetUtils.scheduleWidgetUpdate(context, SalahTimelineWidgetProvider.class);
 
         if (wasStyledDaysEnabled && skipTime != null) {
             alarm.enableRepeatDayStyleIfAllDaysSelected(prefs);
+        }
+    }
+
+    public static void scheduleAllMasjidDnd(Context context) {
+        final Context appContext = context.getApplicationContext();
+        AppExecutors.getDiskIO().execute(() -> {
+            try {
+                SalahDatabase db = SalahDatabase.getDatabase(appContext);
+                List<Masjid> masjids = db.masjidDao().getAll();
+                List<MasjidEvent> events = db.masjidEventDao().getAll();
+
+                List<DndInterval> intervals = new ArrayList<>();
+                long now = System.currentTimeMillis();
+
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, 0);
+                cal.set(Calendar.MINUTE, 0);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+
+                // Evaluate for today and next 7 days
+                for (int day = 0; day < 7; day++) {
+                    Date date = cal.getTime();
+                    for (MasjidEvent event : events) {
+                        if (!event.dndEnabled) continue;
+
+                        Masjid masjid = null;
+                        for (Masjid m : masjids) {
+                            if (m.id == event.masjidId) {
+                                masjid = m;
+                                break;
+                            }
+                        }
+                        if (masjid == null || !masjid.showMasjidEvents) continue;
+
+                        if ("JUMA".equalsIgnoreCase(event.salahType) && cal.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+                            continue;
+                        }
+
+                        double[] coords = (masjid.latitude != 0.0 || masjid.longitude != 0.0)
+                                ? new double[]{masjid.latitude, masjid.longitude}
+                                : SalahUtils.getCoordinates(appContext);
+                        CalculationMethod method = masjid.getCalculationMethod(appContext);
+                        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(appContext, date, coords[0], coords[1], method);
+
+                        long eventTime = SalahCalculator.evaluateMasjidEvent(appContext, event, times, date, true);
+                        if (eventTime > 0) {
+                            long start = eventTime - (event.dndBeforeMinutes * 60 * 1000L);
+                            long end = eventTime + (event.dndAfterMinutes * 60 * 1000L);
+                            if (end > now) {
+                                intervals.add(new DndInterval(start, end));
+                            }
+                        }
+                    }
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+
+                List<DndInterval> merged = mergeIntervals(intervals);
+
+                AlarmManager am = (AlarmManager) appContext.getSystemService(Context.ALARM_SERVICE);
+                if (am != null) {
+                    for (int i = 0; i < merged.size(); i++) {
+                        DndInterval interval = merged.get(i);
+                        if (interval.end > now) {
+                            Intent startIntent = new Intent(appContext, MasjidDndReceiver.class).setAction(MasjidDndReceiver.ACTION_DND_ON);
+                            PendingIntent startPi = PendingIntent.getBroadcast(appContext, 20000 + i * 2, startIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                            if (interval.start > now) {
+                                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval.start, startPi);
+                            }
+
+                            Intent endIntent = new Intent(appContext, MasjidDndReceiver.class).setAction(MasjidDndReceiver.ACTION_DND_OFF);
+                            PendingIntent endPi = PendingIntent.getBroadcast(appContext, 20000 + i * 2 + 1, endIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, interval.end, endPi);
+                        }
+                    }
+                }
+            } catch (Throwable t) {
+                LogUtils.e("Error scheduling Masjid DND", t);
+            }
+        });
+    }
+
+    private static List<DndInterval> mergeIntervals(List<DndInterval> intervals) {
+        if (intervals.isEmpty()) return intervals;
+        Collections.sort(intervals, (a, b) -> Long.compare(a.start, b.start));
+        List<DndInterval> merged = new ArrayList<>();
+        DndInterval current = intervals.get(0);
+        for (int i = 1; i < intervals.size(); i++) {
+            DndInterval next = intervals.get(i);
+            if (next.start <= current.end) {
+                current = new DndInterval(current.start, Math.max(current.end, next.end));
+            } else {
+                merged.add(current);
+                current = next;
+            }
+        }
+        merged.add(current);
+        return merged;
+    }
+
+    private static class DndInterval {
+        final long start;
+        final long end;
+        DndInterval(long start, long end) {
+            this.start = start;
+            this.end = end;
         }
     }
 

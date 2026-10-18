@@ -28,8 +28,10 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_AUTODISMISS_BY_DEFAULT = "key_salah_autodismiss_by_default";
     public static final String KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING = "key_salah_adjust_alarm_after_rounding";
     public static final String KEY_SALAH_DISPLAY_NEXT_EVENT_INFO = "key_salah_display_next_event_info";
-    public static final String KEY_SALAH_AUTO_TAG = "key_salah_auto_tag";
-    public static final String KEY_SALAH_AUTO_TAG_NAME = "key_salah_auto_tag_name";
+    public static final String KEY_AUTO_TAG_ALARMS = "key_auto_tag_alarms";
+    public static final String KEY_AUTO_TAG_SALAH_NAME = "key_auto_tag_salah_name";
+    public static final String KEY_AUTO_TAG_MASJID_NAME = "key_auto_tag_masjid_name";
+    public static final String KEY_AUTO_TAG_INTERNATIONAL_NAME = "key_auto_tag_international_name";
 
     public static final String KEY_SALAH_ALARM_STYLE_OVERRIDE = "key_salah_alarm_style_override";
     public static final String KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE = "key_salah_alarm_display_style_override";
@@ -253,6 +255,7 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_VIEW_LATITUDE = "key_salah_view_latitude";
     public static final String KEY_SALAH_VIEW_LONGITUDE = "key_salah_view_longitude";
     public static final String KEY_SALAH_VIEW_CITY_NAME = "key_salah_view_city_name";
+    public static final String KEY_SALAH_RECENT_LOCATIONS = "key_salah_recent_locations";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";
@@ -502,7 +505,7 @@ public class PreferencesKeys {
     public static final String KEY_SCREENSAVER_DATE_IN_ITALIC = "key_screensaver_date_in_italic";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_BOLD = "key_screensaver_next_alarm_in_bold";
     public static final String KEY_SCREENSAVER_NEXT_ALARM_IN_ITALIC = "key_screensaver_next_alarm_in_italic";
-    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_ON";
+    public static final String KEY_SCREENSAVER_KEEP_SCREEN_ON = "key_screensaver_keep_screen_on";
     public static final String KEY_SCREENSAVER_BACKGROUND_IMAGE = "key_screensaver_background_image";
     public static final String KEY_SCREENSAVER_BLUR_INTENSITY = "key_screensaver_blur_intensity";
     public static final String KEY_SCREENSAVER_PREVIEW = "key_screensaver_preview";

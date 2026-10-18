@@ -6,6 +6,7 @@ import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Madhab;
 import com.batoulapps.adhan.PrayerTimes;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -45,5 +46,49 @@ public class SalahCalculatorTest {
         assertNotNull(times.fajr);
         assertNotNull(times.asrHanafi);
         assertNotNull(times.asrShafi);
+    }
+
+    @Test
+    public void testEvaluateJumaWithIgnoreJumaDayCheck() {
+        // Wednesday July 15, 2026
+        Calendar cal = Calendar.getInstance();
+        cal.set(2026, Calendar.JULY, 15);
+        Date date = cal.getTime();
+
+        MasjidEvent event = new MasjidEvent();
+        event.salahType = "JUMA";
+        event.definition = new RelationalDefinition();
+        event.definition.isFixedTime = true;
+        event.definition.fixedHour = 13;
+        event.definition.fixedMinute = 30;
+
+        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(date, 24.8607, 67.0011, CalculationMethod.KARACHI);
+
+        long resultWithCheck = SalahCalculator.evaluateMasjidEvent(null, event, times, date, false);
+        Assert.assertEquals(0, resultWithCheck);
+
+        long resultIgnoreCheck = SalahCalculator.evaluateMasjidEvent(null, event, times, date, true);
+        Assert.assertTrue(resultIgnoreCheck > 0);
+    }
+
+    @Test
+    public void testEvaluateUndefinedMasjidEventReturnsZeroWithoutCrashing() {
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+        SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(date, 24.8607, 67.0011, CalculationMethod.KARACHI);
+
+        // Null event
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, null, times, date, true));
+
+        // Event with null definition
+        MasjidEvent eventWithNullDef = new MasjidEvent();
+        eventWithNullDef.definition = null;
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, eventWithNullDef, times, date, true));
+
+        // Event with empty definition
+        MasjidEvent eventWithEmptyDef = new MasjidEvent();
+        eventWithEmptyDef.definition = new RelationalDefinition();
+        eventWithEmptyDef.definition.anchor = null;
+        Assert.assertEquals(0, SalahCalculator.evaluateMasjidEvent(null, eventWithEmptyDef, times, date, true));
     }
 }

@@ -16,6 +16,7 @@ import static com.qwibbler.salarm.settings.PreferencesKeys.KEY_VISIBLE_TABS;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VISIBLE_TABS;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_SALAH;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_QIBLA;
+import static com.qwibbler.salarm.settings.PreferencesDefaultValues.VISIBLE_TAB_MASJID;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +32,7 @@ import com.qwibbler.salarm.data.Timer;
 import com.qwibbler.salarm.provider.Alarm;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -75,13 +77,14 @@ final class TabModel {
         // Migration: ensure new tabs are enabled by default for existing users
         if (!mPrefs.getBoolean(KEY_SALAH_TABS_MIGRATED, false)) {
             Set<String> visibleTabs = mPrefs.getStringSet(KEY_VISIBLE_TABS, null);
-            java.util.Set<String> newSet;
+            Set<String> newSet;
             if (visibleTabs == null) {
-                newSet = new java.util.HashSet<>(DEFAULT_VISIBLE_TABS);
+                newSet = new HashSet<>(DEFAULT_VISIBLE_TABS);
             } else {
-                newSet = new java.util.HashSet<>(visibleTabs);
+                newSet = new HashSet<>(visibleTabs);
                 newSet.add(VISIBLE_TAB_SALAH);
                 newSet.add(VISIBLE_TAB_QIBLA);
+                newSet.add(VISIBLE_TAB_MASJID);
             }
             mPrefs.edit()
                     .putStringSet(KEY_VISIBLE_TABS, newSet)
@@ -97,6 +100,7 @@ final class TabModel {
         final boolean isStopwatchTabVisible = SettingsDAO.isStopwatchTabVisible(mPrefs);
         final boolean isSalahTabVisible = SettingsDAO.isSalahTabVisible(mPrefs);
         final boolean isQiblaTabVisible = SettingsDAO.isQiblaTabVisible(mPrefs);
+        final boolean isMasjidTabVisible = SettingsDAO.isMasjidTabVisible(mPrefs);
 
         if (isAlarmTabVisible) {
             newActiveTabs.add(Tab.ALARMS);
@@ -120,6 +124,10 @@ final class TabModel {
 
         if (isQiblaTabVisible) {
             newActiveTabs.add(Tab.QIBLA);
+        }
+
+        if (isMasjidTabVisible) {
+            newActiveTabs.add(Tab.MASJID);
         }
 
         // This shouldn't happen because it's impossible to uncheck all the entries in the "Visible tabs" setting

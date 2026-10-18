@@ -18,6 +18,9 @@ public interface RelationalRuleDao {
     @Query("SELECT * FROM relational_rules WHERE id = :id")
     RelationalRule getById(long id);
 
+    @Query("SELECT * FROM relational_rules WHERE masjidId = :masjidId")
+    List<RelationalRule> getByMasjidId(long masjidId);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insert(RelationalRule rule);
 

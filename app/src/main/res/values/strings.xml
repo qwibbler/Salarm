@@ -4,7 +4,7 @@
     modified
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" xmlns:tools="http://schemas.android.com/tools"
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
     tools:ignore="MissingTranslation">
 
     <!-- ******************** -->
@@ -115,6 +115,17 @@
     <string name="pause_alarm_title">Pause alarm</string>
     <!-- Label title in the alarm editing panel when the pause is set -->
     <string name="pause_alarm_range">Paused: %1$s</string>
+    <!-- Label title in the alarm editing panel to lock alarm to timezone -->
+    <string name="lock_to_timezone">Lock to timezone</string>
+    <!-- Label title in the alarm editing panel when locked to a timezone -->
+    <string name="locked_to_timezone">Locked to %1$s</string>
+    <!-- Information displaying the set time and timezone offset for a locked timezone alarm -->
+    <string name="locked_timezone_set_time_and_offset">%1$s %2$s</string>
+    <!-- Title of timezone picker dialog -->
+    <string name="select_timezone_dialog_title">Lock to timezone</string>
+    <!-- Hint for searching timezones in timezone picker dialog -->
+    <string name="search_timezone_hint">Search timezone…</string>
+    <string name="lock_emoji" translatable="false">🔒</string>
     <!-- Label shown when user is setting up non-repeating alarm for tomorrow -->
     <string name="alarm_tomorrow">Tomorrow</string>
     <!-- Label shown when user is setting up non-repeating alarm for later today -->
@@ -1431,7 +1442,7 @@
     <!-- Version for about screen -->
     <string name="version">Version</string>
     <!-- Version text [CHAR LIMIT=30] -->
-    <string name="version_text">Version <xliff:g id="VERSION_NUMBER" example="1.0">%1$s</xliff:g></string>
+    <string name="version_text">Version <xliff:g example="1.0" id="VERSION_NUMBER">%1$s</xliff:g></string>
     <!-- What's new features title -->
     <string name="whats_new_title">What\'s new</string>
     <!-- What's new dialog message in about screen -->
@@ -1572,22 +1583,26 @@
     <!-- Toast message when restore fails -->
     <string name="toast_message_restore_error">Restore failed</string>
     <!-- Salah City Search -->
-    <string name="salah_city_search_title">Select City</string>
+    <string name="salarm_city_search_title">Select City</string>
     <!-- Salah Settings -->
     <string name="salah_settings_title">Salah Settings</string>
     <!-- Salah Location Not Set Title -->
-    <string name="salah_location_not_set_title">Location Not Set</string>
+    <string name="salarm_location_not_set_title">Location Not Set</string>
     <!-- Salah Location Not Set Message -->
-    <string name="salah_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
+    <string name="salarm_location_not_set_message">Salah Alarms are not active at this moment as the location has not been set. Please set the location in Salah Settings to use Salah Alarms.</string>
     <!-- Label Set Location -->
     <string name="label_set_location">Set Location</string>
     <!-- Salah Error Saving -->
     <string name="salah_error_saving">Failed to save salah alarm. Please try again.</string>
 
-    <!-- Salah Alarm Tagging -->
+    <!-- Alarm Tagging -->
     <string name="salah_tagging_category_title">Alarm Tagging</string>
     <string name="salah_auto_tag_title">Auto tag salah alarms</string>
     <string name="salah_auto_tag_name_title">Auto tag name</string>
+    <string name="auto_tag_alarms_title">Autotag alarms</string>
+    <string name="auto_tag_salah_title">Autotag salah alarms</string>
+    <string name="auto_tag_masjid_title">Autotag masjid alarms</string>
+    <string name="auto_tag_international_title">Autotag international alarms</string>
     <!-- Display tags in the alarm setting title -->
     <string name="display_alarm_tags_title">Display tags in the alarm</string>
     <!-- Add tags label -->
@@ -1603,17 +1618,17 @@
     <!-- Tooltip for the all alarms toggle -->
     <string name="all_alarms_toggle_tooltip">Toggle all visible alarms</string>
     <!-- Salah Error Background Sync -->
-    <string name="salah_error_background_sync">Salah sync issue</string>
+    <string name="salarm_error_background_sync">Salah sync issue</string>
     <!-- Salah Error Background Sync Details -->
-    <string name="salah_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
+    <string name="salarm_error_background_sync_details">Background update for prayer times failed. Some alarms may be inaccurate.</string>
     <!-- Salah Detecting Location -->
-    <string name="salah_detecting_location">Detecting location…</string>
+    <string name="salarm_detecting_location">Detecting location…</string>
     <!-- Location category title for Salah settings -->
-    <string name="salah_location_category_title">Location</string>
+    <string name="salarm_location_category_title">Location</string>
     <!-- Prayer settings category title for Salah settings -->
-    <string name="salah_prayer_settings_category_title">Prayer Settings</string>
+    <string name="salarm_prayer_settings_category_title">Salah Settings</string>
     <!-- Advanced settings category title for Salah settings -->
-    <string name="salah_advanced_settings_category_title">Advanced Settings</string>
+    <string name="salarm_advanced_settings_category_title">Advanced Settings</string>
     <!-- Salah time rounding setting title -->
     <string name="salah_time_rounding_title">Salah time rounding</string>
     <!-- Rounding options -->
@@ -1666,18 +1681,19 @@
     <string name="salah_display_next_event_info_nothing">Do not show next event</string>
     <string name="salah_next_event_info_countdown_format">%1$s to %2$s</string>
     <string name="salah_next_event_info_time_format">%1$s at %2$s</string>
+    <string name="salah_alarm_to_event">%1$s to %2$s</string>
 
     <!-- Relational Alarm -->
     <string name="dialog_add_relational_alarm_title">Salah Alarm</string>
     <string name="relational_alarm_primary_alarm">Primary Alarm set at</string>
     <string name="relational_alarm_set_alarm_at">Set Alarm At</string>
     <string name="relational_alarm_minutes">minutes</string>
-    <string name="relational_alarm_round">Round Alarm</string>
+    <string name="relational_alarm_round">Rounded</string>
     <string name="relational_alarm_safety_boundary">Cap Alarm to</string>
     <string name="relational_alarm_no">No</string>
     <string name="relational_alarm_auto_stop">Auto-Stop/Dismiss Alarm</string>
     <string name="relational_alarm_stop_ringing">Dismiss Alarm</string>
-    <string name="relational_alarm_adjust_alarm">Adjust Alarm by</string>
+    <string name="relational_alarm_adjust_alarm">Adjusted by</string>
     <string name="relational_alarm_adjusted_by">Adjusted by</string>
     <string name="relational_alarm_custom">Custom</string>
     <string name="relational_alarm_save">SAVE</string>
@@ -1758,6 +1774,7 @@
     <string name="dhuhr_label">Dhuhr</string>
     <string name="maghrib_label">Maghrib</string>
     <string name="isha_label">Isha</string>
+    <string name="juma_label">Juma</string>
 
     <string name="salah_widget_show_countdown_title">Show countdown</string>
     <string name="salah_widget_show_alarms_title">Show upcoming salah alarms</string>
@@ -1797,7 +1814,20 @@
     <string name="salarm_display_timezone_label">Display Timezone</string>
     <string name="salarm_select_timezone_hint">Select Timezone</string>
     <string name="salarm_city_search_hint_extended">Search City or Country\u2026</string>
-    <string name="salah_near_city">Near %s</string>
+    <string name="salarm_custom_location_action_title">Enter Custom Location\u2026</string>
+    <string name="salarm_custom_location_action_subtitle">Specify latitude, longitude, and timezone manually</string>
+    <string name="salarm_custom_location_button">Custom Location</string>
+    <string name="salarm_custom_location_dialog_title">Custom Location</string>
+    <string name="salarm_custom_location_name_hint">Location / City Name (optional)</string>
+    <string name="salarm_custom_location_lat_hint">Latitude (-90 to 90)</string>
+    <string name="salarm_custom_location_lon_hint">Longitude (-180 to 180)</string>
+    <string name="salarm_custom_location_tz_hint">Timezone ID (e.g. Asia/Riyadh)</string>
+    <string name="salarm_custom_location_invalid_lat">Invalid latitude (-90 to 90)</string>
+    <string name="salarm_custom_location_invalid_lon">Invalid longitude (-180 to 180)</string>
+    <string name="salarm_recent_locations_title">Recent Locations</string>
+    <string name="salarm_all_locations_title">Available Locations</string>
+    <string name="salarm_recent_label">Recent</string>
+    <string name="salarm_near_city">Near %s</string>
 
     <!-- Widget Previews -->
     <string name="salarm_preview_countdown_time">1h:24m</string>
@@ -1810,4 +1840,116 @@
     <string name="salarm_preview_dhuhr_time">12:30 PM</string>
     <string name="salarm_preview_asr_time">04:15 PM</string>
     <string name="salarm_preview_maghrib_time">07:20 PM</string>
+
+    <!-- Masjid -->
+    <string name="menu_masjid">Masjid</string>
+    <string name="masjid_events_shown_title">Events Shown</string>
+    <string name="masjid_events_shown_summary">Choose which Salah events appear in the system</string>
+    <string name="masjids_category_title">Masjids</string>
+    <string name="salarm_add_new_masjid">Add a New Masjid</string>
+    <string name="masjid_import_qr_title">Import Masjid from QR Code</string>
+    <string name="masjid_import_qr_hint">QR code text string (https://salarm.meafar.com/mc?&#8230;)</string>
+    <string name="masjid_import_qr_btn_paste">Paste from Clipboard</string>
+    <string name="masjid_import_qr_btn_import">Import</string>
+    <string name="masjid_import_qr_invalid_toast">Invalid or unrecognized Salarm QR Code string</string>
+    <string name="masjid_import_qr_success_toast">Successfully imported %s</string>
+    <string name="masjid_import_qr_camera_permission_needed">Camera permission is required to scan QR code</string>
+    <string name="masjid_import_qr_grant_permission">Grant Permission</string>
+    <string name="masjid_import_qr_rescan">Scan Again</string>
+    <string name="masjid_import_qr_detected_prompt">QR code detected! Click Import to add this masjid.</string>
+    <string name="masjid_name_title">Masjid Name*</string>
+    <string name="masjid_icon_title">Masjid Icon</string>
+    <string name="masjid_select_icon">Select Icon</string>
+    <string name="masjid_remove_icon">Remove Icon</string>
+    <string name="masjid_location_title">Masjid Location*</string>
+    <string name="masjid_select_location">Location*</string>
+    <string name="masjid_select_location_dialog_title">Select Location Method</string>
+    <string name="masjid_open_map_window">Open Map in Window</string>
+    <string name="masjid_interactive_map">Interactive Map Window</string>
+    <string name="masjid_location_use_current">Use my current location</string>
+    <string name="masjid_location_search_city">Search city</string>
+    <string name="masjid_location_search_map">Search precise location on map</string>
+    <string name="masjid_location_enter_manual">Enter manual coordinates</string>
+    <string name="masjid_location_coordinates_format">Lat: %.4f, Lon: %.4f</string>
+    <string name="masjid_location_required_error">Masjid location coordinates are mandatory</string>
+    <string name="masjid_missing_values_defaults_toast">This masjid had missing values; resorting to default settings.</string>
+    <string name="masjid_street_address_title">Street Address</string>
+    <string name="masjid_city_title">City</string>
+    <string name="masjid_country_title">Country</string>
+    <string name="masjid_timezone_title">Timezone*</string>
+    <string name="masjid_select_timezone_title">Select Timezone</string>
+    <string name="masjid_calc_method_title">Calculation Method</string>
+    <string name="masjid_select_calc_method_title">Select Calculation Method</string>
+    <string name="masjid_madhab_title">Madhab</string>
+    <string name="masjid_select_madhab_title">Select Madhab</string>
+    <string name="masjid_manual_coords_dialog_title">Enter Manual Coordinates</string>
+    <string name="masjid_latitude">Latitude (-90 to 90)</string>
+    <string name="masjid_longitude">Longitude (-180 to 180)</string>
+    <string name="masjid_invalid_coords">Invalid coordinates entered</string>
+    <string name="salarm_map_error_load">Unable to load map. Please check your internet connection.</string>
+    <string name="salarm_map_error_load_with_message">%1$s\n(%2$s)</string>
+    <string name="salarm_map_retry">Retry</string>
+    <string name="salarm_map_select_location">Select Location</string>
+    <string name="salarm_map_tap_to_pick">Tap map to pick location</string>
+    <string name="masjid_intervals_title">Masjid Intervals*</string>
+    <string name="masjid_intervals_dialog_title">Configure Intervals</string>
+    <string name="masjid_show_events_title">Show Masjid Events</string>
+    <string name="masjid_save">Save</string>
+    <string name="masjid_delete_confirm">Are you sure you want to delete this masjid?</string>
+
+    <string name="masjid_salah_extreme_min">Earliest</string>
+    <string name="masjid_salah_extreme_max">Latest</string>
+    <string name="masjid_intervals_2">2 Intervals</string>
+    <string name="masjid_intervals_3">3 Intervals</string>
+    <string name="masjid_intervals_adjust_hint">Adjust the boundaries to set interval ranges (1 to 31)</string>
+    <string name="masjid_edit_title">Edit Masjid</string>
+    <string name="masjid_default_name">Masjid 1</string>
+    <string name="masjid_event_time_set_at">Event time set at</string>
+    <string name="masjid_minutes">minutes</string>
+    <string name="masjid_time_of">time of</string>
+    <string name="masjid_round_event_time">Round event time</string>
+    <string name="masjid_adjust_event_time_by">Adjust event time by</string>
+    <string name="masjid_cap_event_time_to">Cap event time to</string>
+    <string name="masjid_than">than</string>
+    <string name="masjid_before">before</string>
+    <string name="masjid_events_default">Default</string>
+    <string name="masjid_not_configured">Not configured</string>
+    <string name="masjid_timing_title_format">%1$s Timing</string>
+    <string name="masjid_copy">Copy</string>
+    <string name="masjid_copy_suffix">- COPY</string>
+    <string name="ordinal_1st">%1$dst</string>
+    <string name="ordinal_2nd">%1$dnd</string>
+    <string name="ordinal_3rd">%1$drd</string>
+    <string name="ordinal_th">%1$dth</string>
+    <string name="masjid_interval_range">%1$s to %2$s</string>
+
+    <string name="salah_alarm_rule_description_base_max">alarm %1$s latest starting time of %2$s</string>
+    <string name="salah_alarm_rule_description_base_min">alarm %1$s earliest ending time of %2$s</string>
+    <string name="masjid_rule_description_base">Jamaat %1$s %2$s</string>
+    <string name="masjid_rule_description_base_max">Jamaat %1$s latest time of %2$s</string>
+    <string name="masjid_rule_description_base_min">Jamaat %1$s earliest time of %2$s</string>
+    <string name="view_timesheet">View Timesheet</string>
+    <string name="masjid_card_editor_title">Masjid Card Editor</string>
+    <string name="masjid_card_export_png">PNG</string>
+    <string name="masjid_card_export_pdf">PDF</string>
+    <string name="masjid_card_export_svg">SVG</string>
+    <string name="masjid_card_front">Front</string>
+    <string name="masjid_card_back">Back</string>
+    <string name="masjid_card_name_label">Masjid Name</string>
+    <string name="masjid_card_subtitle_label">Subtitle</string>
+    <string name="masjid_card_footer_label">Footer Text</string>
+    <string name="masjid_card_footer_label_front">Footer Text (Front)</string>
+    <string name="masjid_card_footer_label_back">Footer Text (Back)</string>
+    <string name="masjid_card_format_label">Format</string>
+    <string name="masjid_card_format_card">Card</string>
+    <string name="masjid_card_format_a4">A4</string>
+    <string name="masjid_card_export_label">Export</string>
+    <string name="masjid_card_flip">Flip Card Side</string>
+    <string name="masjid_card_orientation_toggle">Toggle Orientation</string>
+    <string name="masjid_dnd_title">Turn on Do Not Disturb</string>
+    <string name="masjid_dnd_from">From</string>
+    <string name="masjid_dnd_before_jamaat">mins before Jamaat to</string>
+    <string name="masjid_dnd_after_jamaat">mins after Jamaat</string>
+    <string name="masjid_jamaat_time">Jamaat Time</string>
+    <string name="dnd_permission_required">Do Not Disturb access permission is required to turn on Do Not Disturb automatically.</string>
 </resources>

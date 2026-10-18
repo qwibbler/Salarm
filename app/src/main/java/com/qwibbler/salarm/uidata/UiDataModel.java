@@ -19,6 +19,7 @@ import com.qwibbler.salarm.alarms.AlarmFragment;
 import com.qwibbler.salarm.clock.ClockFragment;
 import com.qwibbler.salarm.salah.SalahTimesFragment;
 import com.qwibbler.salarm.salah.QiblaFragment;
+import com.qwibbler.salarm.salah.MasjidFragment;
 import com.qwibbler.salarm.stopwatch.StopwatchFragment;
 import com.qwibbler.salarm.timer.TimerFragment;
 
@@ -285,7 +286,8 @@ public final class UiDataModel {
         TIMERS(TimerFragment.class, R.id.page_timer, R.string.menu_timer),
         STOPWATCH(StopwatchFragment.class, R.id.page_stopwatch, R.string.menu_stopwatch),
         SALAH(SalahTimesFragment.class, R.id.page_salah, R.string.menu_salah),
-        QIBLA(QiblaFragment.class, R.id.page_qibla, R.string.menu_qibla);
+        QIBLA(QiblaFragment.class, R.id.page_qibla, R.string.menu_qibla),
+        MASJID(MasjidFragment.class, R.id.page_masjid, R.string.menu_masjid);
 
         private final String mFragmentClassName;
         private final int mPageResId;

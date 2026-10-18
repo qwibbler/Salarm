@@ -10,15 +10,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import java.util.Objects;
-
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -27,24 +25,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.batoulapps.adhan.CalculationMethod;
-import com.qwibbler.salarm.SalarmApplication;
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.qwibbler.salarm.R;
+import com.qwibbler.salarm.SalarmApplication;
 import com.qwibbler.salarm.base.SalarmFragment;
 import com.qwibbler.salarm.settings.PreferencesKeys;
 import com.qwibbler.salarm.utils.ThemeUtils;
-import com.google.android.material.color.MaterialColors;
-import com.google.android.material.datepicker.MaterialDatePicker;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 public class SalahTimesFragment extends SalarmFragment {
 
+    private final Calendar mSelectedDate = Calendar.getInstance();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private TextView mCountdownText;
     private TextView mLocalTimeText;
     private SalahAdapter mSalahAdapter;
@@ -52,18 +54,6 @@ public class SalahTimesFragment extends SalarmFragment {
     private TextView mLocationInfoText;
     private TextView mTimezoneInfoText;
     private TextView mTimezoneWarningText;
-    private final Calendar mSelectedDate = Calendar.getInstance();
-
-    private void updateTimezone() {
-        Context context = getContext();
-        if (context == null) return;
-        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
-        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
-        TimeZone tz = TimeZone.getTimeZone(tzId);
-        mSelectedDate.setTimeZone(tz);
-    }
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final SharedPreferences.OnSharedPreferenceChangeListener mPreferenceListener = (prefs, key) -> {
         if (PreferencesKeys.KEY_SALAH_CITY_NAME.equals(key) || PreferencesKeys.KEY_SALAH_LATITUDE.equals(key)) {
             updateUI();
@@ -76,9 +66,22 @@ public class SalahTimesFragment extends SalarmFragment {
             mHandler.postDelayed(this, 60000);
         }
     };
-
     public SalahTimesFragment() {
         super(SALAH);
+    }
+
+    private static boolean isSameDay(Calendar cal1, Calendar cal2) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    private void updateTimezone() {
+        Context context = getContext();
+        if (context == null) return;
+        SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
+        String tzId = prefs.getString(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE, TimeZone.getDefault().getID());
+        TimeZone tz = TimeZone.getTimeZone(tzId);
+        mSelectedDate.setTimeZone(tz);
     }
 
     @Nullable
@@ -140,9 +143,9 @@ public class SalahTimesFragment extends SalarmFragment {
 
     private void showDatePicker() {
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText(R.string.date_picker_dialog_title)
-                .setSelection(mSelectedDate.getTimeInMillis())
-                .build();
+            .setTitleText(R.string.date_picker_dialog_title)
+            .setSelection(mSelectedDate.getTimeInMillis())
+            .build();
         datePicker.addOnPositiveButtonClickListener(selection -> {
             mSelectedDate.setTimeInMillis(selection);
             updateUI();
@@ -193,11 +196,11 @@ public class SalahTimesFragment extends SalarmFragment {
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
         // Revert temporary view overrides when leaving the page
         prefs.edit()
-                .remove(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE)
-                .remove(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE)
-                .remove(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME)
-                .remove(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE)
-                .apply();
+            .remove(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE)
+            .remove(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE)
+            .remove(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME)
+            .remove(PreferencesKeys.KEY_SALAH_DISPLAY_TIMEZONE)
+            .apply();
         mSelectedDate.setTimeInMillis(System.currentTimeMillis());
     }
 
@@ -210,9 +213,9 @@ public class SalahTimesFragment extends SalarmFragment {
 
         // Use local VIEW overrides if present, otherwise fall back to global settings
         String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE,
-                prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
+            prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
         String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE,
-                prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
+            prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
 
         double lat, lon;
         try {
@@ -234,7 +237,7 @@ public class SalahTimesFragment extends SalarmFragment {
         SalahCalculator.SalahTimes salahTimes = SalahCalculator.calculateAllSalahTimes(context, mSelectedDate.getTime(), lat, lon, method);
 
         boolean showBothAsr = prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR, false)
-                && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES, false);
+            && prefs.getBoolean(PreferencesKeys.KEY_SALAH_SHOW_BOTH_ASR_IN_SALAH_TIMES, false);
         String madhab = prefs.getString(PreferencesKeys.KEY_SALAH_MADHAB, "HANAFI");
 
         List<PrayerItem> items = new ArrayList<>();
@@ -294,18 +297,13 @@ public class SalahTimesFragment extends SalarmFragment {
         return new SimpleDateFormat(getString(R.string.salarm_short_date_format), Locale.getDefault()).format(date.getTime());
     }
 
-    private static boolean isSameDay(Calendar cal1, Calendar cal2) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-               cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-    }
-
     private void updateFooter() {
         Context context = getContext();
         if (context == null) return;
         SharedPreferences prefs = SalarmApplication.getDefaultSharedPreferences(context);
 
         String cityName = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME,
-                prefs.getString(PreferencesKeys.KEY_SALAH_CITY_NAME, context.getString(R.string.salarm_unknown_location)));
+            prefs.getString(PreferencesKeys.KEY_SALAH_CITY_NAME, context.getString(R.string.salarm_unknown_location)));
 
         SalahLocationManager.LocationMode mode = SalahLocationManager.getLocationMode(context);
         boolean isOverride = prefs.contains(PreferencesKeys.KEY_SALAH_VIEW_CITY_NAME);
@@ -341,9 +339,9 @@ public class SalahTimesFragment extends SalarmFragment {
 
         // Countdown uses the location currently being viewed (preview or global)
         String latStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LATITUDE,
-                prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
+            prefs.getString(PreferencesKeys.KEY_SALAH_LATITUDE, "0.0"));
         String lonStr = prefs.getString(PreferencesKeys.KEY_SALAH_VIEW_LONGITUDE,
-                prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
+            prefs.getString(PreferencesKeys.KEY_SALAH_LONGITUDE, "0.0"));
 
         double lat, lon;
         try {
@@ -371,11 +369,15 @@ public class SalahTimesFragment extends SalarmFragment {
         Date asrTime = isShafi ? todaySalahTimes.asrShafi : todaySalahTimes.asrHanafi;
 
         if (now.before(todaySalahTimes.fajr)) nextPrayer = new PrayerItem(context.getString(R.string.fajr_label), todaySalahTimes.fajr);
-        else if (now.before(todaySalahTimes.sunrise)) nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todaySalahTimes.sunrise);
-        else if (now.before(todaySalahTimes.dhuhr)) nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todaySalahTimes.dhuhr);
+        else if (now.before(todaySalahTimes.sunrise))
+            nextPrayer = new PrayerItem(context.getString(R.string.sunrise_label), todaySalahTimes.sunrise);
+        else if (now.before(todaySalahTimes.dhuhr))
+            nextPrayer = new PrayerItem(context.getString(R.string.dhuhr_label), todaySalahTimes.dhuhr);
         else if (now.before(asrTime)) nextPrayer = new PrayerItem(context.getString(R.string.asr_label), asrTime);
-        else if (now.before(todaySalahTimes.maghrib)) nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todaySalahTimes.maghrib);
-        else if (now.before(todaySalahTimes.isha)) nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todaySalahTimes.isha);
+        else if (now.before(todaySalahTimes.maghrib))
+            nextPrayer = new PrayerItem(context.getString(R.string.maghrib_label), todaySalahTimes.maghrib);
+        else if (now.before(todaySalahTimes.isha))
+            nextPrayer = new PrayerItem(context.getString(R.string.isha_label), todaySalahTimes.isha);
         else {
             // Next day's Fajr
             Calendar tomorrow = Calendar.getInstance(tz);
@@ -391,15 +393,17 @@ public class SalahTimesFragment extends SalarmFragment {
         mCountdownText.setText(countdown);
 
         // Local time in preview timezone
-        String systemTzId = TimeZone.getDefault().getID();
-        if (!Objects.equals(tzId, systemTzId)) {
-            java.text.DateFormat localFormat = android.text.format.DateFormat.getTimeFormat(context);
-            localFormat.setTimeZone(tz);
-            String localTime = localFormat.format(now);
-            mLocalTimeText.setText(String.format("(%s in %s)", localTime, tzId));
-            mLocalTimeText.setVisibility(View.VISIBLE);
-        } else {
-            mLocalTimeText.setVisibility(View.GONE);
+        if (mLocalTimeText != null) {
+            String systemTzId = TimeZone.getDefault().getID();
+            if (!Objects.equals(tzId, systemTzId)) {
+                DateFormat localFormat = android.text.format.DateFormat.getTimeFormat(context);
+                localFormat.setTimeZone(tz);
+                String localTime = localFormat.format(now);
+                mLocalTimeText.setText(String.format("(%s in %s)", localTime, tzId));
+                mLocalTimeText.setVisibility(View.VISIBLE);
+            } else {
+                mLocalTimeText.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -497,9 +501,9 @@ public class SalahTimesFragment extends SalarmFragment {
 
             if (isToday && isCurrent) {
                 @ColorInt int highlightColor = MaterialColors.getColor(context,
-                        com.google.android.material.R.attr.colorPrimaryContainer, Color.BLUE);
+                    com.google.android.material.R.attr.colorPrimaryContainer, Color.BLUE);
                 @ColorInt int onHighlightColor = MaterialColors.getColor(context,
-                        com.google.android.material.R.attr.colorOnPrimaryContainer, Color.WHITE);
+                    com.google.android.material.R.attr.colorOnPrimaryContainer, Color.WHITE);
                 holder.itemView.setBackground(ThemeUtils.rippleDrawable(context, new ColorDrawable(highlightColor)));
                 holder.name.setTextColor(onHighlightColor);
                 holder.time.setTextColor(onHighlightColor);
@@ -509,7 +513,7 @@ public class SalahTimesFragment extends SalarmFragment {
                 holder.itemView.setBackgroundResource(outValue.resourceId);
 
                 @ColorInt int defaultTextColor = MaterialColors.getColor(context,
-                        android.R.attr.textColorPrimary, Color.BLACK);
+                    android.R.attr.textColorPrimary, Color.BLACK);
                 holder.name.setTextColor(defaultTextColor);
                 holder.time.setTextColor(defaultTextColor);
             }

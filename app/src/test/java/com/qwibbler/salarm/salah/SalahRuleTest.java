@@ -17,15 +17,16 @@ public class SalahRuleTest {
         cal.set(2026, Calendar.JULY, 16, 12, 0, 0);
         Date baseDate = cal.getTime();
 
-        // Mocking SalahTimes - we can just use a real calculation for a specific date
         double lat = 24.8607;
         double lon = 67.0011;
         SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(baseDate, lat, lon, CalculationMethod.KARACHI);
 
         // Rule: Fajr + 10 minutes
-        RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 10, null, 0);
+        RelationalRule rule = new RelationalRule();
+        rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        rule.definition.calculation.offsetMinutes = 10;
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         Calendar expected = Calendar.getInstance();
         expected.setTime(times.fajr);
@@ -45,10 +46,13 @@ public class SalahRuleTest {
         SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(baseDate, lat, lon, CalculationMethod.KARACHI);
 
         // Rule: Fajr + 7 minutes, rounded UP to nearest 5
-        // If Fajr is 04:12, +7 is 04:19. Rounded UP to 5 min interval is 04:20.
-        RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 7, RelationalRule.RoundingDirection.UP, 5);
+        RelationalRule rule = new RelationalRule();
+        rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        rule.definition.calculation.offsetMinutes = 7;
+        rule.definition.calculation.roundingDirection = RelationalRule.RoundingDirection.UP;
+        rule.definition.calculation.roundingIntervalMinutes = 5;
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         long resultMillis = result.getTime();
         assertEquals(0, resultMillis % (5 * 60 * 1000));
@@ -58,7 +62,6 @@ public class SalahRuleTest {
         raw.add(Calendar.MINUTE, 7);
         long rawMillis = raw.getTimeInMillis();
 
-        // Manual verification of rounding logic
         long expectedMillis = (long) Math.ceil((double) rawMillis / (5 * 60 * 1000)) * (5 * 60 * 1000);
         assertEquals(expectedMillis, resultMillis);
     }
@@ -74,16 +77,17 @@ public class SalahRuleTest {
         SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(baseDate, lat, lon, CalculationMethod.KARACHI);
 
         // Rule: Fajr + 30 minutes, but CAP at Fajr + 20 minutes (No later than)
-        RelationalRule.Clip clip = new RelationalRule.Clip(
-                RelationalRule.AnchorEvent.FAJR,
-                20,
-                null,
-                0,
-                RelationalRule.BoundaryType.NO_LATER_THAN
-        );
-        RelationalRule rule = new RelationalRule(RelationalRule.AnchorEvent.FAJR, 30, null, 0, clip);
+        RelationalRule rule = new RelationalRule();
+        rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        rule.definition.calculation.offsetMinutes = 30;
 
-        Date result = RelationalRule.evaluateTime(rule, times);
+        RelationalClip clip = new RelationalClip();
+        clip.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        clip.offsetMinutes = 20;
+        clip.boundaryType = RelationalRule.BoundaryType.NO_LATER_THAN;
+        rule.definition.clip = clip;
+
+        Date result = RelationalRule.evaluateTime(null, rule, times, baseDate);
 
         Calendar expected = Calendar.getInstance();
         expected.setTime(times.fajr);
@@ -102,24 +106,20 @@ public class SalahRuleTest {
         double lon = 67.0011;
         SalahCalculator.SalahTimes times = SalahCalculator.calculateAllSalahTimes(baseDate, lat, lon, CalculationMethod.KARACHI);
 
-        // Rule: 60 min after Fajr (4:34 + 60 = 5:34)
-        // Cap: 60 min before Sunrise (5:58 - 60 = 4:58), NO_LATER_THAN
-        RelationalRule.Clip clip = new RelationalRule.Clip(
-                RelationalRule.AnchorEvent.SUNRISE,
-                -60,
-                RelationalRule.RoundingDirection.NEAREST,
-                0,
-                RelationalRule.BoundaryType.NO_LATER_THAN
-        );
-        RelationalRule rule = new RelationalRule(
-                RelationalRule.AnchorEvent.FAJR,
-                60,
-                RelationalRule.RoundingDirection.NEAREST,
-                0,
-                clip
-        );
+        // Rule: 60 min after Fajr
+        // Cap: 60 min before Sunrise, NO_LATER_THAN
+        RelationalRule rule = new RelationalRule();
+        rule.definition.anchor.basicEvent = RelationalRule.AnchorEvent.FAJR;
+        rule.definition.calculation.offsetMinutes = 60;
 
-        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(rule, times);
+        RelationalClip clip = new RelationalClip();
+        clip.anchor.basicEvent = RelationalRule.AnchorEvent.SUNRISE;
+        clip.offsetMinutes = -60;
+        clip.roundingDirection = RelationalRule.RoundingDirection.NEAREST;
+        clip.boundaryType = RelationalRule.BoundaryType.NO_LATER_THAN;
+        rule.definition.clip = clip;
+
+        RelationalRule.EvaluationResult result = RelationalRule.evaluateTimeWithConflictCheck(null, rule, times, baseDate);
 
         long fajrMillis = times.fajr.getTime();
         long sunriseMillis = times.sunrise.getTime();
@@ -129,6 +129,6 @@ public class SalahRuleTest {
 
         long expected = Math.min(targetMillis, clipMillis);
 
-        assertEquals("Should be capped at the earlier time (4:58 AM)", expected, result.time());
+        assertEquals("Should be capped at the earlier time", expected, result.time());
     }
 }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="salah_location_mode_entries">
+    <string-array name="salarm_location_mode_entries">
         <item>GPS (Automatic)</item>
         <item>Manual</item>
     </string-array>
-    <string-array name="salah_location_mode_values" translatable="false">
+    <string-array name="salarm_location_mode_values" translatable="false">
         <item>GPS</item>
         <item>MANUAL</item>
     </string-array>
 
-    <string-array name="salah_madhab_entries">
+    <string-array name="salarm_madhab_entries">
         <item>Hanafi</item>
         <item>Shafi</item>
     </string-array>
-    <string-array name="salah_madhab_values" translatable="false">
+    <string-array name="salarm_madhab_values" translatable="false">
         <item>HANAFI</item>
         <item>SHAFI</item>
     </string-array>
