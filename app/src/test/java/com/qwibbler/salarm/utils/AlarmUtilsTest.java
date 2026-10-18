@@ -42,7 +42,8 @@ public class AlarmUtilsTest {
 
     @Test
     public void testSyncInternationalAutoTag_LockedToTzAndAutotagEnabled() {
-        when(mPrefs.getBoolean(PreferencesKeys.KEY_SALAH_AUTO_TAG, true)).thenReturn(true);
+        when(mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true)).thenReturn(true);
+        when(mPrefs.getString(PreferencesKeys.KEY_AUTO_TAG_INTERNATIONAL_NAME, "International")).thenReturn("International");
 
         Alarm alarm = new Alarm();
         alarm.timezoneId = "America/New_York";
@@ -56,7 +57,7 @@ public class AlarmUtilsTest {
 
     @Test
     public void testSyncInternationalAutoTag_LockedToTzAndAutotagDisabled() {
-        when(mPrefs.getBoolean(PreferencesKeys.KEY_SALAH_AUTO_TAG, true)).thenReturn(false);
+        when(mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true)).thenReturn(false);
 
         Alarm alarm = new Alarm();
         alarm.timezoneId = "America/New_York";
@@ -70,7 +71,8 @@ public class AlarmUtilsTest {
 
     @Test
     public void testSyncInternationalAutoTag_NotLockedToTz() {
-        when(mPrefs.getBoolean(PreferencesKeys.KEY_SALAH_AUTO_TAG, true)).thenReturn(true);
+        when(mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true)).thenReturn(true);
+        when(mPrefs.getString(PreferencesKeys.KEY_AUTO_TAG_INTERNATIONAL_NAME, "International")).thenReturn("International");
 
         Alarm alarm = new Alarm();
         alarm.timezoneId = null;

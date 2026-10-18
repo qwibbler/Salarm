@@ -406,17 +406,31 @@ public final class SettingsDAO {
     }
 
     /**
-     * @return {@code true} if Salah alarms should be automatically tagged.
+     * @return {@code true} if alarms should be automatically tagged.
      */
-    public static boolean isSalahAutoTagEnabled(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_SALAH_AUTO_TAG, DEFAULT_SALAH_AUTO_TAG);
+    public static boolean isAutoTagAlarmsEnabled(SharedPreferences prefs) {
+        return prefs != null && prefs.getBoolean(KEY_AUTO_TAG_ALARMS, DEFAULT_AUTO_TAG_ALARMS);
     }
 
     /**
      * @return the name of the tag to automatically add to Salah alarms.
      */
-    public static String getSalahAutoTagName(SharedPreferences prefs) {
-        return prefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME);
+    public static String getAutoTagSalahName(SharedPreferences prefs) {
+        return prefs != null ? prefs.getString(KEY_AUTO_TAG_SALAH_NAME, DEFAULT_AUTO_TAG_SALAH_NAME) : DEFAULT_AUTO_TAG_SALAH_NAME;
+    }
+
+    /**
+     * @return the name of the tag to automatically add to Masjid alarms.
+     */
+    public static String getAutoTagMasjidName(SharedPreferences prefs) {
+        return prefs != null ? prefs.getString(KEY_AUTO_TAG_MASJID_NAME, DEFAULT_AUTO_TAG_MASJID_NAME) : DEFAULT_AUTO_TAG_MASJID_NAME;
+    }
+
+    /**
+     * @return the name of the tag to automatically add to International alarms.
+     */
+    public static String getAutoTagInternationalName(SharedPreferences prefs) {
+        return prefs != null ? prefs.getString(KEY_AUTO_TAG_INTERNATIONAL_NAME, DEFAULT_AUTO_TAG_INTERNATIONAL_NAME) : DEFAULT_AUTO_TAG_INTERNATIONAL_NAME;
     }
 
     /**

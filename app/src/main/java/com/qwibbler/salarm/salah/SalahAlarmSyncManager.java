@@ -131,15 +131,34 @@ public class SalahAlarmSyncManager {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
         SalahDatabase db = SalahDatabase.getDatabase(context);
 
-        // 1. Tag with Salah auto-tag if auto-tagging is enabled
-        if (SettingsDAO.isSalahAutoTagEnabled(prefs)) {
-            String salahTag = SettingsDAO.getSalahAutoTagName(prefs);
-            if (salahTag == null || salahTag.trim().isEmpty()) {
-                salahTag = "Salah";
-            } else {
-                salahTag = salahTag.trim();
-            }
+        if (nativeAlarm.tags == null) {
+            nativeAlarm.tags = new ArrayList<>();
+        }
 
+        boolean autoTagEnabled = SettingsDAO.isAutoTagAlarmsEnabled(prefs);
+
+        if (!autoTagEnabled) {
+            // IF autotag is off, DO NOT autotag anything!
+            // Ensure masjid is NOT autotagged with either generic masjid tag OR individual masjid name tag.
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+            return;
+        }
+
+        // 1. Tag with Salah auto-tag if auto-tagging is enabled and tag name is non-empty
+        String salahTag = SettingsDAO.getAutoTagSalahName(prefs);
+        if (salahTag != null && !salahTag.trim().isEmpty()) {
+            salahTag = salahTag.trim();
             if (!nativeAlarm.tags.contains(salahTag)) {
                 nativeAlarm.tags.add(salahTag);
             }
@@ -160,9 +179,13 @@ public class SalahAlarmSyncManager {
         }
 
         if (masjid != null) {
-            // Anchor event was a masjid event: ALSO tag with "Masjid" AND "[masjid name]"
-            if (!nativeAlarm.tags.contains("Masjid")) {
-                nativeAlarm.tags.add("Masjid");
+            // Anchor event was a masjid event: ALSO tag with generic masjid tag AND "[masjid name]"
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                genericMasjidTag = genericMasjidTag.trim();
+                if (!nativeAlarm.tags.contains(genericMasjidTag)) {
+                    nativeAlarm.tags.add(genericMasjidTag);
+                }
             }
 
             String masjidName = masjid.name != null ? masjid.name.trim() : "";
@@ -178,7 +201,63 @@ public class SalahAlarmSyncManager {
                 }
             }
         } else {
-            // Not a masjid event: remove "Masjid" tag and any masjid name tags
+            // Not a masjid event: remove generic masjid tag and any masjid name tags
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
+            nativeAlarm.tags.remove("Masjid");
+
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        }
+    }
+
+    public static void syncAutoTagsForAnchorChange(Context context, Alarm nativeAlarm, RelationalRule rule, Masjid masjid) {
+        if (nativeAlarm == null || rule == null) return;
+
+        SharedPreferences prefs = getDefaultSharedPreferences(context);
+        SalahDatabase db = SalahDatabase.getDatabase(context);
+
+        if (nativeAlarm.tags == null) {
+            nativeAlarm.tags = new ArrayList<>();
+        }
+
+        if (masjid != null) {
+            // Switched to or updated a Masjid event anchor
+            if (SettingsDAO.isAutoTagAlarmsEnabled(prefs)) {
+                String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+                if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                    genericMasjidTag = genericMasjidTag.trim();
+                    if (!nativeAlarm.tags.contains(genericMasjidTag)) {
+                        nativeAlarm.tags.add(genericMasjidTag);
+                    }
+                }
+
+                String masjidName = masjid.name != null ? masjid.name.trim() : "";
+                if (!masjidName.isEmpty() && !nativeAlarm.tags.contains(masjidName)) {
+                    nativeAlarm.tags.add(masjidName);
+                }
+            }
+
+            // Remove tags of any other masjids in case the masjid anchor was changed
+            String currentMasjidName = masjid.name != null ? masjid.name.trim() : "";
+            List<Masjid> allMasjids = db.masjidDao().getAll();
+            for (Masjid m : allMasjids) {
+                if (m.name != null && !m.name.trim().equalsIgnoreCase(currentMasjidName)) {
+                    nativeAlarm.tags.remove(m.name.trim());
+                }
+            }
+        } else {
+            // Switched to a Base event anchor: remove generic masjid tag and any masjid name tags
+            String genericMasjidTag = SettingsDAO.getAutoTagMasjidName(prefs);
+            if (genericMasjidTag != null && !genericMasjidTag.trim().isEmpty()) {
+                nativeAlarm.tags.remove(genericMasjidTag.trim());
+            }
             nativeAlarm.tags.remove("Masjid");
 
             List<Masjid> allMasjids = db.masjidDao().getAll();
@@ -254,7 +333,7 @@ public class SalahAlarmSyncManager {
             }
             nativeAlarm.label = "🔔 " + label;
 
-            syncAutoTagsForAlarm(context, nativeAlarm, rule, masjid);
+            syncAutoTagsForAnchorChange(context, nativeAlarm, rule, masjid);
 
             nativeAlarm.updateAlarm(cr);
             LogUtils.i("Updating existing native alarm: " + nativeAlarm.id);
@@ -449,7 +528,6 @@ public class SalahAlarmSyncManager {
             alarm.dismissAfter = SettingsDAO.getAlarmDismissAfter(prefs, true);
         }
 
-        syncAutoTagsForAlarm(context, alarm, rule, null);
         alarm.updateAlarm(cr);
 
         // 2. Update AOSP instances

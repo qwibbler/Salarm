@@ -32,6 +32,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.view.HapticFeedbackConstantsCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -126,6 +127,11 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     SwitchPreferenceCompat mTurnOnBackFlashForTriggeredAlarmPref;
     SwitchPreferenceCompat mDeleteOccasionalAlarmByDefaultPref;
     SwitchPreferenceCompat mDisplayLowAlarmVolumeWarningPref;
+    SwitchPreferenceCompat mDisplayAlarmTagsPref;
+    SwitchPreferenceCompat mAutoTagAlarmsPref;
+    EditTextPreference mAutoTagSalahNamePref;
+    EditTextPreference mAutoTagMasjidNamePref;
+    EditTextPreference mAutoTagInternationalNamePref;
 
     private final ActivityResultLauncher<Intent> fontPickerLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -237,6 +243,11 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mTurnOnBackFlashForTriggeredAlarmPref = findPreference(KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
         mDeleteOccasionalAlarmByDefaultPref = findPreference(KEY_ENABLE_DELETE_OCCASIONAL_ALARM_BY_DEFAULT);
         mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING);
+        mDisplayAlarmTagsPref = findPreference(KEY_DISPLAY_ALARM_TAGS);
+        mAutoTagAlarmsPref = findPreference(KEY_AUTO_TAG_ALARMS);
+        mAutoTagSalahNamePref = findPreference(KEY_AUTO_TAG_SALAH_NAME);
+        mAutoTagMasjidNamePref = findPreference(KEY_AUTO_TAG_MASJID_NAME);
+        mAutoTagInternationalNamePref = findPreference(KEY_AUTO_TAG_INTERNATIONAL_NAME);
 
         if (savedInstanceState != null) {
             mPendingDialogPrefKey = savedInstanceState.getString(KEY_PENDING_DIALOG_PREF_KEY, null);
@@ -322,8 +333,27 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         switch (pref.getKey()) {
             case KEY_DISPLAY_LOW_ALARM_VOLUME_WARNING, KEY_DISPLAY_ENABLED_ALARMS_FIRST, KEY_ENABLE_ALARM_FAB_LONG_PRESS,
-                 KEY_DISPLAY_DISMISS_BUTTON, KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS ->
+                 KEY_DISPLAY_DISMISS_BUTTON, KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS, KEY_DISPLAY_ALARM_TAGS,
+                 KEY_AUTO_TAG_ALARMS ->
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
+
+            case KEY_AUTO_TAG_SALAH_NAME -> {
+                if (mAutoTagSalahNamePref != null) {
+                    mAutoTagSalahNamePref.setSummary((String) newValue);
+                }
+            }
+
+            case KEY_AUTO_TAG_MASJID_NAME -> {
+                if (mAutoTagMasjidNamePref != null) {
+                    mAutoTagMasjidNamePref.setSummary((String) newValue);
+                }
+            }
+
+            case KEY_AUTO_TAG_INTERNATIONAL_NAME -> {
+                if (mAutoTagInternationalNamePref != null) {
+                    mAutoTagInternationalNamePref.setSummary((String) newValue);
+                }
+            }
 
             case KEY_ENABLE_PER_ALARM_AUTO_SILENCE -> {
                 Utils.performHapticFeedback(getView(), HapticFeedbackConstantsCompat.VIRTUAL_KEY);
@@ -734,6 +764,26 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mDeleteOccasionalAlarmByDefaultPref.setOnPreferenceChangeListener(this);
 
         mDisplayLowAlarmVolumeWarningPref.setOnPreferenceChangeListener(this);
+
+        mDisplayAlarmTagsPref.setOnPreferenceChangeListener(this);
+        mAutoTagAlarmsPref.setOnPreferenceChangeListener(this);
+        mAutoTagSalahNamePref.setOnPreferenceChangeListener(this);
+        mAutoTagMasjidNamePref.setOnPreferenceChangeListener(this);
+        mAutoTagInternationalNamePref.setOnPreferenceChangeListener(this);
+
+        updateSummaries();
+    }
+
+    private void updateSummaries() {
+        if (mAutoTagSalahNamePref != null) {
+            mAutoTagSalahNamePref.setSummary(SettingsDAO.getAutoTagSalahName(mPrefs));
+        }
+        if (mAutoTagMasjidNamePref != null) {
+            mAutoTagMasjidNamePref.setSummary(SettingsDAO.getAutoTagMasjidName(mPrefs));
+        }
+        if (mAutoTagInternationalNamePref != null) {
+            mAutoTagInternationalNamePref.setSummary(SettingsDAO.getAutoTagInternationalName(mPrefs));
+        }
     }
 
     private void setupFragmentResultListeners() {
@@ -1128,6 +1178,11 @@ public class AlarmSettingsFragment extends BaseSettingsScreenFragment
         mTurnOnBackFlashForTriggeredAlarmPref = null;
         mDeleteOccasionalAlarmByDefaultPref = null;
         mDisplayLowAlarmVolumeWarningPref = null;
+        mDisplayAlarmTagsPref = null;
+        mAutoTagAlarmsPref = null;
+        mAutoTagSalahNamePref = null;
+        mAutoTagMasjidNamePref = null;
+        mAutoTagInternationalNamePref = null;
     }
 
     /**

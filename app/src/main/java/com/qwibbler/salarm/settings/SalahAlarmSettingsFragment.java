@@ -7,7 +7,6 @@ import static com.qwibbler.salarm.settings.PreferencesDefaultValues.ALARM_SNOOZE
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_ALARM_VOLUME;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_START_DELAY;
 import static com.qwibbler.salarm.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
-import static com.qwibbler.salarm.settings.PreferencesDefaultValues.DEFAULT_SALAH_AUTO_TAG_NAME;
 import static com.qwibbler.salarm.settings.PreferencesKeys.*;
 
 import android.content.Context;
@@ -19,6 +18,7 @@ import android.hardware.SensorManager;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -131,8 +131,6 @@ public class SalahAlarmSettingsFragment extends BaseSettingsScreenFragment
     AlarmNotificationReminderPreference mAlarmNotificationReminderPref;
     SwitchPreferenceCompat mTurnOnBackFlashForTriggeredAlarmPref;
     SwitchPreferenceCompat mDisplayLowAlarmVolumeWarningPref;
-    SwitchPreferenceCompat mAutoTagPref;
-    Preference mAutoTagNamePref;
     Preference mAlarmPreviewPref;
 
     private final ActivityResultLauncher<Intent> ringtonePickerLauncher =
@@ -141,7 +139,7 @@ public class SalahAlarmSettingsFragment extends BaseSettingsScreenFragment
                 return;
             }
 
-            Uri uri = IntentCompat.getParcelableExtra(result.getData(), android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.class);
+            Uri uri = IntentCompat.getParcelableExtra(result.getData(), RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.class);
             if (uri != null) {
                 SettingsDAO.setSalahAlarmRingtoneUriFromSettings(mPrefs, uri);
                 updateRingtonePreferences();
@@ -207,8 +205,6 @@ public class SalahAlarmSettingsFragment extends BaseSettingsScreenFragment
         mAlarmNotificationReminderPref = findPreference(KEY_SALAH_ALARM_NOTIFICATION_REMINDER);
         mTurnOnBackFlashForTriggeredAlarmPref = findPreference(KEY_SALAH_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM);
         mDisplayLowAlarmVolumeWarningPref = findPreference(KEY_SALAH_DISPLAY_LOW_ALARM_VOLUME_WARNING);
-        mAutoTagPref = findPreference(KEY_SALAH_AUTO_TAG);
-        mAutoTagNamePref = findPreference(KEY_SALAH_AUTO_TAG_NAME);
         mAlarmPreviewPref = findPreference(KEY_SALAH_ALARM_PREVIEW);
 
         if (savedInstanceState != null) {
@@ -289,8 +285,7 @@ public class SalahAlarmSettingsFragment extends BaseSettingsScreenFragment
             mEnableAlarmVibrationsByDefaultPref, mVibrationPatternPref, mEnablePerAlarmVibrationPatternPref,
             mVibrationStartDelayPref, mEnableSnoozedOrDismissedAlarmVibrationsPref, mVolumeButtonsPref, mPowerButtonPref,
             mHeadphonesButtonPref, mFlipActionPref, mShakeActionPref, mShakeIntensityPref, mDisplayDismissButtonPref,
-            mAlarmNotificationReminderPref, mTurnOnBackFlashForTriggeredAlarmPref, mDisplayLowAlarmVolumeWarningPref,
-            mAutoTagPref, mAutoTagNamePref
+            mAlarmNotificationReminderPref, mTurnOnBackFlashForTriggeredAlarmPref, mDisplayLowAlarmVolumeWarningPref
         );
 
         mAudioManager = null;
@@ -1042,16 +1037,10 @@ public class SalahAlarmSettingsFragment extends BaseSettingsScreenFragment
     }
 
     private void updateSummaries() {
-        if (mAutoTagNamePref != null) {
-            mAutoTagNamePref.setSummary(mPrefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME));
-        }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (KEY_SALAH_AUTO_TAG_NAME.equals(key)) {
-            updateSummaries();
-        }
     }
 
     private void nullifyAllPrefs() {

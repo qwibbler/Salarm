@@ -515,12 +515,16 @@ public class AlarmUtils {
         if (alarm == null) {
             return;
         }
-        if (alarm.isLockedToTimezone() && SettingsDAO.isSalahAutoTagEnabled(prefs)) {
-            if (alarm.tags == null) {
-                alarm.tags = new ArrayList<>();
-            }
-            if (!alarm.tags.contains("International")) {
-                alarm.tags.add("International");
+        if (alarm.isLockedToTimezone() && SettingsDAO.isAutoTagAlarmsEnabled(prefs)) {
+            String intlTag = SettingsDAO.getAutoTagInternationalName(prefs);
+            if (intlTag != null && !intlTag.trim().isEmpty()) {
+                intlTag = intlTag.trim();
+                if (alarm.tags == null) {
+                    alarm.tags = new ArrayList<>();
+                }
+                if (!alarm.tags.contains(intlTag)) {
+                    alarm.tags.add(intlTag);
+                }
             }
         }
     }

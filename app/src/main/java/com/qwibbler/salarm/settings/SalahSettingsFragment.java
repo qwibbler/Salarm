@@ -126,11 +126,6 @@ public class SalahSettingsFragment extends BaseSettingsScreenFragment implements
         if (cityPref != null) {
             cityPref.setSummary(mPrefs.getString(KEY_SALAH_CITY_NAME, DEFAULT_SALAH_CITY_NAME));
         }
-
-        Preference autoTagPref = findPreference(KEY_SALAH_AUTO_TAG_NAME);
-        if (autoTagPref != null) {
-            autoTagPref.setSummary(mPrefs.getString(KEY_SALAH_AUTO_TAG_NAME, DEFAULT_SALAH_AUTO_TAG_NAME));
-        }
     }
 
     @Override
@@ -151,7 +146,7 @@ public class SalahSettingsFragment extends BaseSettingsScreenFragment implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (KEY_SALAH_CITY_NAME.equals(key) || KEY_SALAH_AUTO_TAG_NAME.equals(key)) {
+        if (KEY_SALAH_CITY_NAME.equals(key)) {
             updateSummaries();
         } else if (KEY_SALAH_MADHAB.equals(key) || KEY_SALAH_CALC_METHOD.equals(key)) {
             SalahAlarmSyncManager.recalculateAllActiveRules(requireContext());

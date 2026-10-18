@@ -148,21 +148,15 @@ public class RelationalDefinition {
     }
 
     private int getBaseResId(boolean isMasjidDefinition) {
-        int baseResId;
         if (isMasjidDefinition) {
-            if (anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
-                baseResId = anchor.isMax ? R.string.masjid_rule_description_base_max : R.string.masjid_rule_description_base_min;
+            if (anchor != null && anchor.basicEvent != null && anchor.basicEvent != RelationalRule.AnchorEvent.MAGHRIB) {
+                return anchor.isMax ? R.string.masjid_rule_description_base_max : R.string.masjid_rule_description_base_min;
             } else {
-                baseResId = R.string.masjid_rule_description_base;
+                return R.string.masjid_rule_description_base;
             }
         } else {
-            if (anchor.basicEvent != null) {
-                baseResId = anchor.isMax ? R.string.salah_alarm_rule_description_base_max : R.string.salah_alarm_rule_description_base_min;
-            } else {
-                baseResId = R.string.salah_rule_description_base;
-            }
+            return R.string.salah_rule_description_base;
         }
-        return baseResId;
     }
 
     @Override

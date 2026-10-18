@@ -134,8 +134,6 @@ public final class AlarmUpdateHandler {
                 return;
             }
 
-            AlarmUtils.syncInternationalAutoTag(SalarmApplication.getDefaultSharedPreferences(mAppContext), alarm);
-
             // Update alarm
             alarm.updateAlarm(cr);
 

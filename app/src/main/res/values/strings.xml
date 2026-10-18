@@ -1595,10 +1595,14 @@
     <!-- Salah Error Saving -->
     <string name="salah_error_saving">Failed to save salah alarm. Please try again.</string>
 
-    <!-- Salah Alarm Tagging -->
+    <!-- Alarm Tagging -->
     <string name="salah_tagging_category_title">Alarm Tagging</string>
     <string name="salah_auto_tag_title">Auto tag salah alarms</string>
     <string name="salah_auto_tag_name_title">Auto tag name</string>
+    <string name="auto_tag_alarms_title">Autotag alarms</string>
+    <string name="auto_tag_salah_title">Autotag salah alarms</string>
+    <string name="auto_tag_masjid_title">Autotag masjid alarms</string>
+    <string name="auto_tag_international_title">Autotag international alarms</string>
     <!-- Display tags in the alarm setting title -->
     <string name="display_alarm_tags_title">Display tags in the alarm</string>
     <!-- Add tags label -->

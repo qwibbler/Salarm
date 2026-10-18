@@ -28,8 +28,10 @@ public class PreferencesKeys {
     public static final String KEY_SALAH_AUTODISMISS_BY_DEFAULT = "key_salah_autodismiss_by_default";
     public static final String KEY_SALAH_ADJUST_ALARM_AFTER_ROUNDING = "key_salah_adjust_alarm_after_rounding";
     public static final String KEY_SALAH_DISPLAY_NEXT_EVENT_INFO = "key_salah_display_next_event_info";
-    public static final String KEY_SALAH_AUTO_TAG = "key_salah_auto_tag";
-    public static final String KEY_SALAH_AUTO_TAG_NAME = "key_salah_auto_tag_name";
+    public static final String KEY_AUTO_TAG_ALARMS = "key_auto_tag_alarms";
+    public static final String KEY_AUTO_TAG_SALAH_NAME = "key_auto_tag_salah_name";
+    public static final String KEY_AUTO_TAG_MASJID_NAME = "key_auto_tag_masjid_name";
+    public static final String KEY_AUTO_TAG_INTERNATIONAL_NAME = "key_auto_tag_international_name";
 
     public static final String KEY_SALAH_ALARM_STYLE_OVERRIDE = "key_salah_alarm_style_override";
     public static final String KEY_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE = "key_salah_alarm_display_style_override";

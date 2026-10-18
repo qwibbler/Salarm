@@ -173,8 +173,10 @@ public class PreferencesDefaultValues {
     public static final boolean DEFAULT_SALAH_AUTODISMISS_BY_DEFAULT = true;
     public static final boolean DEFAULT_SALAH_ADJUST_ALARM_AFTER_ROUNDING = false;
     public static final String DEFAULT_SALAH_DISPLAY_NEXT_EVENT_INFO = "countdown";
-    public static final boolean DEFAULT_SALAH_AUTO_TAG = true;
-    public static final String DEFAULT_SALAH_AUTO_TAG_NAME = "Salah";
+    public static final boolean DEFAULT_AUTO_TAG_ALARMS = true;
+    public static final String DEFAULT_AUTO_TAG_SALAH_NAME = "Salah";
+    public static final String DEFAULT_AUTO_TAG_MASJID_NAME = "Masjid";
+    public static final String DEFAULT_AUTO_TAG_INTERNATIONAL_NAME = "International";
     public static final boolean DEFAULT_SALAH_ALARM_STYLE_OVERRIDE = false;
     public static final boolean DEFAULT_SALAH_ALARM_DISPLAY_STYLE_OVERRIDE = false;
     public static final boolean DEFAULT_SALAH_ALARM_COLORS_OVERRIDE = false;

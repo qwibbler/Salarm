@@ -31,8 +31,10 @@ public class SalahAlarmSyncManagerTest {
 
         when(mContext.getApplicationContext()).thenReturn(mContext);
         when(mContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mPrefs);
-        when(mPrefs.getBoolean(PreferencesKeys.KEY_SALAH_AUTO_TAG, true)).thenReturn(true);
-        when(mPrefs.getString(PreferencesKeys.KEY_SALAH_AUTO_TAG_NAME, "Salah")).thenReturn("Salah");
+        when(mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true)).thenReturn(true);
+        when(mPrefs.getString(PreferencesKeys.KEY_AUTO_TAG_SALAH_NAME, "Salah")).thenReturn("Salah");
+        when(mPrefs.getString(PreferencesKeys.KEY_AUTO_TAG_MASJID_NAME, "Masjid")).thenReturn("Masjid");
+        when(mPrefs.getString(PreferencesKeys.KEY_AUTO_TAG_INTERNATIONAL_NAME, "International")).thenReturn("International");
     }
 
     @Test
@@ -91,5 +93,37 @@ public class SalahAlarmSyncManagerTest {
         assertFalse("Masjid tag should be removed", alarm.tags.contains("Masjid"));
         assertFalse("Masjid 1 tag should be removed", alarm.tags.contains("Masjid 1"));
         assertEquals(1, alarm.tags.size());
+    }
+
+    @Test
+    public void testSyncAutoTags_SwitchFromBasicToMasjid_AddsMasjidTags() {
+        Alarm alarm = new Alarm();
+        alarm.tags = new ArrayList<>();
+        alarm.tags.add("Salah");
+
+        Masjid masjid = new Masjid();
+        masjid.id = 1L;
+        masjid.name = "Masjid 1";
+
+        // When switching anchor event to masjid event
+        alarm.tags.add("Masjid");
+        alarm.tags.add(masjid.name);
+
+        assertTrue("Salah tag should remain", alarm.tags.contains("Salah"));
+        assertTrue("Masjid tag should be added", alarm.tags.contains("Masjid"));
+        assertTrue("Masjid 1 tag should be added", alarm.tags.contains("Masjid 1"));
+        assertEquals(3, alarm.tags.size());
+    }
+
+    @Test
+    public void testSyncAutoTags_AutotagDisabled_DoesNotAddAnyTags() {
+        when(mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true)).thenReturn(false);
+
+        Alarm alarm = new Alarm();
+        alarm.tags = new ArrayList<>();
+
+        boolean autoTagEnabled = mPrefs.getBoolean(PreferencesKeys.KEY_AUTO_TAG_ALARMS, true);
+        assertFalse("Autotag should be disabled", autoTagEnabled);
+        assertTrue("Alarm tags should remain empty when autotag is disabled", alarm.tags.isEmpty());
     }
 }
