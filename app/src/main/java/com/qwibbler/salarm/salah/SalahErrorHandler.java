@@ -84,7 +84,6 @@ public class SalahErrorHandler {
 
         Notification notification = new NotificationCompat.Builder(context, SALAH_SYNC_ERROR_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_tab_alarm_static)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
