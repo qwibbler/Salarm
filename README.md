@@ -31,27 +31,40 @@ It combines modern design, powerful features, and transparency — giving you fu
 # ✨ Features
 
 ### • 🕌 **Relational & Salah Alarms (Salarm Exclusive)**
+  * Set alarms relative to Islamic prayer times (e.g., 15 mins before Fajr, 30 mins after Dhuhr, or halfway between Fajr and Dhuhr). 
+  * One single rule lasts all year—alarm triggers dynamically shift as seasons change and daytime lengths adjust. 
+  * Automatic background recalculation as your location or coordinates change (via GPS or manual city selection). 
+  * Set "no earlier than" or "no later than" caps to prevent dynamic alarms from shifting into forbidden or unwanted windows. 
+  * Dynamic auto-silence cutoffs tied to prayer events to mark alarms as "missed" before the next prayer window begins. 
+  * Dynamic calculations for both Shafi'i and Hanafi Asr prayer times.
 
-* Set alarms relative to Islamic prayer times (e.g., 15 mins before Fajr, 30 mins after Dhuhr, or halfway between Fajr and Dhuhr). 
-* One single rule lasts all year—alarm triggers dynamically shift as seasons change and daytime lengths adjust. 
-* Automatic background recalculation as your location or coordinates change (via GPS or manual city selection). 
-* Set "no earlier than" or "no later than" caps to prevent dynamic alarms from shifting into forbidden or unwanted windows. 
-* Dynamic auto-silence cutoffs tied to prayer events to mark alarms as "missed" before the next prayer window begins. 
-* Dynamic calculations for both Shafi'i and Hanafi Asr prayer times.
+### • 🕌 **Masjid Alarms & Community Suite (Salarm Exclusive)**
+  * Manage community mosques with a dedicated Masjid tab, custom calculation methods, and localized coordinates.
+  * Configure 1 to 3 date intervals per month (e.g., 1st–15th and 16th–31st) to accurately mirror changing jama'at (congregational) times.
+  * Supports both fixed-time jama'at schedules (e.g., Dhuhr/Juma) and relational offsets (e.g., 10 mins after Adhan).
+  * Automated Do Not Disturb (DND) mode on device during jama'at times, with customizable before and after buffer minutes.
+  * Selectable prayer event check-boxes to sync masjid events directly to active alarms.
+  * Export printable yearly or monthly timesheets in PNG, PDF (A4 Portrait, A4 Landscape, Pocket Cards), or SVG formats.
+  * Share and import entire masjid configurations instantly via compact QR codes.
+  * Save multiple masjids and switch between them with quick-tap or long-press navigation controls.
 
-### 🧭 **Salah & Qibla Suite**
-
-* Live countdown to the next prayer event alongside full daily prayer schedules. 
-* View past or future prayer schedules, adjust calculation methods, or toggle manual location overrides. 
-* Dedicated Qibla visualizer and directional guide.
+### • 🧭 **Salah & Qibla Suite**
+  * Live countdown to the next prayer event alongside full daily prayer schedules. 
+  * View past or future prayer schedules, adjust calculation methods, or toggle manual location overrides. 
+  * Dedicated Qibla visualizer and directional guide.
 
 ### • ⏰ **Advanced Alarms**
+  * Set alarms to a specific date
+  * Flip or shake to dismiss/postpone
+  * Use power or volume buttons to snooze/stop
+  * Swipe to delete, duplicate, or customize alarms
+  * Custom titles, backgrounds, and ringtones (including random playback)
 
-* Set alarms to a specific date
-* Flip or shake to dismiss/postpone
-* Use power or volume buttons to snooze/stop
-* Swipe to delete, duplicate, or customize alarms
-* Custom titles, backgrounds, and ringtones (including random playback)
+### • 🌐 **International Alarms**
+  * Lock alarms to specific target timezones (e.g., `America/New_York`, `Asia/Riyadh`, `Europe/London`) so you never miss an event when traveling or coordinating across borders.
+  * Automatically adjusts for Daylight Saving Time (DST) and regional time changes without manual recalculation.
+  * Displays live local time in the target timezone and UTC offset (e.g., UTC+3) directly on alarm cards, edit bottom sheets, and notifications.
+  * Automatic tagging ("International") for organized filtering and full JSON backup/restore support.
 
 ### • 🎨 **Customization**
   * Light, dark, or system theme
@@ -95,12 +108,17 @@ It combines modern design, powerful features, and transparency — giving you fu
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting issues, translations, and code contributions.
 
-<details>
-<summary><b>Click here to see the translation status</b></summary>
-<br>
+[//]: # ()
+[//]: # (<details>)
 
-[![Translation status](https://translate.codeberg.org/widget/clock/clock/multi-auto.svg)](https://translate.codeberg.org/engage/clock/)
-</details>
+[//]: # (<summary><b>Click here to see the translation status</b></summary>)
+
+[//]: # (<br>)
+
+[//]: # ()
+[//]: # ([![Translation status]&#40;https://translate.codeberg.org/widget/clock/clock/multi-auto.svg&#41;]&#40;https://translate.codeberg.org/engage/clock/&#41;)
+
+[//]: # (</details>)
 
 # 📜 License
 
@@ -145,5 +163,6 @@ See the [LICENSE](LICENSE) file for full details.
 * 💻 Code references and inspiration from:
     * [LineageOS](https://github.com/LineageOS/android_packages_apps_DeskClock)
     * [crDroid Android](https://github.com/crdroidandroid/android_packages_apps_DeskClock)
-* 🌍 Translations provided by the community via [Weblate](https://translate.codeberg.org/projects/Salarm/)
-* 🤝 Thanks to all [contributors](https://github.com/BlackyHawky/Clock/graphs/contributors) who help improve Clock
+
+[//]: # (* 🌍 Translations provided by the community via [Weblate]&#40;https://translate.codeberg.org/projects/Salarm/&#41;)
+* 🤝 Thanks to all [contributors](https://github.com/BlackyHawky/Clock/graphs/contributors) who help improve Salarm
