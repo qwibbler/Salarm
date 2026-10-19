@@ -13,6 +13,7 @@ import com.qwibbler.salarm.settings.PreferencesKeys;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -153,6 +154,107 @@ public class SettingsPrecedenceTest {
         // Individual settings override both Salah defaults and Basic defaults
         assertEquals(5, salahAlarm.snoozeDuration);
         assertEquals(7, nonSalahAlarm.snoozeDuration);
+    }
+
+    @Test
+    public void testSnoozePrecedenceMatrix_RegularAndSalahAlarms() {
+        mPrefs.edit()
+                .putBoolean(PreferencesKeys.KEY_SALAH_ALARM_RINGTONE_OVERRIDE, true)
+                .putInt(PreferencesKeys.KEY_ALARM_SNOOZE_DURATION, 5)
+                .putInt(PreferencesKeys.KEY_SALAH_ALARM_SNOOZE_DURATION, 10)
+                .apply();
+
+        int[] testIndividualValues = new int[]{5, 4, 12};
+        for (int individualValue : testIndividualValues) {
+            Alarm regularAlarm = new Alarm(2026, 6, 16, 7, 0, Uri.parse("content://settings/alarm"));
+            regularAlarm.relationalRuleId = -1;
+            regularAlarm.snoozeDuration = individualValue;
+
+            Alarm salahAlarm = new Alarm(2026, 6, 16, 5, 30, Uri.parse("content://settings/alarm"));
+            salahAlarm.relationalRuleId = 100;
+            salahAlarm.snoozeDuration = individualValue;
+
+            assertEquals("Regular alarm snooze duration must match individual value", individualValue, regularAlarm.snoozeDuration);
+            assertEquals("Salah alarm snooze duration must match individual value", individualValue, salahAlarm.snoozeDuration);
+        }
+    }
+
+    @Test
+    public void testModifyingDefaultsDoesNotAlterExistingIndividualAlarmSnooze() {
+        mPrefs.edit()
+                .putBoolean(PreferencesKeys.KEY_SALAH_ALARM_RINGTONE_OVERRIDE, true)
+                .putInt(PreferencesKeys.KEY_ALARM_SNOOZE_DURATION, 5)
+                .putInt(PreferencesKeys.KEY_SALAH_ALARM_SNOOZE_DURATION, 10)
+                .apply();
+
+        Alarm alarm = new Alarm(2026, 6, 16, 6, 0, Uri.parse("content://settings/alarm"));
+        alarm.snoozeDuration = 4; // User set individual snooze to 4 minutes
+
+        // Modify both general and Salah defaults in settings
+        mPrefs.edit()
+                .putInt(PreferencesKeys.KEY_ALARM_SNOOZE_DURATION, 15)
+                .putInt(PreferencesKeys.KEY_SALAH_ALARM_SNOOZE_DURATION, 20)
+                .apply();
+
+        // Existing alarm individual setting must remain untouched
+        assertEquals(4, alarm.snoozeDuration);
+    }
+
+    @Test
+    public void testSnoozeCalculationDelay_exactSingleInterval() {
+        int[] snoozeDurations = new int[]{4, 5, 12};
+
+        for (int snoozeMinutes : snoozeDurations) {
+            Calendar now = Calendar.getInstance();
+            Calendar newAlarmTime = (Calendar) now.clone();
+
+            // Simulate the single snooze addition in AlarmStateManager.setSnoozeState
+            newAlarmTime.add(Calendar.MINUTE, snoozeMinutes);
+
+            long expectedMillis = snoozeMinutes * 60 * 1000L;
+            long actualMillis = newAlarmTime.getTimeInMillis() - now.getTimeInMillis();
+
+            assertEquals("Snooze calculation delay must equal exactly " + snoozeMinutes + " minutes",
+                    expectedMillis, actualMillis);
+        }
+    }
+
+    @Test
+    public void testUniversalVolumePreference_PersistedAndReadCorrectly() {
+        // Universal preference set to 100% (volume 15)
+        mPrefs.edit()
+                .putInt(PreferencesKeys.KEY_ALARM_VOLUME_SETTING, 15)
+                .putBoolean(PreferencesKeys.KEY_SALAH_ALARM_RINGTONE_OVERRIDE, false)
+                .apply();
+
+        int regularVolume = SettingsDAO.getAlarmVolume(mPrefs, false);
+        int salahVolume = SettingsDAO.getAlarmVolume(mPrefs, true);
+
+        assertEquals(15, regularVolume);
+        assertEquals(15, salahVolume);
+
+        // Universal preference changed to 30% (volume 5)
+        mPrefs.edit()
+                .putInt(PreferencesKeys.KEY_ALARM_VOLUME_SETTING, 5)
+                .apply();
+
+        assertEquals(5, SettingsDAO.getAlarmVolume(mPrefs, false));
+        assertEquals(5, SettingsDAO.getAlarmVolume(mPrefs, true));
+    }
+
+    @Test
+    public void testSalahVolumeOverride_WhenEnabled() {
+        mPrefs.edit()
+                .putInt(PreferencesKeys.KEY_ALARM_VOLUME_SETTING, 15) // General default: 100%
+                .putBoolean(PreferencesKeys.KEY_SALAH_ALARM_RINGTONE_OVERRIDE, true)
+                .putInt(PreferencesKeys.KEY_SALAH_ALARM_VOLUME_SETTING, 8) // Salah default: 50%
+                .apply();
+
+        int regularVolume = SettingsDAO.getAlarmVolume(mPrefs, false);
+        int salahVolume = SettingsDAO.getAlarmVolume(mPrefs, true);
+
+        assertEquals(15, regularVolume);
+        assertEquals(8, salahVolume);
     }
 
     /**

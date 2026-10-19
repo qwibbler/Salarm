@@ -102,27 +102,28 @@ public final class AlarmKlaxon {
         if (!isRingtoneSilent) {
             // Crescendo duration always in milliseconds
             final int crescendoDuration = alarmInstance.mCrescendoDuration * 1000;
+
+            int targetVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)
+                ? alarmInstance.mAlarmVolume
+                : SettingsDAO.getAlarmVolume(prefs, isSalah);
+
+            AudioManager audioManager = appContext.getSystemService(AudioManager.class);
+
+            if (instance.mPreviousAlarmVolume == -1) {
+                instance.mPreviousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+            }
+
+            int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+            if (currentVolume != targetVolume) {
+                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, targetVolume, 0);
+            }
+
             if (DeviceUtils.isUserUnlocked(appContext) && SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs, isSalah)) {
                 LogUtils.v("AlarmKlaxon.start() with ExoPlayer");
 
                 instance.getRingtonePlayer().play(alarmInstance.mRingtone, crescendoDuration);
             } else {
                 LogUtils.v("AlarmKlaxon.start() with MediaPlayer");
-
-                int targetVolume = SettingsDAO.isPerAlarmVolumeEnabled(prefs, isSalah)
-                    ? alarmInstance.mAlarmVolume
-                    : SettingsDAO.getAlarmVolume(prefs, isSalah);
-
-                AudioManager audioManager = appContext.getSystemService(AudioManager.class);
-
-                if (instance.mPreviousAlarmVolume == -1) {
-                    instance.mPreviousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                }
-
-                int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                if (currentVolume != targetVolume) {
-                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, targetVolume, 0);
-                }
 
                 instance.getAsyncRingtonePlayer().play(alarmInstance.mRingtone, crescendoDuration);
             }

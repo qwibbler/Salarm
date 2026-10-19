@@ -80,7 +80,18 @@ public class AlarmVolumePreference extends Preference {
         mBinding.slider.setValueTo(mMaxVolume);
         mBinding.slider.setValueFrom(0f);
         mBinding.slider.setStepSize(1f);
-        mBinding.slider.setValue((float) mAudioManager.getStreamVolume(STREAM_ALARM) - mMinVolume);
+
+        int currentStreamVol = mAudioManager.getStreamVolume(STREAM_ALARM);
+        int initialVol = getPersistedInt(currentStreamVol);
+        int maxStreamVol = mAudioManager.getStreamMaxVolume(STREAM_ALARM);
+        initialVol = Math.max(mMinVolume, Math.min(initialVol, maxStreamVol));
+
+        if (currentStreamVol != initialVol) {
+            mAudioManager.setStreamVolume(STREAM_ALARM, initialVol, 0);
+        }
+        persistInt(initialVol);
+
+        mBinding.slider.setValue((float) (initialVol - mMinVolume));
 
         updateSliderSummary(mBinding.summary);
 
@@ -98,8 +109,9 @@ public class AlarmVolumePreference extends Preference {
             @Override
             public void onChange(boolean selfChange) {
                 // Volume was changed elsewhere, update our slider.
-                float currentVolume = (float) (mAudioManager.getStreamVolume(STREAM_ALARM) - mMinVolume);
-                mBinding.slider.setValue(currentVolume);
+                int currentVolume = mAudioManager.getStreamVolume(STREAM_ALARM);
+                mBinding.slider.setValue((float) (currentVolume - mMinVolume));
+                persistInt(currentVolume);
                 updateSliderSummary(mBinding.summary);
             }
         };
@@ -120,6 +132,7 @@ public class AlarmVolumePreference extends Preference {
             if (fromUser) {
                 int newVolume = (int) progress + mMinVolume;
                 mAudioManager.setStreamVolume(STREAM_ALARM, newVolume, 0);
+                persistInt(newVolume);
                 updateSliderSummary(mBinding.summary);
                 updateSliderButtonStates();
             }
@@ -190,6 +203,7 @@ public class AlarmVolumePreference extends Preference {
     private void updateVolume(AudioManager audioManager) {
         int newVolume = (int) mBinding.slider.getValue() + mMinVolume;
         audioManager.setStreamVolume(STREAM_ALARM, newVolume, 0);
+        persistInt(newVolume);
     }
 
     private void startRingtonePreview() {

@@ -560,9 +560,6 @@ public final class AlarmStateManager extends BroadcastReceiver {
             AlarmService.stopAlarm(context, instance);
         }
 
-        // Calculate the new snooze alarm time
-        newAlarmTime.add(Calendar.MINUTE, snoozeMinutes);
-
         // Update alarm state and new alarm time in db.
         LogUtils.i("Setting snoozed state to instance " + instance.mId + " for "
             + AlarmUtils.getFormattedTime(context, newAlarmTime));
